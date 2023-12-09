@@ -3,19 +3,22 @@ name: "\U0001F4ABFeature development"
 about: Organize and branch your list of features to develop(개발할 기능에 대한 목록을 정리 및 branch와
   연계)
 title: ''
-labels: ''
+labels: "\U0001F496feature"
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+# Development Features Summary
+### Summarize the feature you want to develop in one sentence.
+<!-- EX: 관리자 페이지 기초 세팅 -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+# TO DO List
+### Organize the to-do list of things you need to do to move your development forward.
+<!-- Clear and use the example below -->
+- [ ] set initial route setting
+- [ ] set page layout
+- [ ] use dummy data
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+# References
+### Enter the site you need for development.
+<!-- EX: [GitHub Pages](https://pages.github.com/) -->
