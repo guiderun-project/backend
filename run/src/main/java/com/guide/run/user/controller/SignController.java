@@ -1,10 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.gloabl.jwt.JwtProvider;
-import com.guide.run.user.entity.User;
-import com.guide.run.user.repository.UserRepository;
 import com.guide.run.user.response.LoginResponse;
-import com.guide.run.user.response.OAuthCodeResponse;
 import com.guide.run.user.profile.OAuthProfile;
 import com.guide.run.user.service.ProviderService;
 import jakarta.servlet.http.Cookie;
@@ -20,55 +17,34 @@ import javax.naming.CommunicationException;
 @RequiredArgsConstructor
 public class SignController {
     private final ProviderService providerService;
-    private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
-    @PostMapping("/kakao")
-    public OAuthCodeResponse getKakaoAccessToken(String code) throws CommunicationException {
-        return providerService.getAccessToken(code,"kakao");
-    }
-    @PostMapping("/login/kakao")
+
+    @PostMapping("/oauth/token/kakao")
     public LoginResponse kakaoSignup(String code, HttpServletResponse response) throws CommunicationException {
-        OAuthProfile oAuthProfile = providerService.getProfile(code,"kakao");
-        User findUser = userRepository.findBySocialId(oAuthProfile.getSocialId()).orElse(null);
-        String socialId;
-        if(findUser == null){
-            socialId = providerService.socialSignup(oAuthProfile);
-        }
-        else{
-            socialId = findUser.getSocialId();
-        }
+        String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
+        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
+        String socialId = oAuthProfile.getSocialId();
 
         Cookie cookie = new Cookie("refresh",jwtProvider.createRefreshToken());
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
-        return LoginResponse.builder().
-                socialId(socialId)
+        return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(socialId))
                 .build();
     }
-    @PostMapping("/google")
-    public OAuthCodeResponse getGoogleAccessToken(String code) throws CommunicationException {
-        return providerService.getAccessToken(code,"google");
-    }
-    @PostMapping("/login/google")
+
+    @PostMapping("/oauth/token/google")
     public LoginResponse googleSignup(String code,HttpServletResponse response) throws CommunicationException {
-        OAuthProfile oAuthProfile = providerService.getProfile(code,"google");
-        User findUser = userRepository.findBySocialId(oAuthProfile.getSocialId()).orElse(null);
-        String socialId;
-        if(findUser == null){
-            socialId = providerService.socialSignup(oAuthProfile);
-        }
-        else{
-            socialId = findUser.getSocialId();
-        }
+        String accessToken = providerService.getAccessToken(code, "google").getAccess_token();
+        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"google");
+        String socialId = oAuthProfile.getSocialId();
 
         Cookie cookie = new Cookie("refresh",jwtProvider.createRefreshToken());
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
-        return LoginResponse.builder().
-                socialId(socialId)
+        return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(socialId))
                 .build();
     }
