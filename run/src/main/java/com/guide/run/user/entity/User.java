@@ -10,15 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     private String socialId;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Builder
-    public User(Long id, String socialId, String email,Role role) {
-        this.id = id;
+    public User(String socialId, String email,Role role) {
         this.socialId = socialId;
         this.role = role;
     }
