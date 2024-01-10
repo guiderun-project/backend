@@ -1,6 +1,7 @@
 package com.guide.run.user.service;
 
 import com.google.gson.Gson;
+import com.guide.run.user.request.OAuthRequest;
 import com.guide.run.user.response.OAuthCodeResponse;
 import com.guide.run.user.factory.OAuthRequestFactory;
 import com.guide.run.user.entity.Role;
@@ -36,7 +37,7 @@ public class ProviderService {
 
         User user = User.builder()
                 .socialId(socialId)
-                .role(Role.ROLE_USER)
+                .role(Role.User)
                 .build();
         userRepository.save(user);
 
@@ -85,7 +86,7 @@ public class ProviderService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        com.guide.run.user.request.OAuthRequest oAuthRequest = oAuthRequestFactory.getRequest(code, provider);
+        OAuthRequest oAuthRequest = oAuthRequestFactory.getRequest(code, provider);
         HttpEntity<LinkedMultiValueMap<String, String>> request = new HttpEntity<>(oAuthRequest.getMap(), httpHeaders);
 
         ResponseEntity<String> response = restTemplate.postForEntity(oAuthRequest.getUrl(), request, String.class);

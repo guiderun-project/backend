@@ -15,7 +15,7 @@ public class User {
     private Role role;
 
     @Builder
-    public User(String socialId, String email,Role role) {
+    public User(String socialId, Role role) {
         this.socialId = socialId;
         this.role = role;
     }
