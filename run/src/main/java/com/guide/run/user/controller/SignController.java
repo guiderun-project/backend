@@ -1,7 +1,7 @@
 package com.guide.run.user.controller;
 
-import com.guide.run.gloabl.cookie.service.CookieService;
-import com.guide.run.gloabl.jwt.JwtProvider;
+import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.response.LoginResponse;
 import com.guide.run.user.profile.OAuthProfile;
 import com.guide.run.user.service.ProviderService;

@@ -1,9 +1,7 @@
-package com.guide.run.gloabl.security.user;
+package com.guide.run.global.security.user;
 
-import com.guide.run.user.entity.Role;
 import com.guide.run.user.entity.User;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

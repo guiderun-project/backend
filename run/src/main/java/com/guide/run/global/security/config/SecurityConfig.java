@@ -1,7 +1,7 @@
-package com.guide.run.gloabl.security.config;
+package com.guide.run.global.security.config;
 
-import com.guide.run.gloabl.jwt.JwtAuthenticationFilter;
-import com.guide.run.gloabl.jwt.JwtProvider;
+import com.guide.run.global.jwt.JwtAuthenticationFilter;
+import com.guide.run.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

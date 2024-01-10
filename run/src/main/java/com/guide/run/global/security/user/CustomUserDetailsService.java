@@ -1,4 +1,4 @@
-package com.guide.run.gloabl.security.user;
+package com.guide.run.global.security.user;
 
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;

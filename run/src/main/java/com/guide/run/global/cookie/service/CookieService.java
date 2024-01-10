@@ -1,6 +1,6 @@
-package com.guide.run.gloabl.cookie.service;
+package com.guide.run.global.cookie.service;
 
-import com.guide.run.gloabl.jwt.JwtProvider;
+import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
