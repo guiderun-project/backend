@@ -2,13 +2,17 @@ package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.dto.UserSignupDto;
+import com.guide.run.user.entity.User;
 import com.guide.run.user.response.LoginResponse;
 import com.guide.run.user.profile.OAuthProfile;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import javax.naming.CommunicationException;
 
@@ -36,6 +40,12 @@ public class SignController {
                 .build();
     }
 
+    @PostMapping("/api/signup/vi")
+    public User viSignup(@RequestBody UserSignupDto userSignupDto, HttpServletRequest httpServletRequest){
+        String accessToken = jwtProvider.resolveToken(httpServletRequest);
+        String socialId = jwtProvider.getSocialId(accessToken);
+        return userService.viSignup(socialId,userSignupDto);
+    }
 
 
     @PostMapping("/api/oauth/token/google")

@@ -30,8 +30,16 @@ public class TestController {
     }
     @GetMapping("/user/create")
     public String userCreateTest(){
-        userRepository.save(new User("kakao_3232984128", Role.ADMIN));
-        userRepository.save(new User("bb",Role.ADMIN));
+        User user = User.builder()
+                .socialId("kakao_1")
+                .role(Role.ADMIN)
+                .build();
+        User user2 = User.builder()
+                .socialId("kakao_2")
+                .role(Role.WAIT)
+                .build();
+        userRepository.save(user);
+        userRepository.save(user2);
         return "생성 완료";
     }
 }

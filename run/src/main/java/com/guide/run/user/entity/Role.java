@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 public enum Role {
     ADMIN("ROLE_ADMIN"),
-    User("ROLE_USER"),
+    WAIT("ROLE_WAIT"),
     COACH("ROLE_COACH"),
     VI("ROLE_VI"),
     GUIDE("ROLE_GUIDE");
-    private String value;
+    private final String value;
 }

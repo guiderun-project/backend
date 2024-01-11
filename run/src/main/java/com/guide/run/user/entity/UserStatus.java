@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserStatus {
-    USER("user"),
+    EXIST("exist"),
     WAIT("wait"),
     NEW("new");
-    private String value;
+    private final String value;
 }

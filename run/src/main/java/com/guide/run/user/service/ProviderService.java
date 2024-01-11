@@ -31,22 +31,6 @@ public class ProviderService {
     private final OAuthRequestFactory oAuthRequestFactory;
     private final UserRepository userRepository;
 
-    @Transactional
-    public String socialSignup(OAuthProfile oAuthProfile){
-        String socialId = oAuthProfile.getSocialId();
-
-        User user = User.builder()
-                .socialId(socialId)
-                .role(Role.User)
-                .build();
-        userRepository.save(user);
-
-        return socialId;
-        //socialId값을 리턴할지 ???? id 값을 리턴할지???
-        //User saved = userRepository.save(user);
-        //return saved.getId();
-
-    }
 
     public OAuthProfile getProfile(String accessToken, String provider) throws CommunicationException {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -59,8 +43,7 @@ public class ProviderService {
 
         try {
             if (response.getStatusCode() == HttpStatus.OK) {
-                OAuthProfile oAuthProfile = extractProfile(response, provider);
-                return oAuthProfile;
+                return extractProfile(response, provider);
             }
         } catch (Exception e) {
             throw new CommunicationException();
@@ -72,12 +55,10 @@ public class ProviderService {
     private OAuthProfile extractProfile(ResponseEntity<String> response, String provider) {
         if (provider.equals("kakao")) {
             GetKakaoInfo getKakaoInfo = gson.fromJson(response.getBody(), GetKakaoInfo.class);
-            KakaoProfile kakaoProfile = new KakaoProfile("kakao_"+getKakaoInfo.getId(),"kakao");
-            return kakaoProfile;
+            return new KakaoProfile("kakao_"+getKakaoInfo.getId(),"kakao");
         } else if(provider.equals("google")) {
             GetGoogleInfo getGoogleInfo = gson.fromJson(response.getBody(), GetGoogleInfo.class);
-            GoogleProfile googleProfile = new GoogleProfile("google_"+getGoogleInfo.getSub(),"google");
-            return googleProfile;
+            return new GoogleProfile("google_"+getGoogleInfo.getSub(),"google");
         }
         return null; // 에러 추가 바람
     }

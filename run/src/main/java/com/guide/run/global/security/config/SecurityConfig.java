@@ -21,6 +21,7 @@ public class SecurityConfig {
                 .cors(cors->cors.disable())
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/test").hasRole("USER")
                         .requestMatchers("/api/test2").hasRole("ADMIN")
