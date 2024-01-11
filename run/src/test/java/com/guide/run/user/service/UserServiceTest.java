@@ -59,6 +59,19 @@ class UserServiceTest {
     @DisplayName("vi 회원가입")
     @Test
     void viSignup(){
-
+        Vi vi = Vi.builder()
+                .runningExp(true)
+                .guideName("ljg")
+                .socialId("kakao_1")
+                .name("lj")
+                .gender("male")
+                .phoneNumber("010-9999-xxxx")
+                .age(13)
+                .detailRecord("45:23")
+                .recordDegree("A")
+                .role(Role.WAIT)
+                .snsId("XXXXX12345")
+                .build();
+        Assertions.assertThat(vi).isEqualTo(userRepository.save(vi));
     }
 }

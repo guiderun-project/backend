@@ -1,10 +1,13 @@
 package com.guide.run.user.entity;
 
+
 import com.guide.run.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -24,6 +27,5 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     //private List<Event> eventLists;
-    //private List<User> partnerLists;
     private String snsId;
 }

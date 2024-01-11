@@ -1,6 +1,6 @@
 package com.guide.run.user.service;
 
-import com.guide.run.user.dto.UserSignupDto;
+import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.entity.Role;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.entity.UserStatus;
@@ -31,20 +31,19 @@ public class UserService {
     }
 
     @Transactional
-    public User viSignup(String socialId, UserSignupDto userSignupDto){
-        System.out.println("Vi = " + userSignupDto.getSnsId());
+    public User viSignup(String socialId, ViSignupDto viSignupDto){
         Vi vi = Vi.builder()
-                .runningExp(userSignupDto.isRunningExp())
-                .guideName(userSignupDto.getGuideName())
+                .runningExp(viSignupDto.isRunningExp())
+                .guideName(viSignupDto.getGuideName())
                 .socialId(socialId)
-                .name(userSignupDto.getName())
-                .gender(userSignupDto.getGender())
-                .phoneNumber(userSignupDto.getPhoneNumber())
-                .age(userSignupDto.getAge())
-                .detailRecord(userSignupDto.getDetailRecord())
-                .recordDegree(userSignupDto.getRecordDegree())
+                .name(viSignupDto.getName())
+                .gender(viSignupDto.getGender())
+                .phoneNumber(viSignupDto.getPhoneNumber())
+                .age(viSignupDto.getAge())
+                .detailRecord(viSignupDto.getDetailRecord())
+                .recordDegree(viSignupDto.getRecordDegree())
                 .role(Role.WAIT)
-                .snsId(userSignupDto.getSnsId())
+                .snsId(viSignupDto.getSnsId())
                 .build();
 
         return  userRepository.save(vi);

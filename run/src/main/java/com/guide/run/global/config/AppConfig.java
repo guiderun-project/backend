@@ -15,4 +15,5 @@ public class AppConfig {
     public Gson gson(){
         return new Gson();
     }
+
 }
