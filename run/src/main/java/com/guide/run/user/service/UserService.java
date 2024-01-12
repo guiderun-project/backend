@@ -19,7 +19,7 @@ public class UserService {
     public String getUserStatus(String socialId){
         User user = userRepository.findBySocialId(socialId).orElse(null);
         if(user != null){
-            if(user.getRole().equals(Role.WAIT)){
+            if(user.getRole().equals(Role.VWAIT)){
                 return UserStatus.WAIT.getValue();
             } else{
                 return UserStatus.EXIST.getValue();
@@ -42,7 +42,7 @@ public class UserService {
                 .age(viSignupDto.getAge())
                 .detailRecord(viSignupDto.getDetailRecord())
                 .recordDegree(viSignupDto.getRecordDegree())
-                .role(Role.WAIT)
+                .role(Role.VWAIT)
                 .snsId(viSignupDto.getSnsId())
                 .build();
 

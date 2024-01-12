@@ -42,7 +42,7 @@ class UserServiceTest {
     void waitUserLoginResponse(){
         User user = User.builder()
                 .socialId("kakao_1")
-                .role(Role.WAIT)
+                .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
@@ -69,7 +69,7 @@ class UserServiceTest {
                 .age(13)
                 .detailRecord("45:23")
                 .recordDegree("A")
-                .role(Role.WAIT)
+                .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
         Assertions.assertThat(vi).isEqualTo(userRepository.save(vi));
