@@ -1,4 +1,4 @@
-package com.guide.run.gloabl.security.user;
+package com.guide.run.global.security.user;
 
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
@@ -14,7 +14,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String socialId) throws UsernameNotFoundException {
+        System.out.println("야호");
         User user = userRepository.findBySocialId(socialId).orElseThrow();
+        System.out.println("야호");
         return new CustomUserDetails(user);
     }
 }

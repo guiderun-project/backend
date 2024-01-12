@@ -1,7 +1,7 @@
-package com.guide.run.gloabl.security.config;
+package com.guide.run.global.security.config;
 
-import com.guide.run.gloabl.jwt.JwtAuthenticationFilter;
-import com.guide.run.gloabl.jwt.JwtProvider;
+import com.guide.run.global.jwt.JwtAuthenticationFilter;
+import com.guide.run.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +21,11 @@ public class SecurityConfig {
                 .cors(cors->cors.disable())
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/test").hasRole("USER")
+                        .requestMatchers("/api/test2").hasRole("ADMIN")
+                        .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class);

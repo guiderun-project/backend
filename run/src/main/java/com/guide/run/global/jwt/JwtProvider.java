@@ -1,7 +1,6 @@
-package com.guide.run.gloabl.jwt;
+package com.guide.run.global.jwt;
 
-import com.guide.run.gloabl.security.user.CustomUserDetails;
-import com.guide.run.gloabl.security.user.CustomUserDetailsService;
+import com.guide.run.global.security.user.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -14,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Base64;
 import java.util.Date;

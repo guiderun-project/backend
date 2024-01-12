@@ -1,4 +1,4 @@
-package com.guide.run.gloabl.jwt;
+package com.guide.run.global.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

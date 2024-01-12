@@ -1,8 +1,16 @@
 package com.guide.run.user.entity;
 
-import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@ToString
+
+@AllArgsConstructor
+@Getter
 public enum Role {
-    ROLE_ADMIN,ROLE_USER,ROLE_COACH,ROLE_VI,ROLE_GUIDE
+    ADMIN("ROLE_ADMIN"),
+    WAIT("ROLE_WAIT"),
+    COACH("ROLE_COACH"),
+    VI("ROLE_VI"),
+    GUIDE("ROLE_GUIDE");
+    private final String value;
 }

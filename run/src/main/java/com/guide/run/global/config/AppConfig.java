@@ -1,4 +1,4 @@
-package com.guide.run.gloabl.config;
+package com.guide.run.global.config;
 
 import com.google.gson.Gson;
 import org.springframework.context.annotation.Bean;
@@ -15,4 +15,5 @@ public class AppConfig {
     public Gson gson(){
         return new Gson();
     }
+
 }
