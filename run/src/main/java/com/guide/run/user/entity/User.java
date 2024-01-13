@@ -23,7 +23,7 @@ public class User extends BaseEntity {
     private String name;
     private String gender;
     private String phoneNumber;
-    private Boolean openNumber;
+    private boolean openNumber;
     private int age;
     private String detailRecord;
     private String recordDegree; //개인 기록
@@ -31,5 +31,5 @@ public class User extends BaseEntity {
     private Role role;
     //private List<Event> eventLists;
     private String snsId;
-    private Boolean openSNS;
+    private boolean openSNS;
 }
