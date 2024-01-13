@@ -3,20 +3,22 @@ package com.guide.run.user.entity;
 
 import com.guide.run.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jdk.jfr.Name;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-@Data
+@Getter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn
 @SuperBuilder
 public class User extends BaseEntity {
     @Id
+    @Column(name = "social_id")
     private String socialId;
     private String name;
     private String gender;
