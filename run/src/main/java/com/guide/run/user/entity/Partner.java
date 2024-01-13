@@ -21,6 +21,6 @@ public class Partner {
     @ManyToOne
     @JoinColumn(name = "GUIDE_ID")
     private Guide guideId;
-    private int competitionCnt;
+    private int contestCnt;
     private int trainingCnt;
 }
