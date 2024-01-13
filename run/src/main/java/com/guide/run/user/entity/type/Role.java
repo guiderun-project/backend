@@ -1,4 +1,4 @@
-package com.guide.run.user.entity;
+package com.guide.run.user.entity.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

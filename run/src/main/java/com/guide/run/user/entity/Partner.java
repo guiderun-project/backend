@@ -1,13 +1,11 @@
 package com.guide.run.user.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+
 @Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -21,6 +19,6 @@ public class Partner {
     @ManyToOne
     @JoinColumn(name = "GUIDE_ID")
     private Guide guideId;
-    private int competitionCnt;
+    private int contestCnt;
     private int trainingCnt;
 }

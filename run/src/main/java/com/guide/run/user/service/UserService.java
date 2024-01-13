@@ -1,9 +1,9 @@
 package com.guide.run.user.service;
 
 import com.guide.run.user.dto.ViSignupDto;
-import com.guide.run.user.entity.Role;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
-import com.guide.run.user.entity.UserStatus;
+import com.guide.run.user.entity.type.UserStatus;
 import com.guide.run.user.entity.Vi;
 import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     public String getUserStatus(String socialId){
-        User user = userRepository.findBySocialId(socialId).orElse(null);
+        User user = userRepository.findById(socialId).orElse(null);
         if(user != null){
             if(user.getRole().equals(Role.VWAIT)){
                 return UserStatus.WAIT.getValue();
@@ -35,7 +35,7 @@ public class UserService {
         Vi vi = Vi.builder()
                 .runningExp(viSignupDto.isRunningExp())
                 .guideName(viSignupDto.getGuideName())
-                .socialId(socialId)
+                .userId(socialId)
                 .name(viSignupDto.getName())
                 .gender(viSignupDto.getGender())
                 .phoneNumber(viSignupDto.getPhoneNumber())

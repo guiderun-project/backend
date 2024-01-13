@@ -6,9 +6,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Data
+@Getter
 @DiscriminatorValue("V")
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder

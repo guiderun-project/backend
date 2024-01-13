@@ -1,8 +1,8 @@
 package com.guide.run.user.service;
 
-import com.guide.run.user.entity.Role;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
-import com.guide.run.user.entity.UserStatus;
+import com.guide.run.user.entity.type.UserStatus;
 
 import com.guide.run.user.entity.Vi;
 import com.guide.run.user.repository.UserRepository;
@@ -29,7 +29,7 @@ class UserServiceTest {
     @Test
     void existUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .role(Role.VI)
                 .build();
         userRepository.save(user);
@@ -41,7 +41,7 @@ class UserServiceTest {
     @Test
     void waitUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
@@ -62,7 +62,7 @@ class UserServiceTest {
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .name("lj")
                 .gender("male")
                 .phoneNumber("010-9999-xxxx")

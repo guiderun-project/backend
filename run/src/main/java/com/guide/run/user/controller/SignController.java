@@ -4,6 +4,7 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.PartnerRepository;
 import com.guide.run.user.repository.UserRepository;
 import com.guide.run.user.response.LoginResponse;
@@ -34,21 +35,21 @@ public class SignController {
     public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
-        String socialId = oAuthProfile.getSocialId();
+        String userId = oAuthProfile.getSocialId();
 
         cookieService.createCookie("refreshToken",response);
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(socialId))
-                .userStatus(userService.getUserStatus(socialId))
+                .accessToken(jwtProvider.createAccessToken(userId))
+                .userStatus(userService.getUserStatus(userId))
                 .build();
     }
 
     @PostMapping("/api/signup/vi")
     public User viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String accessToken = jwtProvider.resolveToken(httpServletRequest);
-        String socialId = jwtProvider.getSocialId(accessToken);
-        return userService.viSignup(socialId, viSignupDto);
+        String userId = jwtProvider.getSocialId(accessToken);
+        return userService.viSignup(userId, viSignupDto);
     }
 
 
@@ -56,10 +57,10 @@ public class SignController {
     public LoginResponse googleSignup(String code,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "google").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"google");
-        String socialId = oAuthProfile.getSocialId();
+        String userId = oAuthProfile.getSocialId();
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(socialId))
+                .accessToken(jwtProvider.createAccessToken(userId))
                 .build();
     }
 
@@ -67,23 +68,23 @@ public class SignController {
     @PostMapping("/api")
     public void abc(){
         Vi vi1 = Vi.builder()
-                .socialId("aa_1")
+                .userId("aa_1")
                 .role(Role.VI)
                 .build();
         Vi vi2 = Vi.builder()
-                .socialId("aa_2")
+                .userId("aa_2")
                 .role(Role.VI)
                 .build();
         Guide guide1 = Guide.builder()
-                .socialId("gg_1")
+                .userId("gg_1")
                 .role(Role.GUIDE)
                 .build();
         Guide guide2 = Guide.builder()
-                .socialId("gg_2")
+                .userId("gg_2")
                 .role(Role.GUIDE)
                 .build();
         Guide guide3 = Guide.builder()
-                .socialId("gg_3")
+                .userId("gg_3")
                 .role(Role.GUIDE)
                 .build();
         userRepository.save(vi1);
@@ -108,14 +109,14 @@ public class SignController {
                 .viId(vi2)
                 .guideId(guide3)
                 .build());
-        PartnerId partnerId = new PartnerId("aa_1", "gg_1");
+        PartnerId partnerId = new PartnerId(0L, 1L);
         Partner pa = partnerRepository.findById(partnerId).orElse(null);
         if(pa!=null){
             partnerRepository.save(Partner.builder()
                     .viId(pa.getViId())
                     .guideId(pa.getGuideId())
                     .trainingCnt(pa.getTrainingCnt()+1)
-                    .competitionCnt(pa.getCompetitionCnt())
+                    .contestCnt(pa.getContestCnt())
                     .build()
             );
         }
