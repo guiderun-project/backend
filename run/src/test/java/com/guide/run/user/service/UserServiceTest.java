@@ -29,7 +29,7 @@ class UserServiceTest {
     @Test
     void existUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .role(Role.VI)
                 .build();
         userRepository.save(user);
@@ -41,7 +41,7 @@ class UserServiceTest {
     @Test
     void waitUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
@@ -62,7 +62,7 @@ class UserServiceTest {
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .name("lj")
                 .gender("male")
                 .phoneNumber("010-9999-xxxx")

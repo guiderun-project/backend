@@ -1,7 +1,9 @@
 package com.guide.run.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
+@Getter
 @Entity
 public class SignUpInfo {
     @Id

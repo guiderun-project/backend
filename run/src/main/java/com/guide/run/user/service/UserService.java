@@ -17,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     public String getUserStatus(String socialId){
-        User user = userRepository.findBySocialId(socialId).orElse(null);
+        User user = userRepository.findById(socialId).orElse(null);
         if(user != null){
             if(user.getRole().equals(Role.VWAIT)){
                 return UserStatus.WAIT.getValue();

@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
+@Getter
 @DiscriminatorValue("V")
 @NoArgsConstructor
 @AllArgsConstructor

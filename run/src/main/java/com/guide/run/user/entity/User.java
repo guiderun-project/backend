@@ -5,11 +5,13 @@ import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 
 @Entity
+@Getter
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn

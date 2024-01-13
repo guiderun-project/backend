@@ -1,8 +1,10 @@
 package com.guide.run.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class ArchiveData {
     @Id
     private String userId;
