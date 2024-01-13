@@ -14,6 +14,7 @@ import com.guide.run.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +44,7 @@ public class SignController {
                 .build();
     }
 
+    @Secured("ROLE_NEW")
     //정보 입력이 완료되면 임시 토큰이 아닌 accessToken 발급
     @PostMapping("/api/signup/vi")
     public SignupResponse viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
