@@ -7,9 +7,12 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Role {
-    ADMIN("ROLE_ADMIN"),
-    WAIT("ROLE_WAIT"),
-    COACH("ROLE_COACH"),
+    VADMIN("ROLE_VADMIN"),
+    GADMIN("ROLE_GADMIN"),
+    VWAIT("ROLE_VWAIT"),
+    GWAIT("ROLE_GWAIT"),
+    VCOACH("ROLE_VCOACH"),
+    GCOACH("ROLE_GCOACH"),
     VI("ROLE_VI"),
     GUIDE("ROLE_GUIDE");
     private final String value;

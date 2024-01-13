@@ -32,11 +32,11 @@ public class TestController {
     public String userCreateTest(){
         User user = User.builder()
                 .socialId("kakao_1")
-                .role(Role.ADMIN)
+                .role(Role.VADMIN)
                 .build();
         User user2 = User.builder()
                 .socialId("kakao_2")
-                .role(Role.WAIT)
+                .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
         userRepository.save(user2);
