@@ -1,8 +1,5 @@
 package com.guide.run.user.dto;
 
-import com.guide.run.user.entity.type.Role;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
