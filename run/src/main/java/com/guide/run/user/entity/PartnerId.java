@@ -10,6 +10,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PartnerId implements Serializable {
-    private String viId;
-    private String guideId;
+    private Long viId;
+    private Long guideId;
 }
