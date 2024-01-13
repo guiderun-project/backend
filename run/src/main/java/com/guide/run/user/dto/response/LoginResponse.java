@@ -1,4 +1,4 @@
-package com.guide.run.user.response;
+package com.guide.run.user.dto.response;
 
 
 import lombok.AllArgsConstructor;

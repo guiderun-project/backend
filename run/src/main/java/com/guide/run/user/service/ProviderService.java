@@ -1,8 +1,8 @@
 package com.guide.run.user.service;
 
 import com.google.gson.Gson;
-import com.guide.run.user.request.OAuthRequest;
-import com.guide.run.user.response.OAuthCodeResponse;
+import com.guide.run.user.dto.request.OAuthRequest;
+import com.guide.run.user.dto.response.OAuthCodeResponse;
 import com.guide.run.user.factory.OAuthRequestFactory;
 import com.guide.run.user.info.GetGoogleInfo;
 import com.guide.run.user.info.GetKakaoInfo;
