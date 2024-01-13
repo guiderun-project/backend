@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Data
+
 @Entity
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
