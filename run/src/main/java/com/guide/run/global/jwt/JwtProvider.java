@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -67,7 +68,10 @@ public class JwtProvider {
     }
 
     public String resolveToken(HttpServletRequest request){
-        return request.getHeader("Authorization");
+        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if(bearer!=null && bearer.startsWith("Bearer "))
+            return bearer.substring("Bearer ".length());
+        return null ; //에러 작성해야함
     }
 
     public boolean validateTokenExpiration(String token){
