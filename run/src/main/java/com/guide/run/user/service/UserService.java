@@ -39,12 +39,10 @@ public class UserService {
 
     @Transactional
     public User viSignup(String socialId, ViSignupDto viSignupDto){
-        System.out.println("======"+socialId);
         User user = userRepository.findBySocialId(reAssignSocialId(socialId)).orElse(null);
-        System.out.println("user = " + user);
         if(user!=null) {
             log.info("에러발생");
-            return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
+            return user; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         }else{
             User vi = Vi.builder()
                     .runningExp(viSignupDto.isRunningExp())
@@ -65,11 +63,15 @@ public class UserService {
     }
 
     //socialId 재할당
+    //기가입자 및 이미 정보를 입력한 회원은 재할당 하지 않음
     public String reAssignSocialId(String socialId){
-        if(socialId.startsWith("kakao")){
+        if(socialId.startsWith("kakao_")){
+            return socialId;
+        }else if(socialId.startsWith("kakao")){
             return "kakao_"+socialId.substring(6);
-        }else{
-            return "error";
+        }
+        else{
+            return "Error";
         }
     }
 
