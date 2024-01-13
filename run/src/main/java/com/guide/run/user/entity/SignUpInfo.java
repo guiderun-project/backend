@@ -13,6 +13,7 @@ public class SignUpInfo {
     private String password;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(unique = true)
     private User user;
 }
