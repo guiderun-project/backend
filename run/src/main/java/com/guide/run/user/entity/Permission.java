@@ -1,7 +1,6 @@
 package com.guide.run.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -13,4 +12,8 @@ public class Permission {
     private String userId;
     private Boolean privacy;
     private Boolean portraitRights;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
 }

@@ -1,7 +1,6 @@
 package com.guide.run.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class ArchiveData {
@@ -10,4 +9,8 @@ public class ArchiveData {
     private String runningPlace;
     private String howToKnow;
     private String motive;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
 }

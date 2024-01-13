@@ -15,12 +15,13 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorColumn
 @SuperBuilder
 public class User extends BaseEntity {
-    @Id
+    @Column(unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Id
     private String userId;
+
     private String name;
     private String gender;
     private String phoneNumber;

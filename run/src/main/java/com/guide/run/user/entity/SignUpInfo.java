@@ -1,8 +1,6 @@
 package com.guide.run.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class SignUpInfo {
@@ -11,4 +9,8 @@ public class SignUpInfo {
     @Column(unique = true, nullable = false)
     private String accountId;
     private String password;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
 }
