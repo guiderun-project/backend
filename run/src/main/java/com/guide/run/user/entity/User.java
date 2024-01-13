@@ -17,10 +17,14 @@ import java.util.List;
 @SuperBuilder
 public class User extends BaseEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
     private String socialId;
     private String name;
     private String gender;
     private String phoneNumber;
+    private Boolean openNumber;
     private int age;
     private String detailRecord;
     private String recordDegree; //개인 기록
@@ -28,4 +32,5 @@ public class User extends BaseEntity {
     private Role role;
     //private List<Event> eventLists;
     private String snsId;
+    private Boolean openSNS;
 }
