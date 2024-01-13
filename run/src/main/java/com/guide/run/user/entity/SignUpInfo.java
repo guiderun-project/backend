@@ -8,7 +8,7 @@ import lombok.Getter;
 public class SignUpInfo {
     @Id
     private String userId;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String accountId;
     private String password;
 
