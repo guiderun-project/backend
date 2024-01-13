@@ -1,8 +1,8 @@
 package com.guide.run.user.service;
 
-import com.guide.run.user.entity.Role;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
-import com.guide.run.user.entity.UserStatus;
+import com.guide.run.user.entity.type.UserStatus;
 
 import com.guide.run.user.entity.Vi;
 import com.guide.run.user.repository.UserRepository;

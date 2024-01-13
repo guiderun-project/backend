@@ -4,6 +4,7 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.PartnerRepository;
 import com.guide.run.user.repository.UserRepository;
 import com.guide.run.user.response.LoginResponse;
