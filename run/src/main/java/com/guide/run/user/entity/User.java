@@ -17,9 +17,9 @@ import lombok.experimental.SuperBuilder;
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
-    private String socialId;
+    private String userId;
     private String name;
     private String gender;
     private String phoneNumber;

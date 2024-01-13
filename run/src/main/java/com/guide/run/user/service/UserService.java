@@ -35,7 +35,7 @@ public class UserService {
         Vi vi = Vi.builder()
                 .runningExp(viSignupDto.isRunningExp())
                 .guideName(viSignupDto.getGuideName())
-                .socialId(socialId)
+                .userId(socialId)
                 .name(viSignupDto.getName())
                 .gender(viSignupDto.getGender())
                 .phoneNumber(viSignupDto.getPhoneNumber())
