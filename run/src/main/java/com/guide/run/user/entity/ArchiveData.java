@@ -14,6 +14,6 @@ public class ArchiveData {
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(unique = true)
+    @JoinColumn(unique = true, name = "user_id")
     private User user;
 }
