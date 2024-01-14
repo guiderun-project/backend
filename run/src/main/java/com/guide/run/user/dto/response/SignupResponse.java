@@ -1,5 +1,4 @@
-package com.guide.run.user.response;
-
+package com.guide.run.user.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
-    private String accessToken;
-    private String userStatus;
+public class SignupResponse {
+    private String uuid;
+    private String role;
 }

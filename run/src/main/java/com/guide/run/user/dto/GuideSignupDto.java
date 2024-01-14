@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViSignupDto {
+public class GuideSignupDto {
     //private String accountId;
     //private String password;
     private String name;
@@ -19,6 +19,10 @@ public class ViSignupDto {
     private String recordDegree; //개인 기록
     private String snsId;
     private boolean openSNS;
-    private boolean runningExp;
-    private String guideName;
+
+    private boolean guideExp;
+    private String viName;
+    private String viRecord;
+    private String viCount; //상세한 가이드 경험
+    private String guidingPace; //가이드 가능한 페이스 그룹
 }

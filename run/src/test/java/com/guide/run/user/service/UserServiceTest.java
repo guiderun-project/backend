@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
+
 @SpringBootTest
 class UserServiceTest {
     @Autowired
@@ -59,9 +61,11 @@ class UserServiceTest {
     @DisplayName("vi 회원가입")
     @Test
     void viSignup(){
+        String id = UUID.randomUUID().toString();
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
+                .uuid(id)
                 .userId("kakao_1")
                 .name("lj")
                 .gender("male")
@@ -72,6 +76,67 @@ class UserServiceTest {
                 .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
-        Assertions.assertThat(vi).isEqualTo(userRepository.save(vi));
+        Assertions.assertThat(vi.getUuid()).isEqualTo(userRepository.save(vi).getUuid());
     }
+
+    /*
+    *  //테스트입니다
+    @PostMapping("/api")
+    public void abc(){
+        Vi vi1 = Vi.builder()
+                .userId("aa_1")
+                .role(Role.VI)
+                .build();
+        Vi vi2 = Vi.builder()
+                .userId("aa_2")
+                .role(Role.VI)
+                .build();
+        Guide guide1 = Guide.builder()
+                .userId("gg_1")
+                .role(Role.GUIDE)
+                .build();
+        Guide guide2 = Guide.builder()
+                .userId("gg_2")
+                .role(Role.GUIDE)
+                .build();
+        Guide guide3 = Guide.builder()
+                .userId("gg_3")
+                .role(Role.GUIDE)
+                .build();
+        userRepository.save(vi1);
+        userRepository.save(vi2);
+        userRepository.save(guide1);
+        userRepository.save(guide2);
+        userRepository.save(guide3);
+
+        partnerRepository.save(Partner.builder()
+                .viId(vi1)
+                .guideId(guide1)
+                .build());
+        partnerRepository.save(Partner.builder()
+                .viId(vi1)
+                .guideId(guide2)
+                .build());
+        partnerRepository.save(Partner.builder()
+                .viId(vi2)
+                .guideId(guide2)
+                .build());
+        partnerRepository.save(Partner.builder()
+                .viId(vi2)
+                .guideId(guide3)
+                .build());
+        PartnerId partnerId = new PartnerId(0L, 1L);
+        Partner pa = partnerRepository.findById(partnerId).orElse(null);
+        if(pa!=null){
+            partnerRepository.save(Partner.builder()
+                    .viId(pa.getViId())
+                    .guideId(pa.getGuideId())
+                    .trainingCnt(pa.getTrainingCnt()+1)
+                    .contestCnt(pa.getContestCnt())
+                    .build()
+            );
+        }
+
+    }
+    * */
 }

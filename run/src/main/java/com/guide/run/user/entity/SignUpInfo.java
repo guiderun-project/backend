@@ -8,11 +8,12 @@ import lombok.Getter;
 public class SignUpInfo {
     @Id
     private String userId;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String accountId;
     private String password;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(unique = true, name = "user_id")
     private User user;
 }

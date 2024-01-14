@@ -16,6 +16,7 @@ public class Permission {
     private Boolean portraitRights;
 
     @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(unique = true, name = "user_id")
     private User user;
 }
