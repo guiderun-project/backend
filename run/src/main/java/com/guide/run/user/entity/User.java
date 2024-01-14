@@ -4,7 +4,6 @@ package com.guide.run.user.entity;
 import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.Role;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -18,8 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String uuid;
 
     @Id
     private String userId;
