@@ -4,9 +4,12 @@ package com.guide.run.user.entity;
 import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.Role;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -35,4 +38,20 @@ public class User extends BaseEntity {
     private String snsId;
     private boolean openSNS;
 
+    public void editUser(String name,
+                         String gender,
+                         String phoneNumber,
+                         boolean openNumber,
+                         int age,
+                         String snsId,
+                         boolean openSNS) {
+        this.name = name;
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.openNumber = openNumber;
+        this.age = age;
+        this.snsId = snsId;
+        this.openSNS = openSNS;
+    }
 }
+
