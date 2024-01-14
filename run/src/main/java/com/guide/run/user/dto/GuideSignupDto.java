@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GuideSignupDto {
+    //private String accountId;
+    //private String password;
     private String name;
     private String gender;
     private String phoneNumber;
