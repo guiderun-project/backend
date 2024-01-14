@@ -78,6 +78,11 @@ class UserServiceTest {
                 .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
-        Assertions.assertThat(vi.getUuid()).isEqualTo(userRepository.save(vi).getUuid());
+
+        Vi newVi = userRepository.save(vi);
+        Assertions.assertThat(vi.getUuid()).isEqualTo(newVi.getUuid());
+        //Assertions.assertThat(vi).isEqualTo(newVi); //created_at 과 updated_at 때문에 같을 수가 없다.
     }
+    
+
 }
