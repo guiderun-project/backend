@@ -8,7 +8,7 @@ import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.profile.OAuthProfile;
-import com.guide.run.user.service.MyPageService;
+import com.guide.run.user.service.UserInfoService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,8 +31,6 @@ public class SignController {
     private final CookieService cookieService;
     private final UserService userService;
 
-    private final MyPageService myPageService;
-
 
     @PostMapping("/oauth/login/kakao")
     public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
@@ -52,7 +50,7 @@ public class SignController {
     @Secured("ROLE_NEW")
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
-        String userId = extractUserId(httpServletRequest);
+        String userId = jwtProvider.extractUserId(httpServletRequest);
         SignupResponse response = userService.viSignup(userId, viSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -60,18 +58,12 @@ public class SignController {
     @Secured("ROLE_NEW")
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
-        String userId = extractUserId(httpServletRequest);
+        String userId = jwtProvider.extractUserId(httpServletRequest);
         SignupResponse response = userService.guideSignup(userId, guideSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/mypage/info/permission")
-    public ResponseEntity<PermissionDto> getPermission(HttpServletRequest httpServletRequest){
-        String userId = extractUserId(httpServletRequest);
-        PermissionDto response = myPageService.getPermission(userId);
 
-        return ResponseEntity.ok().body(response);
-    }
 
 
     @PostMapping("/oauth/token/google")
@@ -85,9 +77,4 @@ public class SignController {
                 .build();
     }
 
-
-    public String extractUserId(HttpServletRequest httpServletRequest){
-        String accessToken = jwtProvider.resolveToken(httpServletRequest);
-        return jwtProvider.getSocialId(accessToken);
-    }
 }
