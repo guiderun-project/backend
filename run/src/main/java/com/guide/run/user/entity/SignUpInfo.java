@@ -11,9 +11,4 @@ public class SignUpInfo {
     @Column(unique = true)
     private String accountId;
     private String password;
-
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(unique = true, name = "user_id")
-    private User user;
 }

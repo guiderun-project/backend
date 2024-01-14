@@ -2,9 +2,11 @@ package com.guide.run.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Getter
 @Entity
 @NoArgsConstructor
@@ -12,11 +14,7 @@ import lombok.NoArgsConstructor;
 public class Permission {
     @Id
     private String userId;
-    private Boolean privacy;
-    private Boolean portraitRights;
+    private boolean privacy;
+    private boolean portraitRights;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(unique = true, name = "user_id")
-    private User user;
 }

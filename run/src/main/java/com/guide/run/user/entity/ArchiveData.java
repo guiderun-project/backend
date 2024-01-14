@@ -1,10 +1,16 @@
 package com.guide.run.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArchiveData {
     @Id
     private String userId;
@@ -12,8 +18,4 @@ public class ArchiveData {
     private String howToKnow;
     private String motive;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(unique = true, name = "user_id")
-    private User user;
 }

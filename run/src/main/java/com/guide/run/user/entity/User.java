@@ -34,4 +34,5 @@ public class User extends BaseEntity {
     //private List<Event> eventLists;
     private String snsId;
     private boolean openSNS;
+
 }
