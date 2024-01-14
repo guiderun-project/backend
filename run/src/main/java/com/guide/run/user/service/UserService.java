@@ -4,15 +4,13 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
-import com.guide.run.user.entity.Guide;
+import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.entity.User;
-import com.guide.run.user.entity.type.UserStatus;
-import com.guide.run.user.entity.Vi;
+import com.guide.run.user.repository.ArchiveDataRepository;
+import com.guide.run.user.repository.PermissionRepository;
 import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +22,8 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final ArchiveDataRepository archiveDataRepository;
+    private final PermissionRepository permissionRepository;
     private final JwtProvider jwtProvider;
 
     public String getUserStatus(String userId){
@@ -71,6 +71,23 @@ public class UserService {
 
             Vi newVi = userRepository.save(vi);
 
+            ArchiveData archiveData = ArchiveData.builder()
+                    .userId(userId)
+                    .howToKnow(viSignupDto.getHowToKnow())
+                    .motive(viSignupDto.getMotive())
+                    .runningPlace(viSignupDto.getRunningPlace())
+                    .build();
+
+            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
+
+            Permission permission = Permission.builder()
+                    .userId(userId)
+                    .privacy(viSignupDto.getPrivacy())
+                    .portraitRights(viSignupDto.getPortraitRights())
+                    .build();
+
+            permissionRepository.save(permission); //약관 동의 저장
+
             SignupResponse response = SignupResponse
                     .builder()
                     .accessToken(jwtProvider.createAccessToken(userId))
@@ -111,6 +128,26 @@ public class UserService {
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
 
             Guide newGuide = userRepository.save(guide);
+
+            ArchiveData archiveData = ArchiveData.builder()
+                    .userId(userId)
+                    .howToKnow(guideSignupDto.getHowToKnow())
+                    .motive(guideSignupDto.getMotive())
+                    .runningPlace(guideSignupDto.getRunningPlace())
+                    .build();
+
+            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
+
+
+            Permission permission = Permission.builder()
+                    .userId(userId)
+                    .privacy(guideSignupDto.getPrivacy())
+                    .portraitRights(guideSignupDto.getPortraitRights())
+                    .build();
+
+            permissionRepository.save(permission); //약관 동의 저장
+
+            //todo : 추후 일반 로그인을 위한 SignupInfo도 생성해야 함.
 
             SignupResponse response = SignupResponse.builder()
                     .uuid(newGuide.getUuid())
