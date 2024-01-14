@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
+
 @SpringBootTest
 class UserServiceTest {
     @Autowired
@@ -59,9 +61,11 @@ class UserServiceTest {
     @DisplayName("vi 회원가입")
     @Test
     void viSignup(){
+        String id = UUID.randomUUID().toString();
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
+                .uuid(id)
                 .userId("kakao_1")
                 .name("lj")
                 .gender("male")
@@ -72,7 +76,7 @@ class UserServiceTest {
                 .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
-        Assertions.assertThat(vi).isEqualTo(userRepository.save(vi));
+        Assertions.assertThat(vi.getUuid()).isEqualTo(userRepository.save(vi).getUuid());
     }
 
     /*
