@@ -1,15 +1,13 @@
-package com.guide.run.user.response;
+package com.guide.run.user.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class SignupResponse {
+    private String uuid;
     private String accessToken;
     private String userStatus;
 }
