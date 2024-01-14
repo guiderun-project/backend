@@ -11,6 +11,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PartnerId implements Serializable {
-    private Long viId;
-    private Long guideId;
+    private String viId;
+    private String guideId;
 }
