@@ -82,8 +82,8 @@ public class UserService {
 
             Permission permission = Permission.builder()
                     .userId(userId)
-                    .privacy(viSignupDto.getPrivacy())
-                    .portraitRights(viSignupDto.getPortraitRights())
+                    .privacy(viSignupDto.isPrivacy())
+                    .portraitRights(viSignupDto.isPortraitRights())
                     .build();
 
             permissionRepository.save(permission); //약관 동의 저장
@@ -141,8 +141,8 @@ public class UserService {
 
             Permission permission = Permission.builder()
                     .userId(userId)
-                    .privacy(guideSignupDto.getPrivacy())
-                    .portraitRights(guideSignupDto.getPortraitRights())
+                    .privacy(guideSignupDto.isPrivacy())
+                    .portraitRights(guideSignupDto.isPortraitRights())
                     .build();
 
             permissionRepository.save(permission); //약관 동의 저장
@@ -158,7 +158,6 @@ public class UserService {
             return response;
         }
     }
-
 
 
     public String getUUID(){
