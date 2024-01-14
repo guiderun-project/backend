@@ -1,10 +1,8 @@
 package com.guide.run.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class GuideSignupDto {
@@ -20,9 +18,20 @@ public class GuideSignupDto {
     private String snsId;
     private boolean openSNS;
 
+    //가이드 전용 정보
     private boolean guideExp;
     private String viName;
     private String viRecord;
     private String viCount; //상세한 가이드 경험
     private String guidingPace; //가이드 가능한 페이스 그룹
+
+    //아카이브 데이터
+    private String runningPlace;
+    private String howToKnow; //가이드 경험 있을 시 null
+    private String motive; //가이더 경험 있을 시 null
+    private String hopePrefs;
+
+    //약관동의
+    private boolean privacy;
+    private boolean portraitRights;
 }
