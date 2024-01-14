@@ -7,10 +7,8 @@ import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
-import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.profile.OAuthProfile;
-import com.guide.run.user.repository.PartnerRepository;
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.service.MyPageService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +30,8 @@ public class SignController {
     private final JwtProvider jwtProvider;
     private final CookieService cookieService;
     private final UserService userService;
+
+    private final MyPageService myPageService;
 
 
     @PostMapping("/oauth/login/kakao")
@@ -63,6 +63,14 @@ public class SignController {
         String userId = extractUserId(httpServletRequest);
         SignupResponse response = userService.guideSignup(userId, guideSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/mypage/info/permission")
+    public ResponseEntity<PermissionDto> getPermission(HttpServletRequest httpServletRequest){
+        String userId = extractUserId(httpServletRequest);
+        PermissionDto response = myPageService.getPermission(userId);
+
+        return ResponseEntity.ok().body(response);
     }
 
 
