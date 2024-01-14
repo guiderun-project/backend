@@ -3,6 +3,7 @@ package com.guide.run.user.controller;
 import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
+import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -18,10 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
 
@@ -34,8 +32,6 @@ public class SignController {
     private final JwtProvider jwtProvider;
     private final CookieService cookieService;
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final PartnerRepository partnerRepository;
 
 
     @PostMapping("/oauth/login/kakao")
@@ -56,14 +52,15 @@ public class SignController {
     @Secured("ROLE_NEW")
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
-        String userId = extractAccessToken(httpServletRequest);
+        String userId = extractUserId(httpServletRequest);
         SignupResponse response = userService.viSignup(userId, viSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Secured("ROLE_NEW")
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
-        String userId = extractAccessToken(httpServletRequest);
+        String userId = extractUserId(httpServletRequest);
         SignupResponse response = userService.guideSignup(userId, guideSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -81,7 +78,7 @@ public class SignController {
     }
 
 
-    public String extractAccessToken(HttpServletRequest httpServletRequest){
+    public String extractUserId(HttpServletRequest httpServletRequest){
         String accessToken = jwtProvider.resolveToken(httpServletRequest);
         return jwtProvider.getSocialId(accessToken);
     }
