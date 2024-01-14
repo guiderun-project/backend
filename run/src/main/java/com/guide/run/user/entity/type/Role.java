@@ -14,6 +14,7 @@ public enum Role {
     VCOACH("ROLE_VCOACH"),
     GCOACH("ROLE_GCOACH"),
     VI("ROLE_VI"),
-    GUIDE("ROLE_GUIDE");
+    GUIDE("ROLE_GUIDE"),
+    NEW("ROLE_NEW");
     private final String value;
 }

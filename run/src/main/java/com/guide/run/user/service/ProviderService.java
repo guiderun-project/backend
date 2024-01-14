@@ -52,9 +52,11 @@ public class ProviderService {
     private OAuthProfile extractProfile(ResponseEntity<String> response, String provider) {
         if (provider.equals("kakao")) {
             GetKakaoInfo getKakaoInfo = gson.fromJson(response.getBody(), GetKakaoInfo.class);
-            return new KakaoProfile("kakao_"+getKakaoInfo.getId(),"kakao");
+            log.info(getKakaoInfo.getId());
+            return new KakaoProfile("kakao"+getKakaoInfo.getId(),"kakao");
         } else if(provider.equals("google")) {
             GetGoogleInfo getGoogleInfo = gson.fromJson(response.getBody(), GetGoogleInfo.class);
+            log.info(getGoogleInfo.getSub());
             return new GoogleProfile("google_"+getGoogleInfo.getSub(),"google");
         }
         return null; // 에러 추가 바람

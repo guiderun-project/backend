@@ -36,7 +36,7 @@ class UserServiceTest {
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(UserStatus.EXIST.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.VI.getValue());
     }
 
     @DisplayName("로그인 시 가입 대기중 회원 응답")
@@ -48,14 +48,14 @@ class UserServiceTest {
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(UserStatus.WAIT.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.VWAIT.getValue());
     }
 
     @DisplayName("로그인 시 신규 회원 응답")
     @Test
     void newUserLoginResponse(){
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(UserStatus.NEW.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.NEW.getValue());
     }
 
     @DisplayName("vi 회원가입")

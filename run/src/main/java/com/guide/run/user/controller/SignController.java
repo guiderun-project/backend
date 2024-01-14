@@ -6,6 +6,7 @@ import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.profile.OAuthProfile;
 import com.guide.run.user.repository.PartnerRepository;
 import com.guide.run.user.repository.UserRepository;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,20 +43,21 @@ public class SignController {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String userId = oAuthProfile.getSocialId();
+        String userStatus = userService.getUserStatus(userId);
 
         cookieService.createCookie("refreshToken",response);
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(userId))
-                .userStatus(userService.getUserStatus(userId))
+                .userStatus(userStatus)
                 .build();
     }
 
+    @Secured("ROLE_NEW")
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = extractAccessToken(httpServletRequest);
         SignupResponse response = userService.viSignup(userId, viSignupDto);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
