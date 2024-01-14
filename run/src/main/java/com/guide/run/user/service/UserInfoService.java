@@ -52,12 +52,13 @@ public class UserInfoService {
 
         PersonalInfoDto response = PersonalInfoDto.builder()
                 .role(user.getRole().getValue())
+                .name(user.getName())
                 .gender(user.getGender())
                 .phoneNumber(user.getPhoneNumber())
                 .openNumber(user.isOpenNumber())
                 .age(user.getAge())
                 .snsId(user.getSnsId())
-                .openSNS(user.isOpenSNS())
+                .openSns(user.isOpenSns())
                 .build();
 
         return response;
@@ -78,7 +79,7 @@ public class UserInfoService {
                 dto.isOpenNumber(),
                 dto.getAge(),
                 dto.getSnsId(),
-                dto.isOpenSNS()
+                dto.isOpenSns()
         );
 
         PersonalInfoDto response = PersonalInfoDto.userToInfoDto(user);

@@ -36,7 +36,7 @@ public class User extends BaseEntity {
     private Role role;
     //private List<Event> eventLists;
     private String snsId;
-    private boolean openSNS;
+    private boolean openSns;
 
     public void editUser(String name,
                          String gender,
@@ -44,14 +44,14 @@ public class User extends BaseEntity {
                          boolean openNumber,
                          int age,
                          String snsId,
-                         boolean openSNS) {
+                         boolean openSns) {
         this.name = name;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.openNumber = openNumber;
         this.age = age;
         this.snsId = snsId;
-        this.openSNS = openSNS;
+        this.openSns = openSns;
     }
 }
 

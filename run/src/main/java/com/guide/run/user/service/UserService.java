@@ -64,7 +64,7 @@ public class UserService {
                     .recordDegree(viSignupDto.getRecordDegree())
                     .role(Role.VWAIT)
                     .snsId(viSignupDto.getSnsId())
-                    .openSNS(viSignupDto.isOpenSNS())
+                    .openSns(viSignupDto.isOpenSns())
                     .build();
 
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
@@ -117,7 +117,7 @@ public class UserService {
                     .detailRecord(guideSignupDto.getDetailRecord())
                     .recordDegree(guideSignupDto.getRecordDegree())
                     .snsId(guideSignupDto.getSnsId())
-                    .openSNS(guideSignupDto.isOpenSNS())
+                    .openSns(guideSignupDto.isOpenSns())
                     .guideExp(guideSignupDto.isGuideExp())
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
@@ -125,9 +125,11 @@ public class UserService {
                     .role(Role.GWAIT)
                     .build();
 
+
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
 
             Guide newGuide = userRepository.save(guide);
+
 
             ArchiveData archiveData = ArchiveData.builder()
                     .userId(userId)
