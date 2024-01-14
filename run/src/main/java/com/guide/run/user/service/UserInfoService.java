@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class MyPageService {
+public class UserInfoService {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final ArchiveDataRepository archiveDataRepository;
