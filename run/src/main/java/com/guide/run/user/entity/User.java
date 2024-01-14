@@ -4,6 +4,7 @@ package com.guide.run.user.entity;
 import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
