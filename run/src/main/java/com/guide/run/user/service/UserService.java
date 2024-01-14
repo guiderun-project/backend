@@ -64,7 +64,7 @@ public class UserService {
                     .recordDegree(viSignupDto.getRecordDegree())
                     .role(Role.VWAIT)
                     .snsId(viSignupDto.getSnsId())
-                    .openSNS(viSignupDto.isOpenSNS())
+                    .openSns(viSignupDto.isOpenSns())
                     .build();
 
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
@@ -82,8 +82,8 @@ public class UserService {
 
             Permission permission = Permission.builder()
                     .userId(userId)
-                    .privacy(viSignupDto.getPrivacy())
-                    .portraitRights(viSignupDto.getPortraitRights())
+                    .privacy(viSignupDto.isPrivacy())
+                    .portraitRights(viSignupDto.isPortraitRights())
                     .build();
 
             permissionRepository.save(permission); //약관 동의 저장
@@ -117,7 +117,7 @@ public class UserService {
                     .detailRecord(guideSignupDto.getDetailRecord())
                     .recordDegree(guideSignupDto.getRecordDegree())
                     .snsId(guideSignupDto.getSnsId())
-                    .openSNS(guideSignupDto.isOpenSNS())
+                    .openSns(guideSignupDto.isOpenSns())
                     .guideExp(guideSignupDto.isGuideExp())
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
@@ -125,9 +125,11 @@ public class UserService {
                     .role(Role.GWAIT)
                     .build();
 
+
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
 
             Guide newGuide = userRepository.save(guide);
+
 
             ArchiveData archiveData = ArchiveData.builder()
                     .userId(userId)
@@ -141,8 +143,8 @@ public class UserService {
 
             Permission permission = Permission.builder()
                     .userId(userId)
-                    .privacy(guideSignupDto.getPrivacy())
-                    .portraitRights(guideSignupDto.getPortraitRights())
+                    .privacy(guideSignupDto.isPrivacy())
+                    .portraitRights(guideSignupDto.isPortraitRights())
                     .build();
 
             permissionRepository.save(permission); //약관 동의 저장
@@ -158,7 +160,6 @@ public class UserService {
             return response;
         }
     }
-
 
 
     public String getUUID(){

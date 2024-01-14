@@ -67,6 +67,11 @@ public class JwtProvider {
         }
     }
 
+    public String extractUserId(HttpServletRequest httpServletRequest){
+        String accessToken = resolveToken(httpServletRequest);
+        return getSocialId(accessToken);
+    }
+
     public String resolveToken(HttpServletRequest request){
         String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
         if(bearer !=null && bearer.startsWith("Bearer "))

@@ -16,7 +16,7 @@ public class GuideSignupDto {
     private String detailRecord;
     private String recordDegree; //개인 기록
     private String snsId;
-    private boolean openSNS;
+    private boolean openSns;
 
     //가이드 전용 정보
     private boolean guideExp;

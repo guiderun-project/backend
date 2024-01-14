@@ -31,6 +31,7 @@ class UserServiceTest {
     @Test
     void existUserLoginResponse(){
         User user = User.builder()
+                .uuid(userService.getUUID())
                 .userId("kakao_1")
                 .role(Role.VI)
                 .build();
@@ -43,6 +44,7 @@ class UserServiceTest {
     @Test
     void waitUserLoginResponse(){
         User user = User.builder()
+                .uuid(userService.getUUID())
                 .userId("kakao_1")
                 .role(Role.VWAIT)
                 .build();
@@ -76,67 +78,11 @@ class UserServiceTest {
                 .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
-        Assertions.assertThat(vi.getUuid()).isEqualTo(userRepository.save(vi).getUuid());
+
+        Vi newVi = userRepository.save(vi);
+        Assertions.assertThat(vi.getUuid()).isEqualTo(newVi.getUuid());
+        //Assertions.assertThat(vi).isEqualTo(newVi); //created_at 과 updated_at 때문에 같을 수가 없다.
     }
+    
 
-    /*
-    *  //테스트입니다
-    @PostMapping("/api")
-    public void abc(){
-        Vi vi1 = Vi.builder()
-                .userId("aa_1")
-                .role(Role.VI)
-                .build();
-        Vi vi2 = Vi.builder()
-                .userId("aa_2")
-                .role(Role.VI)
-                .build();
-        Guide guide1 = Guide.builder()
-                .userId("gg_1")
-                .role(Role.GUIDE)
-                .build();
-        Guide guide2 = Guide.builder()
-                .userId("gg_2")
-                .role(Role.GUIDE)
-                .build();
-        Guide guide3 = Guide.builder()
-                .userId("gg_3")
-                .role(Role.GUIDE)
-                .build();
-        userRepository.save(vi1);
-        userRepository.save(vi2);
-        userRepository.save(guide1);
-        userRepository.save(guide2);
-        userRepository.save(guide3);
-
-        partnerRepository.save(Partner.builder()
-                .viId(vi1)
-                .guideId(guide1)
-                .build());
-        partnerRepository.save(Partner.builder()
-                .viId(vi1)
-                .guideId(guide2)
-                .build());
-        partnerRepository.save(Partner.builder()
-                .viId(vi2)
-                .guideId(guide2)
-                .build());
-        partnerRepository.save(Partner.builder()
-                .viId(vi2)
-                .guideId(guide3)
-                .build());
-        PartnerId partnerId = new PartnerId(0L, 1L);
-        Partner pa = partnerRepository.findById(partnerId).orElse(null);
-        if(pa!=null){
-            partnerRepository.save(Partner.builder()
-                    .viId(pa.getViId())
-                    .guideId(pa.getGuideId())
-                    .trainingCnt(pa.getTrainingCnt()+1)
-                    .contestCnt(pa.getContestCnt())
-                    .build()
-            );
-        }
-
-    }
-    * */
 }

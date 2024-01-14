@@ -11,7 +11,7 @@ public class ViRunningInfoDto {
     private String recordDegree;
     private String detailRecord;
     private boolean runningExp;
-    private String howToKnow;
-    private String motive;
+    private String howToKnow; //러닝 경험 없을 시 null
+    private String motive; //러닝 경험 없을 시 null
     private String hopePrefs;
 }
