@@ -1,6 +1,6 @@
 package com.guide.run.user.service;
 
-import com.guide.run.user.entity.Role;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
 
 import com.guide.run.user.entity.Vi;
@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.UUID;
 
 @SpringBootTest
 class UserServiceTest {
@@ -28,7 +30,8 @@ class UserServiceTest {
     @Test
     void existUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .uuid(userService.getUUID())
+                .userId("kakao_1")
                 .role(Role.VI)
                 .build();
         userRepository.save(user);
@@ -40,7 +43,8 @@ class UserServiceTest {
     @Test
     void waitUserLoginResponse(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .uuid(userService.getUUID())
+                .userId("kakao_1")
                 .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
@@ -58,10 +62,12 @@ class UserServiceTest {
     @DisplayName("vi 회원가입")
     @Test
     void viSignup(){
+        String id = UUID.randomUUID().toString();
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
-                .socialId("kakao_1")
+                .uuid(id)
+                .userId("kakao_1")
                 .name("lj")
                 .gender("male")
                 .phoneNumber("010-9999-xxxx")
@@ -71,6 +77,11 @@ class UserServiceTest {
                 .role(Role.VWAIT)
                 .snsId("XXXXX12345")
                 .build();
-        Assertions.assertThat(vi).isEqualTo(userRepository.save(vi));
+
+        Vi newVi = userRepository.save(vi);
+        Assertions.assertThat(vi.getUuid()).isEqualTo(newVi.getUuid());
+        //Assertions.assertThat(vi).isEqualTo(newVi); //created_at 과 updated_at 때문에 같을 수가 없다.
     }
+    
+
 }

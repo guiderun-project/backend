@@ -1,4 +1,4 @@
-package com.guide.run.user.request;
+package com.guide.run.user.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

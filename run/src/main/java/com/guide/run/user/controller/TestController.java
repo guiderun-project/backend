@@ -1,7 +1,7 @@
 package com.guide.run.user.controller;
 
 
-import com.guide.run.user.entity.Role;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
 
@@ -31,11 +31,11 @@ public class TestController {
     @GetMapping("/user/create")
     public String userCreateTest(){
         User user = User.builder()
-                .socialId("kakao_1")
+                .userId("kakao_1")
                 .role(Role.VADMIN)
                 .build();
         User user2 = User.builder()
-                .socialId("kakao_2")
+                .userId("kakao_2")
                 .role(Role.VWAIT)
                 .build();
         userRepository.save(user);
