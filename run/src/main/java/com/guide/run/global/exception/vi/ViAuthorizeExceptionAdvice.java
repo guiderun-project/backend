@@ -1,7 +1,6 @@
 package com.guide.run.global.exception.vi;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.UnknownException;
 import com.guide.run.global.exception.vi.authorize.NotAuthorityViException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;

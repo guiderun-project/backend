@@ -3,7 +3,6 @@ package com.guide.run.global.exception.user;
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.user.authorize.NotApprovedUserException;
 import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
-import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
