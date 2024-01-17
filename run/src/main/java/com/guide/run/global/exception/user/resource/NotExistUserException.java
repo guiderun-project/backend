@@ -1,6 +1,6 @@
-package com.guide.run.global.exception.user;
+package com.guide.run.global.exception.user.resource;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 
 public class NotExistUserException extends RuntimeException{
     public NotExistUserException(String message){
@@ -9,7 +9,5 @@ public class NotExistUserException extends RuntimeException{
     public NotExistUserException(String message, Throwable cause){
         super(message,cause);
     }
-
-    public NotExistUserException() {
-    }
+    public NotExistUserException() {}
 }
