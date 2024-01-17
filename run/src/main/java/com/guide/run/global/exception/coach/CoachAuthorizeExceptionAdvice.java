@@ -2,7 +2,6 @@ package com.guide.run.global.exception.coach;
 
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.coach.authorize.NotAuthorityCoachException;
-import com.guide.run.global.exception.vi.authorize.NotAuthorityViException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

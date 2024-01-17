@@ -1,9 +1,6 @@
 package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.auth.authorize.NotExistAuthorizationException;
-import com.guide.run.global.exception.auth.authorize.NotValidAccessTokenException;
-import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.event.authorize.NotEventApplierException;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.authorize.NotEventParticipantException;

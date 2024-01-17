@@ -2,7 +2,6 @@ package com.guide.run.global.exception.admin;
 
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.admin.authorize.NotAuthorityAdminException;
-import com.guide.run.global.exception.vi.authorize.NotAuthorityViException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
