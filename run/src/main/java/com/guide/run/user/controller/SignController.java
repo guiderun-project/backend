@@ -47,7 +47,7 @@ public class SignController {
                 .build();
     }
 
-    @Secured("ROLE_NEW")
+
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
@@ -55,7 +55,7 @@ public class SignController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Secured("ROLE_NEW")
+
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
