@@ -22,14 +22,14 @@ public class UserAuthorizeExceptionAdvice {
 
     //1100
     @ExceptionHandler(NotApprovedUserException.class)
-    protected ResponseEntity<FailResult> NotApprovedUserException(NotExistUserException e){
+    protected ResponseEntity<FailResult> NotApprovedUserException(NotApprovedUserException e){
         return ResponseEntity.status(403).body(responseService.getFailResult(
                 getMessage("notApprovedUser.code"),
                 getMessage("notApprovedUser.msg")));
     }
     //1101
     @ExceptionHandler(NotAuthorizationException.class)
-    protected ResponseEntity<FailResult> NotAuthorizationException(NotExistUserException e){
+    protected ResponseEntity<FailResult> NotAuthorizationException(NotAuthorizationException e){
         return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notAuthorization.code"),
                 getMessage("notAuthorization.msg")));
