@@ -19,7 +19,7 @@ public class UserResourceExceptionAdvice {
     private final ResponseService responseService;
     //1300
     @ExceptionHandler(NotExistUserException.class)
-    protected ResponseEntity<FailResult> NotValidAccessTokenException(NotExistUserException e){
+    protected ResponseEntity<FailResult> NotExistUserException(NotExistUserException e){
         return ResponseEntity.status(404).body(responseService.getFailResult(
                 getMessage("notExistUser.code"),
                 getMessage("notExistUser.msg")));
