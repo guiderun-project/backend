@@ -19,7 +19,7 @@ public class GuideAuthorizeExceptionAdvice {
     private final MessageSource messageSource;
     private final ResponseService responseService;
 
-    //3100
+    //4100
     @ExceptionHandler(NotAuthorityGuideException.class)
     protected ResponseEntity<FailResult> NotAuthorityGuideException(NotAuthorityGuideException e){
         return ResponseEntity.status(403).body(responseService.getFailResult(
