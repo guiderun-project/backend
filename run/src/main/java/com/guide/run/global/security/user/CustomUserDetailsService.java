@@ -1,6 +1,5 @@
 package com.guide.run.global.security.user;
 
-import com.guide.run.global.exception.user.NotExistUserException;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

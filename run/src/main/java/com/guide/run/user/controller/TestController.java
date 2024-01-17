@@ -1,7 +1,7 @@
 package com.guide.run.user.controller;
 
 
-import com.guide.run.global.exception.user.NotExistUserException;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
