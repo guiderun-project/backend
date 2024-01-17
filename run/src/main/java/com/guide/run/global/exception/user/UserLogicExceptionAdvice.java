@@ -15,7 +15,6 @@ public class UserLogicExceptionAdvice {
     private final MessageSource messageSource;
     private final ResponseService responseService;
 
-    //1100
     private String getMessage(String code){
         return getMessage(code,null);
     }
