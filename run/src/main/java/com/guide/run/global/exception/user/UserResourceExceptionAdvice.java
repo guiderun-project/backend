@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RequiredArgsConstructor
 @RestControllerAdvice
-public class UserResourceException {
+public class UserResourceExceptionAdvice {
     private final MessageSource messageSource;
     private final ResponseService responseService;
     //1300
