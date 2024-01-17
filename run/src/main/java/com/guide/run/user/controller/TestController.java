@@ -1,12 +1,14 @@
 package com.guide.run.user.controller;
 
 
+import com.guide.run.global.exception.user.NotExistUserException;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,6 +19,10 @@ public class TestController {
     @GetMapping("/api/test")
     public String test(){
         return "테스트 성공";
+    }
+    @PostMapping("/ap")
+    public String test34(){
+        throw new NotExistUserException();
     }
     //ADMIN 권한 테스트
     @GetMapping("/api/test2")
@@ -42,4 +48,5 @@ public class TestController {
         userRepository.save(user2);
         return "생성 완료";
     }
+
 }
