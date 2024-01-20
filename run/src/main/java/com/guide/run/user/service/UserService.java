@@ -62,7 +62,7 @@ public class UserService {
                     .age(viSignupDto.getAge())
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
-                    .role(Role.VWAIT)
+                    .role(Role.WAIT)
                     .snsId(viSignupDto.getSnsId())
                     .openSns(viSignupDto.isOpenSns())
                     .build();
@@ -122,7 +122,7 @@ public class UserService {
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
                     .viRecord(guideSignupDto.getViRecord())
-                    .role(Role.GWAIT)
+                    .role(Role.WAIT)
                     .build();
 
 

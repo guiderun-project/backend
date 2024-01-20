@@ -32,11 +32,11 @@ class UserServiceTest {
         User user = User.builder()
                 .uuid(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.VI)
+                .role(Role.USER)
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.VI.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.USER.getValue());
     }
 
     @DisplayName("로그인 시 가입 대기중 회원 응답")
@@ -45,11 +45,11 @@ class UserServiceTest {
         User user = User.builder()
                 .uuid(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.VWAIT)
+                .role(Role.WAIT)
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.VWAIT.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.WAIT.getValue());
     }
 
     @DisplayName("로그인 시 신규 회원 응답")
@@ -74,7 +74,7 @@ class UserServiceTest {
                 .age(13)
                 .detailRecord("45:23")
                 .recordDegree("A")
-                .role(Role.VWAIT)
+                .role(Role.WAIT)
                 .snsId("XXXXX12345")
                 .build();
 
