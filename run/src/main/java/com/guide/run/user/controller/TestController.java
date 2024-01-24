@@ -22,7 +22,7 @@ public class TestController {
     }
     @PostMapping("/ap")
     public String test34(){
-        throw new NotExistUserException();
+        throw new NotExistUserException("존재하지 않는 사용자입니다");
     }
     //ADMIN 권한 테스트
     @GetMapping("/api/test2")
