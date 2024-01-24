@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventController {
     private final JwtProvider jwtProvider;
     private final EventService eventService;
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest eventCreateRequest, HttpServletRequest request){
         String userId = jwtProvider.resolveToken(request);
         EventCreatedResponse eventCreatedResponse = eventService.eventCreate(eventCreateRequest, userId);
