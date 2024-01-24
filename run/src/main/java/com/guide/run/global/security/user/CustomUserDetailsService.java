@@ -1,5 +1,6 @@
 package com.guide.run.global.security.user;
 
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String socialId) throws UsernameNotFoundException{
-        User user = userRepository.findById(socialId).orElseThrow(() -> new UsernameNotFoundException("사용자 존재 x"));
+        User user = userRepository.findById(socialId).orElseThrow(() -> new NotExistUserException());
         return new CustomUserDetails(user);
     }
 }

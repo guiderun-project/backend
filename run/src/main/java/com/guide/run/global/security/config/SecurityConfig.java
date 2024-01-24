@@ -25,7 +25,7 @@ public class SecurityConfig {
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/api/test").hasRole("USER")
+                        .requestMatchers("/api/test").hasRole("VADMIN")
                         .requestMatchers("/api/test2").hasRole("ADMIN")
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
