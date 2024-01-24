@@ -1,32 +1,18 @@
-package com.guide.run.event.entity;
+package com.guide.run.event.entity.dto.request;
 
 import com.guide.run.event.entity.type.EvenvtType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Event{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; //이벤트 id
-    private String organizer; //주최자 id
+public class EventCreateRequest {
     private LocalDate recruitStartDate;//모집 시작일
     private LocalDate recruitEndDate;//모집 마감일
-    private String name; //이벤트 제목
-    private boolean isCreated; // event 대기 생성 여부 true면 생성 상태 false면 대기 상태
+    private String name;//이벤트 제목
     private boolean isRecruited; // 모집 상태 true면 모집중 false면 모집 마감
     private EvenvtType type;//이벤트 분류
     private LocalDateTime startTime;//이벤트 시작일+ 시작시간
