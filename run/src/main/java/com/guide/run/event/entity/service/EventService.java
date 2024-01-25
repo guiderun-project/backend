@@ -41,7 +41,7 @@ public class EventService {
     @Transactional
     public EventUpdatedResponse eventUpdate(EventUpdateRequest eventUpdateRequest, String userId,Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if(event.getOrganizer()==userId){
+        if(event.getOrganizer().equals(userId)){
             Event updatedEvent = eventRepository.save(Event.builder()
                     .id(eventId)
                     .organizer(userId)
@@ -63,5 +63,14 @@ public class EventService {
                     .build();
         }
         throw new NotEventOrganizerException();
+    }
+    @Transactional
+    public void eventDelete(String userId,Long eventId){
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        if(event.getOrganizer().equals(userId)){
+            eventRepository.deleteById(eventId);
+        }
+        else
+            throw new NotEventOrganizerException();
     }
 }
