@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,6 @@ public class EventService {
                     .idCreated(updatedEvent.isCreated())
                     .build();
         }
-        throw new RuntimeException();
+        throw new NotExistEventException();
     }
 }
