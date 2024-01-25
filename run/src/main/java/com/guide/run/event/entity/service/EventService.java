@@ -2,7 +2,9 @@ package com.guide.run.event.entity.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
+import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
+import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,5 +34,31 @@ public class EventService {
                 .eventId(createdEvent.getId())
                 .idCreated(createdEvent.isCreated())
                 .build();
+    }
+
+    @Transactional
+    public EventUpdatedResponse eventUpdate(EventUpdateRequest eventUpdateRequest, String userId) {
+        if(!eventRepository.findById(eventUpdateRequest.getEventId()).isEmpty()){
+            Event updatedEvent = eventRepository.save(Event.builder()
+                    .id(eventUpdateRequest.getEventId())
+                    .organizer(userId)
+                    .recruitStartDate(eventUpdateRequest.getRecruitStartDate())
+                    .recruitEndDate(eventUpdateRequest.getRecruitEndDate())
+                    .name(eventUpdateRequest.getName())
+                    .isCreated(false)
+                    .isRecruited(eventUpdateRequest.isRecruited())
+                    .type(eventUpdateRequest.getType())
+                    .startTime(eventUpdateRequest.getStartTime())
+                    .endTime(eventUpdateRequest.getEndTime())
+                    .maxNumV(eventUpdateRequest.getMaxNumV())
+                    .maxNumG(eventUpdateRequest.getMaxNumG())
+                    .place(eventUpdateRequest.getPlace())
+                    .content(eventUpdateRequest.getContent()).build());
+            return EventUpdatedResponse.builder()
+                    .eventId(updatedEvent.getId())
+                    .idCreated(updatedEvent.isCreated())
+                    .build();
+        }
+        throw new RuntimeException();
     }
 }
