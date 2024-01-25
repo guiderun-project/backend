@@ -37,10 +37,10 @@ public class EventService {
     }
 
     @Transactional
-    public EventUpdatedResponse eventUpdate(EventUpdateRequest eventUpdateRequest, String userId) {
-        if(!eventRepository.findById(eventUpdateRequest.getEventId()).isEmpty()){
+    public EventUpdatedResponse eventUpdate(EventUpdateRequest eventUpdateRequest, String userId,Long eventId) {
+        if(!eventRepository.findById(eventId).isEmpty()){
             Event updatedEvent = eventRepository.save(Event.builder()
-                    .id(eventUpdateRequest.getEventId())
+                    .id(eventId)
                     .organizer(userId)
                     .recruitStartDate(eventUpdateRequest.getRecruitStartDate())
                     .recruitEndDate(eventUpdateRequest.getRecruitEndDate())

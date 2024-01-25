@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class EventUpdateRequest {
-    private Long eventId;
     private LocalDate recruitStartDate;//모집 시작일
     private LocalDate recruitEndDate;//모집 마감일
     private String name;//이벤트 제목

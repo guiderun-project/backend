@@ -35,14 +35,14 @@ public class EventController {
         EventCreatedResponse eventCreatedResponse = eventService.eventCreate(eventCreateRequest, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(eventCreatedResponse);
     }
-    @PatchMapping
-    public ResponseEntity<EventUpdatedResponse> eventUpdate(@RequestBody EventUpdateRequest eventUpdateRequest, HttpServletRequest request){
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventUpdateRequest eventUpdateRequest, HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
         User user = userRepository.findByUserId(userId).
                 orElseThrow(() -> new NotExistUserException());
         if(user.getRole().getValue() != VADMIN.getValue())
             throw new NotAuthorityAdminException();
-        EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(eventUpdateRequest, userId);
+        EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(eventUpdateRequest, userId,eventId);
         return ResponseEntity.status(HttpStatus.CREATED).body(eventUpdatedResponse);
     }
 }
