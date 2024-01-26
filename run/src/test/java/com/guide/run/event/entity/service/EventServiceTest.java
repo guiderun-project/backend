@@ -2,6 +2,7 @@ package com.guide.run.event.entity.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EvenvtType;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +37,8 @@ class EventServiceTest {
                 .id(1L)
                 .organizer("org")
                 .name("event")
-                .isCreated(true)
-                .isRecruited(true)
+                .isApprove(true)
+                .recruitStatus(EventRecruitStatus.UPCOMING)
                 .type(EvenvtType.Training)
                 .maxNumG(10)
                 .maxNumV(10)
