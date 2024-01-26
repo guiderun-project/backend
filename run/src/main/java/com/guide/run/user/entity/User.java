@@ -19,10 +19,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
-    private String uuid; //todo : 이름 바꿔야 함..
-
+    private String userId; //uuid
     @Id
-    private String userId;
+    private String signupId;
 
     private String name;
 

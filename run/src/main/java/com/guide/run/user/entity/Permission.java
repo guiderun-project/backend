@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Permission {
     @Id
-    private String userId;
+    private String signupId;
     private boolean privacy;
     private boolean portraitRights;
 
