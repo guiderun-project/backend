@@ -2,16 +2,18 @@ package com.guide.run.user.entity;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@DiscriminatorValue("G")
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class Guide extends User{
+public class Guide{
+    @Id
+    private String userId;
     private boolean guideExp;
     private String viName;
     private String viRecord;
