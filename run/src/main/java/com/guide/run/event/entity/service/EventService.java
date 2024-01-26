@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,8 @@ public class EventService {
                 .recruitStartDate(eventCreateRequest.getRecruitStartDate())
                 .recruitEndDate(eventCreateRequest.getRecruitEndDate())
                 .name(eventCreateRequest.getName())
-                .isCreated(false)
-                .isRecruited(eventCreateRequest.isRecruited())
+                .recruitStatus(EventRecruitStatus.UPCOMING)
+                .isApprove(false)
                 .type(eventCreateRequest.getType())
                 .startTime(eventCreateRequest.getStartTime())
                 .endTime(eventCreateRequest.getEndTime())
@@ -34,7 +35,7 @@ public class EventService {
                 .content(eventCreateRequest.getContent()).build());
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
-                .idCreated(createdEvent.isCreated())
+                .isApprove(createdEvent.isApprove())
                 .build();
     }
 
@@ -48,8 +49,8 @@ public class EventService {
                     .recruitStartDate(eventUpdateRequest.getRecruitStartDate())
                     .recruitEndDate(eventUpdateRequest.getRecruitEndDate())
                     .name(eventUpdateRequest.getName())
-                    .isCreated(false)
-                    .isRecruited(eventUpdateRequest.isRecruited())
+                    .recruitStatus(event.getRecruitStatus())
+                    .isApprove(event.isApprove())
                     .type(eventUpdateRequest.getType())
                     .startTime(eventUpdateRequest.getStartTime())
                     .endTime(eventUpdateRequest.getEndTime())
@@ -59,7 +60,7 @@ public class EventService {
                     .content(eventUpdateRequest.getContent()).build());
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())
-                    .idCreated(updatedEvent.isCreated())
+                    .isApprove(updatedEvent.isApprove())
                     .build();
         }
         throw new NotEventOrganizerException();
