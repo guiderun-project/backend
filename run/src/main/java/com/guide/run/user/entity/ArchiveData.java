@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ArchiveData {
     @Id
-    private String signupId;
+    private String privateId;
     private String runningPlace;
 
     @Convert(converter = StringListConverter.class)

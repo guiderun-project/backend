@@ -7,7 +7,7 @@ import lombok.Getter;
 @Entity
 public class SignUpInfo {
     @Id
-    private String signupId;
+    private String privateId;
     @Column(unique = true)
     private String accountId;
     private String password;

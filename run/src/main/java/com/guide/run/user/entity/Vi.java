@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Vi {
     @Id
-    private String signupId;
+    private String privateId;
     private boolean runningExp;
     private String guideName;
 }

@@ -45,15 +45,15 @@ public class UserService {
     }
 
     @Transactional
-    public SignupResponse viSignup(String signupId, ViSignupDto viSignupDto){
-        User user = userRepository.findById(reAssignSocialId(signupId)).orElse(null);
+    public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
+        User user = userRepository.findById(reAssignSocialId(privateId)).orElse(null);
         if(user!=null) {
             log.info("에러발생");
             return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
             User vi = User.builder()
                     .userId(getUUID())
-                    .userId(signupId)
+                    .userId(privateId)
                     .name(viSignupDto.getName())
                     .gender(viSignupDto.getGender())
                     .phoneNumber(viSignupDto.getPhoneNumber())
@@ -67,18 +67,18 @@ public class UserService {
                     .build();
 
             Vi viInfo = Vi.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .runningExp(viSignupDto.isRunningExp())
                     .guideName(viSignupDto.getGuideName())
                     .build();
 
-            userRepository.delete(userRepository.findById(signupId).orElse(null)); //임시 유저 삭제
+            userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
 
             User newVi = userRepository.save(vi);
             viRepository.save(viInfo);
 
             ArchiveData archiveData = ArchiveData.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .howToKnow(viSignupDto.getHowToKnow())
                     .motive(viSignupDto.getMotive())
                     .runningPlace(viSignupDto.getRunningPlace())
@@ -87,7 +87,7 @@ public class UserService {
             archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
 
             Permission permission = Permission.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .privacy(viSignupDto.isPrivacy())
                     .portraitRights(viSignupDto.isPortraitRights())
                     .build();
@@ -96,7 +96,7 @@ public class UserService {
 
             SignupResponse response = SignupResponse
                     .builder()
-                    .accessToken(jwtProvider.createAccessToken(signupId))
+                    .accessToken(jwtProvider.createAccessToken(privateId))
                     .uuid(newVi.getUserId())
                     .userStatus(newVi.getRole().getValue())
                     .build();
@@ -106,15 +106,15 @@ public class UserService {
     }
 
     @Transactional
-    public SignupResponse guideSignup(String signupId, GuideSignupDto guideSignupDto){
-        User user = userRepository.findById(reAssignSocialId(signupId)).orElse(null);
+    public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
+        User user = userRepository.findById(reAssignSocialId(privateId)).orElse(null);
         if(user!=null) {
             log.info("에러발생");
             return null;
         } else {
             User guide = User.builder()
                     .userId(getUUID())
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .name(guideSignupDto.getName())
                     .gender(guideSignupDto.getGender())
                     .phoneNumber(guideSignupDto.getPhoneNumber())
@@ -128,7 +128,7 @@ public class UserService {
                     .build();
 
             Guide guideInfo = Guide.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .guideExp(guideSignupDto.isGuideExp())
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
@@ -136,14 +136,14 @@ public class UserService {
                     .build();
 
 
-            userRepository.delete(userRepository.findById(signupId).orElse(null)); //임시 유저 삭제
+            userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
 
             User newUser = userRepository.save(guide);
             guideRepository.save(guideInfo);
 
 
             ArchiveData archiveData = ArchiveData.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .howToKnow(guideSignupDto.getHowToKnow())
                     .motive(guideSignupDto.getMotive())
                     .runningPlace(guideSignupDto.getRunningPlace())
@@ -153,7 +153,7 @@ public class UserService {
 
 
             Permission permission = Permission.builder()
-                    .signupId(signupId)
+                    .privateId(privateId)
                     .privacy(guideSignupDto.isPrivacy())
                     .portraitRights(guideSignupDto.isPortraitRights())
                     .build();
@@ -164,7 +164,7 @@ public class UserService {
 
             SignupResponse response = SignupResponse.builder()
                     .uuid(newUser.getUserId())
-                    .accessToken(jwtProvider.createAccessToken(signupId))
+                    .accessToken(jwtProvider.createAccessToken(privateId))
                     .userStatus(newUser.getRole().getValue())
                     .build();
 
@@ -179,13 +179,13 @@ public class UserService {
     }
 
 
-    //userId = signupId로 변경, uuid -> userId 로 변경
+    //userId = privateId로 변경, uuid -> userId 로 변경
     //기가입자 및 이미 정보를 입력한 회원은 재할당 하지 않음
-    private String reAssignSocialId(String signupId) {
-        if(signupId.startsWith("kakao_")){
-            return signupId;
-        }else if(signupId.startsWith("kakao")){
-            return "kakao_"+signupId.substring(6);
+    private String reAssignSocialId(String privateId) {
+        if(privateId.startsWith("kakao_")){
+            return privateId;
+        }else if(privateId.startsWith("kakao")){
+            return "kakao_"+privateId.substring(6);
         }
         else{
             return "Error";
@@ -195,7 +195,7 @@ public class UserService {
     //임시 자격 부여
     public void temporaryUserCreate(String socialId){
         User user = User.builder()
-                .signupId(socialId)
+                .privateId(socialId)
                 .role(Role.NEW)
                 .build();
         userRepository.save(user);
