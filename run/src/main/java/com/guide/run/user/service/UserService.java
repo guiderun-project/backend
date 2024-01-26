@@ -6,14 +6,13 @@ import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.repository.ArchiveDataRepository;
-import com.guide.run.user.repository.PermissionRepository;
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 
@@ -21,6 +20,8 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class UserService {
+    private final ViRepository viRepository;
+    private final GuideRepository guideRepository;
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
     private final PermissionRepository permissionRepository;
@@ -50,9 +51,7 @@ public class UserService {
             log.info("에러발생");
             return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
-            Vi vi = Vi.builder()
-                    .runningExp(viSignupDto.isRunningExp())
-                    .guideName(viSignupDto.getGuideName())
+            User vi = User.builder()
                     .uuid(getUUID())
                     .userId(userId)
                     .name(viSignupDto.getName())
@@ -67,9 +66,16 @@ public class UserService {
                     .openSns(viSignupDto.isOpenSns())
                     .build();
 
+            Vi viInfo = Vi.builder()
+                    .userId(userId)
+                    .runningExp(viSignupDto.isRunningExp())
+                    .guideName(viSignupDto.getGuideName())
+                    .build();
+
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
 
-            Vi newVi = userRepository.save(vi);
+            User newVi = userRepository.save(vi);
+            viRepository.save(viInfo);
 
             ArchiveData archiveData = ArchiveData.builder()
                     .userId(userId)
@@ -106,7 +112,7 @@ public class UserService {
             log.info("에러발생");
             return null;
         } else {
-            Guide guide = Guide.builder()
+            User guide = User.builder()
                     .uuid(getUUID())
                     .userId(userId)
                     .name(guideSignupDto.getName())
@@ -118,17 +124,22 @@ public class UserService {
                     .recordDegree(guideSignupDto.getRecordDegree())
                     .snsId(guideSignupDto.getSnsId())
                     .openSns(guideSignupDto.isOpenSns())
+                    .role(Role.WAIT)
+                    .build();
+
+            Guide guideInfo = Guide.builder()
+                    .userId(userId)
                     .guideExp(guideSignupDto.isGuideExp())
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
                     .viRecord(guideSignupDto.getViRecord())
-                    .role(Role.WAIT)
                     .build();
 
 
             userRepository.delete(userRepository.findById(userId).orElse(null)); //임시 유저 삭제
 
-            Guide newGuide = userRepository.save(guide);
+            User newUser = userRepository.save(guide);
+            guideRepository.save(guideInfo);
 
 
             ArchiveData archiveData = ArchiveData.builder()
@@ -152,9 +163,9 @@ public class UserService {
             //todo : 추후 일반 로그인을 위한 SignupInfo도 생성해야 함.
 
             SignupResponse response = SignupResponse.builder()
-                    .uuid(newGuide.getUuid())
+                    .uuid(newUser.getUuid())
                     .accessToken(jwtProvider.createAccessToken(userId))
-                    .userStatus(newGuide.getRole().getValue())
+                    .userStatus(newUser.getRole().getValue())
                     .build();
 
             return response;
