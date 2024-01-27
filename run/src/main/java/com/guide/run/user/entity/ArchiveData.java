@@ -31,7 +31,6 @@ public class ArchiveData {
             String motive,
             String hopePrefs
     ) {
-        this.runningPlace = runningPlace;
         this.howToKnow = howToKnow;
         this.motive = motive;
         this.hopePrefs = hopePrefs;

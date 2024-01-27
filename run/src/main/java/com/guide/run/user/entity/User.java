@@ -4,7 +4,6 @@ package com.guide.run.user.entity;
 import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
-import com.nimbusds.openid.connect.sdk.claims.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,8 +29,8 @@ public class User extends BaseEntity {
     private boolean openNumber;
     private int age;
     private String detailRecord;
-
     private String recordDegree; //개인 기록
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

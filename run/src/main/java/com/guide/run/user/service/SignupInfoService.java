@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
@@ -24,12 +25,12 @@ public class SignupInfoService {
 
     @Transactional
     public PermissionDto getPermission(String userId){
-        User user = userRepository.findUserByUuid(userId).orElseThrow(
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
         Permission permission = permissionRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new
         );
-
+        
         return PermissionDto.builder()
                 .privacy(permission.isPrivacy())
                 .portraitRights(permission.isPortraitRights())
@@ -57,7 +58,7 @@ public class SignupInfoService {
     @Transactional
     public ViRunningInfoDto getViRunningInfo(String userId){
 
-        User user = userRepository.findUserByUuid(userId).orElseThrow(
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
@@ -74,7 +75,7 @@ public class SignupInfoService {
     @Transactional
     public GuideRunningInfoDto getGuideRunningInfo(String userId){
 
-        User user = userRepository.findUserByUuid(userId).orElseThrow(
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
@@ -92,6 +93,7 @@ public class SignupInfoService {
     //vi 러닝 스펙 수정
     @Transactional
     public ViRunningInfoDto editViRunningInfo(String privateId, ViRunningInfoDto request){
+
         User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
@@ -112,6 +114,7 @@ public class SignupInfoService {
     //guide 러닝 스펙 수정
     @Transactional
     public GuideRunningInfoDto editGuideRunningInfo(String privateId, GuideRunningInfoDto request){
+
         User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
@@ -141,19 +144,10 @@ public class SignupInfoService {
     public PersonalInfoDto getPersonalInfo(String userId){
         //역할, 성별, 이름, 전화번호, 나이, sns
 
-        User user = userRepository.findUserByUuid(userId).orElseThrow(
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
 
-        return PersonalInfoDto.builder()
-                .role(user.getRole().getValue())
-                .name(user.getName())
-                .gender(user.getGender())
-                .phoneNumber(user.getPhoneNumber())
-                .openNumber(user.isOpenNumber())
-                .age(user.getAge())
-                .snsId(user.getSnsId())
-                .openSns(user.isOpenSns())
-                .build();
+        return PersonalInfoDto.userToInfoDto(user);
     }
     //개인 정보 수정
     @Transactional
