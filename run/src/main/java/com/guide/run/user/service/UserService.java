@@ -7,6 +7,7 @@ import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +28,16 @@ public class UserService {
     private final PermissionRepository permissionRepository;
     private final JwtProvider jwtProvider;
 
-    public String getUserStatus(String userId){
-        String reAssignSocialId = reAssignSocialId(userId);
-        User user = userRepository.findById(userId).orElse(null);
+    public String getUserStatus(String privateId){
+        String reAssignSocialId = reAssignSocialId(privateId);
+        User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
                 return user.getRole().getValue();
         }else{
             //신규 가입자의 경우 인증을 위해 임시 유저 생성
             //가입이 완료되면 새 토큰 다시 줘야함
             userRepository.save(User.builder()
-                    .userId(userId)
+                    .privateId(privateId)
                     .role(Role.NEW)
                     .userId(getUUID())
                     .build());
@@ -51,15 +52,9 @@ public class UserService {
             log.info("에러발생");
             return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
-            if(
-                    (!viSignupDto.getHowToKnow().isEmpty() || !viSignupDto.getMotive().isBlank())
-                    && viSignupDto.isRunningExp()
-            ){
-                throw new InvalidItemErrorException();
-            }
             User vi = User.builder()
                     .userId(getUUID())
-                    .userId(privateId)
+                    .privateId(privateId)
                     .name(viSignupDto.getName())
                     .gender(viSignupDto.getGender())
                     .phoneNumber(viSignupDto.getPhoneNumber())
@@ -68,6 +63,7 @@ public class UserService {
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
                     .role(Role.WAIT)
+                    .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
                     .openSns(viSignupDto.isOpenSns())
                     .build();
@@ -118,12 +114,6 @@ public class UserService {
             log.info("에러발생");
             return null;
         } else {
-            if(
-                    (!guideSignupDto.getHowToKnow().isEmpty() || !guideSignupDto.getMotive().isBlank())
-                            && guideSignupDto.isGuideExp()
-            ){
-                throw new InvalidItemErrorException();
-            }
 
             User guide = User.builder()
                     .userId(getUUID())
@@ -138,6 +128,7 @@ public class UserService {
                     .snsId(guideSignupDto.getSnsId())
                     .openSns(guideSignupDto.isOpenSns())
                     .role(Role.WAIT)
+                    .type(UserType.GUIDE)
                     .build();
 
             Guide guideInfo = Guide.builder()
