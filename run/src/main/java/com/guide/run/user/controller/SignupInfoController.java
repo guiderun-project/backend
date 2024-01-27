@@ -19,18 +19,14 @@ public class SignupInfoController {
     private final JwtProvider jwtProvider;
 
     @GetMapping("/user/permission/{userId}")
-    public ResponseEntity<PermissionDto> getPermission(String userId,
-                                                       HttpServletRequest httpServletRequest){
-        String signupId = jwtProvider.extractUserId(httpServletRequest);
+    public ResponseEntity<PermissionDto> getPermission(String userId){
         PermissionDto response = signupInfoService.getPermission(userId);
 
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/user/personal/{userId}")
-    public ResponseEntity<PersonalInfoDto> getPersonalInfo(String userId,
-                                                           HttpServletRequest httpServletRequest){
-        String signupId = jwtProvider.extractUserId(httpServletRequest);
+    public ResponseEntity<PersonalInfoDto> getPersonalInfo(String userId){
         PersonalInfoDto response = signupInfoService.getPersonalInfo(userId);
 
         return ResponseEntity.ok().body(response);
@@ -39,27 +35,23 @@ public class SignupInfoController {
     @PostMapping("/user/personal")
     public ResponseEntity<PersonalInfoDto> editPersonalInfo(@RequestBody PersonalInfoDto personalInfoDto,
                                                             HttpServletRequest httpServletRequest){
-        String signupId = jwtProvider.extractUserId(httpServletRequest);
-        PersonalInfoDto response = signupInfoService.editPersonalInfo(signupId, personalInfoDto);
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        PersonalInfoDto response = signupInfoService.editPersonalInfo(privateId, personalInfoDto);
 
         return ResponseEntity.ok().body(response);
     }
 
     //러닝 스펙 조회 vi
     @GetMapping("/user/running/vi/{userId}")
-    public ResponseEntity<ViRunningInfoDto> getViRunningInfo(@PathVariable String userId,
-                                                             HttpServletRequest httpServletRequest){
-        String signupId = jwtProvider.extractUserId(httpServletRequest);
-        ViRunningInfoDto response = signupInfoService.getViRunningInfo(userId, signupId);
+    public ResponseEntity<ViRunningInfoDto> getViRunningInfo(@PathVariable String userId){
+        ViRunningInfoDto response = signupInfoService.getViRunningInfo(userId);
 
         return ResponseEntity.ok().body(response);
     }
     //러닝 스펙 조회 guide
     @GetMapping("/user/running/guide/{userId}")
-    public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId,
-                                                                   HttpServletRequest httpServletRequest){
-        String signupId = jwtProvider.extractUserId(httpServletRequest);
-        GuideRunningInfoDto response = signupInfoService.getGuideRunningInfo(userId, signupId);
+    public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId){
+        GuideRunningInfoDto response = signupInfoService.getGuideRunningInfo(userId);
 
         return ResponseEntity.ok().body(response);
     }
