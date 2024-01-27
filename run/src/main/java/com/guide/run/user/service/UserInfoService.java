@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class UserInfoService {
     private final PermissionRepository permissionRepository;
     private final ArchiveDataRepository archiveDataRepository;
 
+    @Transactional
     public PermissionDto getPermission(String userId){
         Permission permission = permissionRepository.findById(userId).orElseThrow(
                 () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
@@ -39,18 +42,19 @@ public class UserInfoService {
     }
 
     //러닝 스펙 조회
-    public ViRunningInfoDto getViRunningInfo(String uuid, String userId){
+    @Transactional
+    public ViRunningInfoDto getViRunningInfo(String userId, String privateId){
 
-        User user = userRepository.findUserByUuid(uuid).orElseThrow(
+        User user = userRepository.findUserByUuid(userId).orElseThrow(
                 () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
 
-        if(!user.getUserId().equals(userId)){
+        if(!user.getPrivateId().equals(privateId)){
             throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
         }
 
-        ArchiveData archiveData = archiveDataRepository.findById(user.getUserId()).orElseThrow(
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
-        Vi vi = viRepository.findById(user.getUserId()).orElseThrow(
+        Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
 
 
@@ -59,14 +63,21 @@ public class UserInfoService {
         return response.fromEntity(user, vi, archiveData);
     }
 
-    public GuideRunningInfoDto getGuideRunningInfo(String userId){
+    @Transactional
+    public GuideRunningInfoDto getGuideRunningInfo(String userId, String privateId){
 
-        ArchiveData archiveData = archiveDataRepository.findById(userId).orElseThrow(
-                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
-        Guide guide = guideRepository.findById(userId).orElseThrow(
-                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findUserByUuid(userId).orElseThrow(
                 () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+
+        if(!user.getPrivateId().equals(privateId)){
+            throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
+        }
+
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+        Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+
 
         GuideRunningInfoDto response = new GuideRunningInfoDto();
 
@@ -74,10 +85,55 @@ public class UserInfoService {
     }
 
 
-    //러닝 스펙 수정
+    //vi 러닝 스펙 수정
+    @Transactional
+    public ViRunningInfoDto editViRunningInfo(String privateId, ViRunningInfoDto request){
+        User user = userRepository.findById(privateId).orElseThrow(
+                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+        );
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+        Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
 
+        user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
+        vi.editViRunningInfo(request.isRunningExp());
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+
+        ViRunningInfoDto response = new ViRunningInfoDto();
+
+        return response.fromEntity(user, vi, archiveData);
+    }
+
+    //guide 러닝 스펙 수정
+    @Transactional
+    public GuideRunningInfoDto editGuideRunningInfo(String privateId, GuideRunningInfoDto request){
+        User user = userRepository.findById(privateId).orElseThrow(
+                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+        );
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+        Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
+                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+
+        user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
+
+        guide.editGuideRunningInfo(
+                request.isGuideExp(),
+                request.getViName(),
+                request.getViRecord(),
+                request.getViCount(),
+                request.getGuidingPace());
+
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+
+        GuideRunningInfoDto response = new GuideRunningInfoDto();
+
+        return response.fromEntity(user, guide, archiveData);
+    }
 
     //개인 정보 조회
+    @Transactional
     public PersonalInfoDto getPersonalInfo(String userId){
         //역할, 성별, 이름, 전화번호, 나이, sns
 
