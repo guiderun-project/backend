@@ -8,9 +8,11 @@ import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.service.SignupInfoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -20,7 +22,8 @@ public class SignupInfoController {
 
     //약관 동의 조회
     @GetMapping("/user/permission/{userId}")
-    public ResponseEntity<PermissionDto> getPermission(String userId){
+    public ResponseEntity<PermissionDto> getPermission(@PathVariable String userId){
+        log.info(userId);
         PermissionDto response = signupInfoService.getPermission(userId);
 
         return ResponseEntity.ok().body(response);
@@ -38,7 +41,7 @@ public class SignupInfoController {
 
     //인적사항 조회
     @GetMapping("/user/personal/{userId}")
-    public ResponseEntity<PersonalInfoDto> getPersonalInfo(String userId){
+    public ResponseEntity<PersonalInfoDto> getPersonalInfo(@PathVariable String userId){
         PersonalInfoDto response = signupInfoService.getPersonalInfo(userId);
 
         return ResponseEntity.ok().body(response);
@@ -79,7 +82,7 @@ public class SignupInfoController {
     }
 
     //guide 러닝 스펙 수정
-    @PatchMapping("/user/running/vi")
+    @PatchMapping("/user/running/guide")
     public ResponseEntity<GuideRunningInfoDto> editGuideRunningInfo(HttpServletRequest httpServletRequest,
                                                               @RequestBody GuideRunningInfoDto request){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
