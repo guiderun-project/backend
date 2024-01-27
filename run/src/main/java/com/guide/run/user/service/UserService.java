@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ViSignupDto;
@@ -51,6 +52,12 @@ public class UserService {
             log.info("에러발생");
             return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
+            if(
+                    (!viSignupDto.getHowToKnow().isEmpty() || !viSignupDto.getMotive().isBlank())
+                    && viSignupDto.isRunningExp()
+            ){
+                throw new InvalidItemErrorException();
+            }
             User vi = User.builder()
                     .userId(getUUID())
                     .userId(privateId)
@@ -112,6 +119,13 @@ public class UserService {
             log.info("에러발생");
             return null;
         } else {
+            if(
+                    (!guideSignupDto.getHowToKnow().isEmpty() || !guideSignupDto.getMotive().isBlank())
+                            && guideSignupDto.isGuideExp()
+            ){
+                throw new InvalidItemErrorException();
+            }
+
             User guide = User.builder()
                     .userId(getUUID())
                     .privateId(privateId)

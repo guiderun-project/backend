@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
@@ -92,6 +93,13 @@ public class SignupInfoService {
     //vi 러닝 스펙 수정
     @Transactional
     public ViRunningInfoDto editViRunningInfo(String privateId, ViRunningInfoDto request){
+        if(
+                (!request.getHowToKnow().isEmpty() || !request.getMotive().isBlank())
+                        && request.isRunningExp()
+        ){
+            throw new InvalidItemErrorException();
+        }
+
         User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
@@ -112,6 +120,13 @@ public class SignupInfoService {
     //guide 러닝 스펙 수정
     @Transactional
     public GuideRunningInfoDto editGuideRunningInfo(String privateId, GuideRunningInfoDto request){
+        if(
+                (!request.getHowToKnow().isEmpty() || !request.getMotive().isBlank())
+                        && request.isGuideExp()
+        ){
+            throw new InvalidItemErrorException();
+        }
+
         User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
