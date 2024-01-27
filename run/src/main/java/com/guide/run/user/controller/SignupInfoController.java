@@ -5,7 +5,7 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
-import com.guide.run.user.service.UserInfoService;
+import com.guide.run.user.service.SignupInfoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class UserInfoController {
-    private final UserInfoService userInfoService;
+public class SignupInfoController {
+    private final SignupInfoService signupInfoService;
     private final JwtProvider jwtProvider;
 
     @GetMapping("/user/permission/{userId}")
     public ResponseEntity<PermissionDto> getPermission(String userId,
                                                        HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        PermissionDto response = userInfoService.getPermission(userId);
+        PermissionDto response = signupInfoService.getPermission(userId);
 
         return ResponseEntity.ok().body(response);
     }
@@ -31,7 +31,7 @@ public class UserInfoController {
     public ResponseEntity<PersonalInfoDto> getPersonalInfo(String userId,
                                                            HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        PersonalInfoDto response = userInfoService.getPersonalInfo(userId);
+        PersonalInfoDto response = signupInfoService.getPersonalInfo(userId);
 
         return ResponseEntity.ok().body(response);
     }
@@ -40,7 +40,7 @@ public class UserInfoController {
     public ResponseEntity<PersonalInfoDto> editPersonalInfo(@RequestBody PersonalInfoDto personalInfoDto,
                                                             HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        PersonalInfoDto response = userInfoService.editPersonalInfo(signupId, personalInfoDto);
+        PersonalInfoDto response = signupInfoService.editPersonalInfo(signupId, personalInfoDto);
 
         return ResponseEntity.ok().body(response);
     }
@@ -50,7 +50,7 @@ public class UserInfoController {
     public ResponseEntity<ViRunningInfoDto> getViRunningInfo(@PathVariable String userId,
                                                              HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        ViRunningInfoDto response = userInfoService.getViRunningInfo(userId, signupId);
+        ViRunningInfoDto response = signupInfoService.getViRunningInfo(userId, signupId);
 
         return ResponseEntity.ok().body(response);
     }
@@ -59,7 +59,7 @@ public class UserInfoController {
     public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId,
                                                                    HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        GuideRunningInfoDto response = userInfoService.getGuideRunningInfo(userId, signupId);
+        GuideRunningInfoDto response = signupInfoService.getGuideRunningInfo(userId, signupId);
 
         return ResponseEntity.ok().body(response);
     }
