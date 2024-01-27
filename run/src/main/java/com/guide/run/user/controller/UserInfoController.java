@@ -59,7 +59,7 @@ public class UserInfoController {
     public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId,
                                                                    HttpServletRequest httpServletRequest){
         String signupId = jwtProvider.extractUserId(httpServletRequest);
-        GuideRunningInfoDto response = userInfoService.getGuideRunningInfo(signupId);
+        GuideRunningInfoDto response = userInfoService.getGuideRunningInfo(userId, signupId);
 
         return ResponseEntity.ok().body(response);
     }
