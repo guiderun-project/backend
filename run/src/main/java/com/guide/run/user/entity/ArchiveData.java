@@ -23,8 +23,17 @@ public class ArchiveData {
     @Convert(converter = StringListConverter.class)
     private List<String> howToKnow = new ArrayList<>();
 
-
     private String motive;
     private String hopePrefs;
 
+    public void editRunningInfo(
+            List<String> howToKnow,
+            String motive,
+            String hopePrefs
+    ) {
+        this.runningPlace = runningPlace;
+        this.howToKnow = howToKnow;
+        this.motive = motive;
+        this.hopePrefs = hopePrefs;
+    }
 }
