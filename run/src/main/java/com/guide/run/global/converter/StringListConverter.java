@@ -14,12 +14,17 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
 
     @Override
     public String convertToDatabaseColumn(List<String> stringList) {
-        //todo : 에러코드 추가해야함
+        if(stringList == null || stringList.isEmpty()){
+            return null;
+        }
         return String.join(SPLIT, stringList);
     }
 
     @Override
     public List<String> convertToEntityAttribute(String data) {
+        if(data == null){
+            return null;
+        }
         return Arrays.asList(data.split(SPLIT));
     }
 }
