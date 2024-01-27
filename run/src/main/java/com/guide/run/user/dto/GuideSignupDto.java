@@ -1,6 +1,11 @@
 package com.guide.run.user.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -27,7 +32,7 @@ public class GuideSignupDto {
 
     //아카이브 데이터
     private String runningPlace;
-    private String howToKnow; //가이드 경험 있을 시 null
+    private List<String> howToKnow = new ArrayList<>(); //가이드 경험 있을 시 빈 배열
     private String motive; //가이더 경험 있을 시 null
     private String hopePrefs;
 

@@ -1,7 +1,6 @@
 package com.guide.run.user.dto;
 
 import com.guide.run.user.entity.User;
-import com.guide.run.user.entity.type.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
