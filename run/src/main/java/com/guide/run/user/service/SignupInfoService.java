@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
@@ -26,15 +27,13 @@ public class SignupInfoService {
     @Transactional
     public PermissionDto getPermission(String userId){
         Permission permission = permissionRepository.findById(userId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+                NotExistUserException::new
         );
 
-        PermissionDto response = PermissionDto.builder()
+        return PermissionDto.builder()
                 .privacy(permission.isPrivacy())
                 .portraitRights(permission.isPortraitRights())
                 .build();
-
-        return response;
     }
 
     //러닝 스펙 조회
@@ -42,7 +41,7 @@ public class SignupInfoService {
     public ViRunningInfoDto getViRunningInfo(String userId, String privateId){
 
         User user = userRepository.findUserByUuid(userId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
         if(!user.getPrivateId().equals(privateId)){
             throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
@@ -63,7 +62,7 @@ public class SignupInfoService {
     public GuideRunningInfoDto getGuideRunningInfo(String userId, String privateId){
 
         User user = userRepository.findUserByUuid(userId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
         if(!user.getPrivateId().equals(privateId)){
             throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
@@ -85,7 +84,7 @@ public class SignupInfoService {
     @Transactional
     public ViRunningInfoDto editViRunningInfo(String privateId, ViRunningInfoDto request){
         User user = userRepository.findById(privateId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+                NotExistUserException::new
         );
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
@@ -105,7 +104,7 @@ public class SignupInfoService {
     @Transactional
     public GuideRunningInfoDto editGuideRunningInfo(String privateId, GuideRunningInfoDto request){
         User user = userRepository.findById(privateId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+                NotExistUserException::new
         );
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
@@ -134,10 +133,10 @@ public class SignupInfoService {
         //역할, 성별, 이름, 전화번호, 나이, sns
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+                NotExistUserException::new
         );
 
-        PersonalInfoDto response = PersonalInfoDto.builder()
+        return PersonalInfoDto.builder()
                 .role(user.getRole().getValue())
                 .name(user.getName())
                 .gender(user.getGender())
@@ -147,8 +146,6 @@ public class SignupInfoService {
                 .snsId(user.getSnsId())
                 .openSns(user.isOpenSns())
                 .build();
-
-        return response;
     }
     //개인 정보 수정
     @Transactional
@@ -156,7 +153,7 @@ public class SignupInfoService {
         //성별, 이름, 전화번호, 나이, sns
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new NoSuchElementException("유저 정보를 찾을 수 없습니다.")
+                NotExistUserException::new
         );
 
         user.editUser(
@@ -169,8 +166,6 @@ public class SignupInfoService {
                 dto.isOpenSns()
         );
 
-        PersonalInfoDto response = PersonalInfoDto.userToInfoDto(user);
-
-        return response;
+        return PersonalInfoDto.userToInfoDto(user);
     }
 }
