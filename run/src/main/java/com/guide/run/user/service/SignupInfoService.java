@@ -39,6 +39,23 @@ public class SignupInfoService {
                 .build();
     }
 
+    @Transactional
+    public PermissionDto editPermission(String privateId, PermissionDto request){
+        Permission permission = permissionRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        permission.editPermisson(
+                request.isPrivacy(),
+                request.isPortraitRights()
+        );
+
+        return PermissionDto.builder()
+                .privacy(permission.isPrivacy())
+                .portraitRights(permission.isPortraitRights())
+                .build();
+    }
+
     //러닝 스펙 조회
     @Transactional
     public ViRunningInfoDto getViRunningInfo(String userId){
@@ -47,9 +64,9 @@ public class SignupInfoService {
                 NotExistUserException::new);
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+                NotExistUserException::new);
         Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
 
         ViRunningInfoDto response = new ViRunningInfoDto();
@@ -64,9 +81,9 @@ public class SignupInfoService {
                 NotExistUserException::new);
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+                NotExistUserException::new);
         Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
 
         GuideRunningInfoDto response = new GuideRunningInfoDto();
@@ -82,9 +99,9 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+                NotExistUserException::new);
         Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
         vi.editViRunningInfo(request.isRunningExp());
@@ -102,9 +119,9 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
+                NotExistUserException::new);
         Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
-                () -> new NoSuchElementException("vi 정보를 찾을 수 없습니다."));
+                NotExistUserException::new);
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
 
