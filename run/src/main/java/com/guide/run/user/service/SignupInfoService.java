@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
@@ -26,7 +27,9 @@ public class SignupInfoService {
 
     @Transactional
     public PermissionDto getPermission(String userId){
-        Permission permission = permissionRepository.findById(userId).orElseThrow(
+        User user = userRepository.findUserByUuid(userId).orElseThrow(
+                NotExistUserException::new);
+        Permission permission = permissionRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new
         );
 
@@ -38,14 +41,10 @@ public class SignupInfoService {
 
     //러닝 스펙 조회
     @Transactional
-    public ViRunningInfoDto getViRunningInfo(String userId, String privateId){
+    public ViRunningInfoDto getViRunningInfo(String userId){
 
         User user = userRepository.findUserByUuid(userId).orElseThrow(
                 NotExistUserException::new);
-
-        if(!user.getPrivateId().equals(privateId)){
-            throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
-        }
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
@@ -59,14 +58,10 @@ public class SignupInfoService {
     }
 
     @Transactional
-    public GuideRunningInfoDto getGuideRunningInfo(String userId, String privateId){
+    public GuideRunningInfoDto getGuideRunningInfo(String userId){
 
         User user = userRepository.findUserByUuid(userId).orElseThrow(
                 NotExistUserException::new);
-
-        if(!user.getPrivateId().equals(privateId)){
-            throw new RuntimeException("유저 정보가 일치하지 않음"); //todo : 에러코드 추가해야 함.
-        }
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 () -> new NoSuchElementException("아카이브 데이터를 찾을 수 없습니다."));
@@ -132,9 +127,8 @@ public class SignupInfoService {
     public PersonalInfoDto getPersonalInfo(String userId){
         //역할, 성별, 이름, 전화번호, 나이, sns
 
-        User user = userRepository.findById(userId).orElseThrow(
-                NotExistUserException::new
-        );
+        User user = userRepository.findUserByUuid(userId).orElseThrow(
+                NotExistUserException::new);
 
         return PersonalInfoDto.builder()
                 .role(user.getRole().getValue())
@@ -149,10 +143,10 @@ public class SignupInfoService {
     }
     //개인 정보 수정
     @Transactional
-    public PersonalInfoDto editPersonalInfo(String userId, PersonalInfoDto dto){
+    public PersonalInfoDto editPersonalInfo(String privateId, PersonalInfoDto dto){
         //성별, 이름, 전화번호, 나이, sns
 
-        User user = userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
 
