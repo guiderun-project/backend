@@ -55,5 +55,10 @@ public class User extends BaseEntity {
         this.snsId = snsId;
         this.openSns = openSns;
     }
+
+    public void editRunningInfo(String recordDegree, String detailRecord){
+        this.recordDegree = recordDegree;
+        this.detailRecord = detailRecord;
+    }
 }
 
