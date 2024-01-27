@@ -35,13 +35,13 @@ public class SignController {
     public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
-        String userId = oAuthProfile.getSocialId();
-        String userStatus = userService.getUserStatus(userId);
+        String privateId = oAuthProfile.getSocialId();
+        String userStatus = userService.getUserStatus(privateId);
 
         cookieService.createCookie("refreshToken",response);
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(userId))
+                .accessToken(jwtProvider.createAccessToken(privateId))
                 .userStatus(userStatus)
                 .build();
     }

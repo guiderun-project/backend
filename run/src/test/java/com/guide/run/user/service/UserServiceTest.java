@@ -30,7 +30,7 @@ class UserServiceTest {
     @Test
     void existUserLoginResponse(){
         User user = User.builder()
-                .uuid(userService.getUUID())
+                .userId(userService.getUUID())
                 .userId("kakao_1")
                 .role(Role.USER)
                 .build();
@@ -43,7 +43,7 @@ class UserServiceTest {
     @Test
     void waitUserLoginResponse(){
         User user = User.builder()
-                .uuid(userService.getUUID())
+                .userId(userService.getUUID())
                 .userId("kakao_1")
                 .role(Role.WAIT)
                 .build();
@@ -66,8 +66,7 @@ class UserServiceTest {
         Vi vi = Vi.builder()
                 .runningExp(true)
                 .guideName("ljg")
-                .uuid(id)
-                .userId("kakao_1")
+                .privateId("kakao_1")
                 .name("lj")
                 .gender("male")
                 .phoneNumber("010-9999-xxxx")
@@ -79,7 +78,7 @@ class UserServiceTest {
                 .build();
 
         Vi newVi = userRepository.save(vi);
-        Assertions.assertThat(vi.getUuid()).isEqualTo(newVi.getUuid());
+        Assertions.assertThat(vi.getPrivateId()).isEqualTo(newVi.getPrivateId());
         //Assertions.assertThat(vi).isEqualTo(newVi); //created_at 과 updated_at 때문에 같을 수가 없다.
     }
     
