@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 public class PersonalInfoDto {
     private String role;
+    private String type;
     private String gender;
     private String name;
     private String phoneNumber;
@@ -21,6 +22,7 @@ public class PersonalInfoDto {
     public static PersonalInfoDto userToInfoDto(User user){
         return PersonalInfoDto.builder()
                 .role(user.getRole().getValue())
+                .type(user.getType().getValue())
                 .name(user.getName())
                 .gender(user.getGender())
                 .phoneNumber(user.getPhoneNumber())
