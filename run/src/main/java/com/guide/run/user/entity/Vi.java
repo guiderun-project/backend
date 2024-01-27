@@ -16,4 +16,8 @@ public class Vi {
     private String privateId;
     private boolean runningExp;
     private String guideName;
+
+    public void editViRunningInfo(Boolean runningExp){
+        this.runningExp = runningExp;
+    }
 }
