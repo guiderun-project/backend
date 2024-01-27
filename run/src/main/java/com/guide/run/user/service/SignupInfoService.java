@@ -159,16 +159,7 @@ public class SignupInfoService {
         User user = userRepository.findUserByUuid(userId).orElseThrow(
                 NotExistUserException::new);
 
-        return PersonalInfoDto.builder()
-                .role(user.getRole().getValue())
-                .name(user.getName())
-                .gender(user.getGender())
-                .phoneNumber(user.getPhoneNumber())
-                .openNumber(user.isOpenNumber())
-                .age(user.getAge())
-                .snsId(user.getSnsId())
-                .openSns(user.isOpenSns())
-                .build();
+        return PersonalInfoDto.userToInfoDto(user);
     }
     //개인 정보 수정
     @Transactional
