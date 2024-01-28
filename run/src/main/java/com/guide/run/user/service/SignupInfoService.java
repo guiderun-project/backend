@@ -1,0 +1,173 @@
+package com.guide.run.user.service;
+
+import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.user.dto.GuideRunningInfoDto;
+import com.guide.run.user.dto.PermissionDto;
+import com.guide.run.user.dto.PersonalInfoDto;
+import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.entity.*;
+import com.guide.run.user.repository.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class SignupInfoService {
+    private final ViRepository viRepository;
+    private final GuideRepository guideRepository;
+    private final UserRepository userRepository;
+    private final PermissionRepository permissionRepository;
+    private final ArchiveDataRepository archiveDataRepository;
+
+    @Transactional
+    public PermissionDto getPermission(String userId){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
+                NotExistUserException::new);
+        Permission permission = permissionRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new
+        );
+        
+        return PermissionDto.builder()
+                .privacy(permission.isPrivacy())
+                .portraitRights(permission.isPortraitRights())
+                .build();
+    }
+
+    @Transactional
+    public PermissionDto editPermission(String privateId, PermissionDto request){
+        Permission permission = permissionRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        permission.editPermisson(
+                request.isPrivacy(),
+                request.isPortraitRights()
+        );
+
+        return PermissionDto.builder()
+                .privacy(permission.isPrivacy())
+                .portraitRights(permission.isPortraitRights())
+                .build();
+    }
+
+    //러닝 스펙 조회
+    @Transactional
+    public ViRunningInfoDto getViRunningInfo(String userId){
+
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
+                NotExistUserException::new);
+
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+        Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+
+
+        ViRunningInfoDto response = new ViRunningInfoDto();
+
+        return response.fromEntity(user, vi, archiveData);
+    }
+
+    @Transactional
+    public GuideRunningInfoDto getGuideRunningInfo(String userId){
+
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
+                NotExistUserException::new);
+
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+        Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+
+
+        GuideRunningInfoDto response = new GuideRunningInfoDto();
+
+        return response.fromEntity(user, guide, archiveData);
+    }
+
+
+    //vi 러닝 스펙 수정
+    @Transactional
+    public ViRunningInfoDto editViRunningInfo(String privateId, ViRunningInfoDto request){
+
+        User user = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+        Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+
+        user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
+        vi.editViRunningInfo(request.isRunningExp());
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+
+        ViRunningInfoDto response = new ViRunningInfoDto();
+
+        return response.fromEntity(user, vi, archiveData);
+    }
+
+    //guide 러닝 스펙 수정
+    @Transactional
+    public GuideRunningInfoDto editGuideRunningInfo(String privateId, GuideRunningInfoDto request){
+
+        User user = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+        Guide guide = guideRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new);
+
+        user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
+
+        guide.editGuideRunningInfo(
+                request.isGuideExp(),
+                request.getViName(),
+                request.getViRecord(),
+                request.getViCount(),
+                request.getGuidingPace());
+
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+
+        GuideRunningInfoDto response = new GuideRunningInfoDto();
+
+        return response.fromEntity(user, guide, archiveData);
+    }
+
+    //개인 정보 조회
+    @Transactional
+    public PersonalInfoDto getPersonalInfo(String userId){
+        //역할, 성별, 이름, 전화번호, 나이, sns
+
+        User user = userRepository.findUserByUserId(userId).orElseThrow(
+                NotExistUserException::new);
+
+        return PersonalInfoDto.userToInfoDto(user);
+    }
+    //개인 정보 수정
+    @Transactional
+    public PersonalInfoDto editPersonalInfo(String privateId, PersonalInfoDto dto){
+        //성별, 이름, 전화번호, 나이, sns
+
+        User user = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        user.editUser(
+                dto.getName(),
+                dto.getGender(),
+                dto.getPhoneNumber(),
+                dto.isOpenNumber(),
+                dto.getAge(),
+                dto.getSnsId(),
+                dto.isOpenSns()
+        );
+
+        return PersonalInfoDto.userToInfoDto(user);
+    }
+}

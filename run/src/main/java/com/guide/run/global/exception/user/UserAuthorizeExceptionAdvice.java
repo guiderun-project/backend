@@ -3,6 +3,7 @@ package com.guide.run.global.exception.user;
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.user.authorize.NotApprovedUserException;
 import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
+import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,13 @@ public class UserAuthorizeExceptionAdvice {
                 getMessage("notAuthorization.msg")));
     }
 
+    //1102
+    @ExceptionHandler(UnauthorizedUserException.class)
+    protected ResponseEntity<FailResult> UnauthorizedUserException(UnauthorizedUserException e){
+        return ResponseEntity.status(403).body(responseService.getFailResult(
+                getMessage("unauthorizedUser.code"),
+                getMessage("unauthorizedUser.msg")));
+    }
     private String getMessage(String code){
         return getMessage(code,null);
     }

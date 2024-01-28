@@ -3,25 +3,24 @@ package com.guide.run.user.controller;
 import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
-import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.profile.OAuthProfile;
-import com.guide.run.user.service.UserInfoService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
 
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -36,13 +35,13 @@ public class SignController {
     public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
-        String userId = oAuthProfile.getSocialId();
-        String userStatus = userService.getUserStatus(userId);
+        String privateId = oAuthProfile.getSocialId();
+        String userStatus = userService.getUserStatus(privateId);
 
         cookieService.createCookie("refreshToken",response);
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(userId))
+                .accessToken(jwtProvider.createAccessToken(privateId))
                 .userStatus(userStatus)
                 .build();
     }
