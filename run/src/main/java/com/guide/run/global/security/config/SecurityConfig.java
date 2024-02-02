@@ -31,14 +31,14 @@ public class SecurityConfig {
                 .cors(cors->cors.disable())
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/test").hasRole("VADMIN")
-                        .requestMatchers("/api/test2").hasRole("ADMIN")
+                        .requestMatchers("/api/test2").hasRole("VWAIT")
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
