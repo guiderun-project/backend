@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,29 +26,51 @@ public class EventSearchService {
     public List<MyEvent> getMyEvent(String sort,int year,int month,String privateId){
         List<MyEvent> myEvents = new ArrayList<>();
         LocalDateTime startTime= LocalDateTime.of(year, month, 1, 0, 0);
+        int dDay;
+        int cnt =4;
         LocalDateTime endTime = LocalDateTime.of(year, month, LocalDate.of(year, month, 1).lengthOfMonth(), 23, 59);
+        List<EventForm> myEventForms;
         if (sort.equals("OPEN")) {
-            List<EventForm> myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTime(privateId,startTime,endTime);
+            myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTime(privateId,startTime,endTime);
             for(EventForm eventForm: myEventForms){
                 if(eventForm.isMatching()){
                     Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(),EventRecruitStatus.OPEN);
-                    int dDay = Period.between(findEvent.getEndTime().toLocalDate(), LocalDate.now()).getDays();
-                    if(dDay >=0) {
-                        myEvents.add(MyEvent.builder()
-                                .eventId(findEvent.getId())
-                                .eventType(findEvent.getType())
-                                .name(findEvent.getName())
-                                .dDay(dDay)
-                                .endDate(findEvent.getEndTime().toLocalDate())
-                                .recruitStatus(EventRecruitStatus.OPEN)
-                                .build());
+                    if(findEvent!=null) {
+                            myEvents.add(MyEvent.builder()
+                                    .eventId(findEvent.getId())
+                                    .eventType(findEvent.getType())
+                                    .name(findEvent.getName())
+                                    .dDay(Math.toIntExact(ChronoUnit.DAYS.between(findEvent.getEndTime().toLocalDate(), LocalDate.now())))
+                                    .endDate(findEvent.getEndTime().toLocalDate())
+                                    .recruitStatus(EventRecruitStatus.OPEN)
+                                    .build());
+                            cnt--;
                     }
                 }
+                if(cnt<=0) break;
             }
             return myEvents;
         }
         else if(sort.equals("END")){
-
+            myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(privateId,startTime,endTime);
+            for(EventForm eventForm: myEventForms){
+                if(eventForm.isMatching()){
+                    Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(),EventRecruitStatus.CLOSE);
+                    if(findEvent!=null) {
+                            myEvents.add(MyEvent.builder()
+                                    .eventId(findEvent.getId())
+                                    .eventType(findEvent.getType())
+                                    .name(findEvent.getName())
+                                    .dDay(Math.toIntExact(ChronoUnit.DAYS.between(findEvent.getEndTime().toLocalDate(), LocalDate.now())))
+                                    .endDate(findEvent.getEndTime().toLocalDate())
+                                    .recruitStatus(EventRecruitStatus.CLOSE)
+                                    .build());
+                            cnt--;
+                    }
+                }
+                if(cnt<=0) break;
+            }
+            return myEvents;
         }
             throw new NotValidSortException();
     }
