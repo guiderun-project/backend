@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event,Long> {
     Event findByIdAndRecruitStatus(Long id,EventRecruitStatus recruitStatus);
+    List<Event> findByRecruitStatusOrderByEndTime(EventRecruitStatus recruitStatus);
 }

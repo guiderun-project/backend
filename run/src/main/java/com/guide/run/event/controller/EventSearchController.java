@@ -1,7 +1,8 @@
 package com.guide.run.event.controller;
 
 
-import com.guide.run.event.entity.dto.MyEvent;
+import com.guide.run.event.entity.dto.response.search.MyEventResponse;
+import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.service.EventSearchService;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -28,13 +29,23 @@ public class EventSearchController {
     private final EventRepository eventRepository;
 
     @GetMapping("/my")
-    public ResponseEntity<List<MyEvent>> getMyOpenEventList(@RequestParam("sort") String sort
+    public ResponseEntity<List<MyEventResponse>> getMyEventList(@RequestParam("sort") String sort
     , @RequestParam("year") int year, @RequestParam("month") int month, HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
-        User user = userRepository.findByUserId(privateId).
+        userRepository.findByUserId(privateId).
                 orElseThrow(() -> new NotExistUserException());
-        List<MyEvent> myEvent = eventSearchService.getMyEvent(sort, year, month,privateId);
-        return ResponseEntity.status(200).body(myEvent);
+        List<MyEventResponse> myEvents = eventSearchService.getMyEvent(sort, year, month,privateId);
+        return ResponseEntity.status(200).body(myEvents);
+    }
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<UpcomingEventResponse>> getUpcomingEventList(@RequestParam("sort") String sort,
+                                                                            HttpServletRequest request)
+    {
+        String privateId = jwtProvider.extractUserId(request);
+        userRepository.findByUserId(privateId).
+                orElseThrow(() -> new NotExistUserException());
+        List<UpcomingEventResponse> upcomingEvents = eventSearchService.getUpcomingEvent(sort, privateId);
+        return ResponseEntity.status(200).body(upcomingEvents);
     }
 }
