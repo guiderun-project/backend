@@ -2,7 +2,9 @@ package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
+import com.guide.run.global.exception.event.logic.NotValidTypeException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,20 @@ public class EventLogicExceptionAdvice {
         return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidSort.code"),
                 getMessage("notValidSort.msg")));
+    }
+    //2201
+    @ExceptionHandler(NotValidTypeException.class)
+    protected ResponseEntity<FailResult> NotValidTypeException(NotValidTypeException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidType.code"),
+                getMessage("notValidType.msg")));
+    }
+    //2202
+    @ExceptionHandler(NotValidKindException.class)
+    protected ResponseEntity<FailResult> NotValidKindException(NotValidKindException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidKind.code"),
+                getMessage("notValidKind.msg")));
     }
     private String getMessage(String code){
         return getMessage(code,null);
