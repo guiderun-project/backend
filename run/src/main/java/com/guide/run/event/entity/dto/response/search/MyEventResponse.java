@@ -1,4 +1,4 @@
-package com.guide.run.event.entity.dto;
+package com.guide.run.event.entity.dto.response.search;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -7,12 +7,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.time.Period;
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class MyEvent {
+public class MyEventResponse {
     private Long eventId;
     private EventType eventType;
     private String name;
