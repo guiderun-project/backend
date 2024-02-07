@@ -1,21 +1,15 @@
 package com.guide.run.event.entity.dto.response.search;
 
-import com.guide.run.event.entity.type.EventRecruitStatus;
-import com.guide.run.event.entity.type.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 public class UpcomingEventResponse {
-    private Long eventId;
-    private EventType eventType;
-    private String name;
-    private boolean isApply;
-    private LocalDate date;
-    private EventRecruitStatus recruitStatus;
+    private List<UpcomingEvent> items;
+
 }
