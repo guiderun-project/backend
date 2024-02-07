@@ -4,7 +4,7 @@ import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
-import com.guide.run.event.entity.service.EventService;
+import com.guide.run.event.service.EventService;
 import com.guide.run.global.exception.admin.authorize.NotAuthorityAdminException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
