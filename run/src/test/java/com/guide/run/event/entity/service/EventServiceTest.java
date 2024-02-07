@@ -4,6 +4,7 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.event.service.EventService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +40,7 @@ class EventServiceTest {
                 .name("event")
                 .isApprove(true)
                 .recruitStatus(EventRecruitStatus.UPCOMING)
-                .type(EventType.Training)
+                .type(EventType.TRAINING)
                 .maxNumG(10)
                 .maxNumV(10)
                 .place("house")
