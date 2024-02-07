@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class MyEventResponse {
+public class AllEventResponse {
     private List<MyEvent> items;
 }
