@@ -1,4 +1,4 @@
-package com.guide.run.event.entity.service;
+package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
