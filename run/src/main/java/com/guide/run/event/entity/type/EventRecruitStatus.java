@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum EventRecruitStatus {
     UPCOMING("모집예정"),
     OPEN("모집중"),
-    CLOSE("모집마감");
+    CLOSE("모집마감"),
+    END("이벤트종료");
     private final String value;
 }
