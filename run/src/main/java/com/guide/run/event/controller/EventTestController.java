@@ -437,5 +437,29 @@ public class EventTestController {
                 .endTime(LocalDateTime.now().plusDays(20))
                 .recruitStatus(EventRecruitStatus.CLOSE)
                 .build());
+        eventRepository.save(Event.builder()
+                .organizer(jwtProvider.extractUserId(request))
+                .recruitStartDate(LocalDate.now())
+                .recruitEndDate(LocalDate.now())
+                .name("dde2")
+                .recruitStatus(EventRecruitStatus.END)
+                .isApprove(true)
+                .type(EventType.COMPETITION)
+                .startTime(LocalDateTime.now().minusDays(22))
+                .endTime(LocalDateTime.now().minusDays(22))
+                .maxNumV(106)
+                .maxNumG(108)
+                .place("67")
+                .content("68")
+                .build());
+        eventFormRepository.save(EventForm.builder()
+                .privateId("kakao3232984128")
+                .eventId(18L)
+                .isMatching(true)
+                .recruitStatus(EventRecruitStatus.END)
+                .eventType(EventType.COMPETITION)
+                .startTime(LocalDateTime.now().minusDays(22))
+                .endTime(LocalDateTime.now().minusDays(22))
+                .build());
     }
 }
