@@ -30,62 +30,58 @@ public class AllEventGetService {
     public List<AllEvent> getAllEvent(int start, int limit, String sort, String type, String kind, String privateId) {
         Pageable pageable = PageRequest.of(start,limit);
         List<AllEvent> events = new ArrayList<>();
+        Page found;
         switch (kind){
             case "UPCOMING":
                 if(sort.equals("TOTAL")){
                     if(type.equals("TOTAL")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByRecruitStatusNotOrderByEndTime(EventRecruitStatus.END, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByTypeAndRecruitStatusNotOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.END, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    allResponseEventCreate(privateId,events,found);
                 }
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.UPCOMING, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         System.out.println("==========================================a");
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.UPCOMING, pageable);
                         System.out.println("=================================bb");
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    allResponseEventCreate(privateId,events,found);
                 }
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.OPEN, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.OPEN, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    allResponseEventCreate(privateId,events,found);
                 }
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.CLOSE, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
-                        Page<Event> found = eventRepository.
+                        found = eventRepository.
                                 findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.CLOSE, pageable);
-                        allResponseEventCreate(privateId,events,found);
                     }
                     else
                         throw new NotValidTypeException();
@@ -96,91 +92,85 @@ public class AllEventGetService {
             case "MY":
                 if(sort.equals("TOTAL")){
                     if(type.equals("TOTAL")) {
-                        Page<EventForm> found = eventFormRepository.findAllByPrivateIdOrderByEndTime(privateId, pageable);
-                        myEventResponseCreate(events,found);
+                        found = eventFormRepository.findAllByPrivateIdOrderByEndTime(privateId, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndEventTypeOrderByEndTime(privateId, EventType.valueOf(type), pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    myEventResponseCreate(events,found);
                 }
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.UPCOMING, pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
                                         EventRecruitStatus.UPCOMING, EventType.valueOf(type), pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    myEventResponseCreate(events,found);
                 }
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.OPEN, pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
                                         EventRecruitStatus.OPEN, EventType.valueOf(type), pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    myEventResponseCreate(events,found);
                 }
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.CLOSE, pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
                                         EventRecruitStatus.CLOSE, EventType.valueOf(type), pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    myEventResponseCreate(events,found);
                 }
                 else if(sort.equals("END")){
                     if(type.equals("TOTAL")) {
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.END, pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                        Page<EventForm> found = eventFormRepository.
+                        found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
                                         EventRecruitStatus.END, EventType.valueOf(type), pageable);
-                        myEventResponseCreate(events,found);
                     }
                     else
                         throw new NotValidTypeException();
+                    myEventResponseCreate(events,found);
                 }
                 else
                     throw new NotValidSortException();
                 return events;
             case "END":
                 if(type.equals("TOTAL")) {
-                    Page<Event> found = eventRepository.findAllByRecruitStatusOrderByEndTimeDesc(EventRecruitStatus.END, pageable);
-                    allResponseEventCreate(privateId, events, found);
+                    found = eventRepository.findAllByRecruitStatusOrderByEndTimeDesc(EventRecruitStatus.END, pageable);
                 }
                 else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                    Page<Event> found = eventRepository.findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType.valueOf(type), EventRecruitStatus.END, pageable);
-                    allResponseEventCreate(privateId, events, found);
+                    found = eventRepository.findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType.valueOf(type), EventRecruitStatus.END, pageable);
                 }
                 else
                     throw new NotValidTypeException();
+                allResponseEventCreate(privateId, events, found);
                 return events;
             default:
                 throw new NotValidKindException();
