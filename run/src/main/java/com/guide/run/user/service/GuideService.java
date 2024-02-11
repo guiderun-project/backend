@@ -30,16 +30,16 @@ public class GuideService {
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(userService.reAssignReturn(privateId)).orElse(null);
         if(user!=null) {
-            log.info("에러발생");
+            log.info("에러발생"); //todo : 에러코드 추가해야 합니다.
             return null;
         } else {
-
+            String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
             User guide = User.builder()
                     .userId(userService.getUUID())
                     .privateId(privateId)
                     .name(guideSignupDto.getName())
                     .gender(guideSignupDto.getGender())
-                    .phoneNumber(guideSignupDto.getPhoneNumber())
+                    .phoneNumber(phoneNum)
                     .openNumber(guideSignupDto.isOpenNumber())
                     .age(guideSignupDto.getAge())
                     .detailRecord(guideSignupDto.getDetailRecord())
@@ -60,6 +60,7 @@ public class GuideService {
 
 
             userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
+            //todo : 에러코드 추가해야 합니다.
 
             User newUser = userRepository.save(guide);
             guideRepository.save(guideInfo);
