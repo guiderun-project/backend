@@ -7,7 +7,6 @@ import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.service.AllEventGetService;
 import com.guide.run.event.service.EventGetService;
-import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.repository.UserRepository;
@@ -24,7 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
-public class EventSearchController {
+public class EventGetController {
     private final JwtProvider jwtProvider;
     private final EventGetService eventGetService;
     private final UserRepository userRepository;
