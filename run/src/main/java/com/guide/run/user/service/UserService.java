@@ -45,136 +45,9 @@ public class UserService {
         }
     }
 
-    @Transactional
-    public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
-        User user = userRepository.findById(reAssignSocialId(privateId)).orElse(null);
-        if(user!=null) {
-            log.info("에러발생");
-            return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
-        } else {
-            User vi = User.builder()
-                    .userId(getUUID())
-                    .privateId(privateId)
-                    .name(viSignupDto.getName())
-                    .gender(viSignupDto.getGender())
-                    .phoneNumber(viSignupDto.getPhoneNumber())
-                    .openNumber(viSignupDto.isOpenNumber())
-                    .age(viSignupDto.getAge())
-                    .detailRecord(viSignupDto.getDetailRecord())
-                    .recordDegree(viSignupDto.getRecordDegree())
-                    .role(Role.WAIT)
-                    .type(UserType.VI)
-                    .snsId(viSignupDto.getSnsId())
-                    .openSns(viSignupDto.isOpenSns())
-                    .build();
-
-            Vi viInfo = Vi.builder()
-                    .privateId(privateId)
-                    .runningExp(viSignupDto.isRunningExp())
-                    .guideName(viSignupDto.getGuideName())
-                    .build();
-
-            userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
-
-            User newVi = userRepository.save(vi);
-            viRepository.save(viInfo);
-
-            ArchiveData archiveData = ArchiveData.builder()
-                    .privateId(privateId)
-                    .howToKnow(viSignupDto.getHowToKnow())
-                    .motive(viSignupDto.getMotive())
-                    .runningPlace(viSignupDto.getRunningPlace())
-                    .build();
-
-            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
-
-            Permission permission = Permission.builder()
-                    .privateId(privateId)
-                    .privacy(viSignupDto.isPrivacy())
-                    .portraitRights(viSignupDto.isPortraitRights())
-                    .build();
-
-            permissionRepository.save(permission); //약관 동의 저장
-
-            SignupResponse response = SignupResponse
-                    .builder()
-                    .accessToken(jwtProvider.createAccessToken(privateId))
-                    .uuid(newVi.getUserId())
-                    .userStatus(newVi.getRole().getValue())
-                    .build();
-
-            return response;
-        }
-    }
-
-    @Transactional
-    public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
-        User user = userRepository.findById(reAssignSocialId(privateId)).orElse(null);
-        if(user!=null) {
-            log.info("에러발생");
-            return null;
-        } else {
-
-            User guide = User.builder()
-                    .userId(getUUID())
-                    .privateId(privateId)
-                    .name(guideSignupDto.getName())
-                    .gender(guideSignupDto.getGender())
-                    .phoneNumber(guideSignupDto.getPhoneNumber())
-                    .openNumber(guideSignupDto.isOpenNumber())
-                    .age(guideSignupDto.getAge())
-                    .detailRecord(guideSignupDto.getDetailRecord())
-                    .recordDegree(guideSignupDto.getRecordDegree())
-                    .snsId(guideSignupDto.getSnsId())
-                    .openSns(guideSignupDto.isOpenSns())
-                    .role(Role.WAIT)
-                    .type(UserType.GUIDE)
-                    .build();
-
-            Guide guideInfo = Guide.builder()
-                    .privateId(privateId)
-                    .guideExp(guideSignupDto.isGuideExp())
-                    .viName(guideSignupDto.getViName())
-                    .viCount(guideSignupDto.getViCount())
-                    .viRecord(guideSignupDto.getViRecord())
-                    .build();
 
 
-            userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
 
-            User newUser = userRepository.save(guide);
-            guideRepository.save(guideInfo);
-
-
-            ArchiveData archiveData = ArchiveData.builder()
-                    .privateId(privateId)
-                    .howToKnow(guideSignupDto.getHowToKnow())
-                    .motive(guideSignupDto.getMotive())
-                    .runningPlace(guideSignupDto.getRunningPlace())
-                    .build();
-
-            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
-
-
-            Permission permission = Permission.builder()
-                    .privateId(privateId)
-                    .privacy(guideSignupDto.isPrivacy())
-                    .portraitRights(guideSignupDto.isPortraitRights())
-                    .build();
-
-            permissionRepository.save(permission); //약관 동의 저장
-
-            //todo : 추후 일반 로그인을 위한 SignupInfo도 생성해야 함.
-
-            SignupResponse response = SignupResponse.builder()
-                    .uuid(newUser.getUserId())
-                    .accessToken(jwtProvider.createAccessToken(privateId))
-                    .userStatus(newUser.getRole().getValue())
-                    .build();
-
-            return response;
-        }
-    }
 
 
     public String getUUID(){
@@ -194,6 +67,10 @@ public class UserService {
         else{
             return "Error";
         }
+    }
+
+    public String reAssignReturn(String privateId){
+        return reAssignSocialId(privateId);
     }
 
     //임시 자격 부여

@@ -7,8 +7,10 @@ import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.profile.OAuthProfile;
+import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
+import com.guide.run.user.service.ViService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,9 @@ public class SignController {
     private final CookieService cookieService;
     private final UserService userService;
 
+    private final ViService viService;
+    private final GuideService guideService;
+
 
     @PostMapping("/oauth/login/kakao")
     public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
@@ -50,7 +55,7 @@ public class SignController {
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
-        SignupResponse response = userService.viSignup(userId, viSignupDto);
+        SignupResponse response = viService.viSignup(userId, viSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -58,11 +63,9 @@ public class SignController {
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
-        SignupResponse response = userService.guideSignup(userId, guideSignupDto);
+        SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 
 
     @PostMapping("/oauth/token/google")
