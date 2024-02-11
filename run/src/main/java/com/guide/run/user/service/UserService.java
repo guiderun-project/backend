@@ -1,18 +1,12 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.dto.GuideSignupDto;
-import com.guide.run.user.dto.ViSignupDto;
-import com.guide.run.user.dto.response.SignupResponse;
-import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.User;
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -21,12 +15,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class UserService {
-    private final ViRepository viRepository;
-    private final GuideRepository guideRepository;
     private final UserRepository userRepository;
-    private final ArchiveDataRepository archiveDataRepository;
-    private final PermissionRepository permissionRepository;
-    private final JwtProvider jwtProvider;
 
     public String getUserStatus(String privateId){
         String reAssignSocialId = reAssignSocialId(privateId);
@@ -45,11 +34,6 @@ public class UserService {
         }
     }
 
-
-
-
-
-
     public String getUUID(){
         String id = UUID.randomUUID().toString();
         return id;
@@ -65,7 +49,7 @@ public class UserService {
             return "kakao_"+privateId.substring(6);
         }
         else{
-            return "Error";
+            return "Error"; //todo : 이 부분 에러코드 추가해야 합니다.
         }
     }
 
@@ -80,6 +64,10 @@ public class UserService {
                 .role(Role.NEW)
                 .build();
         userRepository.save(user);
+    }
+
+    public String extractNumber(String phoneNum){
+        return phoneNum.replaceAll("[^0-9]", "");
     }
 
 }
