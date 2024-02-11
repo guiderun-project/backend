@@ -29,7 +29,7 @@ public class EventController {
     @PostMapping
     public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest eventCreateRequest, HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
-        User user = userRepository.findUserByUserId(userId).
+        User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
         if(user.getRole().getValue() != ADMIN.getValue())
             throw new NotAuthorityAdminException();
@@ -39,7 +39,7 @@ public class EventController {
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventUpdateRequest eventUpdateRequest, HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
-        User user = userRepository.findUserByUserId(userId).
+        User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
         if(user.getRole().getValue() != ADMIN.getValue())
             throw new NotAuthorityAdminException();
@@ -49,7 +49,7 @@ public class EventController {
     @DeleteMapping("/{eventId}")
     public ResponseEntity<?> eventUpdate(@PathVariable Long eventId,HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
-        User user = userRepository.findUserByUserId(userId).
+        User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
         if(user.getRole().getValue() != ADMIN.getValue())
             throw new NotAuthorityAdminException();

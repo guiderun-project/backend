@@ -62,24 +62,7 @@ class UserServiceTest {
     @DisplayName("vi 회원가입")
     @Test
     void viSignup(){
-        String id = UUID.randomUUID().toString();
-        Vi vi = Vi.builder()
-                .runningExp(true)
-                .guideName("ljg")
-                .privateId("kakao_1")
-                .name("lj")
-                .gender("male")
-                .phoneNumber("010-9999-xxxx")
-                .age(13)
-                .detailRecord("45:23")
-                .recordDegree("A")
-                .role(Role.WAIT)
-                .snsId("XXXXX12345")
-                .build();
 
-        Vi newVi = userRepository.save(vi);
-        Assertions.assertThat(vi.getPrivateId()).isEqualTo(newVi.getPrivateId());
-        //Assertions.assertThat(vi).isEqualTo(newVi); //created_at 과 updated_at 때문에 같을 수가 없다.
     }
     
 

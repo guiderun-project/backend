@@ -35,7 +35,7 @@ public class EventGetController {
     , @RequestParam("year") int year, @RequestParam("month") int month, HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByUserId(privateId).
+        userRepository.findUserByPrivateId(privateId).
                 orElseThrow(() -> new NotExistUserException());
         MyEventResponse myEvents = eventGetService.getMyEvent(sort, year, month, privateId);
         return ResponseEntity.status(200).body(myEvents);
@@ -45,7 +45,7 @@ public class EventGetController {
                                                                     HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByUserId(privateId).
+        userRepository.findUserByPrivateId(privateId).
                 orElseThrow(() -> new NotExistUserException());
         UpcomingEventResponse upcomingEvents = eventGetService.getUpcomingEvent(sort, privateId);
         return ResponseEntity.status(200).body(upcomingEvents);
@@ -60,7 +60,7 @@ public class EventGetController {
                                                           HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByUserId(privateId).
+        userRepository.findUserByPrivateId(privateId).
                 orElseThrow(() -> new NotExistUserException());
         List<AllEvent> allEvents = allEventGetService.getAllEvent(start,limit,sort,type,kind,privateId);
         return ResponseEntity.status(200).body(allEvents);
@@ -72,7 +72,7 @@ public class EventGetController {
                                                      HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByUserId(privateId).
+        userRepository.findUserByPrivateId(privateId).
                 orElseThrow(() -> new NotExistUserException());
         int count = allEventGetService.getEventsListCount(sort,type,kind,privateId);
         return ResponseEntity.status(200).body(count);

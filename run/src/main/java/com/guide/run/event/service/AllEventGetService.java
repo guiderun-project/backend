@@ -277,6 +277,8 @@ public class AllEventGetService {
                         return eventFormRepository.
                                 findAllByPrivateIdAndEventType(privateId, EventType.valueOf(type)).size();
                     }
+                    else
+                        throw new NotValidTypeException();
                 }
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
@@ -288,6 +290,8 @@ public class AllEventGetService {
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
                                         EventRecruitStatus.UPCOMING, EventType.valueOf(type)).size();
                     }
+                    else
+                        throw new NotValidTypeException();
                 }
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
@@ -299,6 +303,8 @@ public class AllEventGetService {
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
                                         EventRecruitStatus.OPEN, EventType.valueOf(type)).size();
                     }
+                    else
+                        throw new NotValidTypeException();
                 }
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
@@ -310,6 +316,8 @@ public class AllEventGetService {
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
                                         EventRecruitStatus.CLOSE, EventType.valueOf(type)).size();
                     }
+                    else
+                        throw new NotValidTypeException();
                 }
                 else if(sort.equals("END")){
                     if(type.equals("TOTAL")) {
@@ -321,6 +329,8 @@ public class AllEventGetService {
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
                                         EventRecruitStatus.END, EventType.valueOf(type)).size();
                     }
+                    else
+                        throw new NotValidTypeException();
                 }
                 else
                     throw new NotValidSortException();
@@ -332,6 +342,8 @@ public class AllEventGetService {
                 else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                     return eventRepository.findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.END).size();
                 }
+                else
+                    throw new NotValidTypeException();
             default:
                 throw new NotValidKindException();
         }
