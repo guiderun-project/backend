@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.7'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id 'jacoco'
 }
 
 group = 'com.guide'
@@ -9,6 +10,10 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	sourceCompatibility = '17'
+}
+
+jacoco {
+	toolVersion = "0.8.10"
 }
 
 configurations {
@@ -22,10 +27,12 @@ repositories {
 }
 
 dependencies {
+	implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'com.google.code.gson:gson:2.10.1' // json -> 객체 변환
 	implementation 'javax.xml.bind:jaxb-api:2.3.0'  // base64 encoding시 필요
 	// 참고 https://www.inflearn.com/questions/327430/jaxb-%EC%A7%88%EB%AC%B8%EC%9D%B4-%EC%9E%88%EC%8A%B5%EB%8B%88%EB%8B%A4
@@ -44,6 +51,58 @@ tasks.named('bootBuildImage') {
 	builder = 'paketobuildpacks/builder-jammy-base:latest'
 }
 
-tasks.named('test') {
+tasks.named('test'){
 	useJUnitPlatform()
+
+	jacoco{}
+	finalizedBy(tasks.jacocoTestReport) //test 이후에 동작하도록 설정
+}
+
+//테스트 리포트 발행을 위해 사용
+tasks.jacocoTestReport{
+	dependsOn test
+	reports{
+		xml.required.set(true)
+		html.required.set(true)
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it,
+					exclude: [   "**/*Config*",
+								 "**/*Dto*",
+								 "**/*Request*",
+								 "**/*Response*",
+								 "**/*Exception*"
+					])
+		}))
+	}
+
+	finalizedBy(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.jacocoTestCoverageVerification{
+	violationRules{
+		rule{
+			enabled= true
+			element='CLASS'
+
+
+		limit{
+			counter='LINE'
+			value='COVEREDRATIO'
+			minimum = 0.0
+		}
+
+		excludes = [
+				"**.*Config*",
+				"**.*Dto*",
+				"**.*Request*",
+				"**.*Response*",
+				"**.*Exception*",
+				"*.test.*"
+		]
+		}
+	}
+
 }

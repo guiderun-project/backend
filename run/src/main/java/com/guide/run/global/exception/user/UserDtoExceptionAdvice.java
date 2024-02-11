@@ -55,11 +55,11 @@ public class UserDtoExceptionAdvice {
                 getMessage("notValidPhoneNumberForm.msg")));
     }
     //1006
-    @ExceptionHandler(NotAgreeTermException.class)
-    protected ResponseEntity<FailResult> NotAgreeTermException(NotAgreeTermException e){
+    @ExceptionHandler(InvalidItemErrorException.class)
+    protected ResponseEntity<FailResult> NotAgreeTermException(InvalidItemErrorException e){
         return ResponseEntity.status(400).body(responseService.getFailResult(
-                getMessage("NotAgreeTerm.code"),
-                getMessage("NotAgreeTerm.msg")));
+                getMessage("InvalidItemError.code"),
+                getMessage("InvalidItemError.msg")));
     }
 
     private String getMessage(String code){
@@ -70,3 +70,4 @@ public class UserDtoExceptionAdvice {
         return messageSource.getMessage(code,args, LocaleContextHolder.getLocale());
     }
 }
+

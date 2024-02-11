@@ -22,7 +22,7 @@ public class TestController {
     }
     @PostMapping("/ap")
     public String test34(){
-        throw new NotExistUserException("존재하지 않는 사용자입니다");
+        throw new NotExistUserException();
     }
     //ADMIN 권한 테스트
     @GetMapping("/api/test2")
@@ -38,11 +38,11 @@ public class TestController {
     public String userCreateTest(){
         User user = User.builder()
                 .userId("kakao_1")
-                .role(Role.VADMIN)
+                .role(Role.ADMIN)
                 .build();
         User user2 = User.builder()
                 .userId("kakao_2")
-                .role(Role.VWAIT)
+                .role(Role.WAIT)
                 .build();
         userRepository.save(user);
         userRepository.save(user2);

@@ -4,12 +4,16 @@ import com.guide.run.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonalInfoDto {
+public class GlobalUserInfoDto {
     private String role;
+    private String userId;
+    private String recordDegree;
     private String type;
     private String gender;
     private String name;
@@ -19,8 +23,10 @@ public class PersonalInfoDto {
     private String snsId;
     private boolean openSns;
 
-    public static PersonalInfoDto userToInfoDto(User user){
-        return PersonalInfoDto.builder()
+    public static GlobalUserInfoDto userToInfoDto(User user){
+        return GlobalUserInfoDto.builder()
+                .userId(user.getUserId())
+                .recordDegree(user.getRecordDegree())
                 .role(user.getRole().getValue())
                 .type(user.getType().getValue())
                 .name(user.getName())

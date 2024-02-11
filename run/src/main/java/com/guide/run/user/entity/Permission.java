@@ -13,8 +13,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Permission {
     @Id
-    private String userId;
+    private String privateId;
     private boolean privacy;
     private boolean portraitRights;
+
+    public void editPermisson(
+            boolean privacy,
+            boolean portraitRights
+    ){
+        this.privacy = privacy;
+        this.portraitRights = portraitRights;
+    }
 
 }
