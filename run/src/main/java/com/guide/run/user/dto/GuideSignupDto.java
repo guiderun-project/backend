@@ -1,5 +1,6 @@
 package com.guide.run.user.dto;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,8 @@ public class GuideSignupDto {
     //private String password;
     private String name;
     private String gender;
+    @Pattern(regexp = "^01(?:0|1|[6-9])(?:\\s|-)?(?:\\d{3}|\\d{4})?(?:\\s|-)?\\d{4}$",
+            message = "전화번호 형식이 올바르지 않습니다") //todo : 전화번호 형식 관련 에러코드 추가해야 함.
     private String phoneNumber;
     private boolean openNumber;
     private int age;
