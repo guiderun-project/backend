@@ -13,6 +13,7 @@ import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class SignController {
 
 
     @PostMapping("/signup/vi")
-    public ResponseEntity<SignupResponse> viSignup(@RequestBody ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
+    public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
         SignupResponse response = viService.viSignup(userId, viSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -61,7 +62,7 @@ public class SignController {
 
 
     @PostMapping("/signup/guide")
-    public ResponseEntity<SignupResponse> guideSignup(@RequestBody GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
+    public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
         SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
