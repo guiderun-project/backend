@@ -1,5 +1,6 @@
 package com.guide.run.global.jwt;
 
+import com.guide.run.global.exception.auth.authorize.NotExistAuthorizationException;
 import com.guide.run.global.security.user.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -76,7 +77,7 @@ public class JwtProvider {
         String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
         if(bearer!=null && bearer.startsWith("Bearer "))
             return bearer.substring("Bearer ".length());
-        return null ; //에러 작성해야함
+        throw new NotExistAuthorizationException();
     }
 
     public boolean validateTokenExpiration(String token){
