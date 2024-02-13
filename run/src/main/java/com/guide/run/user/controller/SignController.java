@@ -56,16 +56,24 @@ public class SignController {
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
-        SignupResponse response = viService.viSignup(userId, viSignupDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        if(userService.isAccountIdExist(viSignupDto.getAccountId())){
+            throw new RuntimeException("중복된 아이디입니다.");
+        }else{
+            SignupResponse response = viService.viSignup(userId, viSignupDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
     }
 
 
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
-        SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        if(userService.isAccountIdExist(guideSignupDto.getAccountId())){
+            throw new RuntimeException("중복된 아이디입니다.");
+        }else{
+            SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
     }
 
 
