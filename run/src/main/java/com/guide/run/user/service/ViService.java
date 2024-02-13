@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -31,8 +32,8 @@ public class ViService {
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
         if(user!=null && !user.getRole().equals(Role.NEW)) {
-            log.info("에러발생"); //todo : 에러코드 추가해야 합니다.
-            return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
+            //log.info("에러발생");
+            throw new ExistUserException(); //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
             String phoneNum = userService.extractNumber(viSignupDto.getPhoneNumber());
             User vi = User.builder()

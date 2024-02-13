@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -30,8 +31,8 @@ public class GuideService {
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
         if(user!=null && !user.getRole().equals(Role.NEW)) {
-            log.info("에러발생"); //todo : 에러코드 추가해야 합니다.
-            return null;
+            //log.info("에러발생");
+            throw new ExistUserException();
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
             User guide = User.builder()
