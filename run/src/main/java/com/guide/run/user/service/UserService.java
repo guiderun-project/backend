@@ -1,6 +1,7 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.User;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final SignUpInfoRepository signUpInfoRepository;
 
     public String getUserStatus(String privateId){
         String reAssignSocialId = reAssignSocialId(privateId);
@@ -68,6 +71,11 @@ public class UserService {
 
     public String extractNumber(String phoneNum){
         return phoneNum.replaceAll("[^0-9]", "");
+    }
+
+    public boolean isAccountIdExist(String accountId) {
+        Optional<SignUpInfo> byAccountId = signUpInfoRepository.findByAccountId(accountId);
+        return !byAccountId.isEmpty();
     }
 
 }
