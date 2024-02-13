@@ -10,6 +10,7 @@ import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
+import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +36,8 @@ public class EventGetService {
             myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTime(privateId, startTime, endTime);
             for (EventForm eventForm : myEventForms) {
                 if (eventForm.isMatching()) {
-                    Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(), EventRecruitStatus.OPEN);
-                    if (findEvent != null) {
+                    Event findEvent = eventRepository.findById(eventForm.getEventId()).orElseThrow(()->new NotExistEventException());
+                    if (findEvent.getRecruitStatus()==EventRecruitStatus.OPEN || findEvent.getRecruitStatus()==EventRecruitStatus.CLOSE) {
                         myEvents.add(MyEvent.builder()
                                 .eventId(findEvent.getId())
                                 .eventType(findEvent.getType())
