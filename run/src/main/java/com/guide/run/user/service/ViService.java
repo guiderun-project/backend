@@ -28,8 +28,8 @@ public class ViService {
 
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
-        User user = userRepository.findById(userService.reAssignReturn(privateId)).orElse(null);
-        if(user!=null) {
+        User user = userRepository.findById(privateId).orElse(null);
+        if(user!=null && !user.getRole().equals(Role.NEW)) {
             log.info("에러발생"); //todo : 에러코드 추가해야 합니다.
             return null; //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
