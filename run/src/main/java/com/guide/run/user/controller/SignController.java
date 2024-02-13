@@ -1,6 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ViSignupDto;
@@ -42,13 +43,13 @@ public class SignController {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
-        String userStatus = userService.getUserStatus(privateId);
+        boolean isExist = userService.getUserStatus(privateId);
 
         cookieService.createCookie("refreshToken",response);
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
-                .userStatus(userStatus)
+                .isExist(isExist)
                 .build();
     }
 
@@ -57,7 +58,7 @@ public class SignController {
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
         if(userService.isAccountIdExist(viSignupDto.getAccountId())){
-            throw new RuntimeException("중복된 아이디입니다.");
+            throw new DuplicatedUserIdException();
         }else{
             SignupResponse response = viService.viSignup(userId, viSignupDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -69,7 +70,7 @@ public class SignController {
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
         if(userService.isAccountIdExist(guideSignupDto.getAccountId())){
-            throw new RuntimeException("중복된 아이디입니다.");
+            throw new DuplicatedUserIdException();
         }else{
             SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

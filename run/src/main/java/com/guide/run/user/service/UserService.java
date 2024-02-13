@@ -20,11 +20,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    public String getUserStatus(String privateId){
+    public boolean getUserStatus(String privateId){
         String reAssignSocialId = reAssignSocialId(privateId);
         User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
-                return user.getRole().getValue();
+                return true;
         }else{
             //신규 가입자의 경우 인증을 위해 임시 유저 생성
             //가입이 완료되면 새 토큰 다시 줘야함
@@ -33,7 +33,7 @@ public class UserService {
                     .role(Role.NEW)
                     .userId(getUUID())
                     .build());
-            return Role.NEW.getValue();
+            return false;
         }
     }
 
