@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @AllArgsConstructor
 public class FailResult {
-    private String code;
-    private String msg;
+    private String errorCode;
+    private String message;
 }
