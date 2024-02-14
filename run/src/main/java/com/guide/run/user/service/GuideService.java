@@ -1,17 +1,16 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
-import com.guide.run.user.entity.ArchiveData;
-import com.guide.run.user.entity.Guide;
-import com.guide.run.user.entity.Permission;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +24,15 @@ public class GuideService {
     private final PermissionRepository permissionRepository;
     private final JwtProvider jwtProvider;
     private final UserService userService;
+    private final PasswordEncoder bCryptPasswordEncoder;
+    private final SignUpInfoRepository signUpInfoRepository;
 
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
-        User user = userRepository.findById(userService.reAssignReturn(privateId)).orElse(null);
-        if(user!=null) {
-            log.info("에러발생"); //todo : 에러코드 추가해야 합니다.
-            return null;
+        User user = userRepository.findById(privateId).orElse(null);
+        if(user!=null && !user.getRole().equals(Role.NEW)) {
+            //log.info("에러발생");
+            throw new ExistUserException();
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
             User guide = User.builder()
@@ -84,7 +85,15 @@ public class GuideService {
 
             permissionRepository.save(permission); //약관 동의 저장
 
-            //todo : 추후 일반 로그인을 위한 SignupInfo도 생성해야 함.
+            SignUpInfo signUpInfo = SignUpInfo.builder()
+                    .privateId(privateId)
+                    .accountId(guideSignupDto.getAccountId())
+                    .password(guideSignupDto.getPassword())
+                    .build();
+
+            signUpInfo.hashPassword(bCryptPasswordEncoder); //비밀번호 암호화
+
+            signUpInfoRepository.save(signUpInfo); //가입 정보 저장
 
             SignupResponse response = SignupResponse.builder()
                     .uuid(newUser.getUserId())
