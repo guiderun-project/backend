@@ -1,12 +1,14 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.user.Guide;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
