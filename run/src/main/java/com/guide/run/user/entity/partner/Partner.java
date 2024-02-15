@@ -1,5 +1,7 @@
-package com.guide.run.user.entity;
+package com.guide.run.user.entity.partner;
 
+import com.guide.run.user.entity.user.Guide;
+import com.guide.run.user.entity.user.Vi;
 import jakarta.persistence.*;
 import lombok.*;
 
