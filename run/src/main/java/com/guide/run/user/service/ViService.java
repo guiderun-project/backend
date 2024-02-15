@@ -2,11 +2,14 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,8 @@ public class ViService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
+    private final TmpService tmpService;
+
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
@@ -36,6 +41,10 @@ public class ViService {
             throw new ExistUserException(); //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
             String phoneNum = userService.extractNumber(viSignupDto.getPhoneNumber());
+
+            //가입 전 회원정보 연결
+            tmpService.updateMember(phoneNum, privateId);
+
             User vi = User.builder()
                     .userId(userService.getUUID())
                     .privateId(privateId)

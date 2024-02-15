@@ -1,8 +1,8 @@
 package com.guide.run.user.dto;
 
 import com.guide.run.user.entity.ArchiveData;
-import com.guide.run.user.entity.Guide;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.user.Guide;
+import com.guide.run.user.entity.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,8 +1,7 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.entity.SignUpInfo;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;

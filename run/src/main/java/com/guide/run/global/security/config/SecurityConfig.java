@@ -28,6 +28,9 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
             web.ignoring()
+                    .requestMatchers("/member-upload")
+                    .requestMatchers("/event-upload")
+                    .requestMatchers("/attendance-upload")
                     .requestMatchers("/api/oauth/**");
         };
     }
