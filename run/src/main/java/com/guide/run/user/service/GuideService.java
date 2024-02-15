@@ -2,11 +2,14 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.Guide;
+import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,8 @@ public class GuideService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
+    private final TmpService tmpService;
+
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
@@ -35,6 +40,10 @@ public class GuideService {
             throw new ExistUserException();
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
+
+            //가입 전 회원정보 연결
+            tmpService.updateMember(phoneNum, privateId);
+
             User guide = User.builder()
                     .userId(userService.getUUID())
                     .privateId(privateId)
