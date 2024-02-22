@@ -28,7 +28,7 @@ public class AllEventGetService {
     private final EventFormRepository eventFormRepository;
 
     public List<AllEvent> getAllEvent(int start, int limit, String sort, String type, String kind, String privateId) {
-        Pageable pageable = PageRequest.of(start,limit);
+        Pageable pageable = PageRequest.of(start/limit,limit);
         List<AllEvent> events = new ArrayList<>();
         Page found;
         switch (kind){
