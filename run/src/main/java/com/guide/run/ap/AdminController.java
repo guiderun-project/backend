@@ -1,5 +1,6 @@
 package com.guide.run.ap;
 
+import com.guide.run.event.entity.type.EventType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class AdminController {
                 .items(eventHistory)
                 .build());
     }
-    @GetMapping("/{userId}/event-type/count")
+    @GetMapping("/{userId}/event-list/count")
     public ResponseEntity<EventHistoryCount> getUserEventHistoryCount(@PathVariable String userId,
                                                             @RequestParam("year") int year,
                                                             @RequestParam("month") int month){
@@ -30,5 +31,10 @@ public class AdminController {
                 body(EventHistoryCount.builder().count(adminService.getEventHistoryCount(userId,year,month)).build());
     }
 
+    @GetMapping("/{userId}/event-type/count")
+    public ResponseEntity<EventTypeCount> getUserEventHistoryCount(@PathVariable String userId){
+        return ResponseEntity.status(200).
+                body(adminService.getEventTypeCount(userId));
+    }
 
 }

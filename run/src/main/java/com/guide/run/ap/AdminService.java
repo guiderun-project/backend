@@ -4,6 +4,7 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.repository.UserRepository;
@@ -50,5 +51,13 @@ public class AdminService {
         LocalDateTime endTime = LocalDateTime.of(year, month, LocalDate.of(year, month, 1).lengthOfMonth(), 23, 59);
         List<EventForm> eventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(privateId, startTime, endTime);
         return eventForms.size();
+    }
+
+    public EventTypeCount getEventTypeCount(String userId) {
+        String privateId = userRepository.findUserByUserId(userId).orElseThrow(() -> new NotExistUserException()).getPrivateId();
+        return EventTypeCount.builder()
+                .Competition(eventFormRepository.findAllByPrivateIdAndEventType(privateId, EventType.COMPETITION).size())
+                .Training(eventFormRepository.findAllByPrivateIdAndEventType(privateId, EventType.TRAINING).size())
+                .build();
     }
 }
