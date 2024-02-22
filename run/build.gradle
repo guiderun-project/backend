@@ -38,6 +38,7 @@ dependencies {
 	// 참고 https://www.inflearn.com/questions/327430/jaxb-%EC%A7%88%EB%AC%B8%EC%9D%B4-%EC%9E%88%EC%8A%B5%EB%8B%88%EB%8B%A4
 	implementation 'io.jsonwebtoken:jjwt:0.9.1' // jjwt(Java Json Web Token) 오픈소스 라이브러리
 	implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'//다국어 설정 관련
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis' //redis
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
