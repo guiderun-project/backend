@@ -2,6 +2,7 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -24,7 +25,6 @@ public class ViService {
     private final ViRepository viRepository;
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
-    private final PermissionRepository permissionRepository;
     private final JwtProvider jwtProvider;
     private final UserService userService;
 
@@ -43,7 +43,7 @@ public class ViService {
             String phoneNum = userService.extractNumber(viSignupDto.getPhoneNumber());
 
             //가입 전 회원정보 연결
-            tmpService.updateMember(phoneNum, privateId);
+            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User vi = User.builder()
                     .userId(userService.getUUID())
@@ -55,6 +55,8 @@ public class ViService {
                     .age(viSignupDto.getAge())
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
+                    .competitionCnt(cntDTO.getCompetitionCnt())
+                    .trainingCnt(cntDTO.getTrainingCnt())
                     .role(Role.WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
@@ -76,18 +78,12 @@ public class ViService {
                     .privateId(privateId)
                     .howToKnow(viSignupDto.getHowToKnow())
                     .motive(viSignupDto.getMotive())
+                    .privacy(viSignupDto.isPrivacy())
+                    .portraitRights(viSignupDto.isPortraitRights())
                     .runningPlace(viSignupDto.getRunningPlace())
                     .build();
 
-            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
-
-            Permission permission = Permission.builder()
-                    .privateId(privateId)
-                    .privacy(viSignupDto.isPrivacy())
-                    .portraitRights(viSignupDto.isPortraitRights())
-                    .build();
-
-            permissionRepository.save(permission); //약관 동의 저장
+            archiveDataRepository.save(archiveData); //기타 데이터 저장
 
             SignUpInfo signUpInfo = SignUpInfo.builder()
                     .privateId(privateId)

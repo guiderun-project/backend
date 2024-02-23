@@ -25,6 +25,16 @@ public class ArchiveData {
 
     private String motive;
     private String hopePrefs;
+    private boolean privacy;
+    private boolean portraitRights;
+
+    public void editPermisson(
+            boolean privacy,
+            boolean portraitRights
+    ){
+        this.privacy = privacy;
+        this.portraitRights = portraitRights;
+    }
 
     public void editRunningInfo(
             List<String> howToKnow,

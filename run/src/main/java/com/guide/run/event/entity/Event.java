@@ -2,6 +2,7 @@ package com.guide.run.event.entity;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Event{
+public class Event extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //이벤트 id

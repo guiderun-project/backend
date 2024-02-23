@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/test").hasRole("VADMIN")
                         .requestMatchers("/api/test2").hasRole("VWAIT")
+                        //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
