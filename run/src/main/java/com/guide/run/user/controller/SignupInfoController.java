@@ -41,8 +41,11 @@ public class SignupInfoController {
 
     //인적사항 조회
     @GetMapping("/user/personal/{userId}")
-    public ResponseEntity<PersonalInfoDto> getPersonalInfo(@PathVariable String userId){
-        PersonalInfoDto response = signupInfoService.getPersonalInfo(userId);
+    public ResponseEntity<PersonalInfoDto> getPersonalInfo(@PathVariable String userId,
+                                                           HttpServletRequest httpServletRequest){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+
+        PersonalInfoDto response = signupInfoService.getPersonalInfo(privateId, userId);
 
         return ResponseEntity.ok().body(response);
     }
