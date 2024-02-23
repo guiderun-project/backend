@@ -1,7 +1,9 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -24,7 +26,6 @@ public class GuideService {
     private final GuideRepository guideRepository;
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
-    private final PermissionRepository permissionRepository;
     private final JwtProvider jwtProvider;
     private final UserService userService;
     private final PasswordEncoder bCryptPasswordEncoder;
@@ -42,7 +43,7 @@ public class GuideService {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
 
             //가입 전 회원정보 연결
-            tmpService.updateMember(phoneNum, privateId);
+            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User guide = User.builder()
                     .userId(userService.getUUID())
@@ -54,6 +55,8 @@ public class GuideService {
                     .age(guideSignupDto.getAge())
                     .detailRecord(guideSignupDto.getDetailRecord())
                     .recordDegree(guideSignupDto.getRecordDegree())
+                    .competitionCnt(cntDTO.getCompetitionCnt())
+                    .trainingCnt(cntDTO.getTrainingCnt())
                     .snsId(guideSignupDto.getSnsId())
                     .openSns(guideSignupDto.isOpenSns())
                     .role(Role.WAIT)
@@ -69,8 +72,9 @@ public class GuideService {
                     .build();
 
 
-            userRepository.delete(userRepository.findById(privateId).orElse(null)); //임시 유저 삭제
-            //todo : 에러코드 추가해야 합니다.
+            userRepository.delete(userRepository.findById(privateId).orElseThrow(
+                    NotExistUserException::new
+            )); //임시 유저 삭제
 
             User newUser = userRepository.save(guide);
             guideRepository.save(guideInfo);
@@ -80,19 +84,12 @@ public class GuideService {
                     .privateId(privateId)
                     .howToKnow(guideSignupDto.getHowToKnow())
                     .motive(guideSignupDto.getMotive())
+                    .privacy(guideSignupDto.isPrivacy())
+                    .portraitRights(guideSignupDto.isPortraitRights())
                     .runningPlace(guideSignupDto.getRunningPlace())
                     .build();
 
-            archiveDataRepository.save(archiveData); //안 쓰는 데이터 저장
-
-
-            Permission permission = Permission.builder()
-                    .privateId(privateId)
-                    .privacy(guideSignupDto.isPrivacy())
-                    .portraitRights(guideSignupDto.isPortraitRights())
-                    .build();
-
-            permissionRepository.save(permission); //약관 동의 저장
+            archiveDataRepository.save(archiveData); //기타 데이터 저장
 
             SignUpInfo signUpInfo = SignUpInfo.builder()
                     .privateId(privateId)
