@@ -9,6 +9,7 @@ import com.guide.run.temp.member.dto.EventDTO;
 import com.guide.run.temp.member.dto.MemberDTO;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.MemberRepository;
+import com.guide.run.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -36,6 +37,7 @@ public class ExcelService {
     private final EventRepository eventRepository;
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
 
     public List<MemberDTO> readMemberExcelData(MultipartFile file) throws IOException {
         List<MemberDTO> dataList = new ArrayList<>();
@@ -75,12 +77,14 @@ public class ExcelService {
 
                 Cell phoneNumberCell = row.getCell(5);
                 if (phoneNumberCell != null) {
-                    dto.setPhoneNumber(getStringValue(phoneNumberCell));
+                    dto.setPhoneNumber(
+                            userService.extractNumber(getStringValue(phoneNumberCell))
+                    );
                 }
 
                 Cell ageCell = row.getCell(6);
-                if (ageCell != null && ageCell.getCellType() == CellType.NUMERIC) {
-                    dto.setAge((int) ageCell.getNumericCellValue());
+                if (ageCell != null) {
+                    dto.setAge(Integer.parseInt(ageCell.getStringCellValue()));
                 }
 
                 Cell detailRecordCell = row.getCell(7);
@@ -138,10 +142,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()==35){
-                    continue;
-                }
-                if(row.getRowNum()>=46){
+                if(row.getRowNum()>=45){
                     break;
                 }
                 //log.info(String.valueOf(row.getRowNum()));
@@ -174,18 +175,21 @@ public class ExcelService {
 
                     Cell viCntCell = row.getCell(7);
                     if (viCntCell != null) {
-                        if(row.getRowNum()>=41){
+                        if(row.getRowNum()>41){
                             dto.setViCnt(0);
+                        }else {
+                            dto.setViCnt(Integer.parseInt(viCntCell.getStringCellValue()));
                         }
-                        dto.setViCnt(Integer.parseInt(viCntCell.getStringCellValue()));
                     }
 
                     Cell guideCntCell = row.getCell(8);
                     if (guideCntCell != null) {
-                        if(row.getRowNum()>=41){
+                        if(row.getRowNum()>41){
                             dto.setGuideCnt(0);
                         }
-                        dto.setGuideCnt(Integer.parseInt(guideCntCell.getStringCellValue()));
+                        else{
+                            dto.setGuideCnt(Integer.parseInt(guideCntCell.getStringCellValue()));
+                        }
                     }
 
                     Cell placeCell = row.getCell(9);
@@ -224,6 +228,8 @@ public class ExcelService {
                     .viCnt(data.getViCnt())
                     .guideCnt(data.getGuideCnt())
                     .type(data.getType())
+                    .maxNumG(30)
+                    .maxNumV(30)
                     .content(data.getContent())
                     .build();
 
@@ -241,7 +247,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>=1911){
+                if(row.getRowNum()>1906){
                     break;
                 }
 
@@ -261,9 +267,9 @@ public class ExcelService {
                 Cell dateCell = row.getCell(3);
                 if (dateCell != null) {
                     if(row.getRowNum()>=39){
-                        dto.setDate(getAttDate(dateCell));
+                        dto.setDate(getDateTime(dateCell));
                     }else{
-                        dto.setDate(getAttDate(dateCell));
+                        dto.setDate(getDateTime(dateCell));
                     }
 
                 }
@@ -321,10 +327,6 @@ public class ExcelService {
     private LocalDateTime getDateTime(Cell cell){
         //log.info(cell.getStringCellValue());
         return LocalDateTime.parse(cell.getStringCellValue());
-    }
-    private LocalDateTime getAttDate(Cell cell){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.parse(cell.getStringCellValue(),formatter);
     }
     private EventType getEventType(Cell cell){
         if(cell.getStringCellValue().equals("TRAINING")){
