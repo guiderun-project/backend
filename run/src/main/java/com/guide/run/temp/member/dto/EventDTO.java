@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 public class EventDTO {
     private Long id; //이벤트 id
-    private String organizer = "admin"; //주최자 id
+    private String organizer = "458"; //주최자 id
     private String name; //이벤트 제목
     private EventRecruitStatus recruitStatus = EventRecruitStatus.END; // event 모집 상태 대기,모집중,모집마감
     private boolean isApprove = true; // 이벤트 승인 여부

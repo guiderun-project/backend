@@ -68,6 +68,7 @@ public class GuideService {
                     .guideExp(guideSignupDto.isGuideExp())
                     .viName(guideSignupDto.getViName())
                     .viCount(guideSignupDto.getViCount())
+                    .guidingPace(guideSignupDto.getGuidingPace())
                     .viRecord(guideSignupDto.getViRecord())
                     .build();
 
@@ -85,6 +86,7 @@ public class GuideService {
                     .howToKnow(guideSignupDto.getHowToKnow())
                     .motive(guideSignupDto.getMotive())
                     .privacy(guideSignupDto.isPrivacy())
+                    .hopePrefs(guideSignupDto.getHopePrefs())
                     .portraitRights(guideSignupDto.isPortraitRights())
                     .runningPlace(guideSignupDto.getRunningPlace())
                     .build();
@@ -102,7 +104,7 @@ public class GuideService {
             signUpInfoRepository.save(signUpInfo); //가입 정보 저장
 
             SignupResponse response = SignupResponse.builder()
-                    .uuid(newUser.getUserId())
+                    .userId(newUser.getUserId())
                     .accessToken(jwtProvider.createAccessToken(privateId))
                     .userStatus(newUser.getRole().getValue())
                     .build();
