@@ -28,7 +28,7 @@ public class AllEventGetService {
     private final EventFormRepository eventFormRepository;
 
     public List<AllEvent> getAllEvent(int start, int limit, String sort, String type, String kind, String privateId) {
-        Pageable pageable = PageRequest.of(start,limit);
+        Pageable pageable = PageRequest.of(start/limit,limit);
         List<AllEvent> events = new ArrayList<>();
         Page found;
         switch (kind){
@@ -52,10 +52,8 @@ public class AllEventGetService {
                                 findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.UPCOMING, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
-                        System.out.println("==========================================a");
                         found = eventRepository.
                                 findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.UPCOMING, pageable);
-                        System.out.println("=================================bb");
                     }
                     else
                         throw new NotValidTypeException();
@@ -78,10 +76,12 @@ public class AllEventGetService {
                     if(type.equals("TOTAL")) {
                         found = eventRepository.
                                 findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.CLOSE, pageable);
+                        allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         found = eventRepository.
                                 findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.CLOSE, pageable);
+                        allResponseEventCreate(privateId,events,found);
                     }
                     else
                         throw new NotValidTypeException();

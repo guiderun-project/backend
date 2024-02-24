@@ -4,6 +4,7 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
+import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -33,7 +34,6 @@ public class SignController {
     private final JwtProvider jwtProvider;
     private final CookieService cookieService;
     private final UserService userService;
-
     private final ViService viService;
     private final GuideService guideService;
 
@@ -45,15 +45,13 @@ public class SignController {
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        cookieService.createCookie("refreshToken",response);
+        cookieService.createCookie("refreshToken",response,privateId);
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .isExist(isExist)
                 .build();
     }
-
-
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
@@ -87,6 +85,13 @@ public class SignController {
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(userId))
                 .build();
+    }
+    @GetMapping("/oauth/login/reissue")
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
+        String accessToken = jwtProvider.reissue(request.getCookies(), jwtProvider.extractUserId(request));
+        return ReissuedAccessTokenDto.builder()
+                .accessToken(accessToken).
+                build();
     }
 
 }

@@ -47,7 +47,7 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventUpdatedResponse);
     }
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<?> eventUpdate(@PathVariable Long eventId,HttpServletRequest request){
+    public ResponseEntity<?> eventDelete(@PathVariable Long eventId,HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
         User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());

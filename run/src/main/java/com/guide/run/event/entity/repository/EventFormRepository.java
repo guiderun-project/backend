@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface EventFormRepository extends JpaRepository <EventForm,Long> {
     List<EventForm> findByPrivateIdAndEndTimeBetweenOrderByEndTime(String privateId, LocalDateTime startTime,LocalDateTime endTime);
+    Page<EventForm> findByPrivateIdAndEndTimeBetweenOrderByEndTime(String privateId, LocalDateTime startTime,LocalDateTime endTime,Pageable pageable);
     List<EventForm> findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(String privateId, LocalDateTime startTime,LocalDateTime endTime);
     EventForm findByEventIdAndPrivateId(Long eventId,String privateId);
     Page<EventForm> findAllByPrivateIdOrderByEndTime(String privateId,Pageable pageable);

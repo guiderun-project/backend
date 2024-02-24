@@ -1,6 +1,7 @@
 package com.guide.run.event.controller;
 
 
+import com.guide.run.event.entity.dto.response.EventCountResponse;
 import com.guide.run.event.entity.dto.response.search.AllEvent;
 import com.guide.run.event.entity.dto.response.search.MyEventResponse;
 import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
@@ -66,15 +67,15 @@ public class EventGetController {
         return ResponseEntity.status(200).body(allEvents);
     }
     @GetMapping("/all/count")
-    public ResponseEntity<Integer> getEventListCount(@RequestParam("sort") String sort,
-                                                     @RequestParam("type") String type,
-                                                     @RequestParam("kind") String kind,
-                                                     HttpServletRequest request)
+    public ResponseEntity<EventCountResponse> getEventListCount(@RequestParam("sort") String sort,
+                                                                @RequestParam("type") String type,
+                                                                @RequestParam("kind") String kind,
+                                                                HttpServletRequest request)
     {
         String privateId = jwtProvider.extractUserId(request);
         userRepository.findUserByPrivateId(privateId).
                 orElseThrow(() -> new NotExistUserException());
         int count = allEventGetService.getEventsListCount(sort,type,kind,privateId);
-        return ResponseEntity.status(200).body(count);
+        return ResponseEntity.status(200).body(EventCountResponse.builder().count(count).build());
     }
 }
