@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,29 +57,33 @@ public class MypageService {
 
         String privateId = user.getPrivateId();
         List<EventForm> eventForms =eventFormRepository.findAllByPrivateId(privateId);
-        List<MyPageEvent> events = new ArrayList<>();
+        List<Event> events = new ArrayList<>();
         
         //날짜 필터링 없이 조회
         for(EventForm eventForm : eventForms){
              Event event = eventRepository.findById(eventForm.getEventId()).orElseThrow(
                      NotExistEventException::new
              );
-             MyPageEvent myPageEvent = MyPageEvent.builder()
-                     .eventId(event.getId())
-                     .eventType(event.getType())
-                     .date(LocalDate.from(event.getStartTime()))
-                     .name(event.getName())
-                     .recruitStatus(event.getRecruitStatus())
-                     .build();
-             events.add(myPageEvent);
+             events.add(event);
         }
-        events.sort((e1, e2) -> e2.getDate().compareTo(e1.getDate()));
+        events.sort((e1, e2) -> e2.getStartTime().compareTo(e1.getStartTime()));
 
 
         int startIndex = Math.min(start * limit, events.size());
         int endIndex = Math.min(startIndex + limit, events.size());
-        List<MyPageEvent> pagedEvents = events.subList(startIndex, endIndex);
 
+        events = events.subList(startIndex, endIndex);
+        List<MyPageEvent> pagedEvents = new ArrayList<>();
+        for(Event event : events){
+            MyPageEvent myPageEvent = MyPageEvent.builder()
+                    .eventId(event.getId())
+                    .eventType(event.getType())
+                    .date(LocalDate.from(event.getStartTime()))
+                    .name(event.getName())
+                    .recruitStatus(event.getRecruitStatus())
+                    .build();
+            pagedEvents.add(myPageEvent);
+        }
         MyPageEventResponse response = MyPageEventResponse.builder()
                 .items(pagedEvents)
                 .limit(limit)
