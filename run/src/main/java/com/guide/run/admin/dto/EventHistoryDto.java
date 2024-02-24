@@ -1,4 +1,4 @@
-package com.guide.run.ap;
+package com.guide.run.admin.dto;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 @Builder
-public class EventHistory {
+public class EventHistoryDto {
     private Long eventId;
     private EventType eventType;
     private String name;

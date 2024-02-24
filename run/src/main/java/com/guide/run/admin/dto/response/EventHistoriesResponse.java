@@ -1,5 +1,6 @@
-package com.guide.run.ap;
+package com.guide.run.admin.dto.response;
 
+import com.guide.run.admin.dto.EventHistoryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class EventHistoriesResponse {
-    private List<EventHistory> items;
+    private List<EventHistoryDto> items;
 }

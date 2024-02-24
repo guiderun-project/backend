@@ -1,4 +1,4 @@
-package com.guide.run.ap;
+package com.guide.run.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 @Getter
-public class EventHistoryCount {
+public class EventHistoryCountDto {
     private int count;
 }

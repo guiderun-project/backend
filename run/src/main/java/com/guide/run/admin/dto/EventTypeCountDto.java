@@ -1,4 +1,4 @@
-package com.guide.run.ap;
+package com.guide.run.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class EventTypeCount {
+public class EventTypeCountDto {
     private int Training;
     private int Competition;
 }
