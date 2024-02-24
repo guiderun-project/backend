@@ -46,6 +46,8 @@ public class ViSignupDto {
     private boolean runningExp;
     private String guideName;
 
+    private String hopePrefs;
+
     //아카이브 데이터
     private String runningPlace;
     private List<String> howToKnow = new ArrayList<>(); //러닝 경험 있을 시 null

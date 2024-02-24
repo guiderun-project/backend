@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SignupResponse {
-    private String uuid;
+    private String userId;
     private String accessToken;
     private String userStatus;
 }

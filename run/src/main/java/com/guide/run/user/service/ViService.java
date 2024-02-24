@@ -79,6 +79,7 @@ public class ViService {
                     .howToKnow(viSignupDto.getHowToKnow())
                     .motive(viSignupDto.getMotive())
                     .privacy(viSignupDto.isPrivacy())
+                    .hopePrefs(viSignupDto.getHopePrefs())
                     .portraitRights(viSignupDto.isPortraitRights())
                     .runningPlace(viSignupDto.getRunningPlace())
                     .build();
@@ -95,10 +96,9 @@ public class ViService {
 
             signUpInfoRepository.save(signUpInfo); //가입 정보 저장
 
-            SignupResponse response = SignupResponse
-                    .builder()
+            SignupResponse response = SignupResponse.builder()
                     .accessToken(jwtProvider.createAccessToken(privateId))
-                    .uuid(newVi.getUserId())
+                    .userId(newVi.getUserId())
                     .userStatus(newVi.getRole().getValue())
                     .build();
 
