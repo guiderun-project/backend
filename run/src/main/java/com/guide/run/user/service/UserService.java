@@ -1,13 +1,14 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.SignUpInfo;
+import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -16,12 +17,13 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final SignUpInfoRepository signUpInfoRepository;
 
-    public String getUserStatus(String privateId){
+    public boolean getUserStatus(String privateId){
         String reAssignSocialId = reAssignSocialId(privateId);
         User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
-                return user.getRole().getValue();
+                return true;
         }else{
             //신규 가입자의 경우 인증을 위해 임시 유저 생성
             //가입이 완료되면 새 토큰 다시 줘야함
@@ -30,7 +32,7 @@ public class UserService {
                     .role(Role.NEW)
                     .userId(getUUID())
                     .build());
-            return Role.NEW.getValue();
+            return false;
         }
     }
 
@@ -68,6 +70,11 @@ public class UserService {
 
     public String extractNumber(String phoneNum){
         return phoneNum.replaceAll("[^0-9]", "");
+    }
+
+    public boolean isAccountIdExist(String accountId) {
+        Optional<SignUpInfo> byAccountId = signUpInfoRepository.findByAccountId(accountId);
+        return !byAccountId.isEmpty();
     }
 
 }

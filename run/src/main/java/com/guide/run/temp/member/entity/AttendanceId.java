@@ -1,7 +1,6 @@
-package com.guide.run.user.entity;
+package com.guide.run.temp.member.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +9,7 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PartnerId implements Serializable {
-    private String viId;
-    private String guideId;
+public class AttendanceId implements Serializable {
+    private String privateId;
+    private Long eventId;
 }

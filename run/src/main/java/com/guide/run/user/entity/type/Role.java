@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum Role {
     ADMIN("ADMIN"),
+    REJECT("REJECT"),
     WAIT("WAIT"),
     COACH("COACH"),
     USER("USER"),

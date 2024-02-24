@@ -1,6 +1,6 @@
 package com.guide.run.user.dto;
 
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,21 +12,36 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GuideSignupDto {
-    //private String accountId;
-    //private String password;
+
+    @NotBlank
+    private String accountId;
+    
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).{8,}$")
+    private String password;
+
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String gender;
-    @Pattern(regexp = "^01(?:0|1|[6-9])(?:\\s|-)?(?:\\d{3}|\\d{4})?(?:\\s|-)?\\d{4}$",
-            message = "전화번호 형식이 올바르지 않습니다") //todo : 전화번호 형식 관련 에러코드 추가해야 함.
+
+    @Pattern(regexp = "^01(?:0|1|[6-9])(?:\\s|-)?(?:\\d{3}|\\d{4})?(?:\\s|-)?\\d{4}$")
     private String phoneNumber;
+
+    @NotNull
     private boolean openNumber;
+
+    @PositiveOrZero
     private int age;
     private String detailRecord;
+
+    @NotBlank
     private String recordDegree; //개인 기록
     private String snsId;
     private boolean openSns;
 
     //가이드 전용 정보
+    @NotNull
     private boolean guideExp;
     private String viName;
     private String viRecord;
@@ -40,6 +55,8 @@ public class GuideSignupDto {
     private String hopePrefs;
 
     //약관동의
+    @NotNull
     private boolean privacy;
+    @NotNull
     private boolean portraitRights;
 }

@@ -1,9 +1,8 @@
 package com.guide.run.user.service;
 
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.user.User;
 
-import com.guide.run.user.entity.Vi;
 import com.guide.run.user.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,8 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.UUID;
 
 @SpringBootTest
 class UserServiceTest {
@@ -35,7 +32,7 @@ class UserServiceTest {
                 .role(Role.USER)
                 .build();
         userRepository.save(user);
-        String userStatus = userService.getUserStatus("kakao_1");
+        boolean userStatus = userService.getUserStatus("kakao_1");
         Assertions.assertThat(userStatus).isEqualTo(Role.USER.getValue());
     }
 
@@ -48,14 +45,14 @@ class UserServiceTest {
                 .role(Role.WAIT)
                 .build();
         userRepository.save(user);
-        String userStatus = userService.getUserStatus("kakao_1");
+        boolean userStatus = userService.getUserStatus("kakao_1");
         Assertions.assertThat(userStatus).isEqualTo(Role.WAIT.getValue());
     }
 
     @DisplayName("로그인 시 신규 회원 응답")
     @Test
     void newUserLoginResponse(){
-        String userStatus = userService.getUserStatus("kakao_1");
+        boolean userStatus = userService.getUserStatus("kakao_1");
         Assertions.assertThat(userStatus).isEqualTo(Role.NEW.getValue());
     }
 

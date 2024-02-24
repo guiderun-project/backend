@@ -1,6 +1,7 @@
 package com.guide.run.global.exception.user;
 
 import com.guide.run.global.dto.response.FailResult;
+import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.exception.user.authorize.NotApprovedUserException;
 import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
@@ -41,6 +42,14 @@ public class UserAuthorizeExceptionAdvice {
         return ResponseEntity.status(403).body(responseService.getFailResult(
                 getMessage("unauthorizedUser.code"),
                 getMessage("unauthorizedUser.msg")));
+    }
+
+    //1103
+    @ExceptionHandler(ExistUserException.class)
+    protected ResponseEntity<FailResult> UnauthorizedUserException(ExistUserException e){
+        return ResponseEntity.status(403).body(responseService.getFailResult(
+                getMessage("existUser.code"),
+                getMessage("existUser.msg")));
     }
     private String getMessage(String code){
         return getMessage(code,null);

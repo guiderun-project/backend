@@ -3,10 +3,7 @@ package com.guide.run.event.entity;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +32,8 @@ public class EventForm extends BaseEntity {
     //새로 추가한 부분
     private LocalDateTime startTime;//이벤트 시작일+ 시작시간
     private LocalDateTime endTime;//이벤트 종료일 + 이벤트 종료 시간
+    @Enumerated(EnumType.STRING)
     private EventType eventType;
+    @Enumerated(EnumType.STRING)
     private EventRecruitStatus recruitStatus;
 }

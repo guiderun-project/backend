@@ -1,12 +1,16 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
+import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.user.Guide;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,37 +24,36 @@ public class SignupInfoService {
     private final ViRepository viRepository;
     private final GuideRepository guideRepository;
     private final UserRepository userRepository;
-    private final PermissionRepository permissionRepository;
     private final ArchiveDataRepository archiveDataRepository;
 
     @Transactional
     public PermissionDto getPermission(String userId){
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
-        Permission permission = permissionRepository.findById(user.getPrivateId()).orElseThrow(
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new
         );
         
         return PermissionDto.builder()
-                .privacy(permission.isPrivacy())
-                .portraitRights(permission.isPortraitRights())
+                .privacy(archiveData.isPrivacy())
+                .portraitRights(archiveData.isPortraitRights())
                 .build();
     }
 
     @Transactional
     public PermissionDto editPermission(String privateId, PermissionDto request){
-        Permission permission = permissionRepository.findById(privateId).orElseThrow(
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
 
-        permission.editPermisson(
+        archiveData.editPermisson(
                 request.isPrivacy(),
                 request.isPortraitRights()
         );
 
         return PermissionDto.builder()
-                .privacy(permission.isPrivacy())
-                .portraitRights(permission.isPortraitRights())
+                .privacy(archiveData.isPrivacy())
+                .portraitRights(archiveData.isPortraitRights())
                 .build();
     }
 
@@ -141,12 +144,18 @@ public class SignupInfoService {
 
     //개인 정보 조회
     @Transactional
-    public PersonalInfoDto getPersonalInfo(String userId){
+    public PersonalInfoDto getPersonalInfo(String privateId, String userId){
         //역할, 성별, 이름, 전화번호, 나이, sns
 
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
+        User viewer = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
 
+        if(viewer.getRole()!= Role.ADMIN || !user.getPrivateId().equals(privateId)){
+            throw new UnauthorizedUserException();
+        }
         return PersonalInfoDto.userToInfoDto(user);
     }
     //개인 정보 수정
@@ -157,6 +166,10 @@ public class SignupInfoService {
         User user = userRepository.findById(privateId).orElseThrow(
                 NotExistUserException::new
         );
+
+        if(!user.getPrivateId().equals(privateId)){
+            throw new UnauthorizedUserException();
+        }
 
         user.editUser(
                 dto.getName(),

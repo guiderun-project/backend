@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -17,10 +18,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
             web.ignoring()
+                    .requestMatchers("/member-upload")
+                    .requestMatchers("/event-upload")
+                    .requestMatchers("/attendance-upload")
                     .requestMatchers("/api/oauth/**");
         };
     }
@@ -34,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/test").hasRole("VADMIN")
                         .requestMatchers("/api/test2").hasRole("VWAIT")
+                        //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),

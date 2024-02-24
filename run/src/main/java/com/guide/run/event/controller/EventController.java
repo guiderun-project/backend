@@ -8,7 +8,7 @@ import com.guide.run.event.service.EventService;
 import com.guide.run.global.exception.admin.authorize.NotAuthorityAdminException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.entity.User;
+import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

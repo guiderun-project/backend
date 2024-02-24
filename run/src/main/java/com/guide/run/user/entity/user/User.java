@@ -1,4 +1,4 @@
-package com.guide.run.user.entity;
+package com.guide.run.user.entity.user;
 
 
 import com.guide.run.global.entity.BaseEntity;
@@ -39,6 +39,9 @@ public class User extends BaseEntity {
     private String snsId;
     private boolean openSns;
 
+    private int trainingCnt; //참여한 훈련 수
+    private int competitionCnt; //참여한 대회 수
+    
     public void editUser(String name,
                          String gender,
                          String phoneNumber,
@@ -58,6 +61,10 @@ public class User extends BaseEntity {
     public void editRunningInfo(String recordDegree, String detailRecord){
         this.recordDegree = recordDegree;
         this.detailRecord = detailRecord;
+    }
+
+    public void editUserRole(Role role){
+        this.role = role;
     }
 }
 
