@@ -6,6 +6,8 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
+import com.guide.run.user.dto.request.AccountIdDto;
+import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.profile.OAuthProfile;
@@ -92,6 +94,16 @@ public class SignController {
         return ReissuedAccessTokenDto.builder()
                 .accessToken(accessToken).
                 build();
+    }
+
+    //아이디 중복확인
+    @PostMapping("/signup/duplicated")
+    public ResponseEntity<IsDuplicatedResponse> isIdDuplicated(@RequestBody AccountIdDto request){
+        IsDuplicatedResponse response =
+                IsDuplicatedResponse.builder()
+                        .isUnique(!userService.isAccountIdExist(request.getAccountId()))
+                        .build();
+        return ResponseEntity.ok().body(response);
     }
 
 }
