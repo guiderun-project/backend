@@ -1,11 +1,9 @@
 package com.guide.run.user.service;
 
 import com.google.gson.Gson;
-import com.guide.run.user.request.OAuthRequest;
-import com.guide.run.user.response.OAuthCodeResponse;
+import com.guide.run.user.dto.request.OAuthRequest;
+import com.guide.run.user.dto.response.OAuthCodeResponse;
 import com.guide.run.user.factory.OAuthRequestFactory;
-import com.guide.run.user.entity.Role;
-import com.guide.run.user.entity.User;
 import com.guide.run.user.info.GetGoogleInfo;
 import com.guide.run.user.info.GetKakaoInfo;
 import com.guide.run.user.profile.*;
@@ -14,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -53,12 +50,15 @@ public class ProviderService {
 
     //getXXXinfo형태로 데이터를 받아와서 필요한 정보(만 뽑아 XXXprofile로 구성해 내보내준다
     private OAuthProfile extractProfile(ResponseEntity<String> response, String provider) {
+
         if (provider.equals("kakao")) {
             GetKakaoInfo getKakaoInfo = gson.fromJson(response.getBody(), GetKakaoInfo.class);
-            return new KakaoProfile("kakao_"+getKakaoInfo.getId(),"kakao");
+            log.info(getKakaoInfo.getId());
+            return new KakaoProfile("kakao"+getKakaoInfo.getId(),"kakao");
         } else if(provider.equals("google")) {
             GetGoogleInfo getGoogleInfo = gson.fromJson(response.getBody(), GetGoogleInfo.class);
-            return new GoogleProfile("google_"+getGoogleInfo.getSub(),"google");
+            log.info(getGoogleInfo.getSub());
+            return new GoogleProfile("google"+getGoogleInfo.getSub(),"google");
         }
         return null; // 에러 추가 바람
     }
