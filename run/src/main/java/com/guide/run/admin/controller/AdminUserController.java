@@ -2,12 +2,11 @@ package com.guide.run.admin.controller;
 
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.GuideApplyResponse;
+import com.guide.run.admin.dto.response.UserApprovalResponse;
 import com.guide.run.admin.dto.response.UserListResponse;
-import com.guide.run.admin.dto.response.UserRoleResponse;
 import com.guide.run.admin.dto.response.ViApplyResponse;
 import com.guide.run.admin.service.AdminUserService;
 import com.guide.run.event.entity.dto.response.search.Count;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,8 +43,8 @@ public class AdminUserController {
     }
 
     @PostMapping("/approval-user/{userId}")
-    public ResponseEntity<UserRoleResponse> approveUser(@PathVariable String userId, @RequestBody ApproveRequest request){
-        UserRoleResponse response = adminUserService.approveUser(userId, request);
+    public ResponseEntity<UserApprovalResponse> approveUser(@PathVariable String userId, @RequestBody ApproveRequest request){
+        UserApprovalResponse response = adminUserService.approveUser(userId, request);
         return ResponseEntity.ok().body(response);
     }
 }
