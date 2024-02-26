@@ -133,14 +133,20 @@ public class AdminUserService {
     }
 
     @Transactional
-    public UserRoleResponse approveUser(String userId, ApproveRequest request){
+    public UserApprovalResponse approveUser(String userId, ApproveRequest request){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        Boolean isApprove = false;
         if(request.getIsApprove()){
             user.editUserRole(Role.USER);
+            isApprove = true;
         }else{
             user.editUserRole(Role.REJECT);
         }
-        UserRoleResponse response = new UserRoleResponse(user.getRole());
+        UserApprovalResponse response = UserApprovalResponse.builder()
+                .userId(user.getUserId())
+                .isApprove(isApprove)
+                .recordDegree(user.getRecordDegree())
+                .build();
         return response;
     }
 
