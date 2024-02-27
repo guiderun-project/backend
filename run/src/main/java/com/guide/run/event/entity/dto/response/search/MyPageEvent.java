@@ -17,6 +17,6 @@ public class MyPageEvent {
     private Long eventId;
     private EventType eventType;
     private String name;
-    private LocalDate date;
+    private String date;
     private EventRecruitStatus recruitStatus;
 }
