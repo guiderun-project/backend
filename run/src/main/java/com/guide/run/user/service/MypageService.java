@@ -7,6 +7,7 @@ import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
 import com.guide.run.event.entity.dto.response.search.UpcomingEvent;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GlobalUserInfoDto;
@@ -33,6 +34,7 @@ public class MypageService {
     private final UserRepository userRepository;
     private final EventFormRepository eventFormRepository;
     private final EventRepository eventRepository;
+    private final TimeFormatter timeFormatter;
 
     public GlobalUserInfoDto getGlobalUserInfo(String privateId){
         User user = userRepository.findById(privateId).orElseThrow(
@@ -78,7 +80,7 @@ public class MypageService {
             MyPageEvent myPageEvent = MyPageEvent.builder()
                     .eventId(event.getId())
                     .eventType(event.getType())
-                    .date(LocalDate.from(event.getStartTime()))
+                    .date(timeFormatter.getHHMMSS(event.getStartTime()))
                     .name(event.getName())
                     .recruitStatus(event.getRecruitStatus())
                     .build();
