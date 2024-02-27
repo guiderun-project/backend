@@ -1,5 +1,6 @@
 package com.guide.run.event.service;
 
+import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.request.EventUpdateRequest;
@@ -7,16 +8,20 @@ import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
+    private final TimeFormatter timeFormatter;
     @Transactional
     public EventCreatedResponse eventCreate(EventCreateRequest eventCreateRequest, String userId){
         Event createdEvent = eventRepository.save(Event.builder()
@@ -73,5 +78,28 @@ public class EventService {
         }
         else
             throw new NotEventOrganizerException();
+    }
+
+    @Transactional
+    public EventPopUpResponse eventPopUp(Long eventId){
+        Event event = eventRepository.findById(eventId).orElseThrow(
+                NotExistEventException::new
+        );
+
+        EventPopUpResponse response = EventPopUpResponse.builder()
+                .type(event.getType())
+                .name(event.getName())
+                .recruitStatus(event.getRecruitStatus())
+                .date(LocalDate.from(event.getStartTime()))
+                .startTime(timeFormatter.getHHMM(event.getStartTime()))
+                .endTime(timeFormatter.getHHMM(event.getEndTime()))
+                .viCnt(event.getViCnt())
+                .guideCnt(event.getGuideCnt())
+                .place(event.getPlace())
+                .content(event.getContent())
+                .updatedAt(LocalDate.from(event.getUpdatedAt()))
+                .build();
+
+        return response;
     }
 }

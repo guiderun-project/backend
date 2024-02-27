@@ -1,5 +1,6 @@
 package com.guide.run.event.controller;
 
+import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
@@ -55,5 +56,15 @@ public class EventController {
             throw new NotAuthorityAdminException();
         eventService.eventDelete(userId,eventId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/pop/{eventId}")
+    public ResponseEntity<EventPopUpResponse> eventPopUp(@PathVariable Long eventId, HttpServletRequest request){
+        String userId = jwtProvider.extractUserId(request);
+        User user = userRepository.findUserByPrivateId(userId).
+                orElseThrow(() -> new NotExistUserException());
+        EventPopUpResponse response = eventService.eventPopUp(eventId);
+
+        return ResponseEntity.ok().body(response);
     }
 }
