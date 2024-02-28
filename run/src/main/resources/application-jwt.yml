@@ -2,5 +2,5 @@ spring:
   jwt:
     secretKey: ${JWT_SECRET_KEY}
 redis:
-  host: guiderun.shop
+  host: localhost
   port: 6379
