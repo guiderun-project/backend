@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class EventPopUpResponse {
+        private Long eventId;
         private EventType type;//이벤트 분류
         private String name;//이벤트 제목
         private EventRecruitStatus recruitStatus; //이벤트 모집 상태
