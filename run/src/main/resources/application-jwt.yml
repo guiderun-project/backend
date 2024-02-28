@@ -1,0 +1,6 @@
+spring:
+  jwt:
+    secretKey: ${JWT_SECRET_KEY}
+redis:
+  host: localhost
+  port: 6379
