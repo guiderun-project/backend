@@ -87,6 +87,7 @@ public class EventService {
         );
 
         EventPopUpResponse response = EventPopUpResponse.builder()
+                .eventId(event.getId())
                 .type(event.getType())
                 .name(event.getName())
                 .recruitStatus(event.getRecruitStatus())

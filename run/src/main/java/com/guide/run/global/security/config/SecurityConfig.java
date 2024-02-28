@@ -24,11 +24,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
             web.ignoring()
-                    .requestMatchers("/")
+                    .requestMatchers("/healty")
                     .requestMatchers("/favicon.ico")
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
@@ -36,11 +37,11 @@ public class SecurityConfig {
                     .requestMatchers("/api/oauth/**");
         };
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception{
         http
-                .csrf(csrf->csrf.disable())
-                .cors(cors->cors.disable())
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
@@ -49,8 +50,10 @@ public class SecurityConfig {
                         //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
+
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
