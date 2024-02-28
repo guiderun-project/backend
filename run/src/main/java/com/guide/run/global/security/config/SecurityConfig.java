@@ -28,7 +28,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
             web.ignoring()
-                    .requestMatchers("/")
+                    .requestMatchers("/healty")
                     .requestMatchers("/favicon.ico")
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
