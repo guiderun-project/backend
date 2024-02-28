@@ -10,14 +10,12 @@ import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event/test")
