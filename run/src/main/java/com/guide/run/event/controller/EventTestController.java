@@ -411,7 +411,7 @@ public class EventTestController {
                 .maxNumG(108)
                 .place("67")
                 .content("68")
-                .build()); //16
+                .build()); //17
         eventRepository.save(Event.builder()
                 .organizer(jwtProvider.extractUserId(request))
                 .recruitStartDate(LocalDate.now())
@@ -426,10 +426,10 @@ public class EventTestController {
                 .maxNumG(108)
                 .place("67")
                 .content("68")
-                .build()); //17
+                .build()); //18
         eventFormRepository.save(EventForm.builder()
                 .privateId("kakao3232984128")
-                .eventId(17L)
+                .eventId(18L)
                 .isMatching(true)
                 .startTime(LocalDateTime.now().plusDays(20))
                 .eventType(EventType.COMPETITION)
@@ -453,7 +453,7 @@ public class EventTestController {
                 .build());
         eventFormRepository.save(EventForm.builder()
                 .privateId("kakao3232984128")
-                .eventId(18L)
+                .eventId(19L)
                 .isMatching(true)
                 .recruitStatus(EventRecruitStatus.END)
                 .eventType(EventType.COMPETITION)
