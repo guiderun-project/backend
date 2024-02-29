@@ -1,7 +1,6 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.event.entity.dto.response.search.Count;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
 import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GlobalUserInfoDto;
