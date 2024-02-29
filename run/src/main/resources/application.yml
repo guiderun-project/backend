@@ -1,6 +1,7 @@
 spring:
   profiles:
     include: oauth, mysql, jwt
+
   messages:
     basename: i18n/exception
     encoding: UTF-8

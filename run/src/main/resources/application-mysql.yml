@@ -1,10 +1,10 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://guide-run-test.criwyq2yai25.ap-northeast-2.rds.amazonaws.com:3306/guiderun_test
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:mysql://127.0.0.1:3306/user
+    username: root
+    password: dlffpdlsk1@00
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create

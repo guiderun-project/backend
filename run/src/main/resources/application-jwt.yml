@@ -1,6 +1,6 @@
 spring:
   jwt:
-    secretKey: ${JWT_SECRET_KEY}
+    secretKey: ABCDEFGHIJKFF
 redis:
   host: localhost
   port: 6379
