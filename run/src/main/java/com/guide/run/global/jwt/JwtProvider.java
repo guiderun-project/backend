@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -80,11 +81,15 @@ public class JwtProvider {
         return getSocialId(accessToken);
     }
 
-    public String resolveToken(HttpServletRequest request){
-        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if(bearer!=null && bearer.startsWith("Bearer "))
-            return bearer.substring("Bearer ".length());
-        throw new NotExistAuthorizationException();
+    public String resolveToken(HttpServletRequest request) throws AuthenticationException {
+        if (request.getMethod().equals("OPTIONS")) {
+            return null;
+        }else {
+            String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (bearer != null && bearer.startsWith("Bearer "))
+                return bearer.substring("Bearer ".length());
+            throw new NotExistAuthorizationException("인증 에러");
+        }
     }
 
     public boolean validateTokenExpiration(String token){

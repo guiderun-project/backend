@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import static com.guide.run.user.entity.type.Role.ADMIN;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"})
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
+        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
