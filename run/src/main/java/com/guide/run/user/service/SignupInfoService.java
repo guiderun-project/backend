@@ -107,7 +107,7 @@ public class SignupInfoService {
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
         vi.editViRunningInfo(request.isRunningExp());
-        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs(), request.getRunningPlace());
 
         ViRunningInfoDto response = new ViRunningInfoDto();
 
@@ -135,7 +135,7 @@ public class SignupInfoService {
                 request.getViCount(),
                 request.getGuidingPace());
 
-        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs());
+        archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs(), request.getRunningPlace());
 
         GuideRunningInfoDto response = new GuideRunningInfoDto();
 
