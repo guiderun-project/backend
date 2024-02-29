@@ -23,6 +23,7 @@ public class GuideRunningInfoDto {
     private String viRecord;
     private String viCount; //상세한 가이드 경험
     private String guidingPace; //가이드 가능한 페이스 그룹
+    private String runningPlace;
     private List<String> howToKnow = new ArrayList<>();
     private String motive;
     private String hopePrefs;
@@ -37,6 +38,7 @@ public class GuideRunningInfoDto {
                 guide.getViRecord(),
                 guide.getViCount(),
                 guide.getGuidingPace(),
+                archiveData.getRunningPlace(),
                 archiveData.getHowToKnow(),
                 archiveData.getMotive(),
                 archiveData.getHopePrefs()
