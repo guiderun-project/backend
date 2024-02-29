@@ -51,7 +51,7 @@ public class ViService {
                     .name(viSignupDto.getName())
                     .gender(viSignupDto.getGender())
                     .phoneNumber(phoneNum)
-                    .openNumber(viSignupDto.isOpenNumber())
+                    .isOpenNumber(viSignupDto.getIsOpenNumber())
                     .age(viSignupDto.getAge())
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
@@ -60,12 +60,12 @@ public class ViService {
                     .role(Role.WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
-                    .openSns(viSignupDto.isOpenSns())
+                    .isOpenSns(viSignupDto.getIsOpenSns())
                     .build();
 
             Vi viInfo = Vi.builder()
                     .privateId(privateId)
-                    .runningExp(viSignupDto.isRunningExp())
+                    .isRunningExp(viSignupDto.getIsRunningExp())
                     .guideName(viSignupDto.getGuideName())
                     .build();
 

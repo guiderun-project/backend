@@ -21,13 +21,14 @@ public class AdminUserController {
 
     @GetMapping("/user-list")
     public ResponseEntity<UserListResponse> getUserList(@RequestParam int start,
-                                                        @RequestParam int limit){
+                                                        @RequestParam int limit,
+                                                        @RequestParam String sort){
         UserListResponse response = adminUserService.getUserList(start, limit);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/user-list/count")
-    public ResponseEntity<Count> getUserListCount(){
+    public ResponseEntity<Count> getUserListCount(@RequestParam String sort){
         Count response = adminUserService.getUserListCount();
         return ResponseEntity.ok().body(response);
     }

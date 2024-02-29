@@ -114,9 +114,9 @@ public class MypageService {
                 .detailRecord(user.getDetailRecord())
 
                 .phoneNumber(phoneNum)
-                .isOpenNumber(user.isOpenNumber())
+                .isOpenNumber(user.getIsOpenNumber())
                 .snsId(snsId)
-                .isOpenSns(user.isOpenSns())
+                .isOpenSns(user.getIsOpenSns())
                 .age(user.getAge())
                 .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
                 .competitionCnt(user.getCompetitionCnt())

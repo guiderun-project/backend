@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 public class Guide{
     @Id
     private String privateId;
-    private boolean guideExp;
+    private Boolean isGuideExp;
     private String viName;
     private String viRecord;
     private String viCount; //상세한 가이드 경험
@@ -27,7 +27,7 @@ public class Guide{
             String viCount,
             String guidingPace
     ){
-        this.guideExp = guideExp;
+        this.isGuideExp = guideExp;
         this.viName = viName;
         this.viRecord = viRecord;
         this.viCount = viCount;

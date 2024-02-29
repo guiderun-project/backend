@@ -89,7 +89,7 @@ public class AdminUserService {
                 .age(user.getAge())
                 .snsId(user.getSnsId())
 
-                .isRunningExp(vi.isRunningExp())
+                .isRunningExp(vi.getIsRunningExp())
                 .detailRecord(user.getDetailRecord())
                 .recordDegree(user.getRecordDegree())
                 .guideName(vi.getGuideName())
@@ -115,7 +115,7 @@ public class AdminUserService {
                 .age(user.getAge())
                 .snsId(user.getSnsId())
 
-                .isGuideExp(guide.isGuideExp())
+                .isGuideExp(guide.getIsGuideExp())
                 .recordDegree(user.getRecordDegree())
                 .detailRecord(user.getDetailRecord())
                 .viCount(guide.getViCount())
