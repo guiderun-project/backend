@@ -14,10 +14,10 @@ import lombok.experimental.SuperBuilder;
 public class Vi {
     @Id
     private String privateId;
-    private boolean runningExp;
+    private Boolean isRunningExp;
     private String guideName;
 
     public void editViRunningInfo(Boolean runningExp){
-        this.runningExp = runningExp;
+        this.isRunningExp = runningExp;
     }
 }

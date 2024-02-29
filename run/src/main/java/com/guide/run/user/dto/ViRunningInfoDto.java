@@ -18,7 +18,7 @@ import java.util.List;
 public class ViRunningInfoDto {
     private String recordDegree;
     private String detailRecord;
-    private boolean runningExp;
+    private Boolean isRunningExp;
     private List<String> howToKnow = new ArrayList<>(); //러닝 경험 없을 시 null
     private String motive; //러닝 경험 없을 시 null
     private String runningPlace;
@@ -29,7 +29,7 @@ public class ViRunningInfoDto {
         return new ViRunningInfoDto(
                 user.getRecordDegree(),
                 user.getDetailRecord(),
-                vi.isRunningExp(),
+                vi.getIsRunningExp(),
                 archiveData.getHowToKnow(),
                 archiveData.getMotive(),
                 archiveData.getRunningPlace(),

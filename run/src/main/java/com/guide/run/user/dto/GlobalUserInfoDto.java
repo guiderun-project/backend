@@ -18,10 +18,10 @@ public class GlobalUserInfoDto {
     private String gender;
     private String name;
     private String phoneNumber;
-    private boolean openNumber;
+    private Boolean isOpenNumber;
     private int age;
     private String snsId;
-    private boolean openSns;
+    private Boolean isOpenSns;
 
     public static GlobalUserInfoDto userToInfoDto(User user){
         return GlobalUserInfoDto.builder()
@@ -34,8 +34,8 @@ public class GlobalUserInfoDto {
                 .phoneNumber(user.getPhoneNumber())
                 .age(user.getAge())
                 .snsId(user.getSnsId())
-                .openSns(user.isOpenSns())
-                .openNumber(user.isOpenNumber())
+                .isOpenSns(user.getIsOpenSns())
+                .isOpenNumber(user.getIsOpenNumber())
                 .build();
     }
 }

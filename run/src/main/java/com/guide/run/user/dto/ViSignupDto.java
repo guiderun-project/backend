@@ -28,7 +28,7 @@ public class ViSignupDto {
     private String phoneNumber;
 
     @NotNull
-    private boolean openNumber;
+    private Boolean isOpenNumber;
 
     @PositiveOrZero
     private int age;
@@ -39,11 +39,11 @@ public class ViSignupDto {
     private String recordDegree; //개인 기록
 
     private String snsId;
-    private boolean openSns;
+    private Boolean isOpenSns;
 
     //vi 전용 정보
     @NotNull
-    private boolean runningExp;
+    private Boolean isRunningExp;
     private String guideName;
 
     private String hopePrefs;
