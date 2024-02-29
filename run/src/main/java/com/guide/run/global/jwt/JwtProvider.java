@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -81,7 +80,7 @@ public class JwtProvider {
         return getSocialId(accessToken);
     }
 
-    public String resolveToken(HttpServletRequest request) throws AuthenticationException {
+    public String resolveToken(HttpServletRequest request) {
         if (request.getMethod().equals("OPTIONS")) {
             return null;
         }else {
