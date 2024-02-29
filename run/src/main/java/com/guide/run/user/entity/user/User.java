@@ -26,7 +26,7 @@ public class User extends BaseEntity {
 
     private String gender;
     private String phoneNumber;
-    private boolean openNumber;
+    private Boolean isOpenNumber;
     private int age;
     private String detailRecord;
     private String recordDegree; //개인 기록
@@ -37,7 +37,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserType type;
     private String snsId;
-    private boolean openSns;
+    private Boolean isOpenSns;
 
     private int trainingCnt; //참여한 훈련 수
     private int competitionCnt; //참여한 대회 수
@@ -52,10 +52,10 @@ public class User extends BaseEntity {
         this.name = name;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
-        this.openNumber = openNumber;
+        this.isOpenNumber = openNumber;
         this.age = age;
         this.snsId = snsId;
-        this.openSns = openSns;
+        this.isOpenSns = openSns;
     }
 
     public void editRunningInfo(String recordDegree, String detailRecord){

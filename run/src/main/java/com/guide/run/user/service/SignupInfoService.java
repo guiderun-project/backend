@@ -106,7 +106,7 @@ public class SignupInfoService {
                 NotExistUserException::new);
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
-        vi.editViRunningInfo(request.isRunningExp());
+        vi.editViRunningInfo(request.getIsRunningExp());
         archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs(), request.getRunningPlace());
 
         ViRunningInfoDto response = new ViRunningInfoDto();
@@ -129,7 +129,7 @@ public class SignupInfoService {
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
 
         guide.editGuideRunningInfo(
-                request.isGuideExp(),
+                request.getIsGuideExp(),
                 request.getViName(),
                 request.getViRecord(),
                 request.getViCount(),
@@ -175,10 +175,10 @@ public class SignupInfoService {
                 dto.getName(),
                 dto.getGender(),
                 dto.getPhoneNumber(),
-                dto.isOpenNumber(),
+                dto.getIsOpenNumber(),
                 dto.getAge(),
                 dto.getSnsId(),
-                dto.isOpenSns()
+                dto.getIsOpenSns()
         );
 
         return PersonalInfoDto.userToInfoDto(user);

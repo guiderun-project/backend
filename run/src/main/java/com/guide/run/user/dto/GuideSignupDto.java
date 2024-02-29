@@ -29,7 +29,7 @@ public class GuideSignupDto {
     private String phoneNumber;
 
     @NotNull
-    private boolean openNumber;
+    private Boolean isOpenNumber;
 
     @PositiveOrZero
     private int age;
@@ -38,11 +38,11 @@ public class GuideSignupDto {
     @NotBlank
     private String recordDegree; //개인 기록
     private String snsId;
-    private boolean openSns;
+    private Boolean isOpenSns;
 
     //가이드 전용 정보
     @NotNull
-    private boolean guideExp;
+    private Boolean isGuideExp;
     private String viName;
     private String viRecord;
     private String viCount; //상세한 가이드 경험

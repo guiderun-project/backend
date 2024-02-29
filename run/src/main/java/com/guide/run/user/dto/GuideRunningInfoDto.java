@@ -18,7 +18,7 @@ import java.util.List;
 public class GuideRunningInfoDto {
     private String recordDegree;
     private String detailRecord;
-    private boolean guideExp;
+    private Boolean isGuideExp;
     private String viName;
     private String viRecord;
     private String viCount; //상세한 가이드 경험
@@ -33,7 +33,7 @@ public class GuideRunningInfoDto {
         return new GuideRunningInfoDto(
                 user.getRecordDegree(),
                 user.getDetailRecord(),
-                guide.isGuideExp(),
+                guide.getIsGuideExp(),
                 guide.getViName(),
                 guide.getViRecord(),
                 guide.getViCount(),

@@ -31,7 +31,8 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/event-history/count/{userId}")
-    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId){
+    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
+                                                 @RequestParam String sort){
         Count response = Count.builder()
                 .count(mypageService.getMyPageEventsCount(userId))
                 .build();
@@ -40,7 +41,8 @@ public class MypageController {
     @GetMapping("/event-history/{userId}")
     public ResponseEntity<MyPageEventResponse> getMyEventList(@PathVariable String userId,
                                                               @RequestParam(defaultValue = "0") int start,
-                                                              @RequestParam(defaultValue = "10") int limit){
+                                                              @RequestParam(defaultValue = "10") int limit,
+                                                              @RequestParam String sort){
         MyPageEventResponse response = mypageService.getMyPageEvents(userId,start,limit);
 
         return ResponseEntity.ok().body(response);
