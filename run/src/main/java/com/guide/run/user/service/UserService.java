@@ -20,19 +20,22 @@ public class UserService {
     private final SignUpInfoRepository signUpInfoRepository;
 
     public boolean getUserStatus(String privateId){
-        String reAssignSocialId = reAssignSocialId(privateId);
         User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
+            if(user.getPhoneNumber()==null) {
+                return false;
+            }
+            else
                 return true;
         }else{
-            //신규 가입자의 경우 인증을 위해 임시 유저 생성
-            //가입이 완료되면 새 토큰 다시 줘야함
-            userRepository.save(User.builder()
-                    .privateId(privateId)
-                    .role(Role.NEW)
-                    .userId(getUUID())
-                    .build());
-            return false;
+                //신규 가입자의 경우 인증을 위해 임시 유저 생성
+                //가입이 완료되면 새 토큰 다시 줘야함
+                userRepository.save(User.builder()
+                        .privateId(privateId)
+                        .role(Role.NEW)
+                        .userId(getUUID())
+                        .build());
+                return false;
         }
     }
 
@@ -59,14 +62,6 @@ public class UserService {
         return reAssignSocialId(privateId);
     }
 
-    //임시 자격 부여
-    public void temporaryUserCreate(String socialId){
-        User user = User.builder()
-                .privateId(socialId)
-                .role(Role.NEW)
-                .build();
-        userRepository.save(user);
-    }
 
     public String extractNumber(String phoneNum){
         return phoneNum.replaceAll("[^0-9]", "");
