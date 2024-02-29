@@ -1,6 +1,7 @@
 package com.guide.run.global.security.config;
 
 import com.guide.run.global.jwt.JwtAuthenticationFilter;
+import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,11 +38,10 @@ public class SecurityConfig {
                     .requestMatchers("/api/oauth/**");
         };
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception{
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf->csrf.disable())
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
@@ -52,7 +52,9 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
 
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(),JwtAuthenticationFilter.class);
+
 
 
         return http.build();
