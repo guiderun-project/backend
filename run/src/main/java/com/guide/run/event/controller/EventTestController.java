@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"})
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
+        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event/test")

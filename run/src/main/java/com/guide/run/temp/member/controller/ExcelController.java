@@ -14,7 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"})
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
+        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 public class ExcelController {
