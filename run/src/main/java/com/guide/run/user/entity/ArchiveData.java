@@ -39,10 +39,12 @@ public class ArchiveData {
     public void editRunningInfo(
             List<String> howToKnow,
             String motive,
-            String hopePrefs
+            String hopePrefs,
+            String runningPlace
     ) {
         this.howToKnow = howToKnow;
         this.motive = motive;
         this.hopePrefs = hopePrefs;
+        this.runningPlace = runningPlace;
     }
 }
