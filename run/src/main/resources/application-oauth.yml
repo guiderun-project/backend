@@ -1,7 +1,7 @@
 spring:
   social:
     kakao:
-      client_id: 7126ea6c5901a90a35bbfc1213c53a9f
+      client_id: ${KAKAO_CLIENT_ID}
       redirect: https://guide-run.netlify.app/oauth
       url:
         login: https://kauth.kakao.com/oauth/authorize  # 로그인 진행 사이트
@@ -9,8 +9,8 @@ spring:
         profile: https://kapi.kakao.com/v2/user/me  # Access Token을 통해 정보를 받는 url
 
     google:
-      client_id: 485636133187-lq1dg1qa1bhclajd9pr7eqip7335p6c7.apps.googleusercontent.com
-      client_secret: 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
+      client_id: aa
+      client_secret: aa
       redirect: http://localhost:8080/login/oauth2/code/google
       url:
         login: https://accounts.google.com/o/oauth2/v2/auth
