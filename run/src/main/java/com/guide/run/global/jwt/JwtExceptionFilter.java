@@ -34,7 +34,6 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             log.error("엑세스 토큰 정보로 찾을 수 있는 유저가 없습니다");
             return;
         }
-        filterChain.doFilter(request, response);
     }
 
     private static void sendError
