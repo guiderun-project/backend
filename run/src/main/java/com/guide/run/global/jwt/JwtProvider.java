@@ -31,7 +31,7 @@ public class JwtProvider {
     @Value("${spring.jwt.secretKey}")
     private String secretKey;
    // public static final long TOKEN_VALID_TIME = 1000L * 60 * 30 ; // 30분
-    public static final long TOKEN_VALID_TIME = 1000L * 60 * 15  ;
+    public static final long TOKEN_VALID_TIME = 1000L * 60 * 60 * 24  ; //1일
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 7; // 7일
 
     private final CustomUserDetailsService customUserDetailsService;
