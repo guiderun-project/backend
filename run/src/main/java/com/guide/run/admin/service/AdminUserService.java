@@ -49,6 +49,7 @@ public class AdminUserService {
                     .name(user.getName())
                     .gender(user.getGender())
                     .role(user.getRole())
+                    .age(user.getAge())
                     .phoneNumber(user.getPhoneNumber())
                     .snsId(user.getSnsId())
                     .totalCnt(user.getCompetitionCnt() + user.getTrainingCnt())
