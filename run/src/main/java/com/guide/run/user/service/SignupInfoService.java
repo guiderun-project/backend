@@ -26,10 +26,19 @@ public class SignupInfoService {
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
 
+    //약관 동의 조회
     @Transactional
-    public PermissionDto getPermission(String userId){
+    public PermissionDto getPermission(String userId, String privateId){
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
+        User viewer = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+            throw new UnauthorizedUserException();
+        }
+
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new
         );
@@ -57,12 +66,20 @@ public class SignupInfoService {
                 .build();
     }
 
-    //러닝 스펙 조회
+    //VI 러닝 스펙 조회
     @Transactional
-    public ViRunningInfoDto getViRunningInfo(String userId){
+    public ViRunningInfoDto getViRunningInfo(String userId, String privateId){
 
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
+
+        User viewer = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+            throw new UnauthorizedUserException();
+        }
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new);
@@ -75,11 +92,19 @@ public class SignupInfoService {
         return response.fromEntity(user, vi, archiveData);
     }
 
+    //GUIDE 러닝 스펙 조회
     @Transactional
-    public GuideRunningInfoDto getGuideRunningInfo(String userId){
+    public GuideRunningInfoDto getGuideRunningInfo(String userId, String privateId){
 
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new);
+        User viewer = userRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+            throw new UnauthorizedUserException();
+        }
 
         ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new);
@@ -104,6 +129,8 @@ public class SignupInfoService {
                 NotExistUserException::new);
         Vi vi = viRepository.findById(user.getPrivateId()).orElseThrow(
                 NotExistUserException::new);
+
+
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
         vi.editViRunningInfo(request.getIsRunningExp());
