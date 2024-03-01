@@ -17,6 +17,7 @@ import java.time.LocalTime;
 public class UserItem {
     private String userId;
     private Role role;
+    private int age;
     private UserType type;
     private String name;
     private String team;
