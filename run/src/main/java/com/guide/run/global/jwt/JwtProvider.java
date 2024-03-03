@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsUtils;
 
 import java.util.Base64;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class JwtProvider {
    // public static final long TOKEN_VALID_TIME = 1000L * 60 * 30 ; // 30분
     public static final long TOKEN_VALID_TIME = 1000L *60 *60  ;
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 365; // 365일
+
 
     private final CustomUserDetailsService customUserDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -82,7 +84,7 @@ public class JwtProvider {
     }
 
     public String resolveToken(HttpServletRequest request) {
-        if (request.getMethod().equals("OPTIONS")) {
+        if (CorsUtils.isPreFlightRequest(request)) {
             return null;
         }else {
             String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);

@@ -1,7 +1,6 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.event.entity.dto.response.search.Count;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
 import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GlobalUserInfoDto;
@@ -31,8 +30,7 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/event-history/count/{userId}")
-    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
-                                                 @RequestParam String sort){
+    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId){
         Count response = Count.builder()
                 .count(mypageService.getMyPageEventsCount(userId))
                 .build();
@@ -41,8 +39,7 @@ public class MypageController {
     @GetMapping("/event-history/{userId}")
     public ResponseEntity<MyPageEventResponse> getMyEventList(@PathVariable String userId,
                                                               @RequestParam(defaultValue = "0") int start,
-                                                              @RequestParam(defaultValue = "10") int limit,
-                                                              @RequestParam String sort){
+                                                              @RequestParam(defaultValue = "10") int limit){
         MyPageEventResponse response = mypageService.getMyPageEvents(userId,start,limit);
 
         return ResponseEntity.ok().body(response);

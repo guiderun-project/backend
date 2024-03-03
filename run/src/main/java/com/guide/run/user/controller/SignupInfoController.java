@@ -24,9 +24,11 @@ public class SignupInfoController {
 
     //약관 동의 조회
     @GetMapping("/user/permission/{userId}")
-    public ResponseEntity<PermissionDto> getPermission(@PathVariable String userId){
+    public ResponseEntity<PermissionDto> getPermission(@PathVariable String userId,
+                                                       HttpServletRequest httpServletRequest){
         log.info(userId);
-        PermissionDto response = signupInfoService.getPermission(userId);
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        PermissionDto response = signupInfoService.getPermission(userId, privateId);
 
         return ResponseEntity.ok().body(response);
     }
@@ -46,7 +48,6 @@ public class SignupInfoController {
     public ResponseEntity<PersonalInfoDto> getPersonalInfo(@PathVariable String userId,
                                                            HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
-
         PersonalInfoDto response = signupInfoService.getPersonalInfo(privateId, userId);
 
         return ResponseEntity.ok().body(response);
@@ -64,15 +65,19 @@ public class SignupInfoController {
 
     //러닝 스펙 조회 vi
     @GetMapping("/user/running/vi/{userId}")
-    public ResponseEntity<ViRunningInfoDto> getViRunningInfo(@PathVariable String userId){
-        ViRunningInfoDto response = signupInfoService.getViRunningInfo(userId);
+    public ResponseEntity<ViRunningInfoDto> getViRunningInfo(@PathVariable String userId,
+                                                             HttpServletRequest httpServletRequest){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        ViRunningInfoDto response = signupInfoService.getViRunningInfo(userId, privateId);
 
         return ResponseEntity.ok().body(response);
     }
     //러닝 스펙 조회 guide
     @GetMapping("/user/running/guide/{userId}")
-    public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId){
-        GuideRunningInfoDto response = signupInfoService.getGuideRunningInfo(userId);
+    public ResponseEntity<GuideRunningInfoDto> getGuideRunningInfo(@PathVariable String userId,
+                                                                   HttpServletRequest httpServletRequest){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        GuideRunningInfoDto response = signupInfoService.getGuideRunningInfo(userId, privateId);
 
         return ResponseEntity.ok().body(response);
     }
