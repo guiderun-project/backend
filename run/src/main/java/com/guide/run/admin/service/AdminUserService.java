@@ -139,9 +139,11 @@ public class AdminUserService {
         Boolean isApprove = false;
         if(request.getIsApprove()){
             user.approveUser(Role.USER, request.getRecordDegree());
+            userRepository.save(user);
             isApprove = true;
         }else{
             user.approveUser(Role.REJECT, user.getRecordDegree());
+            userRepository.save(user);
         }
         UserApprovalResponse response = UserApprovalResponse.builder()
                 .userId(user.getUserId())
