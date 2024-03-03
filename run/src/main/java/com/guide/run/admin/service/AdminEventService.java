@@ -85,7 +85,7 @@ public class AdminEventService {
                             .date(e.getEndTime().getYear()+"."+e.getEndTime().getMonthValue()+"."+e.getEndTime().getDayOfMonth()+
                                     calculatePM(e)+":"+e.getEndTime().getMinute()+":"+e.getEndTime().getSecond())
                             .organizer(user.getName())
-                            .pace(user.getDetailRecord())
+                            .pace(user.getRecordDegree())
                             .recruitStatus(e.getRecruitStatus())
                             .approval(e.isApprove())
                             .participation(e.getMaxNumG()+e.getMaxNumV())

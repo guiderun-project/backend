@@ -92,7 +92,7 @@ public class SignController {
     }
     @GetMapping("/oauth/login/reissue")
     public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
-        String accessToken = jwtProvider.reissue(request.getCookies(), jwtProvider.extractUserId(request));
+        String accessToken = jwtProvider.reissue(request.getCookies());
         return ReissuedAccessTokenDto.builder()
                 .accessToken(accessToken).
                 build();
@@ -100,10 +100,10 @@ public class SignController {
 
     //아이디 중복확인
     @PostMapping("/signup/duplicated")
-    public ResponseEntity<IsDuplicatedResponse> isIdDuplicated(@RequestBody AccountIdDto request){
+    public ResponseEntity<IsDuplicatedResponse> isIdDuplicated(@RequestBody AccountIdDto aa){
         IsDuplicatedResponse response =
                 IsDuplicatedResponse.builder()
-                        .isUnique(!userService.isAccountIdExist(request.getAccountId()))
+                        .isUnique(!userService.isAccountIdExist(aa.getAccountId()))
                         .build();
         return ResponseEntity.ok().body(response);
     }

@@ -31,8 +31,9 @@ public class JwtProvider {
     @Value("${spring.jwt.secretKey}")
     private String secretKey;
    // public static final long TOKEN_VALID_TIME = 1000L * 60 * 30 ; // 30분
-    public static final long TOKEN_VALID_TIME = 1000L * 60 * 15  ;
-    public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 7; // 7일
+    public static final long TOKEN_VALID_TIME = 1000L *60 *60  ;
+    public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 365; // 365일
+
 
     private final CustomUserDetailsService customUserDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -72,6 +73,7 @@ public class JwtProvider {
         try {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
         }catch (ExpiredJwtException e){
+            System.out.println(e.getClaims().getSubject()+"-----------------------------");
             return e.getClaims().getSubject();
         }
     }
@@ -101,10 +103,11 @@ public class JwtProvider {
         }
     }
 
-    public String reissue(Cookie[] cookies,String privateId){
+    public String reissue(Cookie[] cookies){
         for(Cookie cookie: cookies){
             if(cookie.getName().equals("refreshToken")){
-                return createAccessToken(privateId);
+                RefreshToken token = refreshTokenRepository.findById(cookie.getValue()).orElseThrow(() -> new NotValidRefreshTokenException());
+                return createAccessToken(token.getPrivateId());
             }
         }
         throw new NotValidRefreshTokenException();
