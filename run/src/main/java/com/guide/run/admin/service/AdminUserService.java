@@ -138,10 +138,10 @@ public class AdminUserService {
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         Boolean isApprove = false;
         if(request.getIsApprove()){
-            user.editUserRole(Role.USER);
+            user.approveUser(Role.USER, request.getRecordDegree());
             isApprove = true;
         }else{
-            user.editUserRole(Role.REJECT);
+            user.approveUser(Role.REJECT, user.getRecordDegree());
         }
         UserApprovalResponse response = UserApprovalResponse.builder()
                 .userId(user.getUserId())

@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ApproveRequest {
     private Boolean isApprove;
+    private String recordDegree;
+
 }
