@@ -71,7 +71,7 @@ public class MypageService {
         events.sort((e1, e2) -> e2.getStartTime().compareTo(e1.getStartTime()));
 
 
-        int startIndex = Math.min(start * limit, events.size());
+        int startIndex = Math.min(start, events.size());
         int endIndex = Math.min(startIndex + limit, events.size());
 
         events = events.subList(startIndex, endIndex);
