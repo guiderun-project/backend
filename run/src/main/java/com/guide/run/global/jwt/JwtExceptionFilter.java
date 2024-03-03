@@ -39,7 +39,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     private static void sendError
             (HttpServletResponse response, String number, String message) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        response.setStatus(400);
+        response.setStatus(401);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         FailResult result = new FailResult(number, message);
         response.getWriter().write(objectMapper.writeValueAsString(result));
