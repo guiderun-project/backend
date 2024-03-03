@@ -56,8 +56,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/test").hasRole("VADMIN")
                         .requestMatchers("/api/test2").hasRole("VWAIT")
-                        //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
-
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
+                        .requestMatchers("/api/signup/duplicated").permitAll()
+                        .requestMatchers("/api/signup/**").hasRole("NEW")
+                        .requestMatchers("/api/user").hasRole("USER")
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
 
