@@ -63,8 +63,9 @@ public class User extends BaseEntity {
         this.detailRecord = detailRecord;
     }
 
-    public void editUserRole(Role role){
+    public void approveUser(Role role, String recordDegree){
         this.role = role;
+        this.recordDegree = recordDegree;
     }
 }
 
