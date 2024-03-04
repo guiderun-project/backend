@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
@@ -19,14 +20,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final SignUpInfoRepository signUpInfoRepository;
 
+    private final TmpService tmpService;
+
     public boolean getUserStatus(String privateId){
         User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
             if(user.getPhoneNumber()==null) {
                 return false;
             }
-            else
+            else{
+                tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
                 return true;
+            }
         }else{
                 //신규 가입자의 경우 인증을 위해 임시 유저 생성
                 //가입이 완료되면 새 토큰 다시 줘야함
