@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @Builder
 public class Event extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //이벤트 id
     private String organizer; //주최자 id
     private LocalDate recruitStartDate;//모집 시작일
