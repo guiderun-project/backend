@@ -7,13 +7,10 @@ import com.guide.run.event.entity.type.EventType;
 import com.guide.run.temp.member.dto.AttDTO;
 import com.guide.run.temp.member.dto.EventDTO;
 import com.guide.run.temp.member.dto.MemberDTO;
-import com.guide.run.temp.member.entity.Attendance;
-import com.guide.run.temp.member.repository.MemberRepository;
 import com.guide.run.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -22,12 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 @Slf4j
@@ -49,7 +43,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>=447){
+                if(row.getRowNum()>=451){
                     break;
                 }
 
@@ -142,7 +136,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>=45){
+                if(row.getRowNum()>=46){
                     break;
                 }
                 //log.info(String.valueOf(row.getRowNum()));
@@ -175,21 +169,12 @@ public class ExcelService {
 
                     Cell viCntCell = row.getCell(7);
                     if (viCntCell != null) {
-                        if(row.getRowNum()>41){
-                            dto.setViCnt(0);
-                        }else {
-                            dto.setViCnt(Integer.parseInt(viCntCell.getStringCellValue()));
-                        }
+                        dto.setViCnt(Integer.parseInt(viCntCell.getStringCellValue()));
                     }
 
                     Cell guideCntCell = row.getCell(8);
                     if (guideCntCell != null) {
-                        if(row.getRowNum()>41){
-                            dto.setGuideCnt(0);
-                        }
-                        else{
-                            dto.setGuideCnt(Integer.parseInt(guideCntCell.getStringCellValue()));
-                        }
+                        dto.setGuideCnt(Integer.parseInt(guideCntCell.getStringCellValue()));
                     }
 
                     Cell placeCell = row.getCell(9);
@@ -213,7 +198,7 @@ public class ExcelService {
     public void saveEventExcelData(List<EventDTO> dataList) {
         EventRecruitStatus recruitStatus = EventRecruitStatus.END;
         for (EventDTO data : dataList) {
-            if(data.getId()>=42 && data.getId()<=44){
+            if(data.getId()>=44){
                 recruitStatus = EventRecruitStatus.UPCOMING;
             }
             Event event = Event.builder()
@@ -247,7 +232,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>1906){
+                if(row.getRowNum()>=1971){
                     break;
                 }
 
