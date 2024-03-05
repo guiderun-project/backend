@@ -3,6 +3,7 @@ package com.guide.run.admin.service;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
 import com.guide.run.event.entity.dto.response.search.Count;
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
@@ -33,6 +34,7 @@ public class AdminUserService {
     private final ViRepository viRepository;
     private final GuideRepository guideRepository;
     private final ArchiveDataRepository archiveDataRepository;
+    private final TimeFormatter timeFormatter;
 
     public UserListResponse getUserList(int start, int limit){
         int page = start / limit;
@@ -54,7 +56,7 @@ public class AdminUserService {
                     .type(user.getType())
                     .userId(user.getUserId())
                     .update_date(user.getUpdatedAt().toLocalDate())
-                    .update_time(user.getUpdatedAt().toLocalTime())
+                    .update_time(timeFormatter.getHHMMSS(user.getUpdatedAt()))
                     .build();
             userItems.add(item);
         }
