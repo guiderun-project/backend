@@ -3,7 +3,6 @@ package com.guide.run.admin.service;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
 import com.guide.run.event.entity.dto.response.search.Count;
-import com.guide.run.global.converter.StringListConverter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
@@ -14,7 +13,6 @@ import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
 import com.guide.run.user.repository.UserRepository;
 import com.guide.run.user.repository.ViRepository;
-import jakarta.persistence.Convert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,12 +37,9 @@ public class AdminUserService {
     public UserListResponse getUserList(int start, int limit){
         int page = start / limit;
         Pageable pageable = PageRequest.of(page, limit, Sort.by("updatedAt").descending());
-        Page<User> userList = userRepository.findAll(pageable);
+        Page<User> userList = userRepository.findAllByRoleNot(Role.NEW, pageable);
         List<UserItem> userItems = new ArrayList<>();
         for(User user : userList){
-            if(user.getRole()==Role.NEW){
-                continue;
-            }
             UserItem item = UserItem.builder()
                     .name(user.getName())
                     .gender(user.getGender())
