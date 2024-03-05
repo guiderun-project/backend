@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
@@ -8,6 +9,7 @@ import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +24,7 @@ public class UserService {
 
     private final TmpService tmpService;
 
+    @Transactional
     public boolean getUserStatus(String privateId){
         User user = userRepository.findById(privateId).orElse(null);
         if(user != null){
@@ -29,7 +32,8 @@ public class UserService {
                 return false;
             }
             else{
-                tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
+                CntDTO cntDTO = tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
+                user.editUserCnt(cntDTO);
                 return true;
             }
         }else{
