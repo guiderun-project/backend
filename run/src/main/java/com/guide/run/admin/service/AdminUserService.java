@@ -69,7 +69,7 @@ public class AdminUserService {
 
     public Count getUserListCount(){
         Count response = Count.builder()
-                .count((int) userRepository.count())
+                .count(userRepository.findAllByRoleNot(Role.NEW).size())
                 .build();
         return response;
     }
