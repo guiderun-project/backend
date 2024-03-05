@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User,String> {
     Optional<User> findUserByUserId(String uuid);
     Optional<User> findUserByPrivateId(String privateId);
-    Page<User> findByRoleNot(Role role, Pageable pageable);
+    Page<User> findAllByRoleNot(Role role, Pageable pageable);
 }
 

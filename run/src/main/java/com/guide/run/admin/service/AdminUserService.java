@@ -37,7 +37,7 @@ public class AdminUserService {
     public UserListResponse getUserList(int start, int limit){
         int page = start / limit;
         Pageable pageable = PageRequest.of(page, limit, Sort.by("updatedAt").descending());
-        Page<User> userList = userRepository.findByRoleNot(Role.NEW, pageable);
+        Page<User> userList = userRepository.findAllByRoleNot(Role.NEW, pageable);
         List<UserItem> userItems = new ArrayList<>();
         for(User user : userList){
             UserItem item = UserItem.builder()
