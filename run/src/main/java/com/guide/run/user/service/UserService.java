@@ -34,6 +34,7 @@ public class UserService {
             else{
                 CntDTO cntDTO = tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
                 user.editUserCnt(cntDTO);
+                userRepository.save(user);
                 return true;
             }
         }else{
