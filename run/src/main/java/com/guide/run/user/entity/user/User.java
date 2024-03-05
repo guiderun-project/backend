@@ -2,6 +2,7 @@ package com.guide.run.user.entity.user;
 
 
 import com.guide.run.global.entity.BaseEntity;
+import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import jakarta.persistence.*;
@@ -66,6 +67,11 @@ public class User extends BaseEntity {
     public void approveUser(Role role, String recordDegree){
         this.role = role;
         this.recordDegree = recordDegree;
+    }
+
+    public void editUserCnt(CntDTO cntDTO){
+        this.trainingCnt += cntDTO.getTrainingCnt();
+        this.competitionCnt += cntDTO.getCompetitionCnt();
     }
 }
 
