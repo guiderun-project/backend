@@ -69,6 +69,7 @@ public class TmpService {
                         .isMatching(true)
                         .build();
                 attendanceRepository.delete(att);
+                attendanceRepository.flush();
                 attendanceRepository.save(updateAtt);
                 eventFormRepository.save(eventForm);
             }
