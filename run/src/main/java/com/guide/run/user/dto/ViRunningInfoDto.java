@@ -22,6 +22,7 @@ public class ViRunningInfoDto {
     private List<String> howToKnow = new ArrayList<>(); //러닝 경험 없을 시 null
     private String motive; //러닝 경험 없을 시 null
     private String runningPlace;
+    private String guideName;
     private String hopePrefs;
 
     public ViRunningInfoDto fromEntity (User user, Vi vi, ArchiveData archiveData){
@@ -33,6 +34,7 @@ public class ViRunningInfoDto {
                 archiveData.getHowToKnow(),
                 archiveData.getMotive(),
                 archiveData.getRunningPlace(),
+                vi.getGuideName(),
                 archiveData.getHopePrefs()
         );
     }
