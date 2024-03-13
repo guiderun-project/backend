@@ -1,10 +1,48 @@
 spring:
+  profiles:
+    active: prod_db
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://guide-run-test.criwyq2yai25.ap-northeast-2.rds.amazonaws.com:3306/guiderun_test
+    url: ${MAIN_RDS}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: validate
+cors:
+  origin: https://guiderun.org
+
+---
+
+spring:
+  profiles:
+    active: local_db
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${TEST_RDS}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+cors:
+  origin: http://localhost:3000
+
+---
+
+spring:
+  profiles:
+    active: qa_db
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${TEST_RDS}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+cors:
+  origin: https://guide-run-qa.netlify.app
