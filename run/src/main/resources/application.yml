@@ -3,17 +3,11 @@ spring:
     active: qa
     group:
       local:
-        -jwt
-        -local_db
-        -loacl_oauth
+        - jwt
       qa:
-        -jwt
-        -qa_db
-        -qa_oauth
+        - jwt
       prod:
-        -jwt
-        -prod_db
-        -prod_oauth
+        - jwt
   messages:
     basename: i18n/exception
     encoding: UTF-8
