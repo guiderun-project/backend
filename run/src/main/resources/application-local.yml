@@ -1,4 +1,14 @@
 spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${TEST_RDS}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
   social:
     kakao:
       client_id: ${KAKAO_CLIENT_ID}
@@ -26,14 +36,5 @@ spring:
         token: https://nid.naver.com/oauth2.0/token
         profile: https://openapi.naver.com/v1/nid/me
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${TEST_RDS}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: validate
 cors:
   origin: http://localhost:3000
