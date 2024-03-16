@@ -9,4 +9,5 @@ import lombok.Getter;
 @Builder
 public class ReissuedAccessTokenDto {
     private String accessToken;
+    private Boolean isExist;
 }
