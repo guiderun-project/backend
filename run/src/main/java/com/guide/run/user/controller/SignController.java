@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.CommunicationException;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-maxAge = 3600)
+maxAge = 3600, allowCredentials = "true")
 
 @Slf4j
 @RestController
