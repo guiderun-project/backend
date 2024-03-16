@@ -91,11 +91,15 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) throws CommunicationException {
         String accessToken = jwtProvider.reissue(request.getCookies());
+        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
+        String privateId = oAuthProfile.getSocialId();
+        boolean isExist = userService.getUserStatus(privateId);
         return ReissuedAccessTokenDto.builder()
-                .accessToken(accessToken).
-                build();
+                .accessToken(accessToken)
+                .isExist(isExist)
+                .build();
     }
 
     //아이디 중복확인
