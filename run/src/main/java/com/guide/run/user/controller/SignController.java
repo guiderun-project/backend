@@ -1,8 +1,11 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.redis.RefreshToken;
+import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
@@ -15,6 +18,7 @@ import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -40,6 +44,7 @@ public class SignController {
     private final UserService userService;
     private final ViService viService;
     private final GuideService guideService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
 
     @PostMapping("/oauth/login/kakao")
@@ -92,9 +97,8 @@ public class SignController {
     }
     @GetMapping("/oauth/login/reissue")
     public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) throws CommunicationException {
-        String accessToken = jwtProvider.reissue(request.getCookies());
-        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
-        String privateId = oAuthProfile.getSocialId();
+        String privateId = jwtProvider.getPrivateIdForCookie(request.getCookies());
+        String accessToken = jwtProvider.createAccessToken(privateId);
         boolean isExist = userService.getUserStatus(privateId);
         return ReissuedAccessTokenDto.builder()
                 .accessToken(accessToken)
