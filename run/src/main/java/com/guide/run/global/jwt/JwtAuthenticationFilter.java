@@ -1,5 +1,6 @@
 package com.guide.run.global.jwt;
 
+import com.guide.run.global.exception.auth.authorize.NotValidAccessTokenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -18,9 +19,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = jwtProvider.resolveToken((HttpServletRequest) request);
-        if(token != null && jwtProvider.validateTokenExpiration(token)){
-            Authentication authentication = jwtProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if(token != null){
+            if(jwtProvider.validateTokenExpiration(token)) {
+                Authentication authentication = jwtProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            else
+                throw new NotValidAccessTokenException();
         }
         chain.doFilter(request,response);
     }

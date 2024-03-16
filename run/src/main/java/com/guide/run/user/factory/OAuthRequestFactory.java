@@ -1,6 +1,6 @@
 package com.guide.run.user.factory;
 
-import com.guide.run.user.request.OAuthRequest;
+import com.guide.run.user.dto.request.OAuthRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

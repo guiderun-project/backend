@@ -1,0 +1,87 @@
+# exception_ko.yml
+unknown:
+  code: "0000"
+  msg: "알 수 없는 에러가 발생했습니다"
+
+notValidAccessToken:
+  code: "0100"
+  msg: "유효하지 않은 accessToken 입니다."
+notExistAuthorization:
+  code: "0101"
+  msg: "인증할 수 있는 사용자 데이터가 존재하지 않습니다"
+notValidRefreshToken:
+  code: "0104"
+  msg: "유효하지 않은 refreshToken 입니다."
+
+duplicatedUserId:
+  code: "1001"
+  msg: "이미 존재하는 id 입니다"
+notValidPasswordCombination:
+  code: "1002"
+  msg: "비밀번호의 조합이 유효하지 않습니다."
+notValidPasswordLength:
+  code: "1003"
+  msg: "비밀번호의 길이가 유효하지 않습니다."
+blankRequiredInfo:
+  code: "1004"
+  msg: "필수 정보가 입력되지 않았습니다"
+notValidPhoneNumberForm:
+  code: "1005"
+  msg: "전화번호의 형식이 유효하지 않습니다."
+InvalidItemError:
+  code: "1006"
+  msg: "해당하지 않는 항목을 입력하였습니다."
+notApprovedUser:
+  code: "1100"
+  msg: "가입이 승인되지 않은 사용자 입니다."
+notAuthorization:
+  code: "1101"
+  msg: "로그인 되지 않은 사용자 입니다."
+unauthorizedUser:
+  code: "1102"
+  msg: "권한이 없는 사용자 입니다."
+existUser:
+  code: "1103"
+  msg: "이미 가입된 사용자 입니다."
+notExistUser:
+  code: "1300"
+  msg: "존재하지 않는 사용자 입니다."
+
+notEventOrganizer:
+  code: "2100"
+  msg: "해당 이벤트 생성자가 아닙니다."
+notEventApplier:
+  code: "2101"
+  msg: "해당 이벤트 신청자가 아닙니다."
+notEventParticipant:
+  code: "2102"
+  msg: "해당 이벤트 참가자가 아닙니다."
+notValidSort:
+  code: "2200"
+  msg: "잘못된 sort값 입니다."
+notValidType:
+  code: "2201"
+  msg: "잘못된 type값 입니다."
+notValidKind:
+  code: "2202"
+  msg: "잘못된 kind값 입니다."
+notExistEvent:
+  code: "2300"
+  msg: "해당 이벤트가 존재하지 않습니다."
+
+notAuthorityVi:
+  code: "3100"
+  msg: "Vi 권한이 없습니다."
+
+notAuthorityGuide:
+  code: "4100"
+  msg: "Guide 권한이 없습니다."
+
+notAuthorityAdmin:
+  code: "5100"
+  msg: "Admin 권한이 없습니다."
+
+notAuthorityCoach:
+  code: "6100"
+  msg: "Coach 권한이 없습니다."
+
