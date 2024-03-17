@@ -52,12 +52,14 @@ public class SignController {
 
         boolean isExistCookie =false;
 
-        for(Cookie cookie: request.getCookies()){
-            if(cookie.getName().equals("refreshToken")){
-                isExistCookie=true;
+
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
             }
         }
-        System.out.println("=========================="+isExistCookie);
         if(!isExistCookie) {
             cookieService.createCookie("refreshToken", response, privateId);
         }
