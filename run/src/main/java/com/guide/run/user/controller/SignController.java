@@ -48,13 +48,16 @@ public class SignController {
 
 
     @PostMapping("/oauth/login/kakao")
-    public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
+    public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        cookieService.createCookie("refreshToken",response,privateId);
+        Cookie[] cookies = request.getCookies();
+        if(cookies==null) {
+            cookieService.createCookie("refreshToken", response, privateId);
+        }
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
