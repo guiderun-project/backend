@@ -15,6 +15,7 @@ import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -43,13 +44,24 @@ public class SignController {
 
 
     @PostMapping("/oauth/login/kakao")
-    public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
+    public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        cookieService.createCookie("refreshToken",response,privateId);
+        boolean isExistCookie =false;
+
+        for(Cookie cookie: request.getCookies()){
+            if(cookie.getName().equals("refreshToken")){
+                isExistCookie=true;
+            }
+        }
+        System.out.println("=========================="+isExistCookie);
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", response, privateId);
+        }
+
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
