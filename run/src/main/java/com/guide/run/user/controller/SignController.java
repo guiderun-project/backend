@@ -104,10 +104,12 @@ public class SignController {
     }
     @GetMapping("/oauth/login/reissue")
     public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
-        String accessToken = jwtProvider.reissue(request.getCookies());
+        String privateId = jwtProvider.getPrivateIdForCookie(request.getCookies());
+        boolean isExist = userService.getUserStatus(privateId);
         return ReissuedAccessTokenDto.builder()
-                .accessToken(accessToken).
-                build();
+                .accessToken(jwtProvider.createAccessToken(privateId))
+                .isExist(isExist)
+                .build();
     }
 
     //아이디 중복확인
