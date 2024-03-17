@@ -1,11 +1,8 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
-import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.redis.RefreshToken;
-import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
@@ -44,7 +41,6 @@ public class SignController {
     private final UserService userService;
     private final ViService viService;
     private final GuideService guideService;
-    private final RefreshTokenRepository refreshTokenRepository;
 
 
     @PostMapping("/oauth/login/kakao")
@@ -54,10 +50,18 @@ public class SignController {
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        Cookie[] cookies = request.getCookies();
-        if(cookies==null) {
+        boolean isExistCookie =false;
+
+        for(Cookie cookie: request.getCookies()){
+            if(cookie.getName().equals("refreshToken")){
+                isExistCookie=true;
+            }
+        }
+        System.out.println("=========================="+isExistCookie);
+        if(!isExistCookie) {
             cookieService.createCookie("refreshToken", response, privateId);
         }
+
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
@@ -99,14 +103,11 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) throws CommunicationException {
-        String privateId = jwtProvider.getPrivateIdForCookie(request.getCookies());
-        String accessToken = jwtProvider.createAccessToken(privateId);
-        boolean isExist = userService.getUserStatus(privateId);
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
+        String accessToken = jwtProvider.reissue(request.getCookies());
         return ReissuedAccessTokenDto.builder()
-                .accessToken(accessToken)
-                .isExist(isExist)
-                .build();
+                .accessToken(accessToken).
+                build();
     }
 
     //아이디 중복확인
