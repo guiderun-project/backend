@@ -1,6 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
@@ -20,12 +21,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
+import javax.security.auth.RefreshFailedException;
+
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
 maxAge = 3600, allowCredentials = "true")
@@ -105,13 +109,19 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
-        String privateId = jwtProvider.getPrivateIdForCookie(request.getCookies());
-        boolean isExist = userService.getUserStatus(privateId);
-        return ReissuedAccessTokenDto.builder()
-                .accessToken(jwtProvider.createAccessToken(privateId))
-                .isExist(isExist)
-                .build();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+        try {
+            Cookie[] cookies = request.getCookies();
+            String privateId = jwtProvider.getPrivateIdForCookie(cookies);
+            boolean isExist = userService.getUserStatus(privateId);
+            return ReissuedAccessTokenDto.builder()
+                    .accessToken(jwtProvider.createAccessToken(privateId))
+                    .isExist(isExist)
+                    .build();
+        }catch (Exception e){
+            log.error("refresh 토큰이 없습니다");
+        }
+        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인
