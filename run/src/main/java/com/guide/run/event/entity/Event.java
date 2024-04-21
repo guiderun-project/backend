@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 @Builder
 public class Event extends BaseEntity {
     @Id
+    //@GeneratedValue(strategy = GenerationType.IDENTITY) //todo : 이 부분 기존 이벤트 추가로 적용하려면 db 수정 필요
     private Long id; //이벤트 id
     private String organizer; //주최자 id
     private LocalDate recruitStartDate;//모집 시작일

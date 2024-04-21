@@ -1,5 +1,7 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
+import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.entity.SignUpInfo;
@@ -8,6 +10,7 @@ import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final PasswordEncoder bCryptPasswordEncoder;
 
     private final TmpService tmpService;
 
@@ -46,6 +50,18 @@ public class UserService {
                         .userId(getUUID())
                         .build());
                 return false;
+        }
+    }
+
+    //일반 로그인
+    public String generalLogin(String accountId, String password){
+        SignUpInfo info = signUpInfoRepository.findByAccountId(accountId).orElseThrow(NotValidAccountIdException::new);
+
+
+        if(info.checkPassword(password, bCryptPasswordEncoder)){
+            return info.getPrivateId();
+        }else{
+            throw new NotValidPasswordException();
         }
     }
 

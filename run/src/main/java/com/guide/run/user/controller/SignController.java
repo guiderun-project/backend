@@ -8,6 +8,7 @@ import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
+import com.guide.run.user.dto.request.GeneralLoginRequest;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -32,7 +33,8 @@ import javax.security.auth.RefreshFailedException;
 
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-maxAge = 3600, allowCredentials = "true")
+maxAge = 3600,
+allowCredentials = "true")
 
 @Slf4j
 @RestController
@@ -74,6 +76,19 @@ public class SignController {
                 .isExist(isExist)
                 .build();
     }
+    
+    @PostMapping("/oauth/login/general")
+    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+        log.info(request.getAccountId(), request.getPassword());
+
+        String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
+        boolean isExist = userService.getUserStatus(privateId);
+        return LoginResponse.builder()
+                .accessToken(jwtProvider.createAccessToken(privateId))
+                .isExist(isExist)
+                .build();
+    }
+
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
