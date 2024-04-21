@@ -3,6 +3,12 @@ unknown:
   code: "0000"
   msg: "알 수 없는 에러가 발생했습니다"
 
+notValidAccountId:
+  code: "0001"
+  msg: "존재하지 않는 아이디입니다"
+notValidPassword:
+  code: "0002"
+  msg: "비밀번호가 일치하지 않습니다"
 notValidAccessToken:
   code: "0100"
   msg: "유효하지 않은 accessToken 입니다."
