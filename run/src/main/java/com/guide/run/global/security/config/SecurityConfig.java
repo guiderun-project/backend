@@ -50,16 +50,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception{
         http
                 .csrf(csrf->csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/api/test").hasRole("VADMIN")
-                        .requestMatchers("/api/test2").hasRole("VWAIT")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
+                        // .requestMatchers("/api/test").hasRole("VADMIN")
+                        //.requestMatchers("/api/test2").hasRole("VWAIT")
+                        //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
                         .requestMatchers("/api/signup/duplicated").permitAll()
-                        .requestMatchers("/api/signup/**").hasRole("NEW")
-                        .requestMatchers("/api/user").hasRole("USER")
+                        //.requestMatchers("/api/signup/**").hasRole("NEW")
+                        //.requestMatchers("/api/user").hasRole("USER")
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
 
