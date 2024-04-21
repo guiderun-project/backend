@@ -30,5 +30,5 @@ public class UserItem {
     private int competitionCnt;
 
     private LocalDate update_date;
-    private LocalTime update_time;
+    private String update_time;
 }

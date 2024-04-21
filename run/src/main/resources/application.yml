@@ -1,6 +1,13 @@
 spring:
   profiles:
-    include: oauth, mysql, jwt
+    active: qa
+    group:
+      local:
+        - jwt
+      qa:
+        - jwt
+      prod:
+        - jwt
   messages:
     basename: i18n/exception
     encoding: UTF-8

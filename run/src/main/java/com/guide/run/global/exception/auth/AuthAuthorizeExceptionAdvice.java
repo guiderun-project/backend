@@ -23,7 +23,7 @@ public class AuthAuthorizeExceptionAdvice {
     //0100
     @ExceptionHandler(NotValidAccessTokenException.class)
     protected ResponseEntity<FailResult> NotValidAccessTokenException(NotValidAccessTokenException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
+        return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notValidAccessToken.code"),
                 getMessage("notValidAccessToken.msg")));
     }
@@ -39,7 +39,7 @@ public class AuthAuthorizeExceptionAdvice {
     //0104
     @ExceptionHandler(NotValidRefreshTokenException.class)
     protected ResponseEntity<FailResult> NotValidRefreshTokenException(NotValidRefreshTokenException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
+        return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notValidRefreshToken.code"),
                 getMessage("notValidRefreshToken.msg")));
     }

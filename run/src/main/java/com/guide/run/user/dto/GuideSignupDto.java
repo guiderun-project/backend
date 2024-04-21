@@ -16,7 +16,7 @@ public class GuideSignupDto {
     @NotBlank
     private String accountId;
     
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).{8,}$")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*_]).{8,}$")
     private String password;
 
     @NotBlank

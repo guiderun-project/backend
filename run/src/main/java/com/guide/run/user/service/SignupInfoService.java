@@ -133,7 +133,7 @@ public class SignupInfoService {
 
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
-        vi.editViRunningInfo(request.getIsRunningExp());
+        vi.editViRunningInfo(request.getIsRunningExp(), request.getGuideName());
         archiveData.editRunningInfo(request.getHowToKnow(), request.getMotive(), request.getHopePrefs(), request.getRunningPlace());
 
         ViRunningInfoDto response = new ViRunningInfoDto();

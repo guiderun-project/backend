@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,8 +13,13 @@ import org.springframework.stereotype.Component;
 public class CookieService {
     private final JwtProvider jwtProvider;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
-        Cookie cookie = new Cookie(cookieName, jwtProvider.createRefreshToken(privateId));
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
+                .sameSite("None")
+                .secure(true)
+                .httpOnly(true)
+                .build();
+
+
+        response.setHeader("Set-Cookie", cookie.toString());
     }
 }

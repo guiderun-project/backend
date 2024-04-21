@@ -4,9 +4,9 @@ import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -16,8 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
@@ -26,6 +24,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
+    @Value("${cors.origin}")
+    private String origin;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -54,10 +54,12 @@ public class SecurityConfig {
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
-                        .requestMatchers("/api/test").hasRole("VADMIN")
-                        .requestMatchers("/api/test2").hasRole("VWAIT")
+                        //.requestMatchers("/api/test").hasRole("VADMIN")
+                        //.requestMatchers("/api/test2").hasRole("VWAIT")
                         //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
-
+                        .requestMatchers("/api/signup/duplicated").permitAll()
+                        //.requestMatchers("/api/signup/**").hasRole("NEW")
+                        //.requestMatchers("/api/user").hasRole("USER")
                         .requestMatchers("/api/test3").authenticated()
                         .anyRequest().permitAll())
 
@@ -74,7 +76,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.addAllowedOrigin("https://guide-run-qa.netlify.app");
+        config.addAllowedOrigin(origin);
         config.addAllowedMethod("*"); // 모든 메소드 허용.
         config.addAllowedHeader("*");
         config.setMaxAge(3600L);

@@ -103,11 +103,11 @@ public class JwtProvider {
         }
     }
 
-    public String reissue(Cookie[] cookies){
+    public String getPrivateIdForCookie(Cookie[] cookies){
         for(Cookie cookie: cookies){
             if(cookie.getName().equals("refreshToken")){
                 RefreshToken token = refreshTokenRepository.findById(cookie.getValue()).orElseThrow(() -> new NotValidRefreshTokenException());
-                return createAccessToken(token.getPrivateId());
+                return token.getPrivateId();
             }
         }
         throw new NotValidRefreshTokenException();

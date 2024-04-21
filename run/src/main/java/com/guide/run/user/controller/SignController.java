@@ -1,6 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
@@ -15,19 +16,23 @@ import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
+import javax.security.auth.RefreshFailedException;
+
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-maxAge = 3600)
+maxAge = 3600, allowCredentials = "true")
 
 @Slf4j
 @RestController
@@ -43,13 +48,26 @@ public class SignController {
 
 
     @PostMapping("/oauth/login/kakao")
-    public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
+    public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        cookieService.createCookie("refreshToken",response,privateId);
+        boolean isExistCookie =false;
+
+
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
+            }
+        }
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", response, privateId);
+        }
+
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
@@ -91,11 +109,19 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) {
-        String accessToken = jwtProvider.reissue(request.getCookies());
-        return ReissuedAccessTokenDto.builder()
-                .accessToken(accessToken).
-                build();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+        try {
+            Cookie[] cookies = request.getCookies();
+            String privateId = jwtProvider.getPrivateIdForCookie(cookies);
+            boolean isExist = userService.getUserStatus(privateId);
+            return ReissuedAccessTokenDto.builder()
+                    .accessToken(jwtProvider.createAccessToken(privateId))
+                    .isExist(isExist)
+                    .build();
+        }catch (Exception e){
+            log.error("refresh 토큰이 없습니다");
+        }
+        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인
