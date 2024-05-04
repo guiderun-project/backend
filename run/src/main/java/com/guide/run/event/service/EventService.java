@@ -29,7 +29,7 @@ public class EventService {
                 .recruitStartDate(eventCreateRequest.getRecruitStartDate())
                 .recruitEndDate(eventCreateRequest.getRecruitEndDate())
                 .name(eventCreateRequest.getTitle())
-                .recruitStatus(EventRecruitStatus.UPCOMING)
+                .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
                 .isApprove(false)
                 .type(eventCreateRequest.getEventType())
                 .startTime(eventCreateRequest.getStartTime())

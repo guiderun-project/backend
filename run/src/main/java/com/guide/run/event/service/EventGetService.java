@@ -37,7 +37,7 @@ public class EventGetService {
             for (EventForm eventForm : myEventForms) {
                 if (eventForm.isMatching()) {
                     Event findEvent = eventRepository.findById(eventForm.getEventId()).orElseThrow(()->new NotExistEventException());
-                    if (findEvent.getRecruitStatus()==EventRecruitStatus.OPEN || findEvent.getRecruitStatus()==EventRecruitStatus.CLOSE) {
+                    if (findEvent.getRecruitStatus()==EventRecruitStatus.RECRUIT_OPEN || findEvent.getRecruitStatus()==EventRecruitStatus.RECRUIT_CLOSE) {
                         myEvents.add(MyEvent.builder()
                                 .eventId(findEvent.getId())
                                 .eventType(findEvent.getType())
@@ -58,7 +58,7 @@ public class EventGetService {
             myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(privateId, startTime, endTime);
             for (EventForm eventForm : myEventForms) {
                 if (eventForm.isMatching()) {
-                    Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(), EventRecruitStatus.CLOSE);
+                    Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(), EventRecruitStatus.RECRUIT_CLOSE);
                     if (findEvent != null) {
                         myEvents.add(MyEvent.builder()
                                 .eventId(findEvent.getId())
@@ -84,13 +84,13 @@ public class EventGetService {
         List<UpcomingEvent> events = new ArrayList<>();
         int cnt = 4;
         if (sort.equals("OPEN")) {
-            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.OPEN);
+            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_OPEN);
             upcomingResponseCreate(privateId, events, cnt, findEvents);
             return UpcomingEventResponse.builder()
                     .items(events)
                     .build();
         } else if (sort.equals("UPCOMING")) {
-            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.UPCOMING);
+            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_UPCOMING);
             upcomingResponseCreate(privateId, events, cnt, findEvents);
             return UpcomingEventResponse.builder()
                     .items(events)

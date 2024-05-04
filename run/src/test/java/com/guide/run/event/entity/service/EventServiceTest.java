@@ -39,7 +39,7 @@ class EventServiceTest {
                 .organizer("org")
                 .name("event")
                 .isApprove(true)
-                .recruitStatus(EventRecruitStatus.UPCOMING)
+                .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
                 .type(EventType.TRAINING)
                 .maxNumG(10)
                 .maxNumV(10)

@@ -36,11 +36,11 @@ public class AllEventGetService {
                 if(sort.equals("TOTAL")){
                     if(type.equals("TOTAL")) {
                         found = eventRepository.
-                                findAllByRecruitStatusNotOrderByEndTime(EventRecruitStatus.END, pageable);
+                                findAllByRecruitStatusNotOrderByEndTime(EventRecruitStatus.RECRUIT_END, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         found = eventRepository.
-                                findAllByTypeAndRecruitStatusNotOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.END, pageable);
+                                findAllByTypeAndRecruitStatusNotOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.RECRUIT_END, pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -49,11 +49,11 @@ public class AllEventGetService {
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
                         found = eventRepository.
-                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.UPCOMING, pageable);
+                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_UPCOMING, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         found = eventRepository.
-                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.UPCOMING, pageable);
+                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.RECRUIT_UPCOMING, pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -62,11 +62,11 @@ public class AllEventGetService {
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
                         found = eventRepository.
-                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.OPEN, pageable);
+                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_OPEN, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         found = eventRepository.
-                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.OPEN, pageable);
+                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.RECRUIT_OPEN, pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -75,12 +75,12 @@ public class AllEventGetService {
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
                         found = eventRepository.
-                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.CLOSE, pageable);
+                                findAllByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_CLOSE, pageable);
                         allResponseEventCreate(privateId,events,found);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         found = eventRepository.
-                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.CLOSE, pageable);
+                                findAllByTypeAndRecruitStatusOrderByEndTime(EventType.valueOf(type), EventRecruitStatus.RECRUIT_CLOSE, pageable);
                         allResponseEventCreate(privateId,events,found);
                     }
                     else
@@ -105,12 +105,12 @@ public class AllEventGetService {
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
                         found = eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.UPCOMING, pageable);
+                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.RECRUIT_UPCOMING, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
-                                        EventRecruitStatus.UPCOMING, EventType.valueOf(type), pageable);
+                                        EventRecruitStatus.RECRUIT_UPCOMING, EventType.valueOf(type), pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -119,12 +119,12 @@ public class AllEventGetService {
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
                         found = eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.OPEN, pageable);
+                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.RECRUIT_OPEN, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
-                                        EventRecruitStatus.OPEN, EventType.valueOf(type), pageable);
+                                        EventRecruitStatus.RECRUIT_OPEN, EventType.valueOf(type), pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -133,12 +133,12 @@ public class AllEventGetService {
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
                         found = eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.CLOSE, pageable);
+                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.RECRUIT_CLOSE, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
-                                        EventRecruitStatus.CLOSE, EventType.valueOf(type), pageable);
+                                        EventRecruitStatus.RECRUIT_CLOSE, EventType.valueOf(type), pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -147,12 +147,12 @@ public class AllEventGetService {
                 else if(sort.equals("END")){
                     if(type.equals("TOTAL")) {
                         found = eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.END, pageable);
+                                findAllByPrivateIdAndRecruitStatusOrderByEndTime(privateId, EventRecruitStatus.RECRUIT_END, pageable);
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         found = eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(privateId,
-                                        EventRecruitStatus.END, EventType.valueOf(type), pageable);
+                                        EventRecruitStatus.RECRUIT_END, EventType.valueOf(type), pageable);
                     }
                     else
                         throw new NotValidTypeException();
@@ -163,10 +163,10 @@ public class AllEventGetService {
                 return events;
             case "END":
                 if(type.equals("TOTAL")) {
-                    found = eventRepository.findAllByRecruitStatusOrderByEndTimeDesc(EventRecruitStatus.END, pageable);
+                    found = eventRepository.findAllByRecruitStatusOrderByEndTimeDesc(EventRecruitStatus.RECRUIT_END, pageable);
                 }
                 else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                    found = eventRepository.findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType.valueOf(type), EventRecruitStatus.END, pageable);
+                    found = eventRepository.findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType.valueOf(type), EventRecruitStatus.RECRUIT_END, pageable);
                 }
                 else
                     throw new NotValidTypeException();
@@ -219,11 +219,11 @@ public class AllEventGetService {
                 if(sort.equals("TOTAL")){
                     if(type.equals("TOTAL")) {
                         return eventRepository.
-                                findAllByRecruitStatusNot(EventRecruitStatus.END).size();
+                                findAllByRecruitStatusNot(EventRecruitStatus.RECRUIT_END).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         return eventRepository.
-                                findAllByTypeAndRecruitStatusNot(EventType.valueOf(type), EventRecruitStatus.END).size();
+                                findAllByTypeAndRecruitStatusNot(EventType.valueOf(type), EventRecruitStatus.RECRUIT_END).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -231,11 +231,11 @@ public class AllEventGetService {
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
                         return eventRepository.
-                                findAllByRecruitStatus(EventRecruitStatus.UPCOMING).size();
+                                findAllByRecruitStatus(EventRecruitStatus.RECRUIT_UPCOMING).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         return eventRepository.
-                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.UPCOMING).size();
+                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.RECRUIT_UPCOMING).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -243,11 +243,11 @@ public class AllEventGetService {
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
                         return eventRepository.
-                                findAllByRecruitStatus(EventRecruitStatus.OPEN).size();
+                                findAllByRecruitStatus(EventRecruitStatus.RECRUIT_OPEN).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         return eventRepository.
-                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.OPEN).size();
+                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.RECRUIT_OPEN).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -255,11 +255,11 @@ public class AllEventGetService {
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
                         return eventRepository.
-                                findAllByRecruitStatus(EventRecruitStatus.CLOSE).size();
+                                findAllByRecruitStatus(EventRecruitStatus.RECRUIT_CLOSE).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")) {
                         return eventRepository.
-                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.CLOSE).size();
+                                findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.RECRUIT_CLOSE).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -283,12 +283,12 @@ public class AllEventGetService {
                 else if(sort.equals("UPCOMING")){
                     if(type.equals("TOTAL")) {
                         return eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.UPCOMING).size();
+                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.RECRUIT_UPCOMING).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         return eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
-                                        EventRecruitStatus.UPCOMING, EventType.valueOf(type)).size();
+                                        EventRecruitStatus.RECRUIT_UPCOMING, EventType.valueOf(type)).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -296,12 +296,12 @@ public class AllEventGetService {
                 else if(sort.equals("OPEN")){
                     if(type.equals("TOTAL")) {
                         return eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.OPEN).size();
+                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.RECRUIT_OPEN).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         return eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
-                                        EventRecruitStatus.OPEN, EventType.valueOf(type)).size();
+                                        EventRecruitStatus.RECRUIT_OPEN, EventType.valueOf(type)).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -309,12 +309,12 @@ public class AllEventGetService {
                 else if(sort.equals("CLOSE")){
                     if(type.equals("TOTAL")) {
                         return eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.CLOSE).size();
+                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.RECRUIT_CLOSE).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         return eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
-                                        EventRecruitStatus.CLOSE, EventType.valueOf(type)).size();
+                                        EventRecruitStatus.RECRUIT_CLOSE, EventType.valueOf(type)).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -322,12 +322,12 @@ public class AllEventGetService {
                 else if(sort.equals("END")){
                     if(type.equals("TOTAL")) {
                         return eventFormRepository.
-                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.END).size();
+                                findAllByPrivateIdAndRecruitStatus(privateId, EventRecruitStatus.RECRUIT_END).size();
                     }
                     else if(type.equals("TRAINING") || type.equals("COMPETITION")){
                         return eventFormRepository.
                                 findAllByPrivateIdAndRecruitStatusAndEventType(privateId,
-                                        EventRecruitStatus.END, EventType.valueOf(type)).size();
+                                        EventRecruitStatus.RECRUIT_END, EventType.valueOf(type)).size();
                     }
                     else
                         throw new NotValidTypeException();
@@ -337,10 +337,10 @@ public class AllEventGetService {
 
             case "END":
                 if(type.equals("TOTAL")) {
-                    return eventRepository.findAllByRecruitStatus(EventRecruitStatus.END).size();
+                    return eventRepository.findAllByRecruitStatus(EventRecruitStatus.RECRUIT_END).size();
                 }
                 else if(type.equals("TRAINING") || type.equals("COMPETITION")){
-                    return eventRepository.findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.END).size();
+                    return eventRepository.findAllByTypeAndRecruitStatus(EventType.valueOf(type), EventRecruitStatus.RECRUIT_END).size();
                 }
                 else
                     throw new NotValidTypeException();
