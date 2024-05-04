@@ -2,9 +2,9 @@ package com.guide.run.event.controller;
 
 
 import com.guide.run.event.entity.dto.response.EventCountResponse;
-import com.guide.run.event.entity.dto.response.search.AllEvent;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
-import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
+import com.guide.run.event.entity.dto.response.get.MyEventResponse;
+import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.service.AllEventGetService;
 import com.guide.run.event.service.EventGetService;

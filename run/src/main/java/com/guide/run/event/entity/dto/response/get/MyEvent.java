@@ -1,4 +1,4 @@
-package com.guide.run.event.entity.dto.response.search;
+package com.guide.run.event.entity.dto.response.get;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;

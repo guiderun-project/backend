@@ -2,10 +2,10 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
-import com.guide.run.event.entity.dto.response.search.MyEvent;
-import com.guide.run.event.entity.dto.response.search.UpcomingEvent;
-import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
+import com.guide.run.event.entity.dto.response.get.MyEventResponse;
+import com.guide.run.event.entity.dto.response.get.MyEvent;
+import com.guide.run.event.entity.dto.response.get.UpcomingEvent;
+import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;

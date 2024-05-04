@@ -6,7 +6,7 @@ import com.guide.run.admin.dto.response.UserApprovalResponse;
 import com.guide.run.admin.dto.response.UserListResponse;
 import com.guide.run.admin.dto.response.ViApplyResponse;
 import com.guide.run.admin.service.AdminUserService;
-import com.guide.run.event.entity.dto.response.search.Count;
+import com.guide.run.event.entity.dto.response.get.Count;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

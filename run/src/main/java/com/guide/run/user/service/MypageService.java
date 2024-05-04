@@ -2,9 +2,8 @@ package com.guide.run.user.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.dto.response.search.MyPageEvent;
-import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
-import com.guide.run.event.entity.dto.response.search.UpcomingEvent;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
+import com.guide.run.event.entity.dto.response.get.MyPageEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.converter.TimeFormatter;
@@ -17,13 +16,8 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

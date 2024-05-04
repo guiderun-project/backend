@@ -2,7 +2,7 @@ package com.guide.run.admin.service;
 
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
-import com.guide.run.event.entity.dto.response.search.Count;
+import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.ArchiveData;

@@ -2,7 +2,7 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.dto.response.search.AllEvent;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
