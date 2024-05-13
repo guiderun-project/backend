@@ -46,7 +46,7 @@ public class UserService {
                 //가입이 완료되면 새 토큰 다시 줘야함
                 userRepository.save(User.builder()
                         .privateId(privateId)
-                        .role(Role.NEW)
+                        .role(Role.ROLE_NEW)
                         .userId(getUUID())
                         .build());
                 return false;

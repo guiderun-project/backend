@@ -77,7 +77,7 @@ public class SignController {
                 .build();
     }
     
-    @PostMapping("/oauth/login/general")
+    @PostMapping("/login")
     public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
         log.info(request.getAccountId(), request.getPassword());
 

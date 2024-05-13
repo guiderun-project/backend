@@ -29,11 +29,4 @@ public class EventForm extends BaseEntity {
     private String hopePartner; //희망 파트너 이름
     private String referContent; // 운영진 참고내용
     private boolean isMatching; //대기 매칭 상태
-    //새로 추가한 부분
-    private LocalDateTime startTime;//이벤트 시작일+ 시작시간
-    private LocalDateTime endTime;//이벤트 종료일 + 이벤트 종료 시간
-    @Enumerated(EnumType.STRING)
-    private EventType eventType;
-    @Enumerated(EnumType.STRING)
-    private EventRecruitStatus recruitStatus;
 }
