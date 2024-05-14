@@ -14,7 +14,8 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event,Long> {
     Page<Event> findAll( Pageable pageable);
     Event findByIdAndRecruitStatus(Long id,EventRecruitStatus recruitStatus);
-
+    List<Event> findAllByNameContainingOrContentContaining(String name,String content);
+    Page<Event> findAllByNameContainingOrContentContaining(String name,String content,Pageable pageable);
     List<Event> findByRecruitStatusOrderByEndTime(EventRecruitStatus recruitStatus);
     Page<Event> findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType eventType,
                                                                  EventRecruitStatus eventRecruitStatus,
