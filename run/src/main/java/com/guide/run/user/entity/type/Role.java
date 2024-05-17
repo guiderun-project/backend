@@ -12,6 +12,8 @@ public enum Role {
     ROLE_WAIT("WAIT"),
     ROLE_COACH("COACH"),
     ROLE_USER("USER"),
-    ROLE_NEW("NEW");
+    ROLE_NEW("NEW"),
+
+    ROLE_DELETE("DELETE");
     private final String value;
 }
