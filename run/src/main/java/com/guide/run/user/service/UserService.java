@@ -2,8 +2,11 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
+import com.guide.run.user.dto.request.WithdrawalRequest;
+import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
@@ -25,7 +28,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SignUpInfoRepository signUpInfoRepository;
     private final PasswordEncoder bCryptPasswordEncoder;
-
+    private final ArchiveDataRepository archiveDataRepository;
     private final TmpService tmpService;
 
     @Transactional
@@ -97,5 +100,36 @@ public class UserService {
         Optional<SignUpInfo> byAccountId = signUpInfoRepository.findByAccountId(accountId);
         return !byAccountId.isEmpty();
     }
+
+    //todo : 탈퇴 후 정보 삭제 필요
+    @Transactional
+    public void withDrawal(WithdrawalRequest request, String privateId){
+        //좋아요 기록 삭제
+        //가입 정보(아이디 비밀번호) 삭제
+        //파트너, 매칭 정보 삭제, 이벤트 생성자일 경우 탈퇴한 회원이라고 표시 필요.
+        //댓글 삭제, 출석 기록...어쩌지
+        //남겨야 하는 정보 : 이름, 장애여부, 성별, role(탈퇴 상태), 탈퇴 사유, 러닝등급
+
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        user = User.builder()
+                .phoneNumber(null)
+                .isOpenNumber(false)
+                .detailRecord(null)
+                .recordDegree(null)
+                .role(Role.ROLE_DELETE)
+                .snsId(null)
+                .isOpenSns(false)
+                .trainingCnt(0)
+                .competitionCnt(0)
+                .img(null)
+                .build();
+        userRepository.save(user);
+        archiveData.deleteArchive(request.getReasons());
+        archiveDataRepository.save(archiveData);
+
+    }
+
+
 
 }
