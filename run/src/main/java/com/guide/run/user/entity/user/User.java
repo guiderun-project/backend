@@ -43,6 +43,8 @@ public class User extends BaseEntity {
     private int trainingCnt; //참여한 훈련 수
     private int competitionCnt; //참여한 대회 수
     
+    private String img;//프로필 이미지 링크
+    
     public void editUser(String name,
                          String gender,
                          String phoneNumber,

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 public class MyPageEvent {
     private Long eventId;
     private EventType eventType;
-    private String name;
+    private String title;
     private String date;
     private EventRecruitStatus recruitStatus;
 }
