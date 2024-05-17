@@ -1,4 +1,4 @@
-package com.guide.run.user.repository;
+package com.guide.run.user.repository.user;
 
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User,String> {
+public interface UserRepository extends JpaRepository<User,String>, UserRepositoryCustom {
     Optional<User> findUserByUserId(String uuid);
     Optional<User> findUserByPrivateId(String privateId);
     Page<User> findAllByRoleNot(Role role, Pageable pageable);
