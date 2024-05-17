@@ -36,7 +36,7 @@ public class GuideService {
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
-        if(user!=null && !user.getRole().equals(Role.NEW)) {
+        if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
             //log.info("에러발생");
             throw new ExistUserException();
         } else {
@@ -59,7 +59,7 @@ public class GuideService {
                     .trainingCnt(cntDTO.getTrainingCnt())
                     .snsId(guideSignupDto.getSnsId())
                     .isOpenSns(guideSignupDto.getIsOpenSns())
-                    .role(Role.WAIT)
+                    .role(Role.ROLE_WAIT)
                     .type(UserType.GUIDE)
                     .build();
 

@@ -26,4 +26,8 @@ public class ProfileResponse {
     private int competitionCnt;
     private int trainingCnt;
 
+    //2차 때 추가된 부분
+    private String img;
+    private int like;
+
 }

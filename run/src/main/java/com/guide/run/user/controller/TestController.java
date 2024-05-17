@@ -41,11 +41,11 @@ public class TestController {
     public String userCreateTest(){
         User user = User.builder()
                 .userId("kakao_1")
-                .role(Role.ADMIN)
+                .role(Role.ROLE_ADMIN)
                 .build();
         User user2 = User.builder()
                 .userId("kakao_2")
-                .role(Role.WAIT)
+                .role(Role.ROLE_WAIT)
                 .build();
         userRepository.save(user);
         userRepository.save(user2);
