@@ -1,22 +1,14 @@
 package com.guide.run.event.controller;
 
 
-import com.guide.run.event.entity.dto.response.EventCountResponse;
-import com.guide.run.event.entity.dto.response.search.AllEvent;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
-import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.service.AllEventGetService;
 import com.guide.run.event.service.EventGetService;
-import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -29,7 +21,7 @@ public class EventGetController {
     private final UserRepository userRepository;
     private final AllEventGetService allEventGetService;
     private final EventRepository eventRepository;
-
+/*
     @GetMapping("/my")
     public ResponseEntity<MyEventResponse> getMyEventList(@RequestParam("sort") String sort
     , @RequestParam("year") int year, @RequestParam("month") int month, HttpServletRequest request)
@@ -77,4 +69,6 @@ public class EventGetController {
         int count = allEventGetService.getEventsListCount(sort,type,kind,privateId);
         return ResponseEntity.status(200).body(EventCountResponse.builder().count(count).build());
     }
+
+ */
 }
