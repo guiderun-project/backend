@@ -9,7 +9,6 @@ import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
-import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -33,7 +32,7 @@ import javax.naming.CommunicationException;
 import javax.security.auth.RefreshFailedException;
 
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
 maxAge = 3600,
 allowCredentials = "true")
 
@@ -78,8 +77,9 @@ public class SignController {
                 .build();
     }
     
-    @PostMapping("/login")
+    @PostMapping("/oauth/login/general")
     public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+        log.info(request.getAccountId(), request.getPassword());
 
         String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
         boolean isExist = userService.getUserStatus(privateId);
@@ -147,13 +147,6 @@ public class SignController {
                         .isUnique(!userService.isAccountIdExist(aa.getAccountId()))
                         .build();
         return ResponseEntity.ok().body(response);
-    }
-
-    @DeleteMapping("/withdrawal")
-    public ResponseEntity<String> withDrawal(@RequestBody WithdrawalRequest request, HttpServletRequest httpServletRequest){
-        String userId = jwtProvider.extractUserId(httpServletRequest);
-        userService.withDrawal(request, userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
 }
