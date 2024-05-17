@@ -22,7 +22,6 @@ public class GlobalUserInfoDto {
     private int age;
     private String snsId;
     private Boolean isOpenSns;
-    private String img; //2차 이미지 링크 추가
 
     public static GlobalUserInfoDto userToInfoDto(User user){
         return GlobalUserInfoDto.builder()
@@ -37,7 +36,6 @@ public class GlobalUserInfoDto {
                 .snsId(user.getSnsId())
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
-                .img(user.getImg())
                 .build();
     }
 }

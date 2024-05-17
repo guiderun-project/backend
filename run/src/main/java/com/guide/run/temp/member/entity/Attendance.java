@@ -1,5 +1,6 @@
 package com.guide.run.temp.member.entity;
 
+import com.guide.run.user.entity.partner.PartnerId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;

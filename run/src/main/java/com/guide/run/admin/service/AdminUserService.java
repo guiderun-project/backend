@@ -39,7 +39,7 @@ public class AdminUserService {
     public UserListResponse getUserList(int start, int limit){
         int page = start / limit;
         Pageable pageable = PageRequest.of(page, limit, Sort.by("updatedAt").descending());
-        Page<User> userList = userRepository.findAllByRoleNot(Role.ROLE_NEW, pageable);
+        Page<User> userList = userRepository.findAllByRoleNot(Role.NEW, pageable);
         List<UserItem> userItems = new ArrayList<>();
         for(User user : userList){
             UserItem item = UserItem.builder()
@@ -71,7 +71,7 @@ public class AdminUserService {
 
     public Count getUserListCount(){
         Count response = Count.builder()
-                .count(userRepository.findAllByRoleNot(Role.ROLE_NEW).size())
+                .count(userRepository.findAllByRoleNot(Role.NEW).size())
                 .build();
         return response;
     }
@@ -135,11 +135,11 @@ public class AdminUserService {
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         Boolean isApprove = false;
         if(request.getIsApprove()){
-            user.approveUser(Role.ROLE_USER, request.getRecordDegree());
+            user.approveUser(Role.USER, request.getRecordDegree());
             userRepository.save(user);
             isApprove = true;
         }else{
-            user.approveUser(Role.ROLE_REJECT, user.getRecordDegree());
+            user.approveUser(Role.REJECT, user.getRecordDegree());
             userRepository.save(user);
         }
         UserApprovalResponse response = UserApprovalResponse.builder()

@@ -1,7 +1,7 @@
-package com.guide.run.partner.entity.matching;
-
+package com.guide.run.user.entity.partner;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnMatchingId implements Serializable {
-    private long eventId;
-    private String privateId;
+public class PartnerId implements Serializable {
+    private String viId;
+    private String guideId;
 }
