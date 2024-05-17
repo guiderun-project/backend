@@ -11,6 +11,7 @@ import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

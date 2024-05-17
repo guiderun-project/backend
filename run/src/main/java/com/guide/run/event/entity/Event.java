@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -41,4 +43,9 @@ public class Event extends BaseEntity {
     //이 부분 추가됐습니다~
     private int viCnt; //실제 모집된 vi 수
     private int guideCnt; //실제 모집된 guide 수
+
+    public void closeEvent(){
+        this.recruitEndDate = LocalDate.now();
+        this.recruitStatus = EventRecruitStatus.CLOSE;
+    }
 }

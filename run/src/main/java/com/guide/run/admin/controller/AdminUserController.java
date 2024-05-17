@@ -1,15 +1,16 @@
 package com.guide.run.admin.controller;
 
 import com.guide.run.admin.dto.request.ApproveRequest;
-import com.guide.run.admin.dto.response.GuideApplyResponse;
-import com.guide.run.admin.dto.response.UserApprovalResponse;
-import com.guide.run.admin.dto.response.UserListResponse;
-import com.guide.run.admin.dto.response.ViApplyResponse;
+import com.guide.run.admin.dto.response.*;
 import com.guide.run.admin.service.AdminUserService;
 import com.guide.run.event.entity.dto.response.search.Count;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -20,9 +21,16 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
 
     @GetMapping("/user-list")
-    public ResponseEntity<UserListResponse> getUserList(@RequestParam int start,
-                                                        @RequestParam int limit){
-        UserListResponse response = adminUserService.getUserList(start, limit);
+    public ResponseEntity<List<UserItem>> getUserList(@RequestParam int start,
+                                                      @RequestParam int limit,
+
+                                                      @RequestParam(defaultValue = "false") boolean time,
+                                                      @RequestParam(defaultValue = "false") boolean type,
+                                                      @RequestParam(defaultValue = "false") boolean gender,
+                                                      @RequestParam(defaultValue = "false") boolean name_team,
+                                                      @RequestParam(defaultValue = "false") boolean approval
+                                                      ){
+        List<UserItem> response = adminUserService.getUserList(start, limit, time, type, gender, name_team, approval);
         return ResponseEntity.ok().body(response);
     }
 
