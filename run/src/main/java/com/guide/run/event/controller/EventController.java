@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.guide.run.user.entity.type.Role.ADMIN;
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -33,8 +32,7 @@ public class EventController {
         String userId = jwtProvider.extractUserId(request);
         User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
-        if(user.getRole().getValue() != ADMIN.getValue())
-            throw new NotAuthorityAdminException();
+
         EventCreatedResponse eventCreatedResponse = eventService.eventCreate(eventCreateRequest, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(eventCreatedResponse);
     }
@@ -43,8 +41,7 @@ public class EventController {
         String userId = jwtProvider.extractUserId(request);
         User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
-        if(user.getRole().getValue() != ADMIN.getValue())
-            throw new NotAuthorityAdminException();
+
         EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(eventUpdateRequest, userId,eventId);
         return ResponseEntity.status(HttpStatus.CREATED).body(eventUpdatedResponse);
     }
@@ -53,8 +50,7 @@ public class EventController {
         String userId = jwtProvider.extractUserId(request);
         User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(() -> new NotExistUserException());
-        if(user.getRole().getValue() != ADMIN.getValue())
-            throw new NotAuthorityAdminException();
+
         eventService.eventDelete(userId,eventId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

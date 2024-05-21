@@ -28,6 +28,7 @@ public class EventSearchController {
                                                  @RequestParam("start") int start,
                                                  HttpServletRequest request){
         extracted(request);
+        System.out.println("title = " + title);
         return SearchAllEventList.builder().
                 items(eventSearchService.getSearchAllEvents(start,limit,title))
                 .build();
