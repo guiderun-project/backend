@@ -71,6 +71,9 @@ notValidType:
 notValidKind:
   code: "2202"
   msg: "잘못된 kind값 입니다."
+notValidYear:
+  code: "2204"
+  msg: "잘못된 year값 입니다."
 notExistEvent:
   code: "2300"
   msg: "해당 이벤트가 존재하지 않습니다."

@@ -5,6 +5,7 @@ import com.guide.run.global.exception.event.authorize.NotEventOrganizerException
 import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.global.exception.event.logic.NotValidTypeException;
+import com.guide.run.global.exception.event.logic.NotValidYearException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,13 @@ public class EventLogicExceptionAdvice {
         return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidKind.code"),
                 getMessage("notValidKind.msg")));
+    }
+    //2204
+    @ExceptionHandler(NotValidYearException.class)
+    protected ResponseEntity<FailResult> NotValidYearException(NotValidYearException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidYear.code"),
+                getMessage("notValidYear.msg")));
     }
     private String getMessage(String code){
         return getMessage(code,null);
