@@ -1,7 +1,8 @@
 package com.guide.run.event.entity.repository;
 
 import com.guide.run.admin.dto.EventDto;
-import com.guide.run.event.entity.dto.response.search.MyPageEvent;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
+
 
 import java.util.List;
 

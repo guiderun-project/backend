@@ -1,6 +1,6 @@
 package com.guide.run.user.service;
 
-import com.guide.run.event.entity.dto.response.search.MyPageEvent;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;

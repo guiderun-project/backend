@@ -3,7 +3,7 @@ package com.guide.run.event.entity.repository;
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
-import com.guide.run.event.entity.dto.response.search.MyPageEvent;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.user.entity.user.QUser;
@@ -96,13 +96,13 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     private BooleanExpression searchByKind(String kind){
         if(kind.equals("RECRUIT_UPCOMING")){
-            return event.recruitStatus.eq(EventRecruitStatus.UPCOMING);
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING);
         } else if(kind.equals("RECRUIT_OPEN")){
-            return event.recruitStatus.eq(EventRecruitStatus.OPEN);
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_OPEN);
         } else if(kind.equals("RECRUIT_CLOSE")){
-            return event.recruitStatus.eq(EventRecruitStatus.CLOSE);
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_CLOSE);
         } else if (kind.equals("RECRUIT_END")) {
-            return event.recruitStatus.eq(EventRecruitStatus.END);
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_END);
         } else{
             return null;
         }

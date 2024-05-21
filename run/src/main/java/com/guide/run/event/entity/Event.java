@@ -46,6 +46,6 @@ public class Event extends BaseEntity {
 
     public void closeEvent(){
         this.recruitEndDate = LocalDate.now();
-        this.recruitStatus = EventRecruitStatus.CLOSE;
+        this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
     }
 }
