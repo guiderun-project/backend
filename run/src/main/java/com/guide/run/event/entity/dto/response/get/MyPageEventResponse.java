@@ -1,4 +1,4 @@
-package com.guide.run.event.entity.dto.response.get;
+package com.guide.run.event.entity.dto.response.search;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

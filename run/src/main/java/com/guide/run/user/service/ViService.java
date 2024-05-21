@@ -36,7 +36,7 @@ public class ViService {
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
-        if(user!=null && !user.getRole().equals(Role.NEW)) {
+        if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
             //log.info("에러발생");
             throw new ExistUserException(); //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
@@ -57,7 +57,7 @@ public class ViService {
                     .recordDegree(viSignupDto.getRecordDegree())
                     .competitionCnt(cntDTO.getCompetitionCnt())
                     .trainingCnt(cntDTO.getTrainingCnt())
-                    .role(Role.WAIT)
+                    .role(Role.ROLE_WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
                     .isOpenSns(viSignupDto.getIsOpenSns())

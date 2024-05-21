@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 @AllArgsConstructor
-public class SearchAllEventsCount {
+@Builder
+public class Count {
     private int count;
 }

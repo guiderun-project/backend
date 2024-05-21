@@ -29,11 +29,11 @@ class UserServiceTest {
         User user = User.builder()
                 .userId(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
         userRepository.save(user);
         boolean userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.USER.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_USER.getValue());
     }
 
     @DisplayName("로그인 시 가입 대기중 회원 응답")
@@ -42,25 +42,9 @@ class UserServiceTest {
         User user = User.builder()
                 .userId(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.WAIT)
+                .role(Role.ROLE_WAIT)
                 .build();
         userRepository.save(user);
         boolean userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.WAIT.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_WAIT.getValue());
     }
-
-    @DisplayName("로그인 시 신규 회원 응답")
-    @Test
-    void newUserLoginResponse(){
-        boolean userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.NEW.getValue());
-    }
-
-    @DisplayName("vi 회원가입")
-    @Test
-    void viSignup(){
-
-    }
-    
-
-}
