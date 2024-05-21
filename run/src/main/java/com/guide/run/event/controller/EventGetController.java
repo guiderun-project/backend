@@ -1,12 +1,16 @@
 package com.guide.run.event.controller;
 
 
+import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.service.AllEventGetService;
 import com.guide.run.event.service.EventGetService;
+import com.guide.run.global.exception.event.logic.NotValidYearException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.repository.user.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
@@ -21,17 +25,19 @@ public class EventGetController {
     private final UserRepository userRepository;
     private final AllEventGetService allEventGetService;
     private final EventRepository eventRepository;
-/*
+
     @GetMapping("/my")
     public ResponseEntity<MyEventResponse> getMyEventList(@RequestParam("sort") String sort
-    , @RequestParam("year") int year, @RequestParam("month") int month, HttpServletRequest request)
+    , @RequestParam("year") int year, HttpServletRequest request)
     {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
-        MyEventResponse myEvents = eventGetService.getMyEvent(sort, year, month, privateId);
-        return ResponseEntity.status(200).body(myEvents);
+        if(year<0){
+            throw new NotValidYearException();
+        }
+        String userId = jwtProvider.extractUserId(request);
+        MyEventResponse myEvent = eventGetService.getMyEvent(sort,year,userId);
+        return ResponseEntity.status(200).body(myEvent);
     }
+    /*
     @GetMapping("/upcoming")
     public ResponseEntity<UpcomingEventResponse> getUpcomingEventList(@RequestParam("sort") String sort,
                                                                     HttpServletRequest request)

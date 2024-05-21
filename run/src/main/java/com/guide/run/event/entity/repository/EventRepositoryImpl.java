@@ -3,9 +3,11 @@ package com.guide.run.event.entity.repository;
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
+import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.converter.TimeFormatter;
+import com.guide.run.global.exception.UnknownException;
 import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstantImpl;
@@ -25,6 +27,7 @@ import java.util.List;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.user.entity.user.QUser.user;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class EventRepositoryImpl implements EventRepositoryCustom{
 
@@ -136,6 +139,49 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .limit(limit)
                 .fetch();
         return null;
+    }
+
+    @Override
+    public List<MyEvent> findMyEventByYear(String privateId, int year, EventRecruitStatus eventRecruitStatus){
+        if(eventRecruitStatus.equals(EventRecruitStatus.RECRUIT_END)){
+            return queryFactory.select(
+                    Projections.constructor(MyEvent.class,
+                            event.id.as("eventId"),
+                            event.type.as("eventType"),
+                            event.name.as("name"),
+                            event.recruitStatus.as("recruitStatus"),
+                            event.endTime.as("endDate"))
+                    )
+                    .from(event)
+                    .join(eventForm).on(event.id.eq(eventForm.eventId),
+                            eventForm.privateId.eq(privateId))
+                    .where(event.recruitStatus.eq(eventRecruitStatus))
+                    .orderBy(event.endTime.desc())
+                    .offset(0)
+                    .limit(4)
+                    .fetch();
+        }else{
+            List<MyEvent> fetch = queryFactory.select(
+                            Projections.constructor(MyEvent.class,
+                                    event.id.as("eventId"),
+                                    event.type.as("eventType"),
+                                    event.name.as("name"),
+                                    event.recruitStatus.as("recruitStatus"),
+                                    event.endTime.as("endDate"))
+                    )
+                    .from(event)
+                    .join(eventForm).on(event.id.eq(eventForm.eventId),
+                            eventForm.privateId.eq(privateId))
+                    .where(event.recruitStatus.ne(EventRecruitStatus.RECRUIT_END))
+                    .orderBy(event.endTime.desc())
+                    .offset(0)
+                    .limit(4)
+                    .fetch();
+            for(MyEvent myEvent : fetch){
+                myEvent.setdDay((int)DAYS.between(LocalDate.now(),myEvent.getEndDate()));
+            }
+            return fetch;
+        }
     }
 
     @Override

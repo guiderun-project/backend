@@ -1,7 +1,9 @@
 package com.guide.run.event.entity.repository;
 
 import com.guide.run.admin.dto.EventDto;
+import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
+import com.guide.run.event.entity.type.EventRecruitStatus;
 
 
 import java.util.List;
@@ -13,5 +15,6 @@ public interface EventRepositoryCustom {
 
     List<EventDto> sortAdminEvent(int start, int limit);
     long sortAdminEventCount();
+    List<MyEvent> findMyEventByYear(String privateId, int year, EventRecruitStatus eventRecruitStatus);
 
 }

@@ -8,6 +8,7 @@ import com.guide.run.event.entity.dto.response.get.UpcomingEvent;
 import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.repository.EventRepositoryImpl;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
@@ -22,64 +23,23 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventGetService {/*
+public class EventGetService {
     private final EventRepository eventRepository;
     private final EventFormRepository eventFormRepository;
 
-    public MyEventResponse getMyEvent(String sort, int year, int month, String privateId) {
-        List<MyEvent> myEvents = new ArrayList<>();
-        LocalDateTime startTime = LocalDateTime.of(year, month, 1, 0, 0);
-        int cnt = 4;
-        LocalDateTime endTime = LocalDateTime.of(year, month, LocalDate.of(year, month, 1).lengthOfMonth(), 23, 59);
-        List<EventForm> myEventForms;
-        if (sort.equals("OPEN")) {
-            myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTime(privateId, startTime, endTime);
-            for (EventForm eventForm : myEventForms) {
-                if (eventForm.isMatching()) {
-                    Event findEvent = eventRepository.findById(eventForm.getEventId()).orElseThrow(()->new NotExistEventException());
-                    if (findEvent.getRecruitStatus()==EventRecruitStatus.RECRUIT_OPEN || findEvent.getRecruitStatus()==EventRecruitStatus.RECRUIT_CLOSE) {
-                        myEvents.add(MyEvent.builder()
-                                .eventId(findEvent.getId())
-                                .eventType(findEvent.getType())
-                                .name(findEvent.getName())
-                                .dDay(Math.toIntExact(ChronoUnit.DAYS.between(findEvent.getEndTime().toLocalDate(), LocalDate.now())))
-                                .endDate(findEvent.getEndTime().toLocalDate())
-                                .recruitStatus(findEvent.getRecruitStatus())
-                                .build());
-                        cnt--;
-                    }
-                }
-                if (cnt <= 0) break;
-            }
-            return MyEventResponse.builder()
-                    .items(myEvents)
-                    .build();
-        } else if (sort.equals("CLOSE")) {
-            myEventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(privateId, startTime, endTime);
-            for (EventForm eventForm : myEventForms) {
-                if (eventForm.isMatching()) {
-                    Event findEvent = eventRepository.findByIdAndRecruitStatus(eventForm.getEventId(), EventRecruitStatus.RECRUIT_CLOSE);
-                    if (findEvent != null) {
-                        myEvents.add(MyEvent.builder()
-                                .eventId(findEvent.getId())
-                                .eventType(findEvent.getType())
-                                .name(findEvent.getName())
-                                .dDay(Math.toIntExact(ChronoUnit.DAYS.between(findEvent.getEndTime().toLocalDate(), LocalDate.now())))
-                                .endDate(findEvent.getEndTime().toLocalDate())
-                                .recruitStatus(findEvent.getRecruitStatus())
-                                .build());
-                        cnt--;
-                    }
-                }
-                if (cnt <= 0) break;
-            }
-            return MyEventResponse.builder()
-                    .items(myEvents)
-                    .build();
-        }
-        throw new NotValidSortException();
-    }
 
+    public MyEventResponse getMyEvent(String sort, int year,String privateId) {
+       List<MyEvent> myEvents;
+       if(sort.equals("UPCOMING")){
+           myEvents = eventRepository.findMyEventByYear(privateId, year, EventRecruitStatus.RECRUIT_ALL);
+       }else if(sort.equals("END")){
+           myEvents = eventRepository.findMyEventByYear(privateId, year, EventRecruitStatus.RECRUIT_END);
+       }else{
+           throw new NotValidSortException();
+       }
+       return MyEventResponse.builder().items(myEvents).build();
+    }
+/*
     public UpcomingEventResponse getUpcomingEvent(String sort, String privateId) {
         List<UpcomingEvent> events = new ArrayList<>();
         int cnt = 4;

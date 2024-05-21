@@ -31,19 +31,37 @@ public class EventTestController {
                 .id(1L)
                 .name("테스트")
                 .content("중입니다.")
-                        .endTime(LocalDateTime.now())
+                        .endTime(LocalDateTime.now().plusDays(2))
+                        .recruitStatus(EventRecruitStatus.RECRUIT_END)
                 .build());
+        eventFormRepository.save(EventForm.builder()
+                        .id(1L)
+                        .eventId(1L)
+                .privateId("kakao3232984128")
+                        .build());
         eventRepository.save(Event.builder()
                 .id(2L)
                 .name("토스트")
                 .content("아닙니다.")
-                .endTime(LocalDateTime.now())
+                .endTime(LocalDateTime.now().plusDays(3))
+                .recruitStatus(EventRecruitStatus.RECRUIT_END)
+                .build());
+        eventFormRepository.save(EventForm.builder()
+                        .id(2L)
+                        .eventId(2L)
+                .privateId("kakao32329841282")
                 .build());
         eventRepository.save(Event.builder()
                 .id(3L)
                 .name("ㅇㅇ")
                 .content("스트라이크")
-                .endTime(LocalDateTime.now())
+                .endTime(LocalDateTime.now().plusDays(4))
+                .recruitStatus(EventRecruitStatus.RECRUIT_OPEN)
+                .build());
+        eventFormRepository.save(EventForm.builder()
+                .id(3L)
+                        .eventId(3L)
+                .privateId("kakao3232984128")
                 .build());
     }
 
