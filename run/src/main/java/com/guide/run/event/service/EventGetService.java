@@ -22,7 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EventGetService {
+public class EventGetService {/*
     private final EventRepository eventRepository;
     private final EventFormRepository eventFormRepository;
 
@@ -125,5 +125,5 @@ public class EventGetService {
             if (cnt <= 0) break;
         }
     }
-
+*/
 }

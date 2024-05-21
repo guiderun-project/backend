@@ -3,7 +3,7 @@ package com.guide.run.user.service;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
 
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.repository.user.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
