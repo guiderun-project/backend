@@ -8,9 +8,11 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.UnknownException;
 import com.guide.run.user.entity.user.QUser;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Projections;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
+import static com.guide.run.event.entity.type.EventRecruitStatus.*;
 import static com.guide.run.user.entity.user.QUser.user;
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -103,11 +106,11 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         if(kind.equals("RECRUIT_UPCOMING")){
             return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING);
         } else if(kind.equals("RECRUIT_OPEN")){
-            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_OPEN);
+            return event.recruitStatus.eq(RECRUIT_OPEN);
         } else if(kind.equals("RECRUIT_CLOSE")){
-            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_CLOSE);
+            return event.recruitStatus.eq(RECRUIT_CLOSE);
         } else if (kind.equals("RECRUIT_END")) {
-            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_END);
+            return event.recruitStatus.eq(RECRUIT_END);
         } else{
             return null;
         }
@@ -145,7 +148,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     @Override
     public List<MyEvent> findMyEventByYear(String privateId, int year, EventRecruitStatus eventRecruitStatus){
-        if(eventRecruitStatus.equals(EventRecruitStatus.RECRUIT_END)){
+        if(eventRecruitStatus.equals(RECRUIT_END)){
             return queryFactory.select(
                     Projections.constructor(MyEvent.class,
                             event.id.as("eventId"),
@@ -174,7 +177,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.ne(EventRecruitStatus.RECRUIT_END))
+                    .where(event.recruitStatus.ne(RECRUIT_END))
                     .orderBy(event.endTime.desc())
                     .offset(0)
                     .limit(4)
@@ -221,6 +224,42 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetch();
 
         return fetch;
+    }
+
+    @Override
+    public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+        return queryFactory.select(event.id.as("eventId"))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)))
+                .fetch().size();
+    }
+
+    private BooleanBuilder checkByKind(EventRecruitStatus kind){
+        if(kind==null){
+            return new BooleanBuilder();
+        } else if(kind.equals(RECRUIT_UPCOMING)){
+            return new BooleanBuilder(event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING));
+        } else if(kind.equals(RECRUIT_OPEN)){
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_OPEN));
+        } else if(kind.equals(RECRUIT_CLOSE)){
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE));
+        } else if (kind.equals(RECRUIT_END)) {
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_END));
+        }
+        return null;
+    }
+
+    private BooleanBuilder checkByType(EventType type){
+        if(type==null){
+            return new BooleanBuilder();
+        } else if(type.equals(EventType.COMPETITION)){
+            return new BooleanBuilder(event.type.eq(EventType.COMPETITION));
+        } else if(type.equals(EventType.TRAINING)){
+            return new BooleanBuilder(event.type.eq(EventType.TRAINING));
+        }
+        return null;
     }
 
     @Override

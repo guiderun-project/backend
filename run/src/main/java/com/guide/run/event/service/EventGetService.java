@@ -10,6 +10,8 @@ import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.repository.EventRepositoryImpl;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.guide.run.event.entity.type.EventRecruitStatus.*;
+import static com.guide.run.event.entity.type.EventType.TOTAL;
+
 @Service
 @RequiredArgsConstructor
 public class EventGetService {
@@ -31,59 +36,54 @@ public class EventGetService {
     public MyEventResponse getMyEvent(String sort, int year,String privateId) {
        List<MyEvent> myEvents;
        if(sort.equals("UPCOMING")){
-           myEvents = eventRepository.findMyEventByYear(privateId, year, EventRecruitStatus.RECRUIT_ALL);
+           myEvents = eventRepository.findMyEventByYear(privateId, year, RECRUIT_ALL);
        }else if(sort.equals("END")){
-           myEvents = eventRepository.findMyEventByYear(privateId, year, EventRecruitStatus.RECRUIT_END);
+           myEvents = eventRepository.findMyEventByYear(privateId, year, RECRUIT_END);
        }else{
            throw new NotValidSortException();
        }
        return MyEventResponse.builder().items(myEvents).build();
     }
-/*
-    public UpcomingEventResponse getUpcomingEvent(String sort, String privateId) {
-        List<UpcomingEvent> events = new ArrayList<>();
-        int cnt = 4;
-        if (sort.equals("OPEN")) {
-            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_OPEN);
-            upcomingResponseCreate(privateId, events, cnt, findEvents);
-            return UpcomingEventResponse.builder()
-                    .items(events)
-                    .build();
-        } else if (sort.equals("UPCOMING")) {
-            List<Event> findEvents = eventRepository.findByRecruitStatusOrderByEndTime(EventRecruitStatus.RECRUIT_UPCOMING);
-            upcomingResponseCreate(privateId, events, cnt, findEvents);
-            return UpcomingEventResponse.builder()
-                    .items(events)
-                    .build();
-        }
-        throw new NotValidSortException();
-    }
 
-    private void upcomingResponseCreate(String privateId, List<UpcomingEvent> events, int cnt, List<Event> findEvents) {
-        for (Event e : findEvents) {
-            EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(e.getId(), privateId);
-            if (eventForm != null) {
-                events.add(UpcomingEvent.builder()
-                        .eventId(e.getId())
-                        .eventType(e.getType())
-                        .name(e.getName())
-                        .isApply(true)
-                        .date(e.getEndTime().toLocalDate())
-                        .recruitStatus(e.getRecruitStatus())
-                        .build());
-            } else {
-                events.add(UpcomingEvent.builder()
-                        .eventId(e.getId())
-                        .eventType(e.getType())
-                        .name(e.getName())
-                        .isApply(false)
-                        .date(e.getEndTime().toLocalDate())
-                        .recruitStatus(e.getRecruitStatus())
-                        .build());
+    public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId){
+        if(sort.equals("UPCOMING")){
+            if(type.equals(TOTAL)){
+                if(kind.equals(RECRUIT_ALL)){
+                    return eventRepository.findAllByRecruitStatusNot(RECRUIT_END).size();
+                }
+                else{
+                    return eventRepository.findAllByRecruitStatus(kind).size();
+                }
+            }else{
+                if(kind.equals(RECRUIT_ALL)){
+                    return eventRepository.findAllByTypeAndRecruitStatusNot(type, RECRUIT_END).size();
+                }
+                else{
+                    return eventRepository.findAllByTypeAndRecruitStatus(type,kind).size();
+                }
             }
-            cnt--;
-            if (cnt <= 0) break;
+        }else if(sort.equals("END")){
+            if(type.equals(TOTAL)){
+                return eventRepository.findAllByRecruitStatus(RECRUIT_END).size();
+            }else{
+                return eventRepository.findAllByTypeAndRecruitStatus(type, RECRUIT_END).size();
+            }
+        }else{
+            if(type.equals(TOTAL)){
+                if(kind.equals(RECRUIT_ALL)){
+                    return eventFormRepository.findAllByPrivateId(privateId).size();
+                }
+                else{
+                    return eventRepository.getAllMyEventListCount(null,kind,privateId);
+                }
+            }else{
+                if(kind.equals(RECRUIT_ALL)){
+                    return eventRepository.getAllMyEventListCount(type, null,privateId);
+                }
+                else{
+                    return eventRepository.getAllMyEventListCount(type,kind,privateId);
+                }
+            }
         }
     }
-*/
 }
