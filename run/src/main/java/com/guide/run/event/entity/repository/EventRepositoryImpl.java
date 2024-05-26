@@ -3,6 +3,8 @@ package com.guide.run.event.entity.repository;
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
+import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
+import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -182,6 +184,43 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             }
             return fetch;
         }
+    }
+
+    @Override
+    public List<MyEventOfMonth> findMyEventsOfMonth(LocalDateTime startTime, LocalDateTime endTime, String privateId){
+        List<MyEventOfMonth> fetch = queryFactory.select(
+                        Projections.constructor(MyEventOfMonth.class,
+                                event.type.as("eventType"),
+                                event.startTime.as("startTime"))
+                )
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(event.startTime.between(startTime, endTime))
+                .orderBy(event.startTime.desc())
+                .fetch();
+
+        return fetch;
+    }
+
+    @Override
+    public List<MyEventOfDayOfCalendar> findMyEventsOfDay(LocalDateTime startTime,LocalDateTime endTime, String privateId) {
+        List<MyEventOfDayOfCalendar> fetch = queryFactory.select(
+                        Projections.constructor(MyEventOfDayOfCalendar.class,
+                                event.id.as("eventId"),
+                                event.type.as("eventType"),
+                                event.name.as("name"),
+                                event.startTime.as("endDate"),
+                                event.recruitStatus.as("recruitStatus"))
+                )
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(event.startTime.between(startTime, endTime))
+                .orderBy(event.startTime.desc())
+                .fetch();
+
+        return fetch;
     }
 
     @Override
