@@ -1,6 +1,7 @@
 package com.guide.run.event.controller;
 
 
+import com.guide.run.event.entity.dto.response.get.AllEventResponse;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -58,5 +59,24 @@ public class EventGetController {
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).
                 body(Count.builder().count(eventGetService.getAllEventListCount(sort,type,kind,userId)).build());
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<AllEventResponse> getAllEventList(@RequestParam("sort") String sort,
+                                                            @RequestParam("type") EventType type,
+                                                            @RequestParam("kind") EventRecruitStatus kind,
+                                                            @RequestParam("limit") int limit,
+                                                            @RequestParam("start") int start,
+                                                            HttpServletRequest request){
+        if(sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")){}
+        else throw new NotValidSortException();
+        if(type.equals(TRAINING) || type.equals(COMPETITION) || type.equals(TOTAL)){}
+        else throw new NotValidTypeException();
+        if(kind.equals(RECRUIT_UPCOMING) || kind.equals(RECRUIT_OPEN) || kind.equals(RECRUIT_CLOSE)||
+                kind.equals(RECRUIT_END)||kind.equals(RECRUIT_ALL)){}
+        else throw new NotValidKindException();
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.status(200).
+                body(eventGetService.getAllEventList(limit,start,sort,type,kind,userId));
     }
 }

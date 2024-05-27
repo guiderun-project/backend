@@ -2,10 +2,7 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.dto.response.get.MyEventResponse;
-import com.guide.run.event.entity.dto.response.get.MyEvent;
-import com.guide.run.event.entity.dto.response.get.UpcomingEvent;
-import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
+import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.repository.EventRepositoryImpl;
@@ -15,6 +12,8 @@ import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -85,5 +84,56 @@ public class EventGetService {
                 }
             }
         }
+    }
+
+    public AllEventResponse getAllEventList(int limit,
+                                            int start,
+                                            String sort,
+                                            EventType type,
+                                            EventRecruitStatus kind,
+                                            String userId) {
+        List<AllEvent> allEvents = new ArrayList<>();
+        if(sort.equals("UPCOMING")){
+            if(kind.equals(RECRUIT_END))
+                throw new NotValidKindException();
+            if(type.equals(TOTAL)){
+                if(kind.equals(RECRUIT_ALL)){
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,null,null);
+                }
+                else{
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,kind,null);
+                }
+            }else{
+                if(kind.equals(RECRUIT_ALL)){
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,null,null);
+                }
+                else{
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,kind,null);
+                }
+            }
+        }else if(sort.equals("END")){
+            if(type.equals(TOTAL)){
+                allEvents = eventRepository.getAllMyEventList(limit,start,null, RECRUIT_END,null);
+            }else{
+                allEvents = eventRepository.getAllMyEventList(limit,start,type,RECRUIT_END,null);
+            }
+        }else{
+            if(type.equals(TOTAL)){
+                if(kind.equals(RECRUIT_ALL)){
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,null,userId);
+                }
+                else{
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,kind,userId);
+                }
+            }else{
+                if(kind.equals(RECRUIT_ALL)){
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,null,userId);
+                }
+                else{
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,kind,userId);
+                }
+            }
+        }
+        return AllEventResponse.builder().items(allEvents).build();
     }
 }

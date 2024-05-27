@@ -5,6 +5,7 @@ import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -236,6 +237,23 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetch().size();
     }
 
+    @Override
+    public List<AllEvent> getAllMyEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                event.id.as("eventId"),
+                event.type.as("eventType"),
+                event.name.as("name"),
+                event.startTime.as("date"),
+                event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId).and(checkByPrivateId(privateId)))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)))
+                .orderBy(event.startTime.asc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
         if(kind==null){
             return new BooleanBuilder();
@@ -260,6 +278,14 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             return new BooleanBuilder(event.type.eq(EventType.TRAINING));
         }
         return null;
+    }
+
+    private BooleanBuilder checkByPrivateId(String privateId){
+        if(privateId==null){
+            return new BooleanBuilder();
+        } else {
+            return new BooleanBuilder(eventForm.privateId.eq(privateId));
+        }
     }
 
     @Override

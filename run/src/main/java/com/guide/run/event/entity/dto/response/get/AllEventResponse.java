@@ -10,5 +10,5 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class AllEventResponse {
-    private List<MyEvent> items;
+    private List<AllEvent> items;
 }
