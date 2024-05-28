@@ -7,6 +7,7 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
+import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -251,6 +252,20 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .orderBy(event.startTime.asc())
                 .offset(start)
                 .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<MyEventDday> getMyEventDday(String userId) {
+        return queryFactory.select(Projections.constructor(MyEventDday.class,
+                event.name.as("name"),
+                event.startTime.as("dDay")))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(userId))
+                .where(event.recruitStatus.ne(RECRUIT_END))
+                .orderBy(event.startTime.asc())
+                .limit(2)
                 .fetch();
     }
 

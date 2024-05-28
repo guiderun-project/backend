@@ -1,6 +1,8 @@
 package com.guide.run.event.entity.repository;
 
 import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import org.springframework.data.domain.Page;
@@ -39,4 +41,6 @@ public interface EventRepository extends JpaRepository<Event,Long>, EventReposit
     List<Event> findAllByRecruitStatus(EventRecruitStatus eventRecruitStatus);
 
     List<Event> findAllByTypeAndRecruitStatus(EventType type, EventRecruitStatus eventRecruitStatus);
+
+
 }

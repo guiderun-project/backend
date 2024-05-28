@@ -8,6 +8,8 @@ import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
+import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
+import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -178,5 +180,9 @@ public class EventService {
         }
 
         return response;
+    }
+
+    public MyEventDdayResponse getMyEventDday(String userId) {
+        return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(userId)).build();
     }
 }

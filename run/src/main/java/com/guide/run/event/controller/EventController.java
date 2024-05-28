@@ -5,6 +5,7 @@ import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
+import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.service.EventService;
 import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,5 +54,11 @@ public class EventController {
         String userId = jwtProvider.extractUserId(request);
         EventPopUpResponse response = eventService.eventPopUp(eventId, userId);
         return ResponseEntity.ok().body(response);
+    }
+    @GetMapping("/dday")
+    public ResponseEntity<MyEventDdayResponse> getMyEventDday(HttpServletRequest request){
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().
+                body(eventService.getMyEventDday(userId));
     }
 }
