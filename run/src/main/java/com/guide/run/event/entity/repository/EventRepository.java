@@ -11,10 +11,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface EventRepository extends JpaRepository<Event,Long> {
+public interface EventRepository extends JpaRepository<Event,Long>, EventRepositoryCustom {
     Page<Event> findAll( Pageable pageable);
     Event findByIdAndRecruitStatus(Long id,EventRecruitStatus recruitStatus);
-
+    List<Event> findAllByNameContainingOrContentContaining(String name,String content);
+    Page<Event> findAllByNameContainingOrContentContaining(String name,String content,Pageable pageable);
     List<Event> findByRecruitStatusOrderByEndTime(EventRecruitStatus recruitStatus);
     Page<Event> findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType eventType,
                                                                  EventRecruitStatus eventRecruitStatus,

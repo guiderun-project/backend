@@ -4,12 +4,12 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.redis.RefreshToken;
-import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
+import com.guide.run.user.dto.request.GeneralLoginRequest;
+import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -23,15 +23,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
+import javax.security.auth.RefreshFailedException;
+
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-maxAge = 3600, allowCredentials = "true")
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+maxAge = 3600,
+allowCredentials = "true")
 
 @Slf4j
 @RestController
@@ -44,23 +48,47 @@ public class SignController {
     private final UserService userService;
     private final ViService viService;
     private final GuideService guideService;
-    private final RefreshTokenRepository refreshTokenRepository;
 
 
     @PostMapping("/oauth/login/kakao")
-    public LoginResponse kakaoLogin(String code, HttpServletResponse response) throws CommunicationException {
+    public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        cookieService.createCookie("refreshToken",response,privateId);
+        boolean isExistCookie =false;
+
+
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
+            }
+        }
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", response, privateId);
+        }
+
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .isExist(isExist)
                 .build();
     }
+    
+    @PostMapping("/login")
+    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+
+        String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
+        boolean isExist = userService.getUserStatus(privateId);
+        return LoginResponse.builder()
+                .accessToken(jwtProvider.createAccessToken(privateId))
+                .isExist(isExist)
+                .build();
+    }
+
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String userId = jwtProvider.extractUserId(httpServletRequest);
@@ -96,14 +124,19 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request) throws CommunicationException {
-        String privateId = jwtProvider.getPrivateIdForCookie(request.getCookies());
-        String accessToken = jwtProvider.createAccessToken(privateId);
-        boolean isExist = userService.getUserStatus(privateId);
-        return ReissuedAccessTokenDto.builder()
-                .accessToken(accessToken)
-                .isExist(isExist)
-                .build();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+        try {
+            Cookie[] cookies = request.getCookies();
+            String privateId = jwtProvider.getPrivateIdForCookie(cookies);
+            boolean isExist = userService.getUserStatus(privateId);
+            return ReissuedAccessTokenDto.builder()
+                    .accessToken(jwtProvider.createAccessToken(privateId))
+                    .isExist(isExist)
+                    .build();
+        }catch (Exception e){
+            log.error("refresh 토큰이 없습니다");
+        }
+        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인
@@ -114,6 +147,13 @@ public class SignController {
                         .isUnique(!userService.isAccountIdExist(aa.getAccountId()))
                         .build();
         return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping("/withdrawal")
+    public ResponseEntity<String> withDrawal(@RequestBody WithdrawalRequest request, HttpServletRequest httpServletRequest){
+        String userId = jwtProvider.extractUserId(httpServletRequest);
+        userService.withDrawal(request, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
 }

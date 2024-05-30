@@ -2,6 +2,7 @@ package com.guide.run.event.entity.dto.response;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,5 +28,17 @@ public class EventPopUpResponse {
         private String place;//이벤트 장소
         private String content;//이벤트 내용
         private LocalDate updatedAt; //수정일
+
+        private Boolean isApply; //신청 여부
+        private Boolean hasPartner; //파트너 존재 여부
+        private String partnerName; //파트너 이름
+        private String partnerRecord; //파트너 러닝 등급
+        private UserType partnerType; //파트너 타입(가이드인지 vi인지)
+
+        public void setPartner(String partnerName, String partnerRecord, UserType partnerType){
+                this.partnerName = partnerName;
+                this.partnerRecord = partnerRecord;
+                this.partnerType = partnerType;
+        }
 
 }

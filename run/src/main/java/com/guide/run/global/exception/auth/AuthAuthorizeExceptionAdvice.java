@@ -1,9 +1,7 @@
 package com.guide.run.global.exception.auth;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.auth.authorize.NotExistAuthorizationException;
-import com.guide.run.global.exception.auth.authorize.NotValidAccessTokenException;
-import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
+import com.guide.run.global.exception.auth.authorize.*;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +18,26 @@ public class AuthAuthorizeExceptionAdvice {
     private final MessageSource messageSource;
     private final ResponseService responseService;
 
+    //0001
+    @ExceptionHandler(NotValidAccountIdException.class)
+    protected ResponseEntity<FailResult> NotValidAccountIdException(NotValidAccountIdException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidAccountId.code"),
+                getMessage("notValidAccountId.msg")));
+    }
+
+    //0002
+    @ExceptionHandler(NotValidPasswordException.class)
+    protected ResponseEntity<FailResult> NotValidPasswordException(NotValidPasswordException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidPassword.code"),
+                getMessage("notValidPassword.msg")));
+    }
+
     //0100
     @ExceptionHandler(NotValidAccessTokenException.class)
     protected ResponseEntity<FailResult> NotValidAccessTokenException(NotValidAccessTokenException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
+        return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notValidAccessToken.code"),
                 getMessage("notValidAccessToken.msg")));
     }
@@ -39,7 +53,7 @@ public class AuthAuthorizeExceptionAdvice {
     //0104
     @ExceptionHandler(NotValidRefreshTokenException.class)
     protected ResponseEntity<FailResult> NotValidRefreshTokenException(NotValidRefreshTokenException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
+        return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notValidRefreshToken.code"),
                 getMessage("notValidRefreshToken.msg")));
     }
