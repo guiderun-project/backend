@@ -3,7 +3,8 @@ package com.guide.run.admin.controller;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
 import com.guide.run.admin.service.AdminUserService;
-import com.guide.run.event.entity.dto.response.search.Count;
+
+import com.guide.run.event.entity.dto.response.get.Count;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -3,10 +3,18 @@ package com.guide.run.event.entity.repository;
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
-import com.guide.run.event.entity.dto.response.search.MyPageEvent;
+import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
+import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
+import com.guide.run.event.entity.dto.response.get.MyEvent;
+import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
+import com.guide.run.global.exception.UnknownException;
 import com.guide.run.user.entity.user.QUser;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Projections;
@@ -24,7 +32,9 @@ import java.util.List;
 
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
+import static com.guide.run.event.entity.type.EventRecruitStatus.*;
 import static com.guide.run.user.entity.user.QUser.user;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class EventRepositoryImpl implements EventRepositoryCustom{
 
@@ -96,13 +106,13 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     private BooleanExpression searchByKind(String kind){
         if(kind.equals("RECRUIT_UPCOMING")){
-            return event.recruitStatus.eq(EventRecruitStatus.UPCOMING);
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING);
         } else if(kind.equals("RECRUIT_OPEN")){
-            return event.recruitStatus.eq(EventRecruitStatus.OPEN);
+            return event.recruitStatus.eq(RECRUIT_OPEN);
         } else if(kind.equals("RECRUIT_CLOSE")){
-            return event.recruitStatus.eq(EventRecruitStatus.CLOSE);
+            return event.recruitStatus.eq(RECRUIT_CLOSE);
         } else if (kind.equals("RECRUIT_END")) {
-            return event.recruitStatus.eq(EventRecruitStatus.END);
+            return event.recruitStatus.eq(RECRUIT_END);
         } else{
             return null;
         }
@@ -136,6 +146,161 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .limit(limit)
                 .fetch();
         return null;
+    }
+
+    @Override
+    public List<MyEvent> findMyEventByYear(String privateId, int year, EventRecruitStatus eventRecruitStatus){
+        if(eventRecruitStatus.equals(RECRUIT_END)){
+            return queryFactory.select(
+                    Projections.constructor(MyEvent.class,
+                            event.id.as("eventId"),
+                            event.type.as("eventType"),
+                            event.name.as("name"),
+                            event.recruitStatus.as("recruitStatus"),
+                            event.endTime.as("endDate"))
+                    )
+                    .from(event)
+                    .join(eventForm).on(event.id.eq(eventForm.eventId),
+                            eventForm.privateId.eq(privateId))
+                    .where(event.recruitStatus.eq(eventRecruitStatus))
+                    .orderBy(event.endTime.desc())
+                    .offset(0)
+                    .limit(4)
+                    .fetch();
+        }else{
+            List<MyEvent> fetch = queryFactory.select(
+                            Projections.constructor(MyEvent.class,
+                                    event.id.as("eventId"),
+                                    event.type.as("eventType"),
+                                    event.name.as("name"),
+                                    event.recruitStatus.as("recruitStatus"),
+                                    event.endTime.as("endDate"))
+                    )
+                    .from(event)
+                    .join(eventForm).on(event.id.eq(eventForm.eventId),
+                            eventForm.privateId.eq(privateId))
+                    .where(event.recruitStatus.ne(RECRUIT_END))
+                    .orderBy(event.endTime.desc())
+                    .offset(0)
+                    .limit(4)
+                    .fetch();
+            for(MyEvent myEvent : fetch){
+                myEvent.setdDay((int)DAYS.between(LocalDate.now(),myEvent.getEndDate()));
+            }
+            return fetch;
+        }
+    }
+
+    @Override
+    public List<MyEventOfMonth> findMyEventsOfMonth(LocalDateTime startTime, LocalDateTime endTime, String privateId){
+        List<MyEventOfMonth> fetch = queryFactory.select(
+                        Projections.constructor(MyEventOfMonth.class,
+                                event.type.as("eventType"),
+                                event.startTime.as("startTime"))
+                )
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(event.startTime.between(startTime, endTime))
+                .orderBy(event.startTime.desc())
+                .fetch();
+
+        return fetch;
+    }
+
+    @Override
+    public List<MyEventOfDayOfCalendar> findMyEventsOfDay(LocalDateTime startTime,LocalDateTime endTime, String privateId) {
+        List<MyEventOfDayOfCalendar> fetch = queryFactory.select(
+                        Projections.constructor(MyEventOfDayOfCalendar.class,
+                                event.id.as("eventId"),
+                                event.type.as("eventType"),
+                                event.name.as("name"),
+                                event.startTime.as("endDate"),
+                                event.recruitStatus.as("recruitStatus"))
+                )
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(event.startTime.between(startTime, endTime))
+                .orderBy(event.startTime.desc())
+                .fetch();
+
+        return fetch;
+    }
+
+    @Override
+    public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+        return queryFactory.select(event.id.as("eventId"))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)))
+                .fetch().size();
+    }
+
+    @Override
+    public List<AllEvent> getAllMyEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                event.id.as("eventId"),
+                event.type.as("eventType"),
+                event.name.as("name"),
+                event.startTime.as("date"),
+                event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId).and(checkByPrivateId(privateId)))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)))
+                .orderBy(event.startTime.asc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<MyEventDday> getMyEventDday(String userId) {
+        return queryFactory.select(Projections.constructor(MyEventDday.class,
+                event.name.as("name"),
+                event.startTime.as("dDay")))
+                .from(event)
+                .join(eventForm).on(event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(userId))
+                .where(event.recruitStatus.ne(RECRUIT_END))
+                .orderBy(event.startTime.asc())
+                .limit(2)
+                .fetch();
+    }
+
+    private BooleanBuilder checkByKind(EventRecruitStatus kind){
+        if(kind==null){
+            return new BooleanBuilder();
+        } else if(kind.equals(RECRUIT_UPCOMING)){
+            return new BooleanBuilder(event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING));
+        } else if(kind.equals(RECRUIT_OPEN)){
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_OPEN));
+        } else if(kind.equals(RECRUIT_CLOSE)){
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE));
+        } else if (kind.equals(RECRUIT_END)) {
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_END));
+        }
+        return null;
+    }
+
+    private BooleanBuilder checkByType(EventType type){
+        if(type==null){
+            return new BooleanBuilder();
+        } else if(type.equals(EventType.COMPETITION)){
+            return new BooleanBuilder(event.type.eq(EventType.COMPETITION));
+        } else if(type.equals(EventType.TRAINING)){
+            return new BooleanBuilder(event.type.eq(EventType.TRAINING));
+        }
+        return null;
+    }
+
+    private BooleanBuilder checkByPrivateId(String privateId){
+        if(privateId==null){
+            return new BooleanBuilder();
+        } else {
+            return new BooleanBuilder(eventForm.privateId.eq(privateId));
+        }
     }
 
     @Override

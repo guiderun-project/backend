@@ -6,16 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDate;
-
 @Getter
 @Builder
 @AllArgsConstructor
-public class AllEvent {
+public class SearchAllEvent {
     private Long eventId;
     private EventType eventType;
     private String name;
-    private boolean isApply;
-    private LocalDate endDate;
+    private String endDate;
     private EventRecruitStatus recruitStatus;
 }

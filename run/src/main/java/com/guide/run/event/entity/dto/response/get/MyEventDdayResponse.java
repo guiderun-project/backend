@@ -1,4 +1,4 @@
-package com.guide.run.event.entity.dto.response.search;
+package com.guide.run.event.entity.dto.response.get;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class UpcomingEventResponse {
-    private List<UpcomingEvent> items;
-
+public class MyEventDdayResponse {
+    List<MyEventDday> eventItems;
 }

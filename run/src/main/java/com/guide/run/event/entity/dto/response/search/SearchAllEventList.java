@@ -6,9 +6,10 @@ import lombok.Getter;
 
 import java.util.List;
 
+
 @Getter
 @Builder
 @AllArgsConstructor
-public class MyEventResponse {
-    private List<MyEvent> items;
+public class SearchAllEventList {
+    private List<SearchAllEvent> items;
 }

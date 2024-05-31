@@ -43,7 +43,7 @@ public class SecurityConfig {
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
                     .requestMatchers("/attendance-upload")
-                    .requestMatchers("/api/oauth/**");
+                    .requestMatchers("/api/**");
         };
     }
     @Bean
