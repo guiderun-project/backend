@@ -16,10 +16,9 @@ import java.time.LocalTime;
 @Builder
 public class UserItem {
     private String userId;
-    private String img;
-    private String role;
+    private Role role;
     private int age;
-    private String type;
+    private UserType type;
     private String name;
     private String team;
     private String gender;
@@ -30,38 +29,6 @@ public class UserItem {
     private int trainingCnt;
     private int competitionCnt;
 
-    private String update_date;
+    private LocalDate update_date;
     private String update_time;
-
-    public UserItem(String userId,
-                    String img,
-                    Role role,
-                    int age,
-                    UserType type,
-                    String name,
-                    String team,
-                    String gender,
-                    String snsId,
-                    String phoneNumber,
-                    int totalCnt,
-                    int trainingCnt,
-                    int competitionCnt,
-                    String update_date,
-                    String update_time) {
-        this.userId = userId;
-        this.img = img;
-        this.role = role.getValue();
-        this.age = age;
-        this.type = type.getValue();
-        this.name = name;
-        this.team = team;
-        this.gender = gender;
-        this.snsId = snsId;
-        this.phoneNumber = phoneNumber;
-        this.totalCnt = totalCnt;
-        this.trainingCnt = trainingCnt;
-        this.competitionCnt = competitionCnt;
-        this.update_date = update_date;
-        this.update_time = update_time;
-    }
 }

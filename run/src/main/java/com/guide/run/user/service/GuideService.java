@@ -13,7 +13,6 @@ import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.*;
-import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +36,7 @@ public class GuideService {
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
-        if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
+        if(user!=null && !user.getRole().equals(Role.NEW)) {
             //log.info("에러발생");
             throw new ExistUserException();
         } else {
@@ -60,7 +59,7 @@ public class GuideService {
                     .trainingCnt(cntDTO.getTrainingCnt())
                     .snsId(guideSignupDto.getSnsId())
                     .isOpenSns(guideSignupDto.getIsOpenSns())
-                    .role(Role.ROLE_WAIT)
+                    .role(Role.WAIT)
                     .type(UserType.GUIDE)
                     .build();
 

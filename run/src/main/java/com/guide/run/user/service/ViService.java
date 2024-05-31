@@ -12,7 +12,6 @@ import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
-import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +36,7 @@ public class ViService {
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
-        if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
+        if(user!=null && !user.getRole().equals(Role.NEW)) {
             //log.info("에러발생");
             throw new ExistUserException(); //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
@@ -58,7 +57,7 @@ public class ViService {
                     .recordDegree(viSignupDto.getRecordDegree())
                     .competitionCnt(cntDTO.getCompetitionCnt())
                     .trainingCnt(cntDTO.getTrainingCnt())
-                    .role(Role.ROLE_WAIT)
+                    .role(Role.WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
                     .isOpenSns(viSignupDto.getIsOpenSns())

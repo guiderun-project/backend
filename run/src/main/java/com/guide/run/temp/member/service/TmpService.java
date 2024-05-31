@@ -62,6 +62,10 @@ public class TmpService {
                 EventForm eventForm = EventForm.builder()
                         .eventId(att.getEventId())
                         .privateId(privateId)
+                        .eventType(event.getType())
+                        .recruitStatus(event.getRecruitStatus())
+                        .startTime(event.getStartTime())
+                        .endTime(event.getEndTime())
                         .isMatching(true)
                         .build();
                 attendanceRepository.delete(att);
@@ -78,8 +82,4 @@ public class TmpService {
         return response;
 
     }
-
-    //파트너 정보 연결
-    //임시 파트너 db 만들고..거기서 조회하는 프로그램 개발 필요.
-    //각 아이디를 받을거고..함께 뛴 횟수 받아야 하고...어디서 같이 뛰었는지도 알아야 하고..
 }

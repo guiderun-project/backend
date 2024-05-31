@@ -27,8 +27,6 @@ repositories {
 }
 
 dependencies {
-	//implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
-
 	implementation 'org.apache.poi:poi:5.2.3' //엑셀 불러오기용. 기존 데이터 저장 후 삭제할 예정.
 	implementation 'org.apache.poi:poi-ooxml:5.2.3' //엑셀 불러오기용2
 
@@ -48,24 +46,14 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
 }
 
 tasks.named('bootBuildImage') {
 	builder = 'paketobuildpacks/builder-jammy-base:latest'
 }
-
-clean {
-	delete file('src/main/generated')
-}
-
 
 tasks.named('test'){
 	useJUnitPlatform()

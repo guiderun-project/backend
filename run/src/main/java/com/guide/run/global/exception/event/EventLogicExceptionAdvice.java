@@ -2,7 +2,9 @@ package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
-import com.guide.run.global.exception.event.logic.*;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
+import com.guide.run.global.exception.event.logic.NotValidSortException;
+import com.guide.run.global.exception.event.logic.NotValidTypeException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,28 +42,6 @@ public class EventLogicExceptionAdvice {
                 getMessage("notValidKind.code"),
                 getMessage("notValidKind.msg")));
     }
-    //2204
-    @ExceptionHandler(NotValidYearException.class)
-    protected ResponseEntity<FailResult> NotValidYearException(NotValidYearException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
-                getMessage("notValidYear.code"),
-                getMessage("notValidYear.msg")));
-    }
-    //2205
-    @ExceptionHandler(NotValidMonthException.class)
-    protected ResponseEntity<FailResult> NotValidMonthException(NotValidMonthException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
-                getMessage("notValidMonth.code"),
-                getMessage("notValidMonth.msg")));
-    }
-    //2206
-    @ExceptionHandler(NotValidDayException.class)
-    protected ResponseEntity<FailResult> NotValidDayException(NotValidDayException e){
-        return ResponseEntity.status(400).body(responseService.getFailResult(
-                getMessage("notValidDay.code"),
-                getMessage("notValidDay.msg")));
-    }
-
     private String getMessage(String code){
         return getMessage(code,null);
     }
