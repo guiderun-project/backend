@@ -1,10 +1,7 @@
 package com.guide.run.admin.controller;
 
-import com.guide.run.admin.dto.EventHistoryCountDto;
 import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.EventTypeCountDto;
-import com.guide.run.admin.dto.response.AllEventListResponse;
-import com.guide.run.admin.dto.response.EventHistoriesResponse;
 import com.guide.run.admin.service.AdminEventService;
 import com.guide.run.event.entity.dto.response.EventCountResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")
-public class AdminEventController {
+public class AdminEventController {/*
+
     private final AdminEventService adminEventService;
     @GetMapping("/{userId}/event-list")
     public ResponseEntity<EventHistoriesResponse> getUserEventHistories(@PathVariable String userId,
@@ -54,5 +50,5 @@ public class AdminEventController {
     public ResponseEntity<AllEventListResponse> getAllEvent(@RequestParam("start") int start,
                                                             @RequestParam("limit") int limit){
         return ResponseEntity.status(200).body(AllEventListResponse.builder().items(adminEventService.getAllEventList(start,limit)).build());
-    }
+    }*/
 }

@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 @Builder
 public class Event extends BaseEntity {
     @Id
+    //@GeneratedValue(strategy = GenerationType.IDENTITY) //todo : 이 부분 기존 이벤트 추가로 적용하려면 db 수정 필요
     private Long id; //이벤트 id
     private String organizer; //주최자 id
     private LocalDate recruitStartDate;//모집 시작일
@@ -40,4 +43,9 @@ public class Event extends BaseEntity {
     //이 부분 추가됐습니다~
     private int viCnt; //실제 모집된 vi 수
     private int guideCnt; //실제 모집된 guide 수
+
+    public void closeEvent(){
+        this.recruitEndDate = LocalDate.now();
+        this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+    }
 }
