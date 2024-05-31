@@ -4,7 +4,7 @@ package com.guide.run.user.controller;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -41,11 +41,11 @@ public class TestController {
     public String userCreateTest(){
         User user = User.builder()
                 .userId("kakao_1")
-                .role(Role.ADMIN)
+                .role(Role.ROLE_ADMIN)
                 .build();
         User user2 = User.builder()
                 .userId("kakao_2")
-                .role(Role.WAIT)
+                .role(Role.ROLE_WAIT)
                 .build();
         userRepository.save(user);
         userRepository.save(user2);

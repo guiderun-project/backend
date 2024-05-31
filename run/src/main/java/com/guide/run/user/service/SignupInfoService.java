@@ -12,6 +12,7 @@ import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
 
-        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+        if(viewer.getRole()!= Role.ROLE_ADMIN && !user.getPrivateId().equals(privateId)){
             throw new UnauthorizedUserException();
         }
 
@@ -77,7 +78,7 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
 
-        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+        if(viewer.getRole()!= Role.ROLE_ADMIN && !user.getPrivateId().equals(privateId)){
             throw new UnauthorizedUserException();
         }
 
@@ -102,7 +103,7 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
 
-        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+        if(viewer.getRole()!= Role.ROLE_ADMIN && !user.getPrivateId().equals(privateId)){
             throw new UnauthorizedUserException();
         }
 
@@ -180,7 +181,7 @@ public class SignupInfoService {
                 NotExistUserException::new
         );
 
-        if(viewer.getRole()!= Role.ADMIN && !user.getPrivateId().equals(privateId)){
+        if(viewer.getRole()!= Role.ROLE_ADMIN && !user.getPrivateId().equals(privateId)){
             throw new UnauthorizedUserException();
         }
         return PersonalInfoDto.userToInfoDto(user);

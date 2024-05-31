@@ -1,8 +1,9 @@
 package com.guide.run.user.controller;
 
-import com.guide.run.event.entity.dto.response.search.Count;
-import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
+import com.guide.run.event.entity.dto.response.get.Count;
+import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.dto.GlobalUserInfoDto;
 import com.guide.run.user.dto.response.ProfileResponse;
 import com.guide.run.user.service.MypageService;
@@ -11,9 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
+
+import java.time.LocalDate;
+import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class MypageController {
 
     private final JwtProvider jwtProvider;
     private final MypageService mypageService;
+
     @GetMapping("/personal")
     public ResponseEntity<GlobalUserInfoDto> getGlobalUserInfo(HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
@@ -30,17 +32,27 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/event-history/count/{userId}")
-    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId){
+    public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
+                                                 @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
+                                                 @RequestParam(defaultValue = "0") int year){
+        if(year==0){
+            year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
+        }
         Count response = Count.builder()
-                .count(mypageService.getMyPageEventsCount(userId))
+                .count(mypageService.getMyPageEventsCount(userId, kind, year))
                 .build();
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/event-history/{userId}")
-    public ResponseEntity<MyPageEventResponse> getMyEventList(@PathVariable String userId,
-                                                              @RequestParam(defaultValue = "0") int start,
-                                                              @RequestParam(defaultValue = "10") int limit){
-        MyPageEventResponse response = mypageService.getMyPageEvents(userId,start,limit);
+    public ResponseEntity<List<MyPageEvent>> getMyEventList(@PathVariable String userId,
+                                                            @RequestParam(defaultValue = "0") int start,
+                                                            @RequestParam(defaultValue = "10") int limit,
+                                                            @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
+                                                            @RequestParam(defaultValue = "0") int year){
+       if(year==0){
+           year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
+       }
+        List<MyPageEvent> response = mypageService.getMyPageEvents(userId,start,limit, kind, year);
 
         return ResponseEntity.ok().body(response);
     }
@@ -50,6 +62,24 @@ public class MypageController {
                                                           HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
         ProfileResponse response = mypageService.getUserProfile(userId,privateId);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/partner-list/{userId}")
+    public ResponseEntity<List<MyPagePartner>> getMyPartnerList(@PathVariable String userId,
+                                                                @RequestParam(defaultValue = "0") int start,
+                                                                @RequestParam(defaultValue = "10") int limit,
+                                                                @RequestParam(defaultValue = "RECENT") String sort){
+        List<MyPagePartner> response = mypageService.getMyPagePartners(userId, start, limit, sort);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/partner-list/count/{userId}")
+    public ResponseEntity<Count> getMypartnerCount(@PathVariable String userId){
+        Count response = Count.builder()
+                .count(mypageService.getMyPartnersCount(userId))
+                .build();
+
         return ResponseEntity.ok().body(response);
     }
 }

@@ -1,22 +1,28 @@
 package com.guide.run.event.controller;
 
 
-import com.guide.run.event.entity.dto.response.EventCountResponse;
-import com.guide.run.event.entity.dto.response.search.AllEvent;
-import com.guide.run.event.entity.dto.response.search.MyEventResponse;
-import com.guide.run.event.entity.dto.response.search.UpcomingEventResponse;
+import com.guide.run.event.entity.dto.response.get.AllEventResponse;
+import com.guide.run.event.entity.dto.response.get.Count;
+import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.event.service.AllEventGetService;
 import com.guide.run.event.service.EventGetService;
-import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
+import com.guide.run.global.exception.event.logic.NotValidSortException;
+import com.guide.run.global.exception.event.logic.NotValidTypeException;
+import com.guide.run.global.exception.event.logic.NotValidYearException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.repository.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import static com.guide.run.event.entity.type.EventRecruitStatus.*;
+import static com.guide.run.event.entity.type.EventType.*;
+
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -26,55 +32,51 @@ import java.util.List;
 public class EventGetController {
     private final JwtProvider jwtProvider;
     private final EventGetService eventGetService;
-    private final UserRepository userRepository;
-    private final AllEventGetService allEventGetService;
-    private final EventRepository eventRepository;
 
     @GetMapping("/my")
     public ResponseEntity<MyEventResponse> getMyEventList(@RequestParam("sort") String sort
-    , @RequestParam("year") int year, @RequestParam("month") int month, HttpServletRequest request)
+    , @RequestParam("year") int year, HttpServletRequest request)
     {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
-        MyEventResponse myEvents = eventGetService.getMyEvent(sort, year, month, privateId);
-        return ResponseEntity.status(200).body(myEvents);
+        if(year<0){
+            throw new NotValidYearException();
+        }
+        String userId = jwtProvider.extractUserId(request);
+        MyEventResponse myEvent = eventGetService.getMyEvent(sort,year,userId);
+        return ResponseEntity.status(200).body(myEvent);
     }
-    @GetMapping("/upcoming")
-    public ResponseEntity<UpcomingEventResponse> getUpcomingEventList(@RequestParam("sort") String sort,
-                                                                    HttpServletRequest request)
-    {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
-        UpcomingEventResponse upcomingEvents = eventGetService.getUpcomingEvent(sort, privateId);
-        return ResponseEntity.status(200).body(upcomingEvents);
+    @GetMapping("/all/count")
+    public ResponseEntity<Count> getAllEventListCount(@RequestParam("sort") String sort,
+                                                      @RequestParam("type") EventType type,
+                                                      @RequestParam("kind") EventRecruitStatus kind,
+                                                      HttpServletRequest request){
+        if(sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")){}
+        else throw new NotValidSortException();
+        if(type.equals(TRAINING) || type.equals(COMPETITION) || type.equals(TOTAL)){}
+        else throw new NotValidTypeException();
+        if(kind.equals(RECRUIT_UPCOMING) || kind.equals(RECRUIT_OPEN) || kind.equals(RECRUIT_CLOSE)||
+                kind.equals(RECRUIT_END)||kind.equals(RECRUIT_ALL)){}
+        else throw new NotValidKindException();
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.status(200).
+                body(Count.builder().count(eventGetService.getAllEventListCount(sort,type,kind,userId)).build());
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<AllEvent>> getAllEventList(@RequestParam("start") int start,
-                                                          @RequestParam("limit") int limit,
-                                                          @RequestParam("sort") String sort,
-                                                          @RequestParam("type") String type,
-                                                          @RequestParam("kind") String kind,
-                                                          HttpServletRequest request)
-    {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
-        List<AllEvent> allEvents = allEventGetService.getAllEvent(start,limit,sort,type,kind,privateId);
-        return ResponseEntity.status(200).body(allEvents);
-    }
-    @GetMapping("/all/count")
-    public ResponseEntity<EventCountResponse> getEventListCount(@RequestParam("sort") String sort,
-                                                                @RequestParam("type") String type,
-                                                                @RequestParam("kind") String kind,
-                                                                HttpServletRequest request)
-    {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
-        int count = allEventGetService.getEventsListCount(sort,type,kind,privateId);
-        return ResponseEntity.status(200).body(EventCountResponse.builder().count(count).build());
+    public ResponseEntity<AllEventResponse> getAllEventList(@RequestParam("sort") String sort,
+                                                            @RequestParam("type") EventType type,
+                                                            @RequestParam("kind") EventRecruitStatus kind,
+                                                            @RequestParam("limit") int limit,
+                                                            @RequestParam("start") int start,
+                                                            HttpServletRequest request){
+        if(sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")){}
+        else throw new NotValidSortException();
+        if(type.equals(TRAINING) || type.equals(COMPETITION) || type.equals(TOTAL)){}
+        else throw new NotValidTypeException();
+        if(kind.equals(RECRUIT_UPCOMING) || kind.equals(RECRUIT_OPEN) || kind.equals(RECRUIT_CLOSE)||
+                kind.equals(RECRUIT_END)||kind.equals(RECRUIT_ALL)){}
+        else throw new NotValidKindException();
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.status(200).
+                body(eventGetService.getAllEventList(limit,start,sort,type,kind,userId));
     }
 }
