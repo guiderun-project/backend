@@ -1,22 +1,30 @@
 package com.guide.run.user.service;
 
-import com.guide.run.event.entity.dto.response.get.MyPageEvent;
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.dto.response.search.MyPageEvent;
+import com.guide.run.event.entity.dto.response.search.MyPageEventResponse;
+import com.guide.run.event.entity.dto.response.search.UpcomingEvent;
+import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.partner.entity.partner.PartnerLike;
-import com.guide.run.partner.entity.partner.repository.PartnerLikeRepository;
-import com.guide.run.partner.entity.dto.MyPagePartner;
-import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.user.dto.GlobalUserInfoDto;
 import com.guide.run.user.dto.response.ProfileResponse;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.repository.user.UserRepository;
+import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -24,9 +32,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MypageService {
     private final UserRepository userRepository;
+    private final EventFormRepository eventFormRepository;
     private final EventRepository eventRepository;
-    private final PartnerRepository partnerRepository;
-    private final PartnerLikeRepository partnerLikeRepository;
+    private final TimeFormatter timeFormatter;
 
     public GlobalUserInfoDto getGlobalUserInfo(String privateId){
         User user = userRepository.findById(privateId).orElseThrow(
@@ -36,70 +44,65 @@ public class MypageService {
         return GlobalUserInfoDto.userToInfoDto(user);
     }
 
-    public long getMyPageEventsCount(String userId, String kind, int year){
+    public int getMyPageEventsCount(String userId){
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new
         );
-        String privateId = user.getPrivateId();
-        long count = eventRepository.countMyEventAfterYear(privateId, kind, year);
+        int count = eventFormRepository.findAllByPrivateId(user.getPrivateId()).size();
 
         return count;
     }
-
-    public List<MyPageEvent> getMyPageEvents(String userId, int start, int limit, String kind, int year){
-
+    public MyPageEventResponse getMyPageEvents(String userId, int start, int limit){
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new
         );
 
         String privateId = user.getPrivateId();
+        List<EventForm> eventForms =eventFormRepository.findAllByPrivateId(privateId);
+        List<Event> events = new ArrayList<>();
+        
+        //날짜 필터링 없이 조회
+        for(EventForm eventForm : eventForms){
+             Event event = eventRepository.findById(eventForm.getEventId()).orElseThrow(
+                     NotExistEventException::new
+             );
+             events.add(event);
+        }
+        events.sort((e1, e2) -> e2.getStartTime().compareTo(e1.getStartTime()));
 
-        List<MyPageEvent> response = eventRepository.findMyEventAfterYear(privateId, start, limit, kind, year);
 
-        return response;
-    }
+        int startIndex = Math.min(start, events.size());
+        int endIndex = Math.min(startIndex + limit, events.size());
 
-    public List<MyPagePartner> getMyPagePartners(String userId, int start, int limit, String sort){
-        User user = userRepository.findUserByUserId(userId).orElseThrow(
-                NotExistUserException::new
-        );
+        events = events.subList(startIndex, endIndex);
+        List<MyPageEvent> pagedEvents = new ArrayList<>();
+        for(Event event : events){
+            MyPageEvent myPageEvent = MyPageEvent.builder()
+                    .eventId(event.getId())
+                    .eventType(event.getType())
+                    .date(timeFormatter.getHHMMSS(event.getStartTime()))
+                    .name(event.getName())
+                    .recruitStatus(event.getRecruitStatus())
+                    .build();
+            pagedEvents.add(myPageEvent);
+        }
+        MyPageEventResponse response = MyPageEventResponse.builder()
+                .items(pagedEvents)
+                .limit(limit)
+                .start(start)
+                .build();
 
-        String privateId = user.getPrivateId();
-
-        String userType = user.getType().getValue();
-        List<MyPagePartner> response = partnerRepository.findMyPartner(privateId,sort , limit, start, userType);
-
-        return response;
-    }
-
-    public long getMyPartnersCount(String userId){
-        User user = userRepository.findUserByUserId(userId).orElseThrow(
-                NotExistUserException::new
-        );
-
-        String privateId = user.getPrivateId();
-
-        String userType = user.getType().getValue();
-
-        long response = partnerRepository.countMyPartner(privateId, userType);
         return response;
     }
 
     public ProfileResponse getUserProfile(String userId, String privateId){
         String phoneNum = "";
         String snsId = "";
-        int like = 0;
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistEventException::new);
         User viewer = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
-        if(viewer.getRole()== Role.ROLE_ADMIN || viewer.getPrivateId().equals(user.getPrivateId())){
+        if(viewer.getRole()== Role.ADMIN || viewer.getPrivateId().equals(user.getPrivateId())){
             phoneNum = user.getPhoneNumber();
             snsId = user.getSnsId();
-        }
-
-        PartnerLike partnerlike = partnerLikeRepository.findById(privateId).orElse(null);
-
-        if(partnerlike!=null){
-            like = partnerlike.getSendIds().size();
         }
 
         ProfileResponse response = ProfileResponse.builder()
@@ -118,8 +121,6 @@ public class MypageService {
                 .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
                 .competitionCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
-                .img(user.getImg())
-                .like(like)
                 .build();
         return response;
     }

@@ -6,10 +6,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum EventRecruitStatus {
-    RECRUIT_UPCOMING("모집예정"),
-    RECRUIT_OPEN("모집중"),
-    RECRUIT_CLOSE("모집마감"),
-    RECRUIT_END("이벤트종료"),
-    RECRUIT_ALL("전체현황");
+    UPCOMING("모집예정"),
+    OPEN("모집중"),
+    CLOSE("모집마감"),
+    END("이벤트종료");
     private final String value;
 }

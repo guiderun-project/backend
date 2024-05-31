@@ -1,9 +1,8 @@
 package com.guide.run.admin.service;
 
-import com.guide.run.admin.dto.condition.UserSortCond;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
-import com.guide.run.event.entity.dto.response.get.Count;
+import com.guide.run.event.entity.dto.response.search.Count;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.ArchiveData;
@@ -13,7 +12,7 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
-import com.guide.run.user.repository.user.UserRepository;
+import com.guide.run.user.repository.UserRepository;
 import com.guide.run.user.repository.ViRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,22 +36,42 @@ public class AdminUserService {
     private final ArchiveDataRepository archiveDataRepository;
     private final TimeFormatter timeFormatter;
 
-    public List<UserItem> getUserList(int start, int limit,  boolean time, boolean type, boolean gender, boolean name_team, boolean approval){
-        UserSortCond cond = UserSortCond.builder()
-                .approval(approval)
-                .name_team(name_team)
-                .gender(gender)
-                .time(time)
-                .type(type)
-                .build();
+    public UserListResponse getUserList(int start, int limit){
+        int page = start / limit;
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("updatedAt").descending());
+        Page<User> userList = userRepository.findAllByRoleNot(Role.NEW, pageable);
+        List<UserItem> userItems = new ArrayList<>();
+        for(User user : userList){
+            UserItem item = UserItem.builder()
+                    .name(user.getName())
+                    .gender(user.getGender())
+                    .role(user.getRole())
+                    .age(user.getAge())
+                    .phoneNumber(user.getPhoneNumber())
+                    .snsId(user.getSnsId())
+                    .totalCnt(user.getCompetitionCnt() + user.getTrainingCnt())
+                    .competitionCnt(user.getCompetitionCnt())
+                    .trainingCnt(user.getTrainingCnt())
+                    .team(user.getRecordDegree())
+                    .type(user.getType())
+                    .userId(user.getUserId())
+                    .update_date(user.getUpdatedAt().toLocalDate())
+                    .update_time(timeFormatter.getHHMMSS(user.getUpdatedAt()))
+                    .build();
+            userItems.add(item);
+        }
 
-       List<UserItem> response =  userRepository.sortAdminUser(start, limit, cond);
+        UserListResponse response = UserListResponse.builder()
+                .items(userItems)
+                .limit(limit)
+                .start(start)
+                .build();
         return response;
     }
 
     public Count getUserListCount(){
         Count response = Count.builder()
-                .count(userRepository.sortAdminUserCount())
+                .count(userRepository.findAllByRoleNot(Role.NEW).size())
                 .build();
         return response;
     }
@@ -116,11 +135,11 @@ public class AdminUserService {
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         Boolean isApprove = false;
         if(request.getIsApprove()){
-            user.approveUser(Role.ROLE_USER, request.getRecordDegree());
+            user.approveUser(Role.USER, request.getRecordDegree());
             userRepository.save(user);
             isApprove = true;
         }else{
-            user.approveUser(Role.ROLE_REJECT, user.getRecordDegree());
+            user.approveUser(Role.REJECT, user.getRecordDegree());
             userRepository.save(user);
         }
         UserApprovalResponse response = UserApprovalResponse.builder()
