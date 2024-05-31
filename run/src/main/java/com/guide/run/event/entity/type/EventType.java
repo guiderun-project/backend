@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum EventType {
     TRAINING("훈련"),
-    COMPETITION("대회");
+    COMPETITION("대회"),
+    TOTAL("전체");
     private final String value;
 }

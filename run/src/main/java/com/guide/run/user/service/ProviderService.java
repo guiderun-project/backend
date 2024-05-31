@@ -7,7 +7,7 @@ import com.guide.run.user.factory.OAuthRequestFactory;
 import com.guide.run.user.info.GetGoogleInfo;
 import com.guide.run.user.info.GetKakaoInfo;
 import com.guide.run.user.profile.*;
-import com.guide.run.user.repository.UserRepository;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
