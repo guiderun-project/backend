@@ -1,10 +1,10 @@
 package com.guide.run.user.repository.user;
 
 import com.guide.run.admin.dto.condition.UserSortCond;
+import com.guide.run.admin.dto.response.NewUserResponse;
 import com.guide.run.admin.dto.response.UserItem;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -16,18 +16,17 @@ import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.guide.run.event.entity.QEvent.event;
+import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
 import static com.guide.run.user.entity.user.QUser.user;
 
-public class UserRepositoryImpl implements UserRepositoryCustom{
+public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
     private final JPAQueryFactory queryFactory;
 
-    public UserRepositoryImpl(EntityManager em){
+    public UserRepositoryAdminImpl(EntityManager em){
         this.queryFactory = new JPAQueryFactory(em);
     }
 
@@ -229,5 +228,27 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                         user.role.ne(Role.ROLE_NEW)
                 ).fetch().size();
         return count;
+    }
+
+    @Override
+    public List<NewUserResponse> findNewUser(int start, int limit) {
+        List<NewUserResponse> result = queryFactory.select(
+                        Projections.constructor(NewUserResponse.class,
+                                user.userId,
+                                user.img,
+                                user.role,
+                                user.type,
+                                user.name,
+                                user.trainingCnt,
+                                user.competitionCnt.as("contestCnt"),
+                                partnerLike.sendIds.size().as("like")
+                        )
+                ).from(user, partnerLike)
+                .where(user.privateId.eq(partnerLike.recId),
+                        user.role.ne(Role.ROLE_DELETE),
+                        user.role.ne(Role.ROLE_NEW))
+                .orderBy(user.createdAt.desc())
+                .fetch();
+        return result;
     }
 }
