@@ -2,6 +2,7 @@ package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.event.authorize.NotEventApplierException;
+import com.guide.run.global.exception.event.authorize.NotEventCommentWriterException;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.authorize.NotEventParticipantException;
 import com.guide.run.global.service.ResponseService;
@@ -42,6 +43,13 @@ public class EventAuthorizeExceptionAdvice {
         return ResponseEntity.status(403).body(responseService.getFailResult(
                 getMessage("notEventParticipant.code"),
                 getMessage("notEventParticipant.msg")));
+    }
+    //2104
+    @ExceptionHandler(NotEventCommentWriterException.class)
+    protected ResponseEntity<FailResult> NotEventCommentWriterException(NotEventCommentWriterException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notCommentWriter.code"),
+                getMessage("notCommentWriter.msg")));
     }
 
     private String getMessage(String code){

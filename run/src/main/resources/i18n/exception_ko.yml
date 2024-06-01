@@ -62,6 +62,9 @@ notEventApplier:
 notEventParticipant:
   code: "2102"
   msg: "해당 이벤트 참가자가 아닙니다."
+notCommentWriter:
+  code: "2104"
+  msg: "해당 댓글 작성자가 아닙니다."
 notValidSort:
   code: "2200"
   msg: "잘못된 sort값 입니다."
@@ -83,6 +86,9 @@ notValidDay:
 notExistEvent:
   code: "2300"
   msg: "해당 이벤트가 존재하지 않습니다."
+notExistComment:
+  code: "2301"
+  msg: "해당 댓글이 존재하지 않습니다."
 
 notAuthorityVi:
   code: "3100"
