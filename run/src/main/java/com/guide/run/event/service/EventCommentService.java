@@ -56,6 +56,7 @@ public class EventCommentService {
     }
 
     public List<GetComment> getComments(Long eventId, int limit, int start) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return null;
     }
 }
