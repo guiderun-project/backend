@@ -10,8 +10,9 @@ import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.repository.user.UserRepository;
+import com.guide.run.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AdminEventService {/*
+public class AdminEventService {
     private final UserRepository userRepository;
     private final EventFormRepository eventFormRepository;
     private final EventRepository eventRepository;
@@ -72,7 +73,7 @@ public class AdminEventService {/*
     }
 
     public List<EventDto> getAllEventList(int start, int limit){
-        Pageable pageable = PageRequest.of(start/limit,limit, Sort.by("endTime").descending());
+        Pageable pageable = PageRequest.of(start/limit,limit,Sort.by("endTime").descending());
         List<EventDto> eventDtos = new ArrayList<>();
         Page<Event> events = eventRepository.findAll(pageable);
         for(Event e : events){
@@ -103,5 +104,4 @@ public class AdminEventService {/*
             return " AM "+e.getEndTime().getHour();
         }
     }
-*/
 }

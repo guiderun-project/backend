@@ -3,7 +3,7 @@ package com.guide.run.user.service;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
 
-import com.guide.run.user.repository.user.UserRepository;
+import com.guide.run.user.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,33 +19,48 @@ class UserServiceTest {
     UserRepository userRepository;
 
     @BeforeEach
-    public void init() {
+    public void init(){
         userRepository.deleteAll();
     }
 
     @DisplayName("로그인 시 기존 회원 응답")
     @Test
-    void existUserLoginResponse() {
+    void existUserLoginResponse(){
         User user = User.builder()
                 .userId(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.ROLE_USER)
+                .role(Role.USER)
                 .build();
         userRepository.save(user);
         boolean userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_USER.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.USER.getValue());
     }
 
     @DisplayName("로그인 시 가입 대기중 회원 응답")
     @Test
-    void waitUserLoginResponse() {
+    void waitUserLoginResponse(){
         User user = User.builder()
                 .userId(userService.getUUID())
                 .userId("kakao_1")
-                .role(Role.ROLE_WAIT)
+                .role(Role.WAIT)
                 .build();
         userRepository.save(user);
         boolean userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_WAIT.getValue());
+        Assertions.assertThat(userStatus).isEqualTo(Role.WAIT.getValue());
     }
+
+    @DisplayName("로그인 시 신규 회원 응답")
+    @Test
+    void newUserLoginResponse(){
+        boolean userStatus = userService.getUserStatus("kakao_1");
+        Assertions.assertThat(userStatus).isEqualTo(Role.NEW.getValue());
+    }
+
+    @DisplayName("vi 회원가입")
+    @Test
+    void viSignup(){
+
+    }
+    
+
 }

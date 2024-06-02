@@ -196,10 +196,10 @@ public class ExcelService {
 
 
     public void saveEventExcelData(List<EventDTO> dataList) {
-        EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_END;
+        EventRecruitStatus recruitStatus = EventRecruitStatus.END;
         for (EventDTO data : dataList) {
             if(data.getId()>=44){
-                recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
+                recruitStatus = EventRecruitStatus.UPCOMING;
             }
             Event event = Event.builder()
                     .id(data.getId())
