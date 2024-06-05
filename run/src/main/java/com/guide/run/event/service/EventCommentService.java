@@ -1,17 +1,21 @@
 package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Comment;
+import com.guide.run.event.entity.CommentLike;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.request.EventCommentCreateRequest;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
+import com.guide.run.event.entity.repository.CommentLikeRepository;
 import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.event.authorize.NotEventCommentWriterException;
+import com.guide.run.global.exception.event.resource.NotExistCommentException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,6 +23,7 @@ import java.util.List;
 public class EventCommentService {
     private final EventRepository eventRepository;
     private final EventCommentRepository eventCommentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     @Transactional
     public Long createComment(Long eventId, String privateId, EventCommentCreateRequest eventCommentCreateRequest){
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
@@ -27,7 +32,12 @@ public class EventCommentService {
                 .eventId(eventId)
                 .privateId(privateId)
                 .build();
-        eventCommentRepository.save(comment);
+        Comment saved = eventCommentRepository.save(comment);
+        CommentLike commentLike = CommentLike.builder()
+                .commentId(saved.getCommentId())
+                .privateIds(new ArrayList<>())
+                .build();
+        commentLikeRepository.save(commentLike);
         return comment.getCommentId();
     }
     @Transactional
@@ -37,6 +47,7 @@ public class EventCommentService {
         if(!comment.getPrivateId().equals(userId))
             throw new NotEventCommentWriterException();
         eventCommentRepository.delete(comment);
+        commentLikeRepository.deleteById(commentId);
         return comment.getCommentId();
     }
     @Transactional

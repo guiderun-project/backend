@@ -2,7 +2,9 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventLikeRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static com.guide.run.event.entity.type.EventType.COMPETITION;
 import static com.guide.run.event.entity.type.EventType.TRAINING;
@@ -28,6 +31,7 @@ public class EventTestController {
     private final EventRepository eventRepository;
     private final JwtProvider jwtProvider;
     private final EventFormRepository eventFormRepository;
+    private final EventLikeRepository eventLikeRepository;
     //kakao3232984128
     @PostMapping
     public void openeventdup(HttpServletRequest request){
@@ -45,6 +49,11 @@ public class EventTestController {
                         .eventId(1L)
                 .privateId("kakao3232984128")
                         .build());
+        eventLikeRepository.save(
+                EventLike.builder()
+                        .EventId(1L)
+                        .privateIds(new ArrayList<>()).build()
+        );
         eventRepository.save(Event.builder()
                 .id(2L)
                 .name("토스트")
