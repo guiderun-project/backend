@@ -66,9 +66,8 @@ public class EventCommentService {
         ).getCommentId();
     }
 
-    //좋아요 만들고 다시 건들기
     public List<GetComment> getComments(Long eventId, int limit, int start) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        return null;
+        return eventCommentRepository.findGetComments(limit,start,eventId);
     }
 }

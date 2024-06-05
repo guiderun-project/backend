@@ -1,15 +1,14 @@
 package com.guide.run.event.controller;
 
-import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.EventLike;
-import com.guide.run.event.entity.repository.EventFormRepository;
-import com.guide.run.event.entity.repository.EventLikeRepository;
-import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.*;
+import com.guide.run.event.entity.repository.*;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.resource.NotExistCommentException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.repository.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.guide.run.event.entity.type.EventType.COMPETITION;
 import static com.guide.run.event.entity.type.EventType.TRAINING;
@@ -32,6 +32,9 @@ public class EventTestController {
     private final JwtProvider jwtProvider;
     private final EventFormRepository eventFormRepository;
     private final EventLikeRepository eventLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final EventCommentRepository eventCommentRepository;
+    private final UserRepository userRepository;
     //kakao3232984128
     @PostMapping
     public void openeventdup(HttpServletRequest request){
@@ -54,6 +57,28 @@ public class EventTestController {
                         .EventId(1L)
                         .privateIds(new ArrayList<>()).build()
         );
+        userRepository.save(
+                User.builder()
+                        .privateId("22")
+                        .userId("dd")
+                        .build()
+        );
+        commentLikeRepository.save(
+                CommentLike.builder()
+                        .commentId(1L)
+                        .privateIds(new ArrayList<>())
+                        .build()
+        );
+        eventCommentRepository.save(
+                Comment.builder()
+                        .eventId(1L)
+                        .commentId(1L)
+                        .privateId("22")
+                        .comment("두번째사람")
+                        .build()
+        );
+
+
         eventRepository.save(Event.builder()
                 .id(2L)
                 .name("토스트")
@@ -156,6 +181,13 @@ public class EventTestController {
 
     @GetMapping
     public void closeeventdup(HttpServletRequest request){
-        eventRepository.deleteAll();
+        CommentLike commentLike = commentLikeRepository.findById(1L).orElseThrow();
+        List<String> privateIds = commentLike.getPrivateIds();
+        privateIds.add("22");
+        System.out.println(privateIds.get(0));
+        commentLike.setPrivateIds(privateIds);
+        commentLikeRepository.save(commentLike);
+
+
     }
 }
