@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -24,11 +25,7 @@ public class PartnerLike {
     @Convert(converter = StringListConverter.class)
     private List<String> sendIds = new ArrayList<>(); //주는 사람 id 리스트
 
-    public void addLike(String senderId){
-        this.sendIds.add(senderId);
-    }
-
-    public void deleteLike(String senderId){
-        this.sendIds.remove(senderId);
+    public void editLike(List<String> sendIds){
+        this.sendIds = sendIds;
     }
 }
