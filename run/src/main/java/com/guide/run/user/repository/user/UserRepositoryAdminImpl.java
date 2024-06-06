@@ -1,8 +1,11 @@
 package com.guide.run.user.repository.user;
 
 import com.guide.run.admin.dto.condition.UserSortCond;
-import com.guide.run.admin.dto.response.NewUserResponse;
-import com.guide.run.admin.dto.response.UserItem;
+import com.guide.run.admin.dto.condition.WithdrawalSortCond;
+import com.guide.run.admin.dto.response.user.NewUserResponse;
+import com.guide.run.admin.dto.response.user.UserItem;
+import com.guide.run.admin.dto.response.user.WithdrawalItem;
+import com.guide.run.user.entity.QArchiveData;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ConstantImpl;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
+import static com.guide.run.user.entity.QArchiveData.archiveData;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
@@ -92,71 +96,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
     }
 
-    private OrderSpecifier[] createOrderSpec(UserSortCond cond) {
-        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
-
-        //null은 기본값. true false가 더 우선순위를 가지도록 하는 자료구조를 사용해야 한다.
-        //어레이 리스트는 add가 들어가면 앞에 값이 추가됨. null일 경우를 뒤로 밀도록 해야 함.
-        //먼저 들어가는 걸 우선순위로 넣도록 해야 하는데.....
-
-        NumberExpression<Integer> roleOrder = new CaseBuilder()
-                .when(user.role.eq(Role.ROLE_ADMIN)).then(0)
-                .when(user.role.eq(Role.ROLE_COACH)).then(1)
-                .when(user.role.eq(Role.ROLE_USER)).then(2)
-                .when(user.role.eq(Role.ROLE_WAIT)).then(3)
-                .otherwise(4);
-
-        NumberExpression<Integer> typeOrder = new CaseBuilder()
-                .when(user.type.eq(UserType.VI)).then(0)
-                .when(user.type.eq(UserType.GUIDE)).then(1)
-                .otherwise(2);
-
-
-        if (cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, roleOrder));
-        }
-
-        if (cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
-        }
-
-        if (cond.isTime()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
-        }
-
-        if (cond.isGender()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
-        }
-
-        if (cond.isName_team()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
-        }
-
-
-        if (!cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, roleOrder));
-        }
-
-        if (!cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
-        }
-
-        if (!cond.isTime()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
-        }
-
-        if (!cond.isGender()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
-        }
-
-        if (!cond.isName_team()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
-        }
-
-        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
-    }
 
     @Override
     public List<UserItem> searchAdminUser(int start, int limit, UserSortCond cond, String text) {
@@ -250,5 +189,201 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .orderBy(user.createdAt.desc())
                 .fetch();
         return result;
+    }
+
+    @Override
+    public List<WithdrawalItem> sortWithdrawal(int start, int limit, WithdrawalSortCond cond) {
+        List<WithdrawalItem> items = queryFactory.select(
+                        Projections.constructor(
+                                WithdrawalItem.class,
+                                user.userId,
+                                user.role,
+                                user.type,
+                                user.name,
+                                user.recordDegree.as("team"),
+                                user.gender,
+                                archiveData.deleteReasons.as("reason"),
+                                user.updatedAt.as("update_date"),
+                                user.updatedAt.as("update_time")
+                        )
+
+                )
+                .from(user, archiveData)
+                .where(user.role.eq(Role.ROLE_DELETE),
+                        user.privateId.eq(archiveData.privateId))
+                .orderBy(createWithdrawalOrder(cond))
+                .offset(start)
+                .limit(limit)
+                .fetch();
+
+        return items;
+    }
+
+    @Override
+    public long sortWithdrawalCount() {
+        long count = queryFactory.select(user.userId)
+                .from(user, archiveData)
+                .where(user.role.eq(Role.ROLE_DELETE),
+                        user.privateId.eq(archiveData.privateId))
+                .fetch().size();
+        return count;
+    }
+
+    @Override
+    public List<WithdrawalItem> searchWithdrawal(String text, int start, int limit, WithdrawalSortCond cond) {
+        List<WithdrawalItem> items = queryFactory.select(
+                        Projections.constructor(
+                                WithdrawalItem.class,
+                                user.userId,
+                                user.role,
+                                user.type,
+                                user.name,
+                                user.recordDegree.as("team"),
+                                user.gender,
+                                archiveData.deleteReasons.as("reason"),
+                                user.updatedAt.as("update_date"),
+                                user.updatedAt.as("update_time")
+                        )
+
+                )
+                .from(user, archiveData)
+                .where(user.role.eq(Role.ROLE_DELETE),
+                        user.privateId.eq(archiveData.privateId),
+                        (user.name.contains(text)
+                                .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
+
+                        //todo : 검색 조건 추가 필요
+                                ))
+                .orderBy(createWithdrawalOrder(cond))
+                .offset(start)
+                .limit(limit)
+                .fetch();
+
+        return items;
+    }
+
+    @Override
+    public long searchWithdrawalCount(String text) {
+
+        long count = queryFactory.select(user.userId)
+                .from(user, archiveData)
+                .where(user.role.eq(Role.ROLE_DELETE),
+                        user.privateId.eq(archiveData.privateId),
+                        (user.name.contains(text)
+                                .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
+
+                                //todo : 검색 조건 추가 필요
+                        ))
+                .fetch().size();
+        return count;
+    }
+
+    private OrderSpecifier[] createWithdrawalOrder(WithdrawalSortCond cond){
+        //정렬 순서 때문에 일부러 if 문을 여러 개 사용
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        NumberExpression<Integer> typeOrder = new CaseBuilder()
+                .when(user.type.eq(UserType.VI)).then(0)
+                .when(user.type.eq(UserType.GUIDE)).then(1)
+                .otherwise(2);
+
+        if (cond.isType()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+        }
+
+        if (cond.isTime()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
+        }
+
+        if (cond.isGender()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
+        }
+
+        if (cond.isName_team()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
+        }
+
+        if (!cond.isType()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+        }
+
+        if (!cond.isTime()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
+        }
+
+        if (!cond.isGender()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
+        }
+
+        if (!cond.isName_team()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+    }
+
+
+    private OrderSpecifier[] createOrderSpec(UserSortCond cond) {
+        //정렬 순서 때문에 일부러 if 문을 여러 개 사용
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+
+        NumberExpression<Integer> roleOrder = new CaseBuilder()
+                .when(user.role.eq(Role.ROLE_ADMIN)).then(0)
+                .when(user.role.eq(Role.ROLE_COACH)).then(1)
+                .when(user.role.eq(Role.ROLE_USER)).then(2)
+                .when(user.role.eq(Role.ROLE_WAIT)).then(3)
+                .otherwise(4);
+
+        NumberExpression<Integer> typeOrder = new CaseBuilder()
+                .when(user.type.eq(UserType.VI)).then(0)
+                .when(user.type.eq(UserType.GUIDE)).then(1)
+                .otherwise(2);
+
+
+        if (cond.isApproval()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, roleOrder));
+        }
+
+        if (cond.isType()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+        }
+
+        if (cond.isTime()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
+        }
+
+        if (cond.isGender()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
+        }
+
+        if (cond.isName_team()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
+        }
+
+
+        if (!cond.isApproval()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, roleOrder));
+        }
+
+        if (!cond.isType()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+        }
+
+        if (!cond.isTime()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
+        }
+
+        if (!cond.isGender()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
+        }
+
+        if (!cond.isName_team()) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+        }
+
+        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
 }
