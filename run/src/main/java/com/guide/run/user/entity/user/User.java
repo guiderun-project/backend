@@ -75,5 +75,9 @@ public class User extends BaseEntity {
         this.trainingCnt += cntDTO.getTrainingCnt();
         this.competitionCnt += cntDTO.getCompetitionCnt();
     }
+
+    public void editImg(String img){
+        this.img = img;
+    }
 }
 
