@@ -13,26 +13,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface EventRepository extends JpaRepository<Event,Long>, EventRepositoryCustom {
+public interface EventRepository extends JpaRepository<Event,Long>, EventRepositoryCustom, EventRepositoryAdmin {
     Page<Event> findAll( Pageable pageable);
-    Event findByIdAndRecruitStatus(Long id,EventRecruitStatus recruitStatus);
     List<Event> findAllByNameContainingOrContentContaining(String name,String content);
     Page<Event> findAllByNameContainingOrContentContaining(String name,String content,Pageable pageable);
-    List<Event> findByRecruitStatusOrderByEndTime(EventRecruitStatus recruitStatus);
-    Page<Event> findAllByTypeAndRecruitStatusOrderByEndTimeDesc(EventType eventType,
-                                                                 EventRecruitStatus eventRecruitStatus,
-                                                                 Pageable pageable);
-    Page<Event> findAllByTypeAndRecruitStatusOrderByEndTime(EventType eventType,
-                                                                EventRecruitStatus eventRecruitStatus,
-                                                                Pageable pageable);
-    Page<Event> findAllByTypeAndRecruitStatusNotOrderByEndTime(EventType eventType,
-                                                               EventRecruitStatus eventRecruitStatus,
-                                                               Pageable pageable);
-    Page<Event> findAllByRecruitStatusNotOrderByEndTime(EventRecruitStatus eventRecruitStatus,
-                                                               Pageable pageable);
-    Page<Event> findAllByRecruitStatusOrderByEndTime(EventRecruitStatus eventRecruitStatus,
-                                                     Pageable pageable);
-    Page<Event> findAllByRecruitStatusOrderByEndTimeDesc(EventRecruitStatus eventRecruitStatus,Pageable pageable);
 
     List<Event> findAllByRecruitStatusNot(EventRecruitStatus eventRecruitStatus);
 
