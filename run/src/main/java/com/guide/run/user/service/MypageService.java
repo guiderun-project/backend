@@ -64,10 +64,8 @@ public class MypageService {
                 NotExistUserException::new
         );
 
-        String privateId = user.getPrivateId();
 
-        String userType = user.getType().getValue();
-        List<MyPagePartner> response = partnerRepository.findMyPartner(privateId,sort , limit, start, userType);
+        List<MyPagePartner> response = partnerRepository.findMyPartner(user.getPrivateId(),sort , limit, start, user.getType());
 
         return response;
     }
@@ -77,11 +75,8 @@ public class MypageService {
                 NotExistUserException::new
         );
 
-        String privateId = user.getPrivateId();
 
-        String userType = user.getType().getValue();
-
-        long response = partnerRepository.countMyPartner(privateId, userType);
+        long response = partnerRepository.countMyPartner(user.getPrivateId(), user.getType());
         return response;
     }
 
