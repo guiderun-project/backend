@@ -3,6 +3,7 @@ package com.guide.run.global.converter;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,6 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
         if(data == null){
             return null;
         }
-        return Arrays.asList(data.split(SPLIT));
+        return new ArrayList<>(Arrays.asList(data.split(SPLIT)));
     }
 }
