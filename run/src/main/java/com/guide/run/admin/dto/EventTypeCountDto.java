@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class EventTypeCountDto {
-    private int Training;
-    private int Competition;
+    private int training;
+    private int competition;
 }
