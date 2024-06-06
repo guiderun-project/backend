@@ -11,12 +11,19 @@ import java.time.LocalDate;
 
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
 public class MyPageEvent {
     private Long eventId;
     private EventType eventType;
     private String name;
-    private String date;
+    private String startDate;
     private EventRecruitStatus recruitStatus;
+
+    public MyPageEvent(Long eventId, EventType eventType, String name, String date, EventRecruitStatus recruitStatus) {
+        this.eventId = eventId;
+        this.eventType = eventType;
+        this.name = name;
+        this.startDate = date;
+        this.recruitStatus = recruitStatus;
+    }
 }
