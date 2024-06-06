@@ -3,99 +3,63 @@ package com.guide.run.admin.service;
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.EventTypeCountDto;
+import com.guide.run.admin.dto.condition.EventSortCond;
+import com.guide.run.admin.dto.request.ApprovalEvent;
+import com.guide.run.admin.dto.response.event.CurrentEventResponse;
+import com.guide.run.admin.dto.response.event.AdminEventResult;
 import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.repository.EventRepository;
-import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AdminEventService {/*
+public class AdminEventService {
     private final UserRepository userRepository;
-    private final EventFormRepository eventFormRepository;
     private final EventRepository eventRepository;
-    public List<EventHistoryDto> getEventHistory(String userId, int start, int limit, int year, int month){
-        Pageable pageable = PageRequest.of(start/limit,limit);
-        String privateId = userRepository.findUserByUserId(userId).orElseThrow(() -> new NotExistUserException()).getPrivateId();
-        List<EventHistoryDto> eventHistories = new ArrayList<>();
-        LocalDateTime startTime = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endTime = LocalDateTime.of(year, month, LocalDate.of(year, month, 1).lengthOfMonth(), 23, 59);
-        Page<EventForm> eventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTime(privateId, startTime, endTime,pageable);
-        for(EventForm ef : eventForms){
-            Event event = eventRepository.findById(ef.getEventId()).orElseThrow(() -> new NotExistEventException());
-            eventHistories.add(EventHistoryDto.builder()
-                    .eventId(event.getId())
-                    .eventType(event.getType())
-                    .name(event.getName())
-                    .endDate(event.getEndTime().toLocalDate())
-                    .recruitStatus(event.getRecruitStatus())
-                    .build());
-        }
-        return eventHistories;
+    private final TimeFormatter timeFormatter;
+
+    public List<EventHistoryDto> getEventHistory(String userId, int start, int limit, String sort){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        return eventRepository.getUserEventHistory(user.getPrivateId(), start, limit, sort);
     }
-    public int getEventHistoryCount(String userId,int year,int month){
-        String privateId = userRepository.findUserByUserId(userId).orElseThrow(() -> new NotExistUserException()).getPrivateId();
-        List<EventHistoryDto> eventHistories = new ArrayList<>();
-        LocalDateTime startTime = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endTime = LocalDateTime.of(year, month, LocalDate.of(year, month, 1).lengthOfMonth(), 23, 59);
-        List<EventForm> eventForms = eventFormRepository.findByPrivateIdAndEndTimeBetweenOrderByEndTimeDesc(privateId, startTime, endTime);
-        return eventForms.size();
+
+    public Count getEventHistoryCount(String userId, String sort){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+
+        return Count.builder()
+                .count(eventRepository.getUserEventHistoryCount(user.getPrivateId(), sort))
+                .build();
     }
 
     public EventTypeCountDto getEventTypeCount(String userId) {
-        String privateId = userRepository.findUserByUserId(userId).orElseThrow(() -> new NotExistUserException()).getPrivateId();
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         return EventTypeCountDto.builder()
-                .Competition(eventFormRepository.findAllByPrivateIdAndEventType(privateId, EventType.COMPETITION).size())
-                .Training(eventFormRepository.findAllByPrivateIdAndEventType(privateId, EventType.TRAINING).size())
+                .competition(user.getCompetitionCnt())
+                .training(user.getTrainingCnt())
                 .build();
     }
 
 
-    public int getAllEventCount() {
-        return eventRepository.findAll().size();
+    public Count getAllEventCount() {
+        return Count.builder()
+                .count(eventRepository.getAdminEventCount())
+                .build();
     }
 
-    public List<EventDto> getAllEventList(int start, int limit){
-        Pageable pageable = PageRequest.of(start/limit,limit, Sort.by("endTime").descending());
-        List<EventDto> eventDtos = new ArrayList<>();
-        Page<Event> events = eventRepository.findAll(pageable);
-        for(Event e : events){
-            User user = userRepository.findUserByPrivateId(e.getOrganizer()).orElseThrow(() -> new NotExistUserException());
-            eventDtos.add(EventDto.builder()
-                            .eventId(e.getId())
-                            .title(e.getName())
-                            .smallDate("["+e.getEndTime().getMonthValue()+"/"+e.getEndTime().getDayOfMonth()+"]")
-                            .date(e.getEndTime().getYear()+"."+e.getEndTime().getMonthValue()+"."+e.getEndTime().getDayOfMonth()+
-                                    calculatePM(e)+":"+e.getEndTime().getMinute()+":"+e.getEndTime().getSecond())
-                            .organizer(user.getName())
-                            .pace(user.getRecordDegree())
-                            .recruitStatus(e.getRecruitStatus())
-                            .approval(e.isApprove())
-                            .participation(e.getMaxNumG()+e.getMaxNumV())
-                            .guideParticipation(e.getMaxNumG())
-                            .viParticipation(e.getMaxNumV())
-                            .update_date(e.getEndTime().getYear()+"."+e.getEndTime().getMonthValue()+"."+e.getEndTime().getDayOfMonth())
-                            .update_time(e.getEndTime().getHour()+":"+e.getEndTime().getMinute()+":"+e.getEndTime().getSecond())
-                    .build());
-        }
-        return eventDtos;
+    public List<EventDto> getAllEventList(int start, int limit, EventSortCond cond){
+        return eventRepository.getAdminEventList(start, limit, cond);
     }
+
     public String calculatePM(Event e){
         if(e.getEndTime().getHour()>=12){
             return " PM "+(e.getEndTime().getHour()-12);
@@ -103,5 +67,58 @@ public class AdminEventService {/*
             return " AM "+e.getEndTime().getHour();
         }
     }
-*/
+
+
+    public List<CurrentEventResponse> getCurrentEvents(int start, int limit){
+        return eventRepository.findCurrentEvent(start, limit);
+    }
+
+    public List<EventDto> searchAllEvent(String text, int start, int limit, EventSortCond cond){
+        return eventRepository.searchAdminEvent(text, start, limit, cond);
+    }
+
+    public Count searchAllEventCount(String text){
+
+        return Count.builder()
+                .count(eventRepository.searchAdminEventCount(text))
+                .build();
+    }
+
+    public List<EventHistoryDto> searchEventHistory(String userId, String text, int start, int limit){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        return eventRepository.searchUserEventHistory(user.getPrivateId(), text, start, limit);
+    }
+
+    public Count searchEventHistoryCount(String userId, String text){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        return Count.builder()
+                .count(eventRepository.searchUserEventHistoryCount(user.getPrivateId(), text))
+                .build();
+    }
+
+    public void approvalEvent(long eventId, ApprovalEvent approvalEvent){
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        event.approvalEvent(approvalEvent.isApproval());
+    }
+
+    public AdminEventResult getEventResult(long eventId){
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User user = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
+        return AdminEventResult.builder()
+                .name(event.getName())
+                .date(event.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-mm-dd")))
+                .type(event.getType())
+                .organizer(user.getName())
+                .pace(user.getRecordDegree())
+                .status(event.getStatus())
+                .recruitStatus(event.getRecruitStatus())
+                .total(event.getGuideCnt()+event.getViCnt())
+                .viCnt(event.getViCnt())
+                .guideCnt(event.getGuideCnt())
+                //todo : 출석 반영해서 안 온 사람 체크해야 함.
+                .build();
+
+    }
+
+
 }
