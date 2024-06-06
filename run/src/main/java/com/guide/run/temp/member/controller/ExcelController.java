@@ -2,7 +2,7 @@ package com.guide.run.temp.member.controller;
 
 
 import com.guide.run.temp.member.dto.AttDTO;
-import com.guide.run.temp.member.dto.EventDTO;
+import com.guide.run.temp.member.dto.EventTMPDTO;
 import com.guide.run.temp.member.dto.MemberDTO;
 import com.guide.run.temp.member.service.ExcelService;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,7 @@ public class ExcelController {
         }
 
         try {
-            List<EventDTO> dataList = excelService.readEventExcelData(file);
+            List<EventTMPDTO> dataList = excelService.readEventExcelData(file);
             if (dataList != null && !dataList.isEmpty()) {
                 excelService.saveEventExcelData(dataList);
                 return new ResponseEntity<>("성공", HttpStatus.OK);

@@ -5,7 +5,7 @@ import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.temp.member.dto.AttDTO;
-import com.guide.run.temp.member.dto.EventDTO;
+import com.guide.run.temp.member.dto.EventTMPDTO;
 import com.guide.run.temp.member.dto.MemberDTO;
 import com.guide.run.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -126,8 +126,8 @@ public class ExcelService {
         }
     }
 
-    public List<EventDTO> readEventExcelData(MultipartFile file) throws IOException {
-        List<EventDTO> dataList = new ArrayList<>();
+    public List<EventTMPDTO> readEventExcelData(MultipartFile file) throws IOException {
+        List<EventTMPDTO> dataList = new ArrayList<>();
 
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -140,7 +140,7 @@ public class ExcelService {
                     break;
                 }
                 //log.info(String.valueOf(row.getRowNum()));
-                    EventDTO dto = new EventDTO();
+                    EventTMPDTO dto = new EventTMPDTO();
                     //id, name, type, startTime, endTime, viCnt, guideCnt, place, content
                     Cell idCell = row.getCell(1);
                     if (idCell != null) {
@@ -195,9 +195,9 @@ public class ExcelService {
     }
 
 
-    public void saveEventExcelData(List<EventDTO> dataList) {
+    public void saveEventExcelData(List<EventTMPDTO> dataList) {
         EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_END;
-        for (EventDTO data : dataList) {
+        for (EventTMPDTO data : dataList) {
             if(data.getId()>=44){
                 recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
             }

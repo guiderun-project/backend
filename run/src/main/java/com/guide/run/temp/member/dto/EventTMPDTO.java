@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EventDTO {
+public class EventTMPDTO {
     private Long id; //이벤트 id
     private String organizer = "458"; //주최자 id
     private String name; //이벤트 제목
