@@ -44,8 +44,9 @@ public class AdminEventService {
     public EventTypeCountDto getEventTypeCount(String userId) {
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         return EventTypeCountDto.builder()
-                .competition(user.getCompetitionCnt())
-                .training(user.getTrainingCnt())
+                .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
+                .competitionCnt(user.getCompetitionCnt())
+                .trainingCnt(user.getTrainingCnt())
                 .build();
     }
 

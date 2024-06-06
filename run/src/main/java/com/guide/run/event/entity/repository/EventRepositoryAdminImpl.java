@@ -35,7 +35,6 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
     @Override
     public long countMyEventAfterYear(String privateId, String kind, int year) {
-        LocalDateTime fromDate = LocalDateTime.of(year, 1, 1, 0, 0, 0);
         long count = queryFactory.select(event.id)
                 .from(event, eventForm)
                 .where(

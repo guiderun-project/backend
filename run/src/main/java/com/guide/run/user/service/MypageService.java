@@ -1,7 +1,10 @@
 package com.guide.run.user.service;
 
+import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.partner.PartnerLike;
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -40,6 +44,13 @@ public class MypageService {
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new
         );
+
+        boolean isValidStatus = Arrays.stream(EventRecruitStatus.values())
+                .anyMatch(e -> e.name().equals(kind));
+        if(isValidStatus){
+            throw new NotValidKindException();
+        }
+
         String privateId = user.getPrivateId();
         long count = eventRepository.countMyEventAfterYear(privateId, kind, year);
 
@@ -51,6 +62,12 @@ public class MypageService {
         User user = userRepository.findUserByUserId(userId).orElseThrow(
                 NotExistUserException::new
         );
+
+        boolean isValidStatus = Arrays.stream(EventRecruitStatus.values())
+                .anyMatch(e -> e.name().equals(kind));
+        if(isValidStatus){
+            throw new NotValidKindException();
+        }
 
         String privateId = user.getPrivateId();
 
@@ -117,5 +134,14 @@ public class MypageService {
                 .like(like)
                 .build();
         return response;
+    }
+
+    public EventTypeCountDto getMyPageEventTypeCount(String privateId){
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        return EventTypeCountDto.builder()
+                .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
+                .competitionCnt(user.getCompetitionCnt())
+                .trainingCnt(user.getTrainingCnt())
+                .build();
     }
 }

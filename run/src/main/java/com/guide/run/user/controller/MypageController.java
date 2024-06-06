@@ -1,10 +1,12 @@
 package com.guide.run.user.controller;
 
+import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.dto.GlobalUserInfoDto;
+import com.guide.run.user.dto.response.MyPageEventList;
 import com.guide.run.user.dto.response.ProfileResponse;
 import com.guide.run.user.service.MypageService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,15 +46,17 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/event-history/{userId}")
-    public ResponseEntity<List<MyPageEvent>> getMyEventList(@PathVariable String userId,
-                                                            @RequestParam(defaultValue = "0") int start,
-                                                            @RequestParam(defaultValue = "10") int limit,
-                                                            @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
-                                                            @RequestParam(defaultValue = "0") int year){
+    public ResponseEntity<MyPageEventList> getMyEventList(@PathVariable String userId,
+                                                          @RequestParam(defaultValue = "0") int start,
+                                                          @RequestParam(defaultValue = "10") int limit,
+                                                          @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
+                                                          @RequestParam(defaultValue = "0") int year){
        if(year==0){
            year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
        }
-        List<MyPageEvent> response = mypageService.getMyPageEvents(userId,start,limit, kind, year);
+        MyPageEventList response = MyPageEventList.builder()
+                .items(mypageService.getMyPageEvents(userId,start,limit, kind, year))
+                .build();
 
         return ResponseEntity.ok().body(response);
     }
@@ -81,5 +85,11 @@ public class MypageController {
                 .build();
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("event-type/count")
+    public ResponseEntity<EventTypeCountDto> getEventTypeCount(HttpServletRequest request){
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(privateId));
     }
 }
