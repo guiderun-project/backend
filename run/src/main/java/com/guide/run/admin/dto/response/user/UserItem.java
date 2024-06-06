@@ -1,4 +1,4 @@
-package com.guide.run.admin.dto.response;
+package com.guide.run.admin.dto.response.user;
 
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
