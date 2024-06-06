@@ -163,6 +163,8 @@ public class EventService {
                 .partnerType(null) //파트너 장애여부
                 .build();
 
+        //todo : 매칭 구현 이후 추가
+        /* 
         //매칭 여부로 파트너 정보 추가
         Matching matching;
         String partnerId;
@@ -177,7 +179,7 @@ public class EventService {
 
             User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
             response.setPartner(partner.getName(), partner.getRecordDegree(), partner.getType());
-        }
+        }*/
 
         return response;
     }

@@ -1,8 +1,8 @@
 package com.guide.run.event.service;
 
+import com.guide.run.admin.dto.SearchAllEventsCount;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
