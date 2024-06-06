@@ -1,26 +1,26 @@
 package com.guide.run.admin.controller;
 
+import com.guide.run.admin.dto.condition.UserSortCond;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
+import com.guide.run.admin.dto.response.user.NewUserResponse;
+import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.admin.service.AdminUserService;
 
 import com.guide.run.event.entity.dto.response.get.Count;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")
 public class AdminUserController {
     private final AdminUserService adminUserService;
 
+    //전체 회원
     @GetMapping("/user-list")
     public ResponseEntity<List<UserItem>> getUserList(@RequestParam int start,
                                                       @RequestParam int limit,
@@ -31,7 +31,14 @@ public class AdminUserController {
                                                       @RequestParam(defaultValue = "false") boolean name_team,
                                                       @RequestParam(defaultValue = "false") boolean approval
                                                       ){
-        List<UserItem> response = adminUserService.getUserList(start, limit, time, type, gender, name_team, approval);
+        UserSortCond cond = UserSortCond.builder()
+                .approval(approval)
+                .name_team(name_team)
+                .gender(gender)
+                .time(time)
+                .type(type)
+                .build();
+        List<UserItem> response = adminUserService.getUserList(start, limit, cond);
         return ResponseEntity.ok().body(response);
     }
 
@@ -40,7 +47,13 @@ public class AdminUserController {
         Count response = adminUserService.getUserListCount();
         return ResponseEntity.ok().body(response);
     }
+    @GetMapping("/new-user")
+    public ResponseEntity<List<NewUserResponse>> getNewUserList(@RequestParam int start, @RequestParam int limit){
+        List<NewUserResponse> response = adminUserService.getNewUser(start,limit);
+        return ResponseEntity.ok().body(response);
+    }
 
+    //단일 회원
     @GetMapping("/apply/vi/{userId}")
     public ResponseEntity<ViApplyResponse> getApplyVi(@PathVariable String userId){
         ViApplyResponse response = adminUserService.getApplyVi(userId);
@@ -58,4 +71,5 @@ public class AdminUserController {
         UserApprovalResponse response = adminUserService.approveUser(userId, request);
         return ResponseEntity.ok().body(response);
     }
+
 }
