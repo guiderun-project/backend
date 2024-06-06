@@ -37,6 +37,7 @@ notValidPhoneNumberForm:
 InvalidItemError:
   code: "1006"
   msg: "해당하지 않는 항목을 입력하였습니다."
+
 notApprovedUser:
   code: "1100"
   msg: "가입이 승인되지 않은 사용자 입니다."
@@ -99,4 +100,10 @@ notAuthorityAdmin:
 notAuthorityCoach:
   code: "6100"
   msg: "Coach 권한이 없습니다."
+
+notValidImgFormat:
+  code: "7001"
+  msg: "지원하지 않는 파일 양식입니다."
+
+
 
