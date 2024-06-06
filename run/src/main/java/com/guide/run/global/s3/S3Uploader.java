@@ -30,8 +30,6 @@ public class S3Uploader {
 
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
         File uploadFile = convert(multipartFile).orElseThrow(() -> new IllegalArgumentException("파일 전환 실패"));
-
-        log.info("업로드");
         return upload(uploadFile, dirName);
     }
 
@@ -40,13 +38,12 @@ public class S3Uploader {
         String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
         String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
         removeNewFile(uploadFile);
-        log.info("업로드2");
         return uploadImageUrl;
     }
 
     // S3로 업로드
     private String putS3(File uploadFile, String fileName) {
-        log.info("s3에 저장");
+        //log.info("s3에 저장");
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3.getUrl(bucket, fileName).toString();
     }
@@ -63,7 +60,7 @@ public class S3Uploader {
     private Optional<File> convert(MultipartFile multipartFile) throws IOException {
         File convertFile = new File(System.getProperty("user.dir") + "/" + multipartFile.getOriginalFilename());
         // 바로 위에서 지정한 경로에 File이 생성됨 (경로가 잘못되었다면 생성 불가능)
-        log.info("convert");
+        //log.info("convert");
         if (convertFile.createNewFile()) {
             try (FileOutputStream fos = new FileOutputStream(convertFile)) { // FileOutputStream 데이터를 파일에 바이트 스트림으로 저장하기 위함
                 fos.write(multipartFile.getBytes());
@@ -77,9 +74,9 @@ public class S3Uploader {
 
     public void deleteFile(String fileName) {
         try {
-            // URL 디코딩을 통해 원래의 파일 이름을 가져옵니다.
+            // URL 디코딩을 통해 원래의 파일 이름을 가져옴.
             String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            log.info("Deleting file from S3: " + decodedFileName);
+            //log.info("Deleting file from S3: " + decodedFileName);
             amazonS3.deleteObject(bucket, decodedFileName);
         } catch (UnsupportedEncodingException e) {
             log.error("Error while decoding the file name: {}", e.getMessage());

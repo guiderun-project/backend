@@ -20,6 +20,7 @@ public class ImgController {
     public ResponseEntity<String> uploadProfile(@RequestParam("image") MultipartFile file,
                                                 HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
+
         String img = imgService.uploadProfile(privateId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(img);
     }
