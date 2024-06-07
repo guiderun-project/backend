@@ -11,8 +11,11 @@ import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.temp.member.entity.Attendance;
+import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +29,9 @@ public class EventFormService {
     private final EventFormRepository eventFormRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final AttendanceRepository attendanceRepository;
 
+    @Transactional
     public Long createForm(CreateEventForm createForm, Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
@@ -35,6 +40,13 @@ public class EventFormService {
         List<EventForm> forms = eventFormRepository.findAllByEventIdAndPrivateId(eventId, userId);
         if(forms.size()>0)
             throw new ExistFormException();
+        attendanceRepository.save(
+                Attendance.builder()
+                        .eventId(eventId)
+                        .privateId(userId)
+                        .isAttend(false)
+                        .build()
+        );
 
         return eventFormRepository.save(
                 EventForm.builder()
@@ -51,6 +63,7 @@ public class EventFormService {
         ).getId();
     }
 
+    @Transactional
     public Long patchForm(CreateEventForm createForm, Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
