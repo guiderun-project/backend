@@ -44,6 +44,9 @@ public class ImgService {
     public void deleteProfile(String privateId){
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         String img = user.getImg();
+        if(img.isBlank()){
+            return;
+        }
         s3Uploader.deleteFile(img);
         user.editImg(null);
     }
