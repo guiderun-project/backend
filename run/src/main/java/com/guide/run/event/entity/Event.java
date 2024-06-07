@@ -57,4 +57,12 @@ public class Event extends BaseEntity {
     public void approvalEvent(Boolean isApprove){
         this.isApprove = isApprove;
     }
+
+    public void changeStatus(EventStatus status){
+        this.status = status;
+    }
+
+    public void changeRecruit(EventRecruitStatus recruitStatus){
+        this.recruitStatus = recruitStatus;
+    }
 }
