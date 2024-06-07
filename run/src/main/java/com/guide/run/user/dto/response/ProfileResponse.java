@@ -28,6 +28,7 @@ public class ProfileResponse {
 
     //2차 때 추가된 부분
     private String img;
+    private boolean isLiked;
     private int like;
 
 }

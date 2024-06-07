@@ -36,7 +36,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 user.recordDegree,
                                 partner.trainingIds.size().as("trainingCnt"),
                                 partner.contestIds.size().as("contestCnt"),
-                                partnerLike.sendIds,
+                                partnerLike.sendIds.size(),
                                 constantAs(privateId, user.privateId)
                         )
 

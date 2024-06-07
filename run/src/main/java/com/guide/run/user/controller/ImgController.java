@@ -17,7 +17,7 @@ public class ImgController {
     private final ImgService imgService;
 
     @PostMapping("/user/img")
-    public ResponseEntity<String> uploadProfile(@RequestParam("image") MultipartFile file,
+    public ResponseEntity<String> uploadProfile(@RequestParam MultipartFile file,
                                                 HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
 

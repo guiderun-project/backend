@@ -51,9 +51,6 @@ public class MypageController {
                                                           @RequestParam(defaultValue = "10") int limit,
                                                           @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
                                                           @RequestParam(defaultValue = "0") int year){
-       if(year==0){
-           year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
-       }
         MyPageEventList response = MyPageEventList.builder()
                 .items(mypageService.getMyPageEvents(userId,start,limit, kind, year))
                 .build();
