@@ -2,7 +2,6 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
-import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
@@ -22,15 +21,15 @@ public class EventController {
     private final EventService eventService;
 
     @PostMapping
-    public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest eventCreateRequest, HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
-        EventCreatedResponse eventCreatedResponse = eventService.eventCreate(eventCreateRequest, userId);
+    public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        EventCreatedResponse eventCreatedResponse = eventService.eventCreate(request, privateId);
         return ResponseEntity.status(HttpStatus.CREATED).body(eventCreatedResponse);
     }
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventUpdateRequest eventUpdateRequest, HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
-        EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(eventUpdateRequest, userId,eventId);
+    public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
+        String priavateId = jwtProvider.extractUserId(httpServletRequest);
+        EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(request, priavateId,eventId);
         return ResponseEntity.status(HttpStatus.OK).body(eventUpdatedResponse);
     }
 
@@ -51,8 +50,8 @@ public class EventController {
 
     @GetMapping("/pop/{eventId}")
     public ResponseEntity<EventPopUpResponse> eventPopUp(@PathVariable Long eventId, HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
-        EventPopUpResponse response = eventService.eventPopUp(eventId, userId);
+        String privateId = jwtProvider.extractUserId(request);
+        EventPopUpResponse response = eventService.eventPopUp(eventId, privateId);
         return ResponseEntity.ok().body(response);
     }
     @GetMapping("/dday")
