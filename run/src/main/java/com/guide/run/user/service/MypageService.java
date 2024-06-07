@@ -47,7 +47,7 @@ public class MypageService {
 
         boolean isValidStatus = Arrays.stream(EventRecruitStatus.values())
                 .anyMatch(e -> e.name().equals(kind));
-        if(isValidStatus){
+        if(!isValidStatus){
             throw new NotValidKindException();
         }
 
@@ -108,10 +108,13 @@ public class MypageService {
             snsId = user.getSnsId();
         }
 
-        PartnerLike partnerlike = partnerLikeRepository.findById(privateId).orElse(null);
+        PartnerLike partnerlike = partnerLikeRepository.findById(user.getPrivateId()).orElse(null);
 
         if(partnerlike!=null){
-            like = partnerlike.getSendIds().size();
+            if(!partnerlike.getSendIds().isEmpty()){
+                //좋아요 수 반환
+                like = partnerlike.getSendIds().size();
+            }
         }
 
         ProfileResponse response = ProfileResponse.builder()
@@ -131,6 +134,7 @@ public class MypageService {
                 .competitionCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
                 .img(user.getImg())
+                .isLiked(partnerlike.getSendIds().contains(privateId))
                 .like(like)
                 .build();
         return response;
