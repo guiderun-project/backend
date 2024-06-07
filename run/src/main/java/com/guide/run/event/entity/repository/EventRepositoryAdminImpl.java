@@ -46,7 +46,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         searchByKind(kind),
 
                         //year 조건 처리
-                        event.startTime.year().goe(year)
+                        sortByYear(year)
 
                 )
                 .fetch().size();
@@ -77,10 +77,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         eventForm.eventId.eq(event.id),
                         //kind 조건 처리
                         searchByKind(kind),
-
                         //year 조건 처리
-                        event.startTime.year().goe(year)
-
+                        sortByYear(year)
                 )
                 .orderBy(
                         event.startTime.desc()
@@ -90,20 +88,6 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .fetch();
 
         return result;
-    }
-
-    private BooleanExpression searchByKind(String kind){
-        if(kind.equals("RECRUIT_UPCOMING")){
-            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING);
-        } else if(kind.equals("RECRUIT_OPEN")){
-            return event.recruitStatus.eq(RECRUIT_OPEN);
-        } else if(kind.equals("RECRUIT_CLOSE")){
-            return event.recruitStatus.eq(RECRUIT_CLOSE);
-        } else if (kind.equals("RECRUIT_END")) {
-            return event.recruitStatus.eq(RECRUIT_END);
-        } else{
-            return null;
-        }
     }
 
 
@@ -350,6 +334,29 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+    }
+
+    private BooleanExpression searchByKind(String kind){
+        if(kind.equals("RECRUIT_UPCOMING")){
+            return event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING);
+        } else if(kind.equals("RECRUIT_OPEN")){
+            return event.recruitStatus.eq(RECRUIT_OPEN);
+        } else if(kind.equals("RECRUIT_CLOSE")){
+            return event.recruitStatus.eq(RECRUIT_CLOSE);
+        } else if (kind.equals("RECRUIT_END")) {
+            return event.recruitStatus.eq(RECRUIT_END);
+        } else{
+            return null;
+        }
+    }
+
+    private BooleanExpression sortByYear(int year){
+        if(year==0){
+            return null;
+        }else{
+            //year 조건 처리
+            return event.startTime.year().goe(year);
+        }
     }
 
 }
