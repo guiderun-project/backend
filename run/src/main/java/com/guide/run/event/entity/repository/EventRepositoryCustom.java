@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.repository;
 
+import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
@@ -19,6 +20,9 @@ public interface EventRepositoryCustom {
     long getAllMyEventListCount(EventType eventType,EventRecruitStatus eventRecruitStatus,String privateId);
     List<AllEvent> getAllMyEventList(int limit,int start,EventType eventType,EventRecruitStatus eventRecruitStatus,String privateId);
     List<MyEventDday> getMyEventDday(String userId);
+
+    List<Event> getSchedulerEvent();
+    List<Event> getSchedulerRecruit();
 
 
 

@@ -1,11 +1,13 @@
 package com.guide.run.event.entity.repository;
 
+import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
@@ -148,6 +150,23 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(event.recruitStatus.ne(RECRUIT_END))
                 .orderBy(event.startTime.asc())
                 .limit(2)
+                .fetch();
+    }
+
+    @Override
+    public List<Event> getSchedulerEvent() {
+        return queryFactory.selectFrom(event)
+                .where(event.recruitStatus.eq(RECRUIT_CLOSE),
+                        event.status.ne(EventStatus.EVENT_END))
+                .fetch();
+    }
+
+    @Override
+    public List<Event> getSchedulerRecruit() {
+        return queryFactory.selectFrom(event)
+                .where(event.status.eq(EventStatus.EVENT_UPCOMING),
+                        event.recruitStatus.ne(RECRUIT_END),
+                        event.recruitStatus.ne(RECRUIT_CLOSE))
                 .fetch();
     }
 
