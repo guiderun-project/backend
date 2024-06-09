@@ -62,6 +62,9 @@ notEventApplier:
 notEventParticipant:
   code: "2102"
   msg: "해당 이벤트 참가자가 아닙니다."
+notCommentWriter:
+  code: "2104"
+  msg: "해당 댓글 작성자가 아닙니다."
 notValidSort:
   code: "2200"
   msg: "잘못된 sort값 입니다."
@@ -71,6 +74,9 @@ notValidType:
 notValidKind:
   code: "2202"
   msg: "잘못된 kind값 입니다."
+notValidDuration:
+  code: "2203"
+  msg: "이벤트 신청 기간이 아닙니다."
 notValidYear:
   code: "2204"
   msg: "잘못된 year값 입니다."
@@ -80,9 +86,16 @@ notValidMonth:
 notValidDay:
   code: "2206"
   msg: "잘못된 day값 입니다."
+ExistForm:
+  code: "2207"
+  msg: "이미 신청한 이벤트 입니다."
+
 notExistEvent:
   code: "2300"
   msg: "해당 이벤트가 존재하지 않습니다."
+notExistComment:
+  code: "2301"
+  msg: "해당 댓글이 존재하지 않습니다."
 
 notAuthorityVi:
   code: "3100"

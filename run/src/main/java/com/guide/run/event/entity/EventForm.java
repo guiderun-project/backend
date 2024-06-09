@@ -30,4 +30,11 @@ public class EventForm extends BaseEntity {
     private String hopePartner; //희망 파트너 이름
     private String referContent; // 운영진 참고내용
     private boolean isMatching; //대기 매칭 상태
+
+    public void setform(String hopeTeam,String hopePartner,String referContent) {
+        this.hopeTeam = hopeTeam;
+        this.hopePartner = hopePartner;
+        this.referContent = referContent;
+    }
+
 }
