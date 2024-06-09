@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface EventFormRepository extends JpaRepository <EventForm,Long> {
    // List<EventForm> findByPrivateIdAndEndTimeBetweenOrderByEndTime(String privateId, LocalDateTime startTime,LocalDateTime endTime);
@@ -19,7 +20,7 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> {
     //Page<EventForm> findAllByPrivateIdAndEventTypeOrderByEndTime(String privateId, EventType eventType,Pageable pageable);
     //Page<EventForm> findAllByPrivateIdAndRecruitStatusOrderByEndTime(String privateId, EventRecruitStatus recruitStatus,Pageable pageable);
     //Page<EventForm> findAllByPrivateIdAndRecruitStatusAndEventTypeOrderByEndTime(String privateId, EventRecruitStatus recruitStatus,EventType eventType,Pageable pageable);
-
+    List<EventForm> findAllByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByPrivateId(String privateId);
 
     //List<EventForm> findAllByPrivateIdAndEventType(String privateId, EventType eventType);
