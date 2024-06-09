@@ -8,6 +8,7 @@ import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
+import com.guide.run.event.entity.dto.response.get.DetailEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
@@ -19,6 +20,8 @@ import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.partner.Partner;
+import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,7 @@ public class EventService {
 
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
+    private final PartnerRepository partnerRepository;
     @Transactional
     public EventCreatedResponse eventCreate(EventCreateRequest eventCreateRequest, String userId){
         User user = userRepository.findUserByPrivateId(userId).
@@ -184,5 +189,57 @@ public class EventService {
 
     public MyEventDdayResponse getMyEventDday(String userId) {
         return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(userId)).build();
+    }
+
+    public DetailEvent getDetailEvent(Long eventId,String privateId) {
+       /* Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        User organizer = userRepository.findUserByOrganizer(event.getOrganizer()).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        DetailEvent detailEvent;
+        boolean submit = false;
+        if(form!=null)
+            submit=true;
+        boolean checkOrganizer =false;
+        if(organizer.getPrivateId().equals(user.getPrivateId()))
+            checkOrganizer = true;
+        if(user.getType().equals(UserType.VI)){
+            Optional<Partner> partners = partnerRepository.findFirstByViIdAndEventId(privateId,eventId);
+            if(partners.isEmpty()){
+                detailEvent = new DetailEvent(
+                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                        organizer.getRecordDegree(),event.getStartTime(),event.getStartTime(),event.getEndTime(),event.getCreatedAt(),
+                        event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),event.getContent(),checkOrganizer,
+                        submit,event.getStatus());
+            }
+            else{
+                Partner partner = partners.get();
+                User partnerG = userRepository.findUserByPrivateId(partner.getGuideId()).orElseThrow(NotExistUserException::new);
+                detailEvent = new DetailEvent(
+                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                        organizer.getRecordDegree(),event.getStartTime(),event.getStartTime(),event.getEndTime(),event.getCreatedAt(),
+                        event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),partnerG.getName(),partnerG.getType(),
+                        partnerG.getRecordDegree(),event.getContent(),checkOrganizer,
+                        submit,event.getStatus());
+            }
+        }else{
+            Optional<Partner> partners = partnerRepository.findByGuideIdAndEventId(privateId,eventId);
+            if(partners.isEmpty()){
+                detailEvent = new DetailEvent(
+                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                        organizer.getRecordDegree(),event.getStartTime(),event.getStartTime(),event.getEndTime(),event.getCreatedAt(),
+                        event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),event.getContent(),checkOrganizer,
+                        submit,event.getStatus());
+            }
+            else{
+                Partner partner = partners.get();
+                User partnerV = userRepository.findUserByPrivateId(partner.getViId()).orElseThrow(NotExistUserException::new);
+            }
+        }
+
+
+
+        )*/
+        return new DetailEvent();
     }
 }

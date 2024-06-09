@@ -156,4 +156,31 @@ public class SignController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
+    @PostMapping("/oauth/login/naver")
+    public LoginResponse naverLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
+        String accessToken = providerService.getAccessToken(code, "naver").getAccess_token();
+        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"naver");
+        String privateId = oAuthProfile.getSocialId();
+        boolean isExist = userService.getUserStatus(privateId);
+
+        boolean isExistCookie =false;
+
+
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
+            }
+        }
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", response, privateId);
+        }
+
+
+        return LoginResponse.builder()
+                .accessToken(jwtProvider.createAccessToken(privateId))
+                .isExist(isExist)
+                .build();
+    }
 }
