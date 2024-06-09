@@ -5,8 +5,9 @@ import com.guide.run.temp.member.entity.AttendanceId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> {
+public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> , AttendanceCustomRepository{
     List<Attendance> findAllByPrivateId(String privateId);
+    Attendance findByEventIdAndPrivateId(Long eventId,String privateId);
+    Long countByIsAttendAndEventId(boolean isAttend,Long eventId);
 }
