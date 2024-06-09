@@ -1,6 +1,8 @@
 package com.guide.run.event.service;
 
 import com.guide.run.event.entity.dto.response.match.*;
+import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
@@ -22,8 +24,10 @@ public class EventMatchingService {
     private final UnMatchingRepository unMatchingRepository;
     private final MatchingRepository matchingRepository;
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
     @Transactional
     public void matchUser(Long eventId, String viId, String userId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         matchingRepository.save(
@@ -50,6 +54,7 @@ public class EventMatchingService {
 
     @Transactional
     public void deleteMatchUser(Long eventId, String viId, String userId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         matchingRepository.delete(
@@ -79,6 +84,7 @@ public class EventMatchingService {
     }
 
     public UserTypeCount getUserTypeCount(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return UserTypeCount.builder()
                 .vi(unMatchingRepository.getUserTypeCount(eventId, UserType.VI))
                 .guide(unMatchingRepository.getUserTypeCount(eventId,UserType.GUIDE))
@@ -86,27 +92,32 @@ public class EventMatchingService {
     }
 
     public List<NotMatchUserInfo> getNotMatchList(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return unMatchingRepository.findNotMatchUserInfos(eventId);
     }
 
     public MatchedGuideCount getMatchedGuideCount(Long eventId, String viId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return MatchedGuideCount.builder()
                 .guide(matchingRepository.findAllByEventIdAndViId(eventId,viId).size()).build();
     }
 
     public MatchedGuideList getMatchedGuideList(Long eventId, String viId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return MatchedGuideList.builder()
                 .guide(matchingRepository.findAllMatchedGuideByEventIdAndViId(eventId,viId))
                 .build();
     }
 
     public MatchedViCount getMatchedViCount(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return MatchedViCount.builder()
                 .vi(matchingRepository.findAllMatchedViByEventIdAndUserType(eventId,UserType.VI).size())
                 .build();
     }
 
     public MatchedViList getMatchedViList(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return MatchedViList.builder()
                 .vi(matchingRepository.findAllMatchedViByEventIdAndUserType(eventId,UserType.VI))
                 .build();
