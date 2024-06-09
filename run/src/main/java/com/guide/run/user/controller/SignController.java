@@ -163,20 +163,6 @@ public class SignController {
         String privateId = oAuthProfile.getSocialId();
         boolean isExist = userService.getUserStatus(privateId);
 
-        boolean isExistCookie =false;
-
-
-        if(request.getCookies() !=null){
-            for(Cookie cookie: request.getCookies()){
-                if(cookie.getName().equals("refreshToken")){
-                    isExistCookie=true;
-                }
-            }
-        }
-        if(!isExistCookie) {
-            cookieService.createCookie("refreshToken", response, privateId);
-        }
-
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))

@@ -19,8 +19,8 @@ spring:
         profile: https://kapi.kakao.com/v2/user/me  # Access Token을 통해 정보를 받는 url
 
     google:
-      client_id: aa
-      client_secret: aa
+      client_id: MaLmA8dihBCzDqsfr0iY
+      client_secret: VIlICBy6vh
       redirect: http://localhost:8080/login/oauth2/code/google
       url:
         login: https://accounts.google.com/o/oauth2/v2/auth
@@ -28,8 +28,8 @@ spring:
         profile: https://www.googleapis.com/oauth2/v3/userinfo
 
     naver:
-      client_id: aa
-      client_secret: aa
+      client_id: MaLmA8dihBCzDqsfr0iY
+      client_secret: VIlICBy6vh
       redirect: http://localhost:8080/social/login/naver
       url:
         login: https://nid.naver.com/oauth2.0/authorize
