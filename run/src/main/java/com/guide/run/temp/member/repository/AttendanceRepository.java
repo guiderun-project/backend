@@ -11,4 +11,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Attendan
     List<Attendance> findAllByPrivateId(String privateId);
     Attendance findByEventIdAndPrivateId(Long eventId,String privateId);
     Long countByIsAttendAndEventId(boolean isAttend,Long eventId);
+
+    void deleteAllByEventId(long eventId);
 }

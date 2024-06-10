@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")
@@ -61,18 +59,18 @@ public class AdminEventController {
     public ResponseEntity<AdminEventHistoryList> getUserEventHistories(@PathVariable String userId,
                                                                        @RequestParam("start") int start,
                                                                        @RequestParam("limit") int limit,
-                                                                       @RequestParam(defaultValue = "all") String sort)
+                                                                       @RequestParam(defaultValue = "all") String kind)
     {
         AdminEventHistoryList response = AdminEventHistoryList.builder()
-                .items(adminEventService.getEventHistory(userId, start, limit, sort))
+                .items(adminEventService.getEventHistory(userId, start, limit, kind))
                 .build();
         return ResponseEntity.status(200).body(response);
     }
 
     @GetMapping("/event-list/count/{userId}")
     public ResponseEntity<Count> getUserEventHistoryCount(@PathVariable String userId,
-                                                          @RequestParam(defaultValue = "all") String sort){
-        Count response = adminEventService.getEventHistoryCount(userId, sort);
+                                                          @RequestParam(defaultValue = "all") String kind){
+        Count response = adminEventService.getEventHistoryCount(userId, kind);
         return ResponseEntity.ok(response);
     }
 

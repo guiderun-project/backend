@@ -1,15 +1,11 @@
 package com.guide.run.temp.member.repository;
 
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfo;
-import com.guide.run.temp.member.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import org.springframework.expression.spel.ast.Projection;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static com.guide.run.temp.member.entity.QAttendance.*;

@@ -37,16 +37,16 @@ public class AdminEventService {
     private final EventFormRepository eventFormRepository;
     private final TimeFormatter timeFormatter;
 
-    public List<EventHistoryDto> getEventHistory(String userId, int start, int limit, String sort){
+    public List<EventHistoryDto> getEventHistory(String userId, int start, int limit, String kind){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        return eventRepository.getUserEventHistory(user.getPrivateId(), start, limit, sort);
+        return eventRepository.getUserEventHistory(user.getPrivateId(), start, limit, kind);
     }
 
-    public Count getEventHistoryCount(String userId, String sort){
+    public Count getEventHistoryCount(String userId, String kind){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
 
         return Count.builder()
-                .count(eventRepository.getUserEventHistoryCount(user.getPrivateId(), sort))
+                .count(eventRepository.getUserEventHistoryCount(user.getPrivateId(), kind))
                 .build();
     }
 

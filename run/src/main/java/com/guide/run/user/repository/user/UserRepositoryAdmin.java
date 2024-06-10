@@ -15,8 +15,4 @@ public interface UserRepositoryAdmin {
     long searchAdminUserCount(String text);
     List<NewUserResponse> findNewUser(int start, int limit, String privateId);
 
-    List<WithdrawalItem> sortWithdrawal(int start, int limit, WithdrawalSortCond cond);
-    long sortWithdrawalCount();
-    List<WithdrawalItem> searchWithdrawal(String text, int start, int limit, WithdrawalSortCond cond);
-    long searchWithdrawalCount(String text);
 }
