@@ -3,6 +3,7 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
@@ -11,6 +12,7 @@ import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventLikeRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.global.converter.TimeFormatter;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class EventService {
 
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
+    private final EventLikeRepository eventLikeRepository;
     @Transactional
     public EventCreatedResponse eventCreate(EventCreateRequest eventCreateRequest, String userId){
         User user = userRepository.findUserByPrivateId(userId).
@@ -59,6 +63,12 @@ public class EventService {
                 .maxNumG(eventCreateRequest.getMaxNumG())
                 .place(eventCreateRequest.getPlace())
                 .content(eventCreateRequest.getContent()).build());
+        eventLikeRepository.save(
+                EventLike.builder()
+                        .EventId(createdEvent.getId())
+                        .privateIds(new ArrayList<>())
+                        .build()
+        );
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
                 .isApprove(createdEvent.isApprove())
@@ -119,6 +129,7 @@ public class EventService {
 
         if(event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)){
             eventRepository.deleteById(eventId);
+            eventLikeRepository.deleteById(eventId);
         }
         else
             throw new NotEventOrganizerException();

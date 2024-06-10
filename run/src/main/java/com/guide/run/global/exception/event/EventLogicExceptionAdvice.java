@@ -40,6 +40,13 @@ public class EventLogicExceptionAdvice {
                 getMessage("notValidKind.code"),
                 getMessage("notValidKind.msg")));
     }
+    //2203
+    @ExceptionHandler(NotValidDurationException.class)
+    protected ResponseEntity<FailResult> NotValidDurationException(NotValidDurationException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notValidDuration.code"),
+                getMessage("notValidDuration.msg")));
+    }
     //2204
     @ExceptionHandler(NotValidYearException.class)
     protected ResponseEntity<FailResult> NotValidYearException(NotValidYearException e){
@@ -60,6 +67,14 @@ public class EventLogicExceptionAdvice {
         return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidDay.code"),
                 getMessage("notValidDay.msg")));
+    }
+
+    //2207
+    @ExceptionHandler(ExistFormException.class)
+    protected ResponseEntity<FailResult> ExistFormException(ExistFormException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("ExistForm.code"),
+                getMessage("ExistForm.msg")));
     }
 
     private String getMessage(String code){
