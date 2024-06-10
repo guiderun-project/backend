@@ -5,8 +5,13 @@ import com.guide.run.temp.member.entity.AttendanceId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
+<<<<<<< HEAD
 public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> , AttendanceRepositoryAdmin{
+=======
+public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> , AttendanceCustomRepository{
+>>>>>>> 61ced483ce90a5a36a8ede88dd2db8851a164b5b
     List<Attendance> findAllByPrivateId(String privateId);
+    Attendance findByEventIdAndPrivateId(Long eventId,String privateId);
+    Long countByIsAttendAndEventId(boolean isAttend,Long eventId);
 }

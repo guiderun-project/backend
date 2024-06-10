@@ -3,12 +3,14 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventLikeRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 
@@ -41,6 +44,7 @@ public class EventService {
 
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
+    private final EventLikeRepository eventLikeRepository;
     @Transactional
     public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId){
         User user = userRepository.findUserByPrivateId(privateId).
@@ -61,6 +65,12 @@ public class EventService {
                 .place(request.getPlace())
                 .status(EventStatus.EVENT_UPCOMING)
                 .content(request.getContent()).build());
+        eventLikeRepository.save(
+                EventLike.builder()
+                        .EventId(createdEvent.getId())
+                        .privateIds(new ArrayList<>())
+                        .build()
+        );
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
                 .isApprove(createdEvent.isApprove())
@@ -124,6 +134,7 @@ public class EventService {
             eventFormRepository.deleteAllByEventId(eventId);
 
             eventRepository.deleteById(eventId);
+            eventLikeRepository.deleteById(eventId);
         }
         else
             throw new NotEventOrganizerException();

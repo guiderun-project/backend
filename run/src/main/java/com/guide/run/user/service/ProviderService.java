@@ -6,6 +6,7 @@ import com.guide.run.user.dto.response.OAuthCodeResponse;
 import com.guide.run.user.factory.OAuthRequestFactory;
 import com.guide.run.user.info.GetGoogleInfo;
 import com.guide.run.user.info.GetKakaoInfo;
+import com.guide.run.user.info.GetNaverInfo;
 import com.guide.run.user.profile.*;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +60,11 @@ public class ProviderService {
             GetGoogleInfo getGoogleInfo = gson.fromJson(response.getBody(), GetGoogleInfo.class);
             log.info(getGoogleInfo.getSub());
             return new GoogleProfile("google"+getGoogleInfo.getSub(),"google");
+        }else {
+            GetNaverInfo getNaverInfo = gson.fromJson(response.getBody(), GetNaverInfo.class);
+            log.info(getNaverInfo.getId());
+            return new NaverProfile("naver"+getNaverInfo.getId(),"naver");
         }
-        return null; // 에러 추가 바람
     }
 
     public OAuthCodeResponse getAccessToken(String code, String provider) throws CommunicationException {

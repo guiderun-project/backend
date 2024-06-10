@@ -44,8 +44,6 @@ public class Event extends BaseEntity {
     //이 부분 추가됐습니다~
     private int viCnt; //실제 모집된 vi 수
     private int guideCnt; //실제 모집된 guide 수
-
-    //이벤트 상태 추가
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 

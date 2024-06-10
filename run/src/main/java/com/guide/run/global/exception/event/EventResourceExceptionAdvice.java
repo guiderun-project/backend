@@ -1,6 +1,7 @@
 package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
+import com.guide.run.global.exception.event.resource.NotExistCommentException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,13 @@ public class EventResourceExceptionAdvice {
         return ResponseEntity.status(404).body(responseService.getFailResult(
                 getMessage("notExistEvent.code"),
                 getMessage("notExistEvent.msg")));
+    }
+    //2301
+    @ExceptionHandler(NotExistCommentException.class)
+    protected ResponseEntity<FailResult> NotExistCommentException(NotExistCommentException e){
+        return ResponseEntity.status(404).body(responseService.getFailResult(
+                getMessage("notExistComment.code"),
+                getMessage("notExistComment.msg")));
     }
 
     private String getMessage(String code){
