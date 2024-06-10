@@ -62,8 +62,8 @@ public class ProviderService {
             return new GoogleProfile("google"+getGoogleInfo.getSub(),"google");
         }else {
             GetNaverInfo getNaverInfo = gson.fromJson(response.getBody(), GetNaverInfo.class);
-            log.info(getNaverInfo.getId());
-            return new NaverProfile("naver"+getNaverInfo.getId(),"naver");
+            log.info(getNaverInfo.getResponse().getId());
+            return new NaverProfile("naver"+getNaverInfo.getResponse().getId(),"naver");
         }
     }
 

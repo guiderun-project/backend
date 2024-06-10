@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetNaverInfo {
-    private String id;
+    private NaverResponse response;
 }
