@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class EventAttendService {
     private final AttendanceRepository attendanceRepository;
     public void requestAttend(Long eventId, String userId) {
-        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, userId);
+        Attendance attendance = attendanceRepository.findByEventIdAndUserId(eventId, userId);
         if(attendance.isAttend()){
             attendanceRepository.save(
                     Attendance.builder()
