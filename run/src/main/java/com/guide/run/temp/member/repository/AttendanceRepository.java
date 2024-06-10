@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> ,  AttendanceCustomRepository, AttendanceRepositoryAdmin{
     List<Attendance> findAllByPrivateId(String privateId);
-    Attendance findByEventIdAndUserId(Long eventId,String privateId);
+    Attendance findByEventIdAndUserId(Long eventId,String userId);
     Long countByIsAttendAndEventId(boolean isAttend,Long eventId);
 }
