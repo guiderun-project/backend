@@ -9,6 +9,7 @@ import com.guide.run.admin.dto.response.AdminSearchList;
 import com.guide.run.admin.dto.response.event.AdminEventHistoryList;
 import com.guide.run.admin.dto.response.event.AdminEventList;
 import com.guide.run.admin.dto.response.partner.AdminPartnerList;
+import com.guide.run.admin.dto.response.user.AdminUserList;
 import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.admin.dto.response.user.WithdrawalList;
 import com.guide.run.admin.service.AdminEventService;
@@ -38,16 +39,16 @@ public class AdminSearchController {
                                                      @RequestParam(defaultValue = "0") int start,
                                                      @RequestParam(defaultValue = "10") int limit,
 
-                                                     @RequestParam(defaultValue = "false") boolean user_time,
-                                                     @RequestParam(defaultValue = "false") boolean type,
-                                                     @RequestParam(defaultValue = "false") boolean gender,
-                                                     @RequestParam(defaultValue = "false") boolean name_team,
-                                                     @RequestParam(defaultValue = "false") boolean user_approval,
+                                                     @RequestParam(defaultValue = "2") int user_time,
+                                                     @RequestParam(defaultValue = "2") int type,
+                                                     @RequestParam(defaultValue = "2") int gender,
+                                                     @RequestParam(defaultValue = "2") int name_team,
+                                                     @RequestParam(defaultValue = "2") int user_approval,
 
-                                                     @RequestParam(defaultValue = "false") boolean event_time,
-                                                     @RequestParam(defaultValue = "false") boolean name,
-                                                     @RequestParam(defaultValue = "false") boolean organizer,
-                                                     @RequestParam(defaultValue = "false") boolean event_approval
+                                                     @RequestParam(defaultValue = "2") int event_time,
+                                                     @RequestParam(defaultValue = "2") int name,
+                                                     @RequestParam(defaultValue = "2") int organizer,
+                                                     @RequestParam(defaultValue = "2") int event_approval
                                       ){
         UserSortCond userSortCond = UserSortCond.builder()
                 .type(user_time)
@@ -76,15 +77,15 @@ public class AdminSearchController {
     }
     //회원 검색
     @GetMapping("/user")
-    public ResponseEntity<List<UserItem>> searchUser(@RequestParam String text,
-                                                     @RequestParam(defaultValue = "0") int start,
-                                                     @RequestParam(defaultValue = "10") int limit,
+    public ResponseEntity<AdminUserList> searchUser(@RequestParam String text,
+                                                    @RequestParam(defaultValue = "0") int start,
+                                                    @RequestParam(defaultValue = "10") int limit,
 
-                                                     @RequestParam(defaultValue = "false") boolean time,
-                                                     @RequestParam(defaultValue = "false") boolean type,
-                                                     @RequestParam(defaultValue = "false") boolean gender,
-                                                     @RequestParam(defaultValue = "false") boolean name_team,
-                                                     @RequestParam(defaultValue = "false") boolean approval){
+                                                    @RequestParam(defaultValue = "2") int time,
+                                                    @RequestParam(defaultValue = "2") int type,
+                                                    @RequestParam(defaultValue = "2") int gender,
+                                                    @RequestParam(defaultValue = "2") int name_team,
+                                                    @RequestParam(defaultValue = "2") int approval){
         UserSortCond cond = UserSortCond.builder()
                 .time(time)
                 .type(type)
@@ -92,7 +93,9 @@ public class AdminSearchController {
                 .name_team(name_team)
                 .approval(approval)
                 .build();
-        List<UserItem> response = adminUserService.searchUser(start, limit, cond, text);
+        AdminUserList response = AdminUserList.builder()
+                        .items(adminUserService.searchUser(start, limit, cond, text))
+                        .build();
         return ResponseEntity.ok(response);
     }
 
@@ -107,10 +110,10 @@ public class AdminSearchController {
     public ResponseEntity<AdminEventList> searchEvent(@RequestParam String text,
                                                       @RequestParam(defaultValue = "0") int start,
                                                       @RequestParam(defaultValue = "10") int limit,
-                                                      @RequestParam(defaultValue = "false") boolean time,
-                                                      @RequestParam(defaultValue = "false") boolean name,
-                                                      @RequestParam(defaultValue = "false") boolean organizer,
-                                                      @RequestParam(defaultValue = "false") boolean approval){
+                                                      @RequestParam(defaultValue = "2") int time,
+                                                      @RequestParam(defaultValue = "2") int name,
+                                                      @RequestParam(defaultValue = "2") int organizer,
+                                                      @RequestParam(defaultValue = "2") int approval){
         EventSortCond cond = EventSortCond.builder()
                 .time(time)
                 .name(name)
@@ -131,12 +134,12 @@ public class AdminSearchController {
     //탈퇴한 회원 검색
     @GetMapping("/withdrawal-list")
     public ResponseEntity<WithdrawalList> searchWithDrawal(@RequestParam String text,
-                                                           @RequestParam int start,
-                                                           @RequestParam int limit,
-                                                           @RequestParam(defaultValue = "false") boolean time,
-                                                           @RequestParam(defaultValue = "fasle") boolean type,
-                                                           @RequestParam(defaultValue = "false") boolean gender,
-                                                           @RequestParam(defaultValue = "false") boolean name_team){
+                                                           @RequestParam(defaultValue = "0") int start,
+                                                           @RequestParam(defaultValue = "10") int limit,
+                                                           @RequestParam(defaultValue = "2") int time,
+                                                           @RequestParam(defaultValue = "2") int type,
+                                                           @RequestParam(defaultValue = "2") int gender,
+                                                           @RequestParam(defaultValue = "2") int name_team){
         WithdrawalSortCond cond = WithdrawalSortCond.builder()
                 .time(time)
                 .type(type)
@@ -178,8 +181,8 @@ public class AdminSearchController {
     @GetMapping("/event-list/{userId}")
     public ResponseEntity<AdminEventHistoryList>searchEventHistory(@PathVariable String userId,
                                                                    @RequestParam String text,
-                                                                   @RequestParam int start,
-                                                                   @RequestParam int limit){
+                                                                   @RequestParam(defaultValue = "0") int start,
+                                                                   @RequestParam(defaultValue = "10") int limit){
 
         AdminEventHistoryList response = AdminEventHistoryList.builder()
                 .items(adminEventService.searchEventHistory(userId, text, start, limit))

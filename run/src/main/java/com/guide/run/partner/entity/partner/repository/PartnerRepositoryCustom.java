@@ -9,7 +9,7 @@ import java.util.List;
 public interface PartnerRepositoryCustom {
     List<MyPagePartner> findMyPartner(String privateId, String sort, int limit, int start, UserType userType);
 
-    int countMyPartner(String privateId, UserType userType);
+    long countMyPartner(String privateId, UserType userType);
 
     List<AdminPartnerResponse> getAdminPartner(String privateId, UserType type, String kind, int limit, int start);
 

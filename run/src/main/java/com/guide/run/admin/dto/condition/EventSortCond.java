@@ -8,8 +8,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class EventSortCond {
-    private boolean time;
-    private boolean name;
-    private boolean organizer;
-    private boolean approval;
+    private int time;
+    private int name;
+    private int organizer;
+    private int approval;
 }

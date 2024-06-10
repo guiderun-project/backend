@@ -12,6 +12,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,7 +36,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
     @Override
     public long countMyEventAfterYear(String privateId, String kind, int year) {
-        long count = queryFactory.select(event.id)
+        long count = queryFactory.select(event.count())
                 .from(event, eventForm)
                 .where(
                         //privateId 조건 처리
@@ -49,7 +50,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         sortByYear(year)
 
                 )
-                .fetch().size();
+                .fetchOne();
 
         return count;
     }
@@ -57,17 +58,13 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     @Override
     public List<MyPageEvent> findMyEventAfterYear(String privateId, int start, int limit, String kind, int year) {
 
-        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , event.startTime
-                , ConstantImpl.create("%Y-%m-%d"));
-
         List<MyPageEvent> result = queryFactory
                 .select(
                         Projections.constructor(MyPageEvent.class,
                                 event.id.as("eventId"),
                                 event.type.as("eventType"),
                                 event.name.as("title"),
-                                formattedDate.as("date"),
+                                formattedDate(event.startTime).as("date"),
                                 event.recruitStatus)
                 )
                 .from(event, eventForm)
@@ -93,22 +90,26 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
     @Override
     public List<EventDto> getAdminEventList(int start, int limit, EventSortCond cond) {
+
+        StringExpression smallDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
+        ,event.startTime
+        ,ConstantImpl.create("%c/%e"));
+
         List<EventDto> results = queryFactory.select(
-                        Projections.constructor(EventDto.class,
+                        Projections.constructor(
+                                EventDto.class,
                                 event.id.as("eventId"),
                                 event.name.as("name"),
-                                event.startTime.as("smallDate"),
-                                event.startTime,
+                                smallDate.as("smallDate"),
+                                formattedDateTime(event.startTime).as("startTime"),
                                 user.name.as("organizer"),
                                 user.recordDegree.as("pace"),
                                 event.recruitStatus,
                                 event.isApprove.as("approval"),
-                                event.maxNumG.add(event.maxNumV).as("maxApply"),
-                                event.maxNumV,
-                                event.maxNumG,
-                                event.updatedAt.as("update_date"),
-                                event.updatedAt.as("update_time")
-
+                                event.maxNumV.as("minNumV"),
+                                event.maxNumG.as("minNumG"),
+                                formattedDate(event.updatedAt).as("update_date"),
+                                formattedTime(event.updatedAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -123,11 +124,11 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     @Override
     public long getAdminEventCount() {
 
-        long count = queryFactory.select(event.id)
+        long count = queryFactory.select(event.count())
                 .from(event, user)
                 .where(event.organizer.eq(user.privateId))
                 .orderBy()
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
@@ -152,16 +153,13 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
     @Override
     public List<EventHistoryDto> getUserEventHistory( String privateId, int start, int limit, String sort) {
-        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , event.startTime
-                , ConstantImpl.create("%Y-%m-%d"));
 
         List<EventHistoryDto> results = queryFactory
                 .select(Projections.constructor(EventHistoryDto.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
-                        event.name.as("title"),
-                        formattedDate.as("startDate"),
+                        event.name.as("name"),
+                        formattedDate(event.startTime).as("startDate"),
                         event.recruitStatus))
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
@@ -178,33 +176,35 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     public long getUserEventHistoryCount( String privateId, String sort) {
 
         long count = queryFactory
-                .select(event.id)
+                .select(event.count())
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
                         eventHistoryCond(sort))
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
     @Override
     public List<EventDto> searchAdminEvent(String text, int start, int limit, EventSortCond cond) {
+        StringExpression smallDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
+                ,event.startTime
+                ,ConstantImpl.create("%c/%e"));
         List<EventDto> results = queryFactory.select(
                         Projections.constructor(
                                 EventDto.class,
                                 event.id.as("eventId"),
                                 event.name.as("name"),
-                                event.startTime.as("smallDate"),
-                                event.startTime,
+                                smallDate.as("smallDate"),
+                                formattedDateTime(event.startTime).as("startTime"),
                                 user.name.as("organizer"),
                                 user.recordDegree.as("pace"),
                                 event.recruitStatus,
                                 event.isApprove.as("approval"),
-                                event.maxNumG.add(event.maxNumV).as("maxApply"),
-                                event.maxNumV,
-                                event.maxNumG,
-                                event.updatedAt.as("update_date"),
-                                event.updatedAt.as("update_time")
+                                event.maxNumV.as("minNumV"),
+                                event.maxNumG.as("minNumG"),
+                                formattedDate(event.updatedAt).as("update_date"),
+                                formattedTime(event.updatedAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -227,7 +227,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
     @Override
     public long searchAdminEventCount(String text) {
-        long count = queryFactory.select(event.id)
+        long count = queryFactory.select(event.count())
                 .from(event, user)
                 .where(
                         event.organizer.eq(user.privateId),
@@ -238,22 +238,19 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 //todo : 기타 검색 조건 추가 필요
                         )
                 )
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
     @Override
     public List<EventHistoryDto> searchUserEventHistory(String privateId, String text, int start, int limit) {
-        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , event.startTime
-                , ConstantImpl.create("%Y-%m-%d"));
 
         List<EventHistoryDto> results = queryFactory
                 .select(Projections.constructor(EventHistoryDto.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
-                        event.name.as("title"),
-                        formattedDate.as("startDate"),
+                        event.name.as("name"),
+                        formattedDate(event.startTime).as("startDate"),
                         event.recruitStatus))
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
@@ -275,7 +272,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     public long searchUserEventHistoryCount(String privateId, String text) {
 
         long count = queryFactory
-                .select(event.id)
+                .select(event.count())
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
@@ -284,7 +281,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 //todo : 기타 검색 조건 추가 필요
                         )
                 )
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
@@ -301,37 +298,43 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     private OrderSpecifier[] createOrderSpec(EventSortCond cond) {
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
-        if (cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.isApprove));
-        }
 
-        if(cond.isName()){
-            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, event.name));
-        }
-
-        if (cond.isTime()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.updatedAt));
-        }
-
-        if (cond.isOrganizer()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
-        }
-
-        if (!cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.isApprove));
-        }
-
-        if(!cond.isName()){
-            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.name));
-        }
-
-        if (!cond.isTime()) {
+        if (cond.getTime()==0 || cond.getTime()==2) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
         }
 
-        if (!cond.isOrganizer()) {
+        if (cond.getOrganizer()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
         }
+
+        if (cond.getApproval()==0) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.isApprove));
+        }
+
+        if(cond.getName()==0){
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.name));
+        }
+
+        if (cond.getApproval()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.isApprove));
+        }
+
+        if(cond.getName()==1){
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, event.name));
+        }
+
+        if (cond.getTime()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.updatedAt));
+        }
+
+        if (cond.getName()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
+        }
+
+        if (cond.getOrganizer()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+        }
+
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
@@ -357,6 +360,26 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
             //year 조건 처리
             return event.startTime.year().goe(year);
         }
+    }
+
+    private StringExpression formattedDate(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
+                , localDateTime
+                , ConstantImpl.create("%Y-%m-%d"));
+    }
+
+    private StringExpression formattedDateTime(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate(
+                "FUNCTION('DATE_FORMAT', {0}, {1})",
+                localDateTime,
+                ConstantImpl.create("%Y-%m-%d %H:%i:%s")
+        );
+    }
+
+    private StringExpression formattedTime(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate("FUNCTION('TIME_FORMAT', {0}, {1})"
+                , localDateTime
+                , ConstantImpl.create("%H:%i:%s"));
     }
 
 }

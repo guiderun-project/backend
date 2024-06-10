@@ -16,8 +16,10 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -116,6 +120,9 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
 
         if(event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)){
+            //todo : 매칭, 출석, 신청서, 파트너, 이벤트 좋아요, 댓글 전부 삭제해야 함.
+            eventFormRepository.deleteAllByEventId(eventId);
+
             eventRepository.deleteById(eventId);
         }
         else
@@ -161,8 +168,6 @@ public class EventService {
                 .partnerType(null) //파트너 장애여부
                 .build();
 
-        //todo : 매칭 구현 이후 추가
-        /* 
         //매칭 여부로 파트너 정보 추가
         Matching matching;
         String partnerId;
@@ -176,8 +181,13 @@ public class EventService {
             }
 
             User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
-            response.setPartner(partner.getName(), partner.getRecordDegree(), partner.getType());
-        }*/
+            response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
+        }
+
+        //이벤트 시작 당일 전까지는 파트너 공개 안함.
+        if(LocalDate.now().isBefore(event.getStartTime().toLocalDate())){
+            response.setPartner(false, null, null, null);
+        }
 
         return response;
     }

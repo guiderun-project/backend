@@ -23,8 +23,8 @@ public class AdminEventResult {
     private int total;
     private int viCnt;
     private int guideCnt;
-    private int absent;
-    private int viAbsent;
-    private int guideAbsent;
+    private long absent;
+    private long viAbsent;
+    private long guideAbsent;
 
 }

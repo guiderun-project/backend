@@ -8,6 +8,7 @@ import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.Guide;
@@ -17,6 +18,8 @@ import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.ViRepository;
+import com.nimbusds.jwt.JWTParser;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,7 @@ public class AdminUserService {
     private final GuideRepository guideRepository;
     private final ArchiveDataRepository archiveDataRepository;
     private final TimeFormatter timeFormatter;
+    private final JwtProvider jwtProvider;
 
     public List<UserItem> getUserList(int start, int limit, UserSortCond cond){
        List<UserItem> response =  userRepository.sortAdminUser(start, limit, cond);
@@ -121,8 +125,8 @@ public class AdminUserService {
     }
 
     @Transactional
-    public List<NewUserResponse> getNewUser(int start, int limit){
-        List<NewUserResponse> result = userRepository.findNewUser(start, limit);
+    public List<NewUserResponse> getNewUser(int start, int limit, String privateId){
+        List<NewUserResponse> result = userRepository.findNewUser(start, limit, privateId);
         return result;
     }
 

@@ -1,12 +1,10 @@
 package com.guide.run.admin.controller;
 
 import com.guide.run.admin.dto.EventTypeCountDto;
+import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.request.ApprovalEvent;
-import com.guide.run.admin.dto.response.event.AdminEventHistoryList;
-import com.guide.run.admin.dto.response.event.AdminEventList;
-import com.guide.run.admin.dto.response.event.CurrentEventResponse;
-import com.guide.run.admin.dto.response.event.AdminEventResult;
+import com.guide.run.admin.dto.response.event.*;
 import com.guide.run.admin.service.AdminEventService;
 import com.guide.run.event.entity.dto.response.get.Count;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +27,12 @@ public class AdminEventController {
                 body(adminEventService.getAllEventCount());
     }
     @GetMapping("/event-list")
-    public ResponseEntity<AdminEventList> getAllEvent(@RequestParam("start") int start,
-                                                      @RequestParam("limit") int limit,
-                                                      @RequestParam(defaultValue = "false") boolean time,
-                                                      @RequestParam(defaultValue = "false") boolean name,
-                                                      @RequestParam(defaultValue = "false") boolean organizer,
-                                                      @RequestParam(defaultValue = "false") boolean approval
+    public ResponseEntity<AdminEventList> getAllEvent(@RequestParam(defaultValue = "0") int start,
+                                                      @RequestParam(defaultValue = "10") int limit,
+                                                      @RequestParam(defaultValue = "2") int time,
+                                                      @RequestParam(defaultValue = "2") int name,
+                                                      @RequestParam(defaultValue = "2") int organizer,
+                                                      @RequestParam(defaultValue = "2") int approval
                                                  ){
 
         EventSortCond cond = EventSortCond.builder()
@@ -50,9 +48,11 @@ public class AdminEventController {
     }
 
     @GetMapping("/current-event")
-    public ResponseEntity<List<CurrentEventResponse>> getCurrentEvent(@RequestParam("start") int start,
-                                                                      @RequestParam("limit") int limit){
-        List<CurrentEventResponse> response = adminEventService.getCurrentEvents(start, limit);
+    public ResponseEntity<CurrentEventList> getCurrentEvent(@RequestParam(defaultValue = "0") int start,
+                                                            @RequestParam(defaultValue = "4") int limit){
+        CurrentEventList response = CurrentEventList.builder()
+                .items(adminEventService.getCurrentEvents(start, limit))
+                .build();
         return ResponseEntity.ok(response);
     }
 
@@ -93,6 +93,29 @@ public class AdminEventController {
     @GetMapping("event-result/{eventId}")
     public ResponseEntity<AdminEventResult> getEventResult(@PathVariable long eventId){
         return ResponseEntity.ok(adminEventService.getEventResult(eventId));
+    }
+
+    @GetMapping("apply-list/{eventId}")
+    public ResponseEntity<AdminEventApplyList> getEventApply(@PathVariable long eventId,
+                                                             @RequestParam int start,
+                                                             @RequestParam int limit,
+                                                             @RequestParam(defaultValue = "2") int time,
+                                                             @RequestParam(defaultValue = "2") int type_name,
+                                                             @RequestParam(defaultValue = "2") int team){
+
+
+        EventApplyCond cond = EventApplyCond.builder()
+                .time(time)
+                .type_name(type_name)
+                .team(team)
+                .build();
+
+        return ResponseEntity.ok(adminEventService.getEventApply(eventId,cond, start, limit));
+    }
+
+    @GetMapping("apply-list/count/{eventId}")
+    public ResponseEntity<Count> getEventApplyCount(@PathVariable long eventId){
+        return ResponseEntity.ok(adminEventService.getEventApplyCount(eventId));
     }
 
 

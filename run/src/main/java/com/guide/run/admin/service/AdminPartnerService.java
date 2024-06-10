@@ -1,9 +1,12 @@
 package com.guide.run.admin.service;
 
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
+import com.guide.run.admin.dto.response.partner.PartnerTypeResponse;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +47,36 @@ public class AdminPartnerService {
                 .count(partnerRepository.searchAdminPartnerCount(user.getPrivateId(), user.getType(), text))
                 .build();
 
+    }
+
+    public PartnerTypeResponse getPartnerType(String userId){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        int contestCnt;
+        int trainingCnt;
+        if(user.getType().equals(UserType.GUIDE)){
+            Partner partner = partnerRepository.findByGuideId(user.getPrivateId()).orElse(null);
+            if(partner==null){
+                contestCnt=0;
+                trainingCnt=0;
+            }else{
+                contestCnt=partner.getContestIds().size();
+                trainingCnt=partner.getTrainingIds().size();
+            }
+
+        }else{
+            Partner partner = partnerRepository.findByViId(user.getPrivateId()).orElse(null);
+            if(partner==null){
+                contestCnt=0;
+                trainingCnt=0;
+            }else{
+                contestCnt=partner.getContestIds().size();
+                trainingCnt=partner.getTrainingIds().size();
+            }
+        }
+
+        return PartnerTypeResponse.builder()
+                .contestCnt(contestCnt)
+                .trainingCnt(trainingCnt)
+                .build();
     }
 }

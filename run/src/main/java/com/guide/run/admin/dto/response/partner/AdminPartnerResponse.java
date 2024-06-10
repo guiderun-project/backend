@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @Builder
@@ -24,13 +26,17 @@ public class AdminPartnerResponse {
                                 UserType type,
                                 String name,
                                 String recordDegree,
-                                int like) {
+                                List<String> sendIds) {
         this.userId = userId;
         this.img = img;
         this.role = role.getValue();
         this.type = type;
         this.name = name;
         this.recordDegree = recordDegree;
-        this.like = like;
+        if(sendIds==null){
+            this.like = 0;
+        }else{
+            this.like = sendIds.size();
+        }
     }
 }

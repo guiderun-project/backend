@@ -20,8 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -65,7 +64,7 @@ public class MypageService {
 
         boolean isValidStatus = Arrays.stream(EventRecruitStatus.values())
                 .anyMatch(e -> e.name().equals(kind));
-        if(isValidStatus){
+        if(!isValidStatus){
             throw new NotValidKindException();
         }
 
@@ -83,6 +82,11 @@ public class MypageService {
 
 
         List<MyPagePartner> response = partnerRepository.findMyPartner(user.getPrivateId(),sort , limit, start, user.getType());
+
+        if(sort.equals("COUNT")){
+            List<MyPagePartner> responseCount = sortByTrainingAndContest(response);
+            return responseCount;
+        }
 
         return response;
     }
@@ -110,7 +114,7 @@ public class MypageService {
 
         PartnerLike partnerlike = partnerLikeRepository.findById(user.getPrivateId()).orElse(null);
 
-        if(partnerlike!=null){
+        if(partnerlike!=null && partnerlike.getSendIds()!=null){
             if(!partnerlike.getSendIds().isEmpty()){
                 //좋아요 수 반환
                 like = partnerlike.getSendIds().size();
@@ -147,5 +151,17 @@ public class MypageService {
                 .competitionCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
                 .build();
+    }
+
+    public List<MyPagePartner> sortByTrainingAndContest(List<MyPagePartner> myPagePartners) {
+        Collections.sort(myPagePartners, new Comparator<MyPagePartner>() {
+            @Override
+            public int compare(MyPagePartner o1, MyPagePartner o2) {
+                int sum1 = o1.getTrainingCnt() + o1.getContestCnt();
+                int sum2 = o2.getTrainingCnt() + o2.getContestCnt();
+                return Integer.compare(sum2, sum1);
+            }
+        });
+        return myPagePartners;
     }
 }

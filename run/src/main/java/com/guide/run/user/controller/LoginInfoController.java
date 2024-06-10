@@ -3,8 +3,11 @@ package com.guide.run.user.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.request.PhoneNumberRequest;
+import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -20,36 +23,35 @@ public class LoginInfoController {
 
     //인증번호 요청(아이디 찾기)
     @PostMapping("/sms/accountId")
-    public void getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+    public ResponseEntity<String> getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         loginInfoService.getNumberForAccountId(request.getPhoneNum());
+        return ResponseEntity.ok("");
     }
 
     //인증번호 요청(비밀번호 재설정)
     @PostMapping("/sms/password")
-    public void getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
+    public ResponseEntity<String> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
             throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         loginInfoService.getNumberForPassword(request);
+        return ResponseEntity.ok("");
     }
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)
     @PostMapping("/sms/token")
-    public void getToken(){
-
+    public ResponseEntity<TokenResponse> getToken(@RequestParam String number){
+        return ResponseEntity.ok(loginInfoService.getToken(number));
     }
 
     //아이디 찾기
-    @PostMapping("/accountId")
-    public void findAccountId(@RequestParam String token){
-
+    @GetMapping("/accountId")
+    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestParam String token){
+        return ResponseEntity.ok(loginInfoService.findAccountId(token));
     }
     //비밀번호 재설정
     @PostMapping("/new-password")
-    public void createNewPassword(@RequestParam String token, @RequestParam String newPassword){
-
+    public ResponseEntity<String> createNewPassword(@RequestParam String token, @RequestParam String newPassword){
+        loginInfoService.createNewPassword(token,newPassword);
+        return ResponseEntity.ok("");
     }
 
-
-    //전화번호-인증번호 로 레디스 저장
-    //이후 인증번호 확인 후 번호 지우고 임시토큰과 privateId를 가지는 정보를 다시 저장.
-    //이후 레디스 확인해서 privateId 뽑아오고 해당 정보를 변경 가능하게 해줌.
 }

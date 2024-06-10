@@ -20,10 +20,10 @@ public class AdminWithdrawalController {
     @GetMapping("/withdrawal-list")
     public ResponseEntity<WithdrawalList> getWithdrawalList(@RequestParam(defaultValue = "0") int start,
                                                             @RequestParam(defaultValue = "10") int limit,
-                                                            @RequestParam(defaultValue = "false") boolean time,
-                                                            @RequestParam(defaultValue = "false") boolean type,
-                                                            @RequestParam(defaultValue = "false") boolean gender,
-                                                            @RequestParam(defaultValue = "false") boolean name_team){
+                                                            @RequestParam(defaultValue = "2") int time,
+                                                            @RequestParam(defaultValue = "2") int type,
+                                                            @RequestParam(defaultValue = "2") int gender,
+                                                            @RequestParam(defaultValue = "2") int name_team){
         WithdrawalSortCond cond = WithdrawalSortCond.builder()
                 .name_team(name_team)
                 .gender(gender)

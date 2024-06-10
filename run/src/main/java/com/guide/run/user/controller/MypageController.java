@@ -7,6 +7,7 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.dto.GlobalUserInfoDto;
 import com.guide.run.user.dto.response.MyPageEventList;
+import com.guide.run.user.dto.response.MyPagePartnerList;
 import com.guide.run.user.dto.response.ProfileResponse;
 import com.guide.run.user.service.MypageService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,11 +68,13 @@ public class MypageController {
     }
 
     @GetMapping("/partner-list/{userId}")
-    public ResponseEntity<List<MyPagePartner>> getMyPartnerList(@PathVariable String userId,
-                                                                @RequestParam(defaultValue = "0") int start,
-                                                                @RequestParam(defaultValue = "10") int limit,
-                                                                @RequestParam(defaultValue = "RECENT") String sort){
-        List<MyPagePartner> response = mypageService.getMyPagePartners(userId, start, limit, sort);
+    public ResponseEntity<MyPagePartnerList> getMyPartnerList(@PathVariable String userId,
+                                                              @RequestParam(defaultValue = "0") int start,
+                                                              @RequestParam(defaultValue = "10") int limit,
+                                                              @RequestParam(defaultValue = "RECENT") String sort){
+        MyPagePartnerList response = MyPagePartnerList.builder()
+                .items(mypageService.getMyPagePartners(userId, start, limit, sort))
+                .build();
         return ResponseEntity.ok().body(response);
     }
 

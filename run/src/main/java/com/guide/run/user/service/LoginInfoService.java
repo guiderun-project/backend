@@ -11,11 +11,15 @@ import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
+import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.SignUpInfoRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +27,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.format.DateTimeFormatter;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class LoginInfoService {
     private final UserRepository userRepository;
@@ -35,7 +41,9 @@ public class LoginInfoService {
 
     private final SmsService smsService;
 
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void getNumberForAccountId(String phoneNum) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
@@ -44,16 +52,22 @@ public class LoginInfoService {
         User user = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistUserException::new);
 
         //인증번호 전송 api 실행
-        SmsResponse smsResponse = smsService.sendSms(
-                MessageDto.builder()
-                        .to(phoneNum)
-                        .build()
-        );
+       // SmsResponse smsResponse = smsService.sendSms(
+         //       MessageDto.builder()
+           //             .to(phoneNum)
+             //           .build()
+        //);
 
         //인증번호 저장
-        AuthNumber authNumber = new AuthNumber("accountId"+phone, smsResponse.getAuthNum());
-        authNumberRepository.save(authNumber);
+        //AuthNumber authNumber = new AuthNumber(phone, smsResponse.getAuthNum(), "accountId");
+        AuthNumber authNumber = new AuthNumber(phone, "12345", "accountId");
+        AuthNumber authNumber1 = authNumberRepository.save(authNumber);
+        log.info(authNumber1.getAuthNum());
+        log.info(authNumber1.getPhone());
+        log.info(authNumber1.getType());
 
+        AuthNumber authNum = authNumberRepository.findById(authNumber.getPhone()).orElse(null);
+        log.info(authNum.getAuthNum());
     }
 
     @Transactional
@@ -72,55 +86,68 @@ public class LoginInfoService {
         }
 
         //인증번호 전송 api 실행
-        SmsResponse smsResponse = smsService.sendSms(
-                MessageDto.builder()
-                        .to(request.getPhoneNum())
-                        .build()
-        );
+       // SmsResponse smsResponse = smsService.sendSms(
+          //      MessageDto.builder()
+            //            .to(request.getPhoneNum())
+              //          .build()
+        //);
 
         //인증번호 저장
-        AuthNumber authNumber = new AuthNumber("password"+phone, smsResponse.getAuthNum());
+        //AuthNumber authNumber = new AuthNumber(phone, smsResponse.getAuthNum(), "password");
+        AuthNumber authNumber = new AuthNumber(phone, "12345", "password");
         authNumberRepository.save(authNumber);
 
     }
 
     @Transactional
-    public String getToken(String authNum){
-        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(
-                RuntimeException::new
-        );//인증번호가 일치하지 않음 에러
+    public TokenResponse getToken(String authNum) {
+        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElse(null);//인증번호가 일치하지 않음 에러
 
-        User user;
-        if(authNumber.getPhone().startsWith("p")){
-            user = userRepository.findUserByPhoneNumber(authNumber.getPhone().substring(("password").length())).orElseThrow(NotExistUserException::new);
-            return jwtProvider.createTmpToken(authNumber.getPhone(),user.getPrivateId());
-        }else if(authNumber.getPhone().startsWith("a")){
-            user = userRepository.findUserByPhoneNumber(authNumber.getPhone().substring(("accountId").length())).orElseThrow(NotExistUserException::new);
-            return jwtProvider.createTmpToken(authNumber.getPhone(),user.getPrivateId());
-        }else{
-            throw new RuntimeException("인증번호가 일치하지 않음 에러");
+        if(authNumber==null){
+            log.info("id 찾기 실패");
         }
+        User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(NotExistUserException::new);
+        return TokenResponse.builder()
+                .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
+                .build();
     }
 
+
     @Transactional
-    public void findAccountId(String token){
+    public FindAccountIdDto findAccountId(String token){
         //잘못된 토큰 에러로 변경
         TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(RuntimeException::new);
-        if(tmpToken.getToken().startsWith("a")){
+        if(tmpToken.getType().equals("accountId")){
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
+            SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             //가입 아이디 찾고 return
+            return FindAccountIdDto.builder()
+                    .accountId(info.getAccountId())
+                    .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .build();
         }else{
             throw new RuntimeException("다른 인증 토큰 에러");
         }
     }
 
     @Transactional
-    public void createNewPassword(String token){
+    public void createNewPassword(String token, String password){
         //잘못된 토큰 에러로 변경
         TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(RuntimeException::new);
-        if(tmpToken.getToken().startsWith("p")){
+        if(tmpToken.getType().equals("password")){
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             //비밀번호 재설정 해줌.
+            SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
+
+            SignUpInfo newInfo = SignUpInfo.builder()
+                    .privateId(info.getPrivateId())
+                    .accountId(info.getAccountId())
+                    .password(password)
+                    .build();
+            newInfo.hashPassword(passwordEncoder); //암호화
+
+            signUpInfoRepository.save(newInfo);//저장
+
         }else{
             throw new RuntimeException("다른 인증 토큰 에러");
         }

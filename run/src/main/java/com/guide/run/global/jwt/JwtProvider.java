@@ -119,7 +119,7 @@ public class JwtProvider {
         throw new NotValidRefreshTokenException();
     }
 
-    public String createTmpToken(String authPhone, String privateId){
+    public String createTmpToken(String authPhone, String privateId, String type){
         Claims claims = Jwts.claims().setSubject(authPhone);
         Date now = new Date();
         TmpToken token= new TmpToken(Jwts.builder()
@@ -127,7 +127,7 @@ public class JwtProvider {
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + TMP_VALID_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact(), privateId);
+                .compact(), privateId, type);
         tmpTokenRepository.save(token);
         return token.getToken();
     }

@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserSortCond {
-    private boolean time;
-    private boolean type;
-    private boolean gender;
-    private boolean name_team;
-    private boolean approval;
+    private int time;
+    private int type;
+    private int gender;
+    private int name_team;
+    private int approval;
 }

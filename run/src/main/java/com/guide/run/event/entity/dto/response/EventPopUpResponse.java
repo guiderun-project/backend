@@ -35,7 +35,8 @@ public class EventPopUpResponse {
         private String partnerRecord; //파트너 러닝 등급
         private UserType partnerType; //파트너 타입(가이드인지 vi인지)
 
-        public void setPartner(String partnerName, String partnerRecord, UserType partnerType){
+        public void setPartner(Boolean hasPartner, String partnerName, String partnerRecord, UserType partnerType){
+                this.hasPartner = hasPartner;
                 this.partnerName = partnerName;
                 this.partnerRecord = partnerRecord;
                 this.partnerType = partnerType;

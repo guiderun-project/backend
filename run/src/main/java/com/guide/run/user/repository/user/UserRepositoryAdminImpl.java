@@ -12,13 +12,11 @@ import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,12 +36,12 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
     public long sortAdminUserCount() {
 
         long count = queryFactory
-                .select(user.userId).from(user)
+                .select(user.count()).from(user)
                 .where(
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW)
                 )
-                .fetch().size();
+                .fetchOne();
 
         return count;
 
@@ -72,7 +70,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.gender,
                                 user.snsId,
                                 user.phoneNumber,
-                                user.trainingCnt.add(user.competitionCnt).as("totalCnt"),
                                 user.trainingCnt,
                                 user.competitionCnt,
                                 formattedDate.as("update_date"),
@@ -120,7 +117,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.gender,
                                 user.snsId,
                                 user.phoneNumber,
-                                user.trainingCnt.add(user.competitionCnt).as("totalCnt"),
                                 user.trainingCnt,
                                 user.competitionCnt,
                                 formattedDate.as("update_date"),
@@ -155,7 +151,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
     public long searchAdminUserCount(String text) {
 
         long count = queryFactory
-                .select(user.userId)
+                .select(user.count())
                 .from(user)
                 .where(
                         //이름, 기록, sns, 나이, 전화번호
@@ -165,12 +161,12 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW)
-                ).fetch().size();
+                ).fetchOne();
         return count;
     }
 
     @Override
-    public List<NewUserResponse> findNewUser(int start, int limit) {
+    public List<NewUserResponse> findNewUser(int start, int limit, String privateId) {
         List<NewUserResponse> result = queryFactory.select(
                         Projections.constructor(NewUserResponse.class,
                                 user.userId,
@@ -180,12 +176,15 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.name,
                                 user.trainingCnt,
                                 user.competitionCnt.as("contestCnt"),
-                                partnerLike.sendIds.size().as("like")
+                                partnerLike.sendIds.as("like"),
+                                Expressions.constant(privateId)
                         )
-                ).from(user, partnerLike)
-                .where(user.privateId.eq(partnerLike.recId),
-                        user.role.ne(Role.ROLE_DELETE),
+                ).from(user)
+                .leftJoin(partnerLike).on(user.privateId.eq(partnerLike.recId))
+                .where(user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW))
+                .offset(start)
+                .limit(limit)
                 .orderBy(user.createdAt.desc())
                 .fetch();
         return result;
@@ -203,8 +202,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.recordDegree.as("team"),
                                 user.gender,
                                 archiveData.deleteReasons.as("reason"),
-                                user.updatedAt.as("update_date"),
-                                user.updatedAt.as("update_time")
+                                formattedDate(user.updatedAt).as("update_date"),
+                                formattedTime(user.updatedAt).as("update_time")
                         )
 
                 )
@@ -221,11 +220,11 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
     @Override
     public long sortWithdrawalCount() {
-        long count = queryFactory.select(user.userId)
+        long count = queryFactory.select(user.count())
                 .from(user, archiveData)
                 .where(user.role.eq(Role.ROLE_DELETE),
                         user.privateId.eq(archiveData.privateId))
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
@@ -241,8 +240,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.recordDegree.as("team"),
                                 user.gender,
                                 archiveData.deleteReasons.as("reason"),
-                                user.updatedAt.as("update_date"),
-                                user.updatedAt.as("update_time")
+                                formattedDate(user.updatedAt).as("update_date"),
+                                formattedTime(user.updatedAt).as("update_time")
                         )
 
                 )
@@ -265,7 +264,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
     @Override
     public long searchWithdrawalCount(String text) {
 
-        long count = queryFactory.select(user.userId)
+        long count = queryFactory.select(user.count())
                 .from(user, archiveData)
                 .where(user.role.eq(Role.ROLE_DELETE),
                         user.privateId.eq(archiveData.privateId),
@@ -274,7 +273,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
                                 //todo : 검색 조건 추가 필요
                         ))
-                .fetch().size();
+                .fetchOne();
         return count;
     }
 
@@ -286,38 +285,38 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .when(user.type.eq(UserType.GUIDE)).then(1)
                 .otherwise(2);
 
-        if (cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
-        }
-
-        if (cond.isTime()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
-        }
-
-        if (cond.isGender()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
-        }
-
-        if (cond.isName_team()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
-        }
-
-        if (!cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
-        }
-
-        if (!cond.isTime()) {
+        if (cond.getTime()==0 || cond.getTime()==2) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
         }
 
-        if (!cond.isGender()) {
+        if (cond.getType()==0) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+        }
+
+        if (cond.getGender()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
         }
 
-        if (!cond.isName_team()) {
+        if (cond.getName_team()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+        }
+
+        if (cond.getType()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+        }
+
+        if (cond.getTime()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
+        }
+
+        if (cond.getGender()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
+        }
+
+        if (cond.getName_team()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
@@ -341,49 +340,67 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .otherwise(2);
 
 
-        if (cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, roleOrder));
-        }
-
-        if (cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
-        }
-
-        if (cond.isTime()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
-        }
-
-        if (cond.isGender()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
-        }
-
-        if (cond.isName_team()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
-        }
-
-
-        if (!cond.isApproval()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, roleOrder));
-        }
-
-        if (!cond.isType()) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
-        }
-
-        if (!cond.isTime()) {
+        if (cond.getTime()==0 || cond.getTime()==2) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
         }
 
-        if (!cond.isGender()) {
+        if (cond.getType()==0) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+        }
+
+        if (cond.getGender()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
         }
 
-        if (!cond.isName_team()) {
+        if (cond.getName_team()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
         }
 
+        if(cond.getApproval()==0){
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, roleOrder));
+        }
+
+        if (cond.getType()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+        }
+
+        if (cond.getTime()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
+        }
+
+        if (cond.getGender()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
+        }
+
+        if (cond.getName_team()==1) {
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
+        }
+        if(cond.getApproval()==1){
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, roleOrder));
+        }
+
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+    }
+
+    private StringExpression formattedDate(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
+                , localDateTime
+                , ConstantImpl.create("%Y-%m-%d"));
+    }
+
+    private StringExpression formattedDateTime(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate(
+                "FUNCTION('DATE_FORMAT', {0}, {1})",
+                localDateTime,
+                ConstantImpl.create("%Y-%m-%d %H:%i:%s")
+        );
+    }
+
+    private StringExpression formattedTime(DateTimePath<LocalDateTime> localDateTime){
+        return Expressions.stringTemplate("FUNCTION('TIME_FORMAT', {0}, {1})"
+                , localDateTime
+                , ConstantImpl.create("%H:%i:%s"));
     }
 }

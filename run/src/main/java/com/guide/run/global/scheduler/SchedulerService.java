@@ -32,11 +32,11 @@ public class SchedulerService {
         List<Event> eventList = eventRepository.getSchedulerEvent();
         LocalDateTime now = LocalDateTime.now();
         for(Event e : eventList){
-            if(e.getStartTime().isAfter(now)||e.getStartTime().isEqual(now)){
+            if(e.getStartTime().isBefore(now)||e.getStartTime().isEqual(now)){
                 //시작시간과 현재 시간 비교해서 시간 같거나 지났으면 진행중으로 변경.
                 e.changeStatus(EventStatus.EVENT_OPEN);
             }
-            if(e.getEndTime().isAfter(now)||e.getEndTime().isEqual(now)){
+            if(e.getEndTime().isBefore(now)||e.getEndTime().isEqual(now)){
                 //종료시간과 현재 시간 비교해서 시간 같거나 지났으면 종료로 변경. + 종료 시 이벤트 모집 상태도 종료로 바꿔줌.
                 e.changeStatus(EventStatus.EVENT_END);
                 e.changeRecruit(EventRecruitStatus.RECRUIT_END);
@@ -55,12 +55,12 @@ public class SchedulerService {
         LocalDate today = LocalDate.now();
 
         for(Event e : eventList){
-            if(e.getRecruitStartDate().isAfter(today)||e.getRecruitStartDate().isEqual(today)){
+            if(e.getRecruitStartDate().isBefore(today)||e.getRecruitStartDate().isEqual(today)){
                 //모집 시작일과 현재 일자 비교해서 시간 같거나 지났으면 진행중으로 변경.
                 e.changeRecruit(EventRecruitStatus.RECRUIT_OPEN);
             }
 
-            if(e.getRecruitEndDate().isAfter(today)||e.getRecruitEndDate().isEqual(today)){
+            if(e.getRecruitEndDate().isBefore(today)||e.getRecruitEndDate().isEqual(today)){
                 //모집 종료일과 현재 일자 비교해서 시간 같거나 지났으면 종료로 변경.
                 e.changeRecruit(EventRecruitStatus.RECRUIT_CLOSE);
             }

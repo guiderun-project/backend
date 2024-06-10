@@ -43,7 +43,6 @@ public class UserItem {
                     String gender,
                     String snsId,
                     String phoneNumber,
-                    int totalCnt,
                     int trainingCnt,
                     int competitionCnt,
                     String update_date,
@@ -58,7 +57,7 @@ public class UserItem {
         this.gender = gender;
         this.snsId = snsId;
         this.phoneNumber = phoneNumber;
-        this.totalCnt = totalCnt;
+        this.totalCnt = trainingCnt+competitionCnt;
         this.trainingCnt = trainingCnt;
         this.competitionCnt = competitionCnt;
         this.update_date = update_date;

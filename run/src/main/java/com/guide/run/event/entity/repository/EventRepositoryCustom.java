@@ -25,5 +25,4 @@ public interface EventRepositoryCustom {
     List<Event> getSchedulerRecruit();
 
 
-
 }

@@ -114,12 +114,12 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     @Override
     public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
-        return queryFactory.select(event.id.as("eventId"))
+        return queryFactory.select(event.count())
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)))
-                .fetch().size();
+                .fetchOne();
     }
 
     @Override

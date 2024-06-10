@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -18,7 +19,29 @@ public class WithdrawalItem {
     private String name;
     private String team;
     private String gender;
-    private ArrayList<String> reason;
+    private List<String> reason;
     private String update_date;
     private String update_time;
+
+    public WithdrawalItem(String userId,
+                          Role role,
+                          UserType type,
+                          String name,
+                          String team,
+                          String gender,
+                          List<String> reason,
+                          String update_date,
+                          String update_time) {
+        this.userId = userId;
+        this.role = role.getValue();
+        this.type = type;
+        this.name = name;
+        this.team = team;
+        this.gender = gender;
+        this.reason = reason;
+        this.update_date = update_date;
+        this.update_time = update_time;
+    }
 }
+
+

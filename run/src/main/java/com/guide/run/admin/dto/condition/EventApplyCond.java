@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class EventApplyCond {
-    private boolean time;
-    private boolean type_name;
-    private boolean team;
+    private int time;
+    private int type_name;
+    private int team;
 }

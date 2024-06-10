@@ -10,9 +10,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface EventFormRepository extends JpaRepository <EventForm,Long> {
+public interface EventFormRepository extends JpaRepository <EventForm,Long> ,EventFormRepositoryAdmin {
     EventForm findByEventIdAndPrivateId(Long eventId,String privateId);
 
     List<EventForm> findAllByPrivateId(String privateId);
+
+    void deleteAllByEventId(Long eventId);
 
 }
