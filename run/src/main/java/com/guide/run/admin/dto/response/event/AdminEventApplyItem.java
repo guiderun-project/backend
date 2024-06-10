@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @AllArgsConstructor
@@ -17,7 +18,7 @@ public class AdminEventApplyItem {
     private UserType type;
     private String name;
     private String team;
-    private LocalDateTime apply_time;
+    private String apply_time;
 
     public AdminEventApplyItem(String userId,
                                Role role,
@@ -30,6 +31,6 @@ public class AdminEventApplyItem {
         this.type = type;
         this.name = name;
         this.team = team;
-        this.apply_time = apply_time;
+        this.apply_time = apply_time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
     }
 }

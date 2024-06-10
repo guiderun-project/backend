@@ -38,9 +38,6 @@ public class MypageController {
     public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
                                                  @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
                                                  @RequestParam(defaultValue = "0") int year){
-        if(year==0){
-            year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
-        }
         Count response = Count.builder()
                 .count(mypageService.getMyPageEventsCount(userId, kind, year))
                 .build();

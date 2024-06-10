@@ -2,7 +2,6 @@ package com.guide.run.partner.entity.matching.repository;
 
 import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
 import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
-import com.guide.run.partner.entity.matching.QMatching;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,7 +10,6 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 import static com.guide.run.partner.entity.matching.QMatching.matching;
-import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class MatchingRepositoryImpl implements MatchingRepositoryCustom {

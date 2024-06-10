@@ -62,6 +62,30 @@ public class UserDtoExceptionAdvice {
                 getMessage("InvalidItemError.msg")));
     }
 
+    //1007
+    @ExceptionHandler(InvalidAuthNumException.class)
+    protected ResponseEntity<FailResult> InvalidAuthNumException(InvalidAuthNumException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("InvalidAuthNumError.code"),
+                getMessage("InvalidAuthNumError.msg")));
+    }
+
+    //1008
+    @ExceptionHandler(NotExistAccountIdException.class)
+    protected ResponseEntity<FailResult> NotExistAccountIdException(NotExistAccountIdException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notExistAccountIdError.code"),
+                getMessage("notExistAccountIdError.msg")));
+    }
+
+    //1009
+    @ExceptionHandler(NotExistPhoneNumException.class)
+    protected ResponseEntity<FailResult> NotExistPhoneNumException(NotExistPhoneNumException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notExistPhoneError.code"),
+                getMessage("notExistPhoneError.msg")));
+    }
+
     private String getMessage(String code){
         return getMessage(code,null);
     }

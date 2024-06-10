@@ -1,9 +1,7 @@
 package com.guide.run.partner.entity.matching.repository;
 
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
-import com.guide.run.partner.entity.matching.QUnMatching;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

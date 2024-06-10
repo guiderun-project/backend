@@ -1,11 +1,9 @@
 package com.guide.run.event.entity.dto.response.get;
 
-import com.guide.run.event.entity.EventStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.entity.type.UserType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

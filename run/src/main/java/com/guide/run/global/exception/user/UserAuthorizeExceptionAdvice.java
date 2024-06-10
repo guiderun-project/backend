@@ -1,10 +1,7 @@
 package com.guide.run.global.exception.user;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.user.authorize.ExistUserException;
-import com.guide.run.global.exception.user.authorize.NotApprovedUserException;
-import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
-import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
+import com.guide.run.global.exception.user.authorize.*;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +47,14 @@ public class UserAuthorizeExceptionAdvice {
         return ResponseEntity.status(403).body(responseService.getFailResult(
                 getMessage("existUser.code"),
                 getMessage("existUser.msg")));
+    }
+
+    //1104
+    @ExceptionHandler(NotValidTmpTokenException.class)
+    protected ResponseEntity<FailResult> NotValidTmpTokenException(NotValidTmpTokenException e){
+        return ResponseEntity.status(403).body(responseService.getFailResult(
+                getMessage("notValidTmpToken.code"),
+                getMessage("notValidTmpToken.msg")));
     }
     private String getMessage(String code){
         return getMessage(code,null);

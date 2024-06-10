@@ -35,7 +35,7 @@ public class AdminSearchController {
 
     //전체 검색
     @GetMapping("/all")
-    public ResponseEntity<AdminSearchList> searchAll(@RequestParam String text,
+    public ResponseEntity<AdminSearchList> searchAll(@RequestParam(defaultValue = "") String text,
                                                      @RequestParam(defaultValue = "0") int start,
                                                      @RequestParam(defaultValue = "10") int limit,
 
@@ -77,7 +77,7 @@ public class AdminSearchController {
     }
     //회원 검색
     @GetMapping("/user")
-    public ResponseEntity<AdminUserList> searchUser(@RequestParam String text,
+    public ResponseEntity<AdminUserList> searchUser(@RequestParam(defaultValue = "") String text,
                                                     @RequestParam(defaultValue = "0") int start,
                                                     @RequestParam(defaultValue = "10") int limit,
 
@@ -100,14 +100,14 @@ public class AdminSearchController {
     }
 
     @GetMapping("/user/count")
-    public ResponseEntity<Count> searchUserCount(@RequestParam String text){
+    public ResponseEntity<Count> searchUserCount(@RequestParam(defaultValue = "") String text){
         Count response = adminUserService.searchUserCount(text);
         return ResponseEntity.ok(response);
     }
 
     //이벤트 검색
     @GetMapping("/event")
-    public ResponseEntity<AdminEventList> searchEvent(@RequestParam String text,
+    public ResponseEntity<AdminEventList> searchEvent(@RequestParam(defaultValue = "") String text,
                                                       @RequestParam(defaultValue = "0") int start,
                                                       @RequestParam(defaultValue = "10") int limit,
                                                       @RequestParam(defaultValue = "2") int time,
@@ -127,13 +127,13 @@ public class AdminSearchController {
     }
 
     @GetMapping("/event/count")
-    public ResponseEntity<Count> searchEventCount(@RequestParam String text){
+    public ResponseEntity<Count> searchEventCount(@RequestParam(defaultValue = "") String text){
         return ResponseEntity.ok(adminEventService.searchAllEventCount(text));
     }
 
     //탈퇴한 회원 검색
     @GetMapping("/withdrawal-list")
-    public ResponseEntity<WithdrawalList> searchWithDrawal(@RequestParam String text,
+    public ResponseEntity<WithdrawalList> searchWithDrawal(@RequestParam(defaultValue = "") String text,
                                                            @RequestParam(defaultValue = "0") int start,
                                                            @RequestParam(defaultValue = "10") int limit,
                                                            @RequestParam(defaultValue = "2") int time,
@@ -155,14 +155,14 @@ public class AdminSearchController {
     }
 
     @GetMapping("/withdrawal-list/count")
-    public ResponseEntity<Count> searchWithDrawalCount(@RequestParam String text){
+    public ResponseEntity<Count> searchWithDrawalCount(@RequestParam(defaultValue = "") String text){
         return ResponseEntity.ok(adminWithdrawalService.searchWithdrawalCount(text));
     }
 
     //파트너 검색
     @GetMapping("/partner-list/{userId}")
     public ResponseEntity<AdminPartnerList> searchPartner(@PathVariable String userId,
-                                                          @RequestParam String text,
+                                                          @RequestParam(defaultValue = "") String text,
                                                           @RequestParam int start,
                                                           @RequestParam int limit){
         AdminPartnerList response = AdminPartnerList.builder()
@@ -173,14 +173,14 @@ public class AdminSearchController {
 
     @GetMapping("/partner-list/count/{userId}")
     public ResponseEntity<Count> searchPartnerCount(@PathVariable String userId,
-                                                    @RequestParam String text){
+                                                    @RequestParam(defaultValue = "") String text){
         return ResponseEntity.ok(adminPartnerService.searchPartnerCount(userId, text));
     }
 
     //이벤트 히스토리 검색
     @GetMapping("/event-list/{userId}")
     public ResponseEntity<AdminEventHistoryList>searchEventHistory(@PathVariable String userId,
-                                                                   @RequestParam String text,
+                                                                   @RequestParam(defaultValue = "") String text,
                                                                    @RequestParam(defaultValue = "0") int start,
                                                                    @RequestParam(defaultValue = "10") int limit){
 
@@ -193,7 +193,7 @@ public class AdminSearchController {
 
     @GetMapping("/event-list/count/{userId}")
     public ResponseEntity<Count> searchEventHistoryCount(@PathVariable String userId,
-                                   @RequestParam String text){
+                                                         @RequestParam(defaultValue = "") String text){
         return ResponseEntity.ok(
                 adminEventService.searchEventHistoryCount(userId, text)
         );
