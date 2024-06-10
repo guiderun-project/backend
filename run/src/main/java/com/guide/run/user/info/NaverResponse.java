@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetNaverInfo {
-    private NaverResponse response;
+public class NaverResponse {
+    private String id;
 }

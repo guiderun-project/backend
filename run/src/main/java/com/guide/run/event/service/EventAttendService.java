@@ -3,9 +3,12 @@ package com.guide.run.event.service;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +18,15 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class EventAttendService {
     private final AttendanceRepository attendanceRepository;
+    private final UserRepository userRepository;
     public void requestAttend(Long eventId, String userId) {
-        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, userId);
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
         if(attendance.isAttend()){
             attendanceRepository.save(
                     Attendance.builder()
                             .eventId(eventId)
-                            .privateId(userId)
+                            .privateId(user.getPrivateId())
                             .isAttend(false)
                             .date(null)
                             .build()
@@ -31,7 +36,7 @@ public class EventAttendService {
             attendanceRepository.save(
                     Attendance.builder()
                             .eventId(eventId)
-                            .privateId(userId)
+                            .privateId(user.getPrivateId())
                             .isAttend(true)
                             .date(LocalDateTime.now())
                             .build()

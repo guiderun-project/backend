@@ -1,6 +1,11 @@
 package com.guide.run.event.entity.repository;
 
+
+import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.Event;
+
+import com.guide.run.event.entity.QEvent;
+import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
