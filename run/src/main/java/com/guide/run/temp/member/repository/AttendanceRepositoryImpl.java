@@ -27,7 +27,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
         return (long) queryFactory.select(attendance.count())
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
-                .where(user.type.eq(userType))
+                .where(user.type.eq(userType).and(attendance.eventId.eq(eventId)))
                 .fetchOne();
     }
 
@@ -39,7 +39,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 user.name.as("name")))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
-                .where(attendance.isAttend.eq(isAttend))
+                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
                 .fetch();
     }
 }

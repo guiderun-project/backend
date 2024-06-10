@@ -43,7 +43,7 @@ public class EventFormService {
         attendanceRepository.save(
                 Attendance.builder()
                         .eventId(eventId)
-                        .privateId(userId)
+                        .privateId(user.getPrivateId())
                         .isAttend(false)
                         .build()
         );
