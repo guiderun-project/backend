@@ -53,7 +53,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.eq(eventRecruitStatus).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                    .where(event.recruitStatus.eq(eventRecruitStatus).and(event.isApprove.eq(true)))
                     .orderBy(event.endTime.desc())
                     .offset(0)
                     .limit(4)
@@ -70,7 +70,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.ne(RECRUIT_END).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                    .where(event.recruitStatus.ne(RECRUIT_END).and(event.isApprove.eq(true)))
                     .orderBy(event.endTime.desc())
                     .offset(0)
                     .limit(4)
@@ -92,7 +92,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(event.startTime.between(startTime, endTime).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                .where(event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
                 .orderBy(event.startTime.desc())
                 .fetch();
 
@@ -112,7 +112,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(event.startTime.between(startTime, endTime).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                .where(event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
                 .orderBy(event.startTime.desc())
                 .fetch();
 
@@ -125,7 +125,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
                 .fetch().size();
     }
 
@@ -139,7 +139,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId).and(checkByPrivateId(privateId)))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
                 .orderBy(event.startTime.asc())
                 .offset(start)
                 .limit(limit)
@@ -154,7 +154,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(userId))
-                .where(event.recruitStatus.ne(RECRUIT_END).and(event.status.ne(EventStatus.EVENT_REJECT)))
+                .where(event.recruitStatus.ne(RECRUIT_END).and(event.isApprove.eq(true)))
                 .orderBy(event.startTime.asc())
                 .limit(2)
                 .fetch();
