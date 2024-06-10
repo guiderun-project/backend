@@ -24,11 +24,11 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
 
     @Override
     public Long countUserType(Long eventId, UserType userType) {
-        return (long) queryFactory.select(attendance.eventId)
+        return (long) queryFactory.select(attendance.count())
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
                 .where(user.type.eq(userType))
-                .fetch().size();
+                .fetchOne();
     }
 
     @Override

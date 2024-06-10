@@ -6,11 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-<<<<<<< HEAD
-public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> , AttendanceRepositoryAdmin{
-=======
-public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> , AttendanceCustomRepository{
->>>>>>> 61ced483ce90a5a36a8ede88dd2db8851a164b5b
+
+public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> ,  AttendanceCustomRepository, AttendanceRepositoryAdmin{
     List<Attendance> findAllByPrivateId(String privateId);
     Attendance findByEventIdAndPrivateId(Long eventId,String privateId);
     Long countByIsAttendAndEventId(boolean isAttend,Long eventId);

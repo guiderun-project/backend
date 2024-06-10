@@ -39,3 +39,15 @@ spring:
 
 cors:
   origin: https://guide-run-qa.netlify.app
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    credentials:
+      access-key: ${S3_ACCESS}
+      secret-key: ${S3_SECRET}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
