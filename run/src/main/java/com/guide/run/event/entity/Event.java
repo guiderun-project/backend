@@ -1,14 +1,17 @@
 package com.guide.run.event.entity;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,6 +47,20 @@ public class Event extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
-    public void closeEvent() {
+    public void closeEvent(){
+        this.recruitEndDate = LocalDate.now();
+        this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+    }
+
+    public void approvalEvent(Boolean isApprove){
+        this.isApprove = isApprove;
+    }
+
+    public void changeStatus(EventStatus status){
+        this.status = status;
+    }
+
+    public void changeRecruit(EventRecruitStatus recruitStatus){
+        this.recruitStatus = recruitStatus;
     }
 }

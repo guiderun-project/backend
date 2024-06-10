@@ -8,6 +8,7 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public class PartnerService {
     private final PartnerLikeRepository partnerLikeRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void partnerLike(String userId, String privateId){
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         User partner = userRepository.findUserByUserId(userId).orElseThrow(RuntimeException::new); //todo : 존재하지 않는 파트너 에러 추가 필요
@@ -26,9 +28,8 @@ public class PartnerService {
         //좋아요를 이미 한 사용자인데 좋아요를 눌렀을 때. -> 좋아요 취소
         //안한 사용자인데 좋아요를 눌렀을 때 -> 좋아요
         //사용자가 좋아요 내역이 없을 때. -> 새 리스트 생성 후 좋아요 추가
-
+        List<String> newLike = new ArrayList<>();
         if(partnerLike == null){ //처음 받는 좋아요
-            List<String> newLike = new ArrayList<>();
             newLike.add(user.getPrivateId());
 
             partnerLike = PartnerLike.builder()
@@ -36,10 +37,19 @@ public class PartnerService {
                     .sendIds(newLike)
                     .build();
             partnerLikeRepository.save(partnerLike);
-        }else if(partnerLike.getSendIds().contains(privateId)){//이미 받은 적 있는 좋아요 = 취소
-            partnerLike.deleteLike(user.getPrivateId());
+        }else if(partnerLike.getSendIds()==null){
+            newLike.add(user.getPrivateId());
+            partnerLike.editLike(newLike);
+        }
+        else if(partnerLike.getSendIds().contains(privateId)){//이미 받은 적 있는 좋아요 = 취소
+            newLike = partnerLike.getSendIds();
+            newLike.remove(user.getPrivateId());
+            partnerLike.editLike(newLike);
+
         }else{
-            partnerLike.addLike(user.getPrivateId());
+            newLike = partnerLike.getSendIds();
+            newLike.add(user.getPrivateId());
+            partnerLike.editLike(newLike);
         }
 
     }

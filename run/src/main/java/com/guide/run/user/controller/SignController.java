@@ -50,6 +50,17 @@ public class SignController {
     private final GuideService guideService;
 
 
+    @PostMapping("/login")
+    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+
+        String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
+        boolean isExist = userService.getUserStatus(privateId);
+        return LoginResponse.builder()
+                .accessToken(jwtProvider.createAccessToken(privateId))
+                .isExist(isExist)
+                .build();
+    }
+
     @PostMapping("/oauth/login/kakao")
     public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
@@ -72,17 +83,6 @@ public class SignController {
         }
 
 
-        return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(privateId))
-                .isExist(isExist)
-                .build();
-    }
-    
-    @PostMapping("/login")
-    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
-
-        String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
-        boolean isExist = userService.getUserStatus(privateId);
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .isExist(isExist)

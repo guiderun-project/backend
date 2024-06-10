@@ -1,4 +1,4 @@
-package com.guide.run.admin.dto.response;
+package com.guide.run.admin.dto.response.event;
 
 import com.guide.run.admin.dto.EventHistoryDto;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,8 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
 @Builder
-public class EventHistoriesResponse {
+@AllArgsConstructor
+public class AdminEventHistoryList {
     private List<EventHistoryDto> items;
 }

@@ -2,6 +2,8 @@ package com.guide.run.global.jwt;
 
 import com.guide.run.global.exception.auth.authorize.NotExistAuthorizationException;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
+import com.guide.run.global.redis.TmpToken;
+import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.security.user.CustomUserDetailsService;
 import com.guide.run.global.redis.RefreshToken;
 import com.guide.run.global.redis.RefreshTokenRepository;
@@ -31,12 +33,16 @@ public class JwtProvider {
     @Value("${spring.jwt.secretKey}")
     private String secretKey;
    // public static final long TOKEN_VALID_TIME = 1000L * 60 * 30 ; // 30분
-    public static final long TOKEN_VALID_TIME = 1000L *60 *60  ;
+    public static final long TOKEN_VALID_TIME = 1000L *60 *60 ;
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 365; // 365일
+
+    public static final long TMP_VALID_TIME = 1000L*60*30; //문자인증 후 주는 임시토큰 30분
 
 
     private final CustomUserDetailsService customUserDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    private final TmpTokenRepository tmpTokenRepository;
 
     @PostConstruct
     public void init(){
@@ -111,5 +117,18 @@ public class JwtProvider {
             }
         }
         throw new NotValidRefreshTokenException();
+    }
+
+    public String createTmpToken(String authPhone, String privateId, String type){
+        Claims claims = Jwts.claims().setSubject(authPhone);
+        Date now = new Date();
+        TmpToken token= new TmpToken(Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + TMP_VALID_TIME))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact(), privateId, type);
+        tmpTokenRepository.save(token);
+        return token.getToken();
     }
 }

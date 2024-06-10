@@ -5,16 +5,15 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
-import com.guide.run.event.entity.dto.request.EventUpdateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
-import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventLikeRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
@@ -31,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -45,24 +46,25 @@ public class EventService {
     private final TimeFormatter timeFormatter;
     private final EventLikeRepository eventLikeRepository;
     @Transactional
-    public EventCreatedResponse eventCreate(EventCreateRequest eventCreateRequest, String userId){
-        User user = userRepository.findUserByPrivateId(userId).
+    public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId){
+        User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         Event createdEvent = eventRepository.save(Event.builder()
-                .organizer(userId)
-                .recruitStartDate(eventCreateRequest.getRecruitStartDate())
-                .recruitEndDate(eventCreateRequest.getRecruitEndDate())
-                .name(eventCreateRequest.getTitle())
+                .organizer(privateId)
+                .recruitStartDate(request.getRecruitStartDate())
+                .recruitEndDate(request.getRecruitEndDate())
+                .name(request.getTitle())
                 .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
                 .isApprove(false)
-                .type(eventCreateRequest.getEventType())
-                .startTime(eventCreateRequest.getStartTime())
-                .endTime(eventCreateRequest.getEndTime())
-                .maxNumV(eventCreateRequest.getMaxNumV())
-                .maxNumG(eventCreateRequest.getMaxNumG())
-                .place(eventCreateRequest.getPlace())
-                .content(eventCreateRequest.getContent()).build());
+                .type(request.getEventType())
+                .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
+                .endTime(timeFormatter.getDateTime(request.getDate(), request.getEndTime()))
+                .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
+                .maxNumG(request.getMinNumG())
+                .place(request.getPlace())
+                .status(EventStatus.EVENT_UPCOMING)
+                .content(request.getContent()).build());
         eventLikeRepository.save(
                 EventLike.builder()
                         .EventId(createdEvent.getId())
@@ -76,27 +78,27 @@ public class EventService {
     }
 
     @Transactional
-    public EventUpdatedResponse eventUpdate(EventUpdateRequest eventUpdateRequest, String userId,Long eventId) {
-        User user = userRepository.findUserByPrivateId(userId).
+    public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId,Long eventId) {
+        User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if(event.getOrganizer().equals(userId)){
+        if(event.getOrganizer().equals(privateId)){
             Event updatedEvent = eventRepository.save(Event.builder()
                     .id(eventId)
-                    .organizer(userId)
-                    .recruitStartDate(eventUpdateRequest.getRecruitStartDate())
-                    .recruitEndDate(eventUpdateRequest.getRecruitEndDate())
-                    .name(eventUpdateRequest.getTitle())
+                    .organizer(privateId)
+                    .recruitStartDate(request.getRecruitStartDate())
+                    .recruitEndDate(request.getRecruitEndDate())
+                    .name(request.getTitle())
                     .recruitStatus(event.getRecruitStatus())
                     .isApprove(event.isApprove())
-                    .type(eventUpdateRequest.getEventType())
-                    .startTime(eventUpdateRequest.getStartTime())
-                    .endTime(eventUpdateRequest.getEndTime())
-                    .maxNumV(eventUpdateRequest.getMaxNumV())
-                    .maxNumG(eventUpdateRequest.getMaxNumG())
-                    .place(eventUpdateRequest.getPlace())
-                    .content(eventUpdateRequest.getContent()).build());
+                    .type(request.getEventType())
+                    .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
+                    .endTime(timeFormatter.getDateTime(request.getDate(), request.getEndTime()))
+                    .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
+                    .maxNumG(request.getMinNumG())
+                    .place(request.getPlace())
+                    .content(request.getContent()).build());
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())
                     .isApprove(updatedEvent.isApprove())
@@ -128,6 +130,9 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
 
         if(event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)){
+            //todo : 매칭, 출석, 신청서, 파트너, 이벤트 좋아요, 댓글 전부 삭제해야 함.
+            eventFormRepository.deleteAllByEventId(eventId);
+
             eventRepository.deleteById(eventId);
             eventLikeRepository.deleteById(eventId);
         }
@@ -187,7 +192,12 @@ public class EventService {
             }
 
             User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
-            response.setPartner(partner.getName(), partner.getRecordDegree(), partner.getType());
+            response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
+        }
+
+        //이벤트 시작 당일 전까지는 파트너 공개 안함.
+        if(LocalDate.now().isBefore(event.getStartTime().toLocalDate())){
+            response.setPartner(false, null, null, null);
         }
 
         return response;

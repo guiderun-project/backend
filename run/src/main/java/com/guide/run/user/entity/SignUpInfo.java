@@ -27,4 +27,5 @@ public class SignUpInfo {
     public boolean checkPassword(String plainPassword, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(plainPassword, this.password);
     }
+
 }

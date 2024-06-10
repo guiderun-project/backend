@@ -23,10 +23,9 @@ public class Partner extends BaseEntity {
     @JoinColumn(name = "GUIDE_ID")
     private String guideId;
 
-    private int contestCnt;
-    private int trainingCnt;
-
     @Convert(converter = LongListConverter.class)
-    private List<Long> eventIds = new ArrayList<>();
+    private List<Long> contestIds = new ArrayList<>();
+    @Convert(converter = LongListConverter.class)
+    private List<Long> trainingIds = new ArrayList<>();
 
 }

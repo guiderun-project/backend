@@ -3,11 +3,14 @@ package com.guide.run.user.service;
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.partner.entity.partner.Partner;
+import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.SignUpInfo;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.repository.*;
@@ -30,6 +33,8 @@ public class UserService {
     private final SignUpInfoRepository signUpInfoRepository;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final ArchiveDataRepository archiveDataRepository;
+
+    private final PartnerRepository partnerRepository;
     private final TmpService tmpService;
 
     @Transactional
@@ -102,7 +107,7 @@ public class UserService {
         return !byAccountId.isEmpty();
     }
 
-    //todo : 탈퇴 후 정보 삭제 필요
+    //todo : 탈퇴 후 정보 삭제 의견 공유 필요
     @Transactional
     public void withDrawal(WithdrawalRequest request, String privateId){
         //좋아요 기록 삭제
@@ -110,9 +115,11 @@ public class UserService {
         //파트너, 매칭 정보 삭제, 이벤트 생성자일 경우 탈퇴한 회원이라고 표시 필요.
         //댓글 삭제, 출석 기록...어쩌지
         //남겨야 하는 정보 : 이름, 장애여부, 성별, role(탈퇴 상태), 탈퇴 사유, 러닝등급
+        //== 테이블을 하나 파서 그것만 남기고 user 정보에는 탈퇴한 회원이라고만 남기는 게 어떨까?
 
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
         user = User.builder()
                 .phoneNumber(null)
                 .isOpenNumber(false)

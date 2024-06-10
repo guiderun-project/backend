@@ -3,9 +3,12 @@ package com.guide.run.admin.service;
 import com.guide.run.admin.dto.condition.UserSortCond;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
+import com.guide.run.admin.dto.response.user.NewUserResponse;
+import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.Guide;
@@ -15,16 +18,13 @@ import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.ViRepository;
+import com.nimbusds.jwt.JWTParser;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,16 +36,9 @@ public class AdminUserService {
     private final GuideRepository guideRepository;
     private final ArchiveDataRepository archiveDataRepository;
     private final TimeFormatter timeFormatter;
+    private final JwtProvider jwtProvider;
 
-    public List<UserItem> getUserList(int start, int limit,  boolean time, boolean type, boolean gender, boolean name_team, boolean approval){
-        UserSortCond cond = UserSortCond.builder()
-                .approval(approval)
-                .name_team(name_team)
-                .gender(gender)
-                .time(time)
-                .type(type)
-                .build();
-
+    public List<UserItem> getUserList(int start, int limit, UserSortCond cond){
        List<UserItem> response =  userRepository.sortAdminUser(start, limit, cond);
         return response;
     }
@@ -129,6 +122,27 @@ public class AdminUserService {
                 .recordDegree(user.getRecordDegree())
                 .build();
         return response;
+    }
+
+    @Transactional
+    public List<NewUserResponse> getNewUser(int start, int limit, String privateId){
+        List<NewUserResponse> result = userRepository.findNewUser(start, limit, privateId);
+        return result;
+    }
+
+    @Transactional
+    public List<UserItem> searchUser(int start, int limit, UserSortCond cond, String text){
+        List<UserItem> result = userRepository.searchAdminUser(start, limit, cond, text);
+        return result;
+    }
+
+    @Transactional
+    public Count searchUserCount(String text){
+        long count = userRepository.searchAdminUserCount(text);
+
+        return Count.builder()
+                .count(count)
+                .build();
     }
 
 }

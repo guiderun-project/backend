@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class GlobalUserInfoDto {
-    private String role;
     private String userId;
-    private String recordDegree;
-    private String type;
-    private String gender;
     private String name;
+    private String type;
+    private String role;
+    private String gender;
     private String phoneNumber;
-    private Boolean isOpenNumber;
+    private String recordDegree;
     private int age;
     private String snsId;
+    private Boolean isOpenNumber;
     private Boolean isOpenSns;
     private String img; //2차 이미지 링크 추가
 

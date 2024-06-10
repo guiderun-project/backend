@@ -16,6 +16,6 @@ public class EventHistoryDto {
     private Long eventId;
     private EventType eventType;
     private String name;
-    private LocalDate endDate;
+    private String startDate;
     private EventRecruitStatus recruitStatus;
 }
