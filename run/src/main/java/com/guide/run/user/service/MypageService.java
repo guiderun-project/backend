@@ -144,11 +144,11 @@ public class MypageService {
         return response;
     }
 
-    public EventTypeCountDto getMyPageEventTypeCount(String privateId){
-        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+    public EventTypeCountDto getMyPageEventTypeCount(String userId){
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         return EventTypeCountDto.builder()
                 .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
-                .competitionCnt(user.getCompetitionCnt())
+                .contestCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
                 .build();
     }

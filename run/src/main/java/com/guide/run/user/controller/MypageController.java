@@ -84,9 +84,8 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("event-type/count")
-    public ResponseEntity<EventTypeCountDto> getEventTypeCount(HttpServletRequest request){
-        String privateId = jwtProvider.extractUserId(request);
-        return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(privateId));
+    @GetMapping("event-type/count/{userId}")
+    public ResponseEntity<EventTypeCountDto> getEventTypeCount(@PathVariable String userId){
+        return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(userId));
     }
 }
