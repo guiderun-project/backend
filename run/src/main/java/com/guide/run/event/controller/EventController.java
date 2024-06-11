@@ -35,7 +35,7 @@ public class EventController {
     }
 
     @PatchMapping("/close/{eventId}")
-    public ResponseEntity<String> eventUpdate(@PathVariable Long eventId, HttpServletRequest request){
+    public ResponseEntity<String> eventClose(@PathVariable Long eventId, HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
         eventService.eventClose(privateId, eventId);
         return ResponseEntity.status(HttpStatus.OK).body("");
