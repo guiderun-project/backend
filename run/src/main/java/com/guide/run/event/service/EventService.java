@@ -183,7 +183,7 @@ public class EventService {
 
         boolean isMatching = false;
         //신청 여부
-        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId).orElse(null);
+        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         if(eventForm!=null){
             apply = true;
             isMatching = eventForm.isMatching();
@@ -213,16 +213,23 @@ public class EventService {
 
         //매칭 여부로 파트너 정보 추가
         Matching matching;
-        String partnerId;
+        String partnerId="0";
         if(isMatching){
             if(user.getType().equals(UserType.GUIDE)){
                 matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
-                partnerId = matching.getViId();
+                if(matching!=null){
+                    partnerId = matching.getViId();
+                }
             }else{
                 matching = matchingRepository.findByEventIdAndViId(eventId, privateId);
-                partnerId = matching.getGuideId();
+                if(matching!=null){
+                    partnerId = matching.getGuideId();
+                }
             }
 
+            if(partnerId.equals("0")){
+                response.setPartner(false, null, null, null);
+            }
             User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
             response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
         }
