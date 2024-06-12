@@ -2,6 +2,8 @@ package com.guide.run.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
+import com.guide.run.user.dto.request.AuthNumRequest;
+import com.guide.run.user.dto.request.NewPasswordDto;
 import com.guide.run.user.dto.request.PhoneNumberRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -42,19 +44,19 @@ public class LoginInfoController {
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)
     @PostMapping("/sms/token")
-    public ResponseEntity<TokenResponse> getToken(@RequestParam String number){
-        return ResponseEntity.ok(loginInfoService.getToken(number));
+    public ResponseEntity<TokenResponse> getToken(@RequestBody AuthNumRequest request){
+        return ResponseEntity.ok(loginInfoService.getToken(request.getNumber()));
     }
 
     //아이디 찾기
     @GetMapping("/accountId")
-    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestParam String token){
+    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestBody String token){
         return ResponseEntity.ok(loginInfoService.findAccountId(token));
     }
     //비밀번호 재설정
     @PostMapping("/new-password")
-    public ResponseEntity<String> createNewPassword(@RequestParam String token, @RequestParam String newPassword){
-        loginInfoService.createNewPassword(token,newPassword);
+    public ResponseEntity<String> createNewPassword(@RequestBody NewPasswordDto newPasswordDto){
+        loginInfoService.createNewPassword(newPasswordDto.getToken(),newPasswordDto.getNewPassword());
         return ResponseEntity.ok("");
     }
 

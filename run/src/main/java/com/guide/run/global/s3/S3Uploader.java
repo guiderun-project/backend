@@ -27,12 +27,14 @@ public class S3Uploader {
     private String bucket;
 
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
+        log.info("업로드 접근");
         File uploadFile = convert(multipartFile);
         return upload(uploadFile, dirName);
     }
 
     // S3로 파일 업로드하기
     private String upload(File uploadFile, String dirName) {
+        log.info("파일 업로드");
         String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
 
         String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
@@ -42,7 +44,7 @@ public class S3Uploader {
 
     // S3로 업로드
     private String putS3(File uploadFile, String fileName) {
-        //log.info("s3에 저장");
+        log.info("s3에 저장");
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3.getUrl(bucket, fileName).toString();
     }
@@ -81,7 +83,7 @@ public class S3Uploader {
         try {
             // URL 디코딩을 통해 원래의 파일 이름을 가져옴.
             String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            //log.info("Deleting file from S3: " + decodedFileName);
+            log.info("Deleting file from S3: " + decodedFileName);
             amazonS3.deleteObject(bucket, decodedFileName);
         } catch (UnsupportedEncodingException e) {
             log.error("Error while decoding the file name: {}", e.getMessage());
