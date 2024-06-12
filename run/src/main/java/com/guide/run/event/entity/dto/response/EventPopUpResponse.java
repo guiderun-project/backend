@@ -23,6 +23,8 @@ public class EventPopUpResponse {
         private String startTime;//시작시간
         private String endTime;//이벤트 종료 시간
 
+        private int recruitVi; //모집 예정인 vi 수
+        private int recruitGuide;//모집 예정인 guide 수
         private int viCnt; //실제 모집된 vi 수
         private int guideCnt; //실제 모집된 guide 수
         private String place;//이벤트 장소
