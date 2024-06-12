@@ -205,6 +205,8 @@ public class EventService {
                 .updatedAt(LocalDate.from(event.getUpdatedAt()))
                 .isApply(apply)
                 //todo : 2차에서 추가된 부분
+                .recruitGuide(event.getMaxNumG())
+                .recruitVi(event.getMaxNumV())
                 .hasPartner(isMatching) //파트너 존재 여부
                 .partnerName(null) //파트너 이름
                 .partnerRecord(null) //파트너 러닝등급
