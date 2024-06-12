@@ -10,5 +10,5 @@ import lombok.Getter;
 public class EventTypeCountDto {
     private int totalCnt;
     private int trainingCnt;
-    private int competitionCnt;
+    private int contestCnt;
 }

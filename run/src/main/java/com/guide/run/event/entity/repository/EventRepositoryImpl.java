@@ -161,7 +161,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     @Override
     public List<Event> getSchedulerEvent() {
         return queryFactory.selectFrom(event)
-                .where(event.recruitStatus.eq(RECRUIT_CLOSE),
+                .where(event.recruitStatus.eq(RECRUIT_CLOSE)
+                                .or(event.recruitStatus.eq(RECRUIT_OPEN)),
                         event.status.ne(EventStatus.EVENT_END))
                 .fetch();
     }

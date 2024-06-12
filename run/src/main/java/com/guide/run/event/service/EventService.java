@@ -59,13 +59,17 @@ public class EventService {
     public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId){
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
+        EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
+        if(request.getRecruitStartDate().isEqual(LocalDate.now())){
+            recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
+        }
 
         Event createdEvent = eventRepository.save(Event.builder()
                 .organizer(privateId)
                 .recruitStartDate(request.getRecruitStartDate())
                 .recruitEndDate(request.getRecruitEndDate())
                 .name(request.getTitle())
-                .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
+                .recruitStatus(recruitStatus)
                 .isApprove(true)
                 .type(request.getEventType())
                 .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
@@ -75,6 +79,8 @@ public class EventService {
                 .place(request.getPlace())
                 .status(EventStatus.EVENT_UPCOMING)
                 .content(request.getContent()).build());
+
+
         eventLikeRepository.save(
                 EventLike.builder()
                         .EventId(createdEvent.getId())
@@ -177,7 +183,7 @@ public class EventService {
 
         boolean isMatching = false;
         //신청 여부
-        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId).orElse(null);
         if(eventForm!=null){
             apply = true;
             isMatching = eventForm.isMatching();
@@ -238,8 +244,7 @@ public class EventService {
     }
 
     public void validEventTime(Event event){
-        if(event.getRecruitStartDate().isAfter(event.getRecruitEndDate())
-                || event.getRecruitStartDate().isEqual(event.getRecruitEndDate())){
+        if(event.getRecruitStartDate().isAfter(event.getRecruitEndDate())){
             throw new NotValidEventRecruitException();
         }
 
