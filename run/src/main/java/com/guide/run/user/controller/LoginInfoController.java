@@ -49,12 +49,12 @@ public class LoginInfoController {
     }
 
     //아이디 찾기
-    @GetMapping("/accountId")
+    @PostMapping("/accountId")
     public ResponseEntity<FindAccountIdDto> findAccountId(@RequestBody String token){
         return ResponseEntity.ok(loginInfoService.findAccountId(token));
     }
     //비밀번호 재설정
-    @PostMapping("/new-password")
+    @PatchMapping("/new-password")
     public ResponseEntity<String> createNewPassword(@RequestBody NewPasswordDto newPasswordDto){
         loginInfoService.createNewPassword(newPasswordDto.getToken(),newPasswordDto.getNewPassword());
         return ResponseEntity.ok("");
