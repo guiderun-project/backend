@@ -1,10 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.guide.run.user.dto.request.AccountIdPhoneRequest;
-import com.guide.run.user.dto.request.AuthNumRequest;
-import com.guide.run.user.dto.request.NewPasswordDto;
-import com.guide.run.user.dto.request.PhoneNumberRequest;
+import com.guide.run.user.dto.request.*;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
@@ -50,8 +47,8 @@ public class LoginInfoController {
 
     //아이디 찾기
     @PostMapping("/accountId")
-    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestBody String token){
-        return ResponseEntity.ok(loginInfoService.findAccountId(token));
+    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestBody TmpTokenDto tmpTokenDto){
+        return ResponseEntity.ok(loginInfoService.findAccountId(tmpTokenDto.getToken()));
     }
     //비밀번호 재설정
     @PatchMapping("/new-password")
