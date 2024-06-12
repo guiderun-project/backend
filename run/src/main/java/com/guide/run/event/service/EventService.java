@@ -229,9 +229,10 @@ public class EventService {
 
             if(partnerId.equals("0")){
                 response.setPartner(false, null, null, null);
+            }else{
+                User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
+                response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
             }
-            User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
-            response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
         }
 
         //이벤트 시작 당일 전까지는 파트너 공개 안함.
