@@ -1,6 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.dto.response.ImgResponse;
 import com.guide.run.user.service.ImgService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,13 @@ public class ImgController {
     private final ImgService imgService;
 
     @PostMapping("/user/img")
-    public ResponseEntity<String> uploadProfile(@RequestParam MultipartFile file,
-                                                HttpServletRequest request){
+    public ResponseEntity<ImgResponse> uploadProfile(@RequestParam MultipartFile files,
+                                                     HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
 
-        String img = imgService.uploadProfile(privateId, file);
+        ImgResponse img = ImgResponse.builder()
+                .img(imgService.uploadProfile(privateId, files))
+                .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(img);
     }
 

@@ -69,7 +69,7 @@ public class EventFormService {
         if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
             throw new NotValidDurationException();
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId).orElse(null); //todo : 임시 수정
         form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail());
         return eventFormRepository.save(
                 form
@@ -78,7 +78,7 @@ public class EventFormService {
 
     public GetForm getForm(Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId).orElse(null); //todo : 임시 수정
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
         return GetForm.builder()
                 .type(user.getType().getValue())
