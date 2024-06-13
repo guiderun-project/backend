@@ -17,6 +17,9 @@ import java.time.LocalDate;
 public class EventPopUpResponse {
         private Long eventId;
         private EventType type;//이벤트 분류
+        private String organizer ; //주최자 이름
+        private String organizerType; //주최자 장애유무
+        private String organizerRecord ; //주최자 러닝등급
         private String name;//이벤트 제목
         private EventRecruitStatus recruitStatus; //이벤트 모집 상태
         private LocalDate date; //이벤트 시작일
