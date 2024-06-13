@@ -99,10 +99,23 @@ public class EventService {
 
     @Transactional
     public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId,Long eventId) {
+        LocalDate today = LocalDate.now();
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
+
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+
+        EventRecruitStatus recruitStatus = event.getRecruitStatus();
+
+        if(request.getRecruitStartDate().isBefore(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
+        }else if(request.getRecruitStartDate().isEqual(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
+        }else if(request.getRecruitStartDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+        }
+
         if(event.getOrganizer().equals(privateId)){
             Event updatedEvent = eventRepository.save(Event.builder()
                     .id(eventId)
@@ -110,7 +123,7 @@ public class EventService {
                     .recruitStartDate(request.getRecruitStartDate())
                     .recruitEndDate(request.getRecruitEndDate())
                     .name(request.getTitle())
-                    .recruitStatus(event.getRecruitStatus())
+                    .recruitStatus(recruitStatus)
                     .isApprove(event.isApprove())
                     .type(request.getEventType())
                     .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
@@ -179,9 +192,26 @@ public class EventService {
                 NotExistEventException::new
         );
 
+        User organizer = userRepository.findById(event.getOrganizer()).orElse(null);
+
+
         boolean apply = false;
 
         boolean isMatching = false;
+        String organizerName;
+        String organizerRecord;
+        String organizerType;
+
+        if(organizer==null){
+            organizerName="존재하지 않는 사용자";
+            organizerRecord=null;
+            organizerType=null;
+        }else{
+            organizerName=organizer.getName();
+            organizerType = organizer.getType().getValue();
+            organizerRecord = organizer.getRecordDegree();
+        }
+
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         if(eventForm!=null){
@@ -194,6 +224,9 @@ public class EventService {
                 .eventId(event.getId())
                 .type(event.getType())
                 .name(event.getName())
+                .organizer(organizerName)
+                .organizerRecord(organizerRecord)
+                .organizer(organizerType)
                 .recruitStatus(event.getRecruitStatus())
                 .date(LocalDate.from(event.getStartTime()))
                 .startTime(timeFormatter.getHHMM(event.getStartTime()))
