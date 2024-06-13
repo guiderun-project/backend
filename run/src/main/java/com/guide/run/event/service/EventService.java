@@ -198,19 +198,6 @@ public class EventService {
         boolean apply = false;
 
         boolean isMatching = false;
-        String organizerName;
-        String organizerRecord;
-        String organizerType;
-
-        if(organizer==null){
-            organizerName="존재하지 않는 사용자";
-            organizerRecord=null;
-            organizerType=UserType.GUIDE.getValue();
-        }else{
-            organizerName=organizer.getName();
-            organizerType = organizer.getType().getValue();
-            organizerRecord = organizer.getRecordDegree();
-        }
 
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
@@ -224,9 +211,9 @@ public class EventService {
                 .eventId(event.getId())
                 .type(event.getType())
                 .name(event.getName())
-                .organizer(organizerName)
-                .organizerRecord(organizerRecord)
-                .organizer(organizerType)
+                .organizer(organizer.getName())
+                .organizerRecord(organizer.getRecordDegree())
+                .organizerType(organizer.getType())
                 .recruitStatus(event.getRecruitStatus())
                 .date(LocalDate.from(event.getStartTime()))
                 .startTime(timeFormatter.getHHMM(event.getStartTime()))
