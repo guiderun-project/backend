@@ -205,7 +205,7 @@ public class EventService {
         if(organizer==null){
             organizerName="존재하지 않는 사용자";
             organizerRecord=null;
-            organizerType=null;
+            organizerType=UserType.GUIDE.getValue();
         }else{
             organizerName=organizer.getName();
             organizerType = organizer.getType().getValue();
