@@ -4,6 +4,7 @@ import com.guide.run.event.entity.dto.request.EventCommentCreateRequest;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsCreatedResponse;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsDeletedResponse;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsGetResponse;
+import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.service.EventCommentService;
 import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +50,13 @@ public class EventCommentController {
                                                            HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(CommentsGetResponse.builder()
-                .comments(eventCommentService.getComments(eventId,limit,start)).build());
+                .comments(eventCommentService.getComments(eventId,limit,start,userId)).build());
+    }
+    @GetMapping("/{eventId}/comments/count")
+    public ResponseEntity<Count> getCommentsCount(@PathVariable Long eventId,
+                                                  HttpServletRequest request){
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.status(200).body(Count.builder()
+                .count(eventCommentService.getCommentsCount(eventId)).build());
     }
 }

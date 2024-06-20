@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.entity.type.UserType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,5 +23,5 @@ public interface EventRepositoryCustom {
     List<Event> getSchedulerEvent();
     List<Event> getSchedulerRecruit();
 
-
+    List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus);
 }

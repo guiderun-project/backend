@@ -1,6 +1,5 @@
 package com.guide.run.event.entity.repository;
 
-
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.Event;
 
@@ -8,12 +7,15 @@ import com.guide.run.event.entity.QEvent;
 import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
-import com.guide.run.event.entity.dto.response.get.AllEvent;
-import com.guide.run.event.entity.dto.response.get.MyEvent;
-import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.converter.TimeFormatter;
+import com.guide.run.global.exception.UnknownException;
+import com.guide.run.partner.entity.matching.QMatching;
+import com.guide.run.partner.entity.partner.QPartner;
+import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,6 +28,9 @@ import java.util.List;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
+import static com.guide.run.partner.entity.matching.QMatching.matching;
+import static com.guide.run.partner.entity.partner.QPartner.partner;
+import static com.guide.run.user.entity.user.QUser.user;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class EventRepositoryImpl implements EventRepositoryCustom{
@@ -121,10 +126,10 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
         return queryFactory.select(event.count())
                 .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
-                .fetch().size();
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId)))
+                .fetchOne();
     }
 
     @Override
@@ -136,8 +141,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 event.startTime.as("date"),
                 event.recruitStatus.as("recruitStatus")))
                 .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId).and(checkByPrivateId(privateId)))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId)))
                 .orderBy(event.startTime.asc())
                 .offset(start)
                 .limit(limit)
@@ -161,8 +167,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     @Override
     public List<Event> getSchedulerEvent() {
         return queryFactory.selectFrom(event)
-                .where(event.recruitStatus.eq(RECRUIT_CLOSE)
-                                .or(event.recruitStatus.eq(RECRUIT_OPEN)),
+                .where(event.recruitStatus.eq(RECRUIT_CLOSE),
                         event.status.ne(EventStatus.EVENT_END))
                 .fetch();
     }
@@ -174,6 +179,34 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.recruitStatus.ne(RECRUIT_END),
                         event.recruitStatus.ne(RECRUIT_CLOSE))
                 .fetch();
+    }
+
+    @Override
+    public List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .orderBy(event.startTime.asc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public DetailEvent getDetailEvent(Long eventId, String organizer) {
+        return queryFactory.select(Projections.constructor(DetailEvent.class,
+                event.id.as("eventId"),
+                event.organizer.as("organizer")
+                ))
+                .from(event)
+                .join(user).on(event.organizer.eq(organizer))
+                .where(event.id.eq(eventId))
+                .fetchOne();
     }
 
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
@@ -190,6 +223,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         }
         return null;
     }
+
 
     private BooleanBuilder checkByType(EventType type){
         if(type==null){
@@ -209,7 +243,5 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             return new BooleanBuilder(eventForm.privateId.eq(privateId));
         }
     }
-
-
 
 }

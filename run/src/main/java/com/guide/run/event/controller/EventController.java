@@ -64,9 +64,9 @@ public class EventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<DetailEvent> getDetailEvent(@PathVariable("eventId")Long eventId,
                                                       HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
+        String privateId = jwtProvider.extractUserId(request);
         return ResponseEntity.ok().
-                body(eventService.getDetailEvent(eventId,userId));
+                body(eventService.getDetailEvent(eventId,privateId));
 
     }
 }

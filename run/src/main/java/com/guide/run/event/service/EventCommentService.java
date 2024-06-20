@@ -33,11 +33,7 @@ public class EventCommentService {
                 .privateId(privateId)
                 .build();
         Comment saved = eventCommentRepository.save(comment);
-        CommentLike commentLike = CommentLike.builder()
-                .commentId(saved.getCommentId())
-                .privateIds(new ArrayList<>())
-                .build();
-        commentLikeRepository.save(commentLike);
+
         return comment.getCommentId();
     }
     @Transactional
@@ -47,7 +43,7 @@ public class EventCommentService {
         if(!comment.getPrivateId().equals(userId))
             throw new NotEventCommentWriterException();
         eventCommentRepository.delete(comment);
-        commentLikeRepository.deleteById(commentId);
+
         return comment.getCommentId();
     }
     @Transactional
@@ -66,8 +62,13 @@ public class EventCommentService {
         ).getCommentId();
     }
 
-    public List<GetComment> getComments(Long eventId, int limit, int start) {
+    public List<GetComment> getComments(Long eventId, int limit, int start,String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        return eventCommentRepository.findGetComments(limit,start,eventId);
+        return eventCommentRepository.findGetComments(limit,start,eventId,userId);
+    }
+
+    public long getCommentsCount(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        return eventCommentRepository.countByEventId(eventId);
     }
 }

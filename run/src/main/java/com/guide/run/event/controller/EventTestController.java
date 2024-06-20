@@ -52,23 +52,14 @@ public class EventTestController {
                         .eventId(1L)
                 .privateId("kakao3232984128")
                         .build());
-        eventLikeRepository.save(
-                EventLike.builder()
-                        .EventId(1L)
-                        .privateIds(new ArrayList<>()).build()
-        );
+
         userRepository.save(
                 User.builder()
                         .privateId("22")
                         .userId("dd")
                         .build()
         );
-        commentLikeRepository.save(
-                CommentLike.builder()
-                        .commentId(1L)
-                        .privateIds(new ArrayList<>())
-                        .build()
-        );
+
         eventCommentRepository.save(
                 Comment.builder()
                         .eventId(1L)
@@ -181,12 +172,6 @@ public class EventTestController {
 
     @GetMapping
     public void closeeventdup(HttpServletRequest request){
-        CommentLike commentLike = commentLikeRepository.findById(1L).orElseThrow();
-        List<String> privateIds = commentLike.getPrivateIds();
-        privateIds.add("22");
-        System.out.println(privateIds.get(0));
-        commentLike.setPrivateIds(privateIds);
-        commentLikeRepository.save(commentLike);
 
 
     }
