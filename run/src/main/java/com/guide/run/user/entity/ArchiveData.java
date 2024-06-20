@@ -28,8 +28,7 @@ public class ArchiveData {
     private boolean privacy;
     private boolean portraitRights;
 
-    @Convert(converter = StringListConverter.class)
-    private List<String> deleteReasons = new ArrayList<>(); //탈퇴 사유
+
 
     public void editPermisson(
             boolean privacy,
@@ -49,15 +48,5 @@ public class ArchiveData {
         this.motive = motive;
         this.hopePrefs = hopePrefs;
         this.runningPlace = runningPlace;
-    }
-
-    public void deleteArchive(List<String> deleteReasons){
-        this.runningPlace = null;
-        this.motive = null;
-        this.howToKnow = null;
-        this.hopePrefs = null;
-        this.privacy = false;
-        this.portraitRights = false;
-        this.deleteReasons = deleteReasons;
     }
 }

@@ -23,7 +23,7 @@ public class ImgService {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         String imgUrl;
         int idx = file.getOriginalFilename().lastIndexOf('.');
-        String imgformat = file.getOriginalFilename().substring(idx + 1);
+        String imgformat = file.getOriginalFilename().substring(idx + 1).toLowerCase();
 
         // 이미지 형식 검사해서 에러 출력하는 코드
         if (imgformat.equals("png") || imgformat.equals("jpg") || imgformat.equals("jpeg")) {

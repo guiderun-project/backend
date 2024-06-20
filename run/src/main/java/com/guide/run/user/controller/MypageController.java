@@ -38,9 +38,6 @@ public class MypageController {
     public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
                                                  @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
                                                  @RequestParam(defaultValue = "0") int year){
-        if(year==0){
-            year = Integer.parseInt(String.valueOf(LocalDate.now().getYear()));
-        }
         Count response = Count.builder()
                 .count(mypageService.getMyPageEventsCount(userId, kind, year))
                 .build();
@@ -87,9 +84,8 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("event-type/count")
-    public ResponseEntity<EventTypeCountDto> getEventTypeCount(HttpServletRequest request){
-        String privateId = jwtProvider.extractUserId(request);
-        return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(privateId));
+    @GetMapping("event-type/count/{userId}")
+    public ResponseEntity<EventTypeCountDto> getEventTypeCount(@PathVariable String userId){
+        return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(userId));
     }
 }

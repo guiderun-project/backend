@@ -1,8 +1,7 @@
 package com.guide.run.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.guide.run.user.dto.request.AccountIdPhoneRequest;
-import com.guide.run.user.dto.request.PhoneNumberRequest;
+import com.guide.run.user.dto.request.*;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
@@ -15,6 +14,10 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+        maxAge = 3600,
+        allowCredentials = "true")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -38,19 +41,19 @@ public class LoginInfoController {
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)
     @PostMapping("/sms/token")
-    public ResponseEntity<TokenResponse> getToken(@RequestParam String number){
-        return ResponseEntity.ok(loginInfoService.getToken(number));
+    public ResponseEntity<TokenResponse> getToken(@RequestBody AuthNumRequest request){
+        return ResponseEntity.ok(loginInfoService.getToken(request.getNumber()));
     }
 
     //아이디 찾기
-    @GetMapping("/accountId")
-    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestParam String token){
-        return ResponseEntity.ok(loginInfoService.findAccountId(token));
+    @PostMapping("/accountId")
+    public ResponseEntity<FindAccountIdDto> findAccountId(@RequestBody TmpTokenDto tmpTokenDto){
+        return ResponseEntity.ok(loginInfoService.findAccountId(tmpTokenDto.getToken()));
     }
     //비밀번호 재설정
-    @PostMapping("/new-password")
-    public ResponseEntity<String> createNewPassword(@RequestParam String token, @RequestParam String newPassword){
-        loginInfoService.createNewPassword(token,newPassword);
+    @PatchMapping("/new-password")
+    public ResponseEntity<String> createNewPassword(@RequestBody NewPasswordDto newPasswordDto){
+        loginInfoService.createNewPassword(newPasswordDto.getToken(),newPasswordDto.getNewPassword());
         return ResponseEntity.ok("");
     }
 

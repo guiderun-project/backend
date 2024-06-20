@@ -152,7 +152,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     }
 
     @Override
-    public List<EventHistoryDto> getUserEventHistory( String privateId, int start, int limit, String sort) {
+    public List<EventHistoryDto> getUserEventHistory( String privateId, int start, int limit, String kind) {
 
         List<EventHistoryDto> results = queryFactory
                 .select(Projections.constructor(EventHistoryDto.class,
@@ -164,7 +164,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
-                        eventHistoryCond(sort))
+                        eventHistoryCond(kind))
                 .orderBy(event.createdAt.desc())
                 .offset(start)
                 .limit(limit)
@@ -173,14 +173,14 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     }
 
     @Override
-    public long getUserEventHistoryCount( String privateId, String sort) {
+    public long getUserEventHistoryCount( String privateId, String kind) {
 
         long count = queryFactory
                 .select(event.count())
                 .from(event, eventForm)
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
-                        eventHistoryCond(sort))
+                        eventHistoryCond(kind))
                 .fetchOne();
         return count;
     }
@@ -252,9 +252,9 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.name.as("name"),
                         formattedDate(event.startTime).as("startDate"),
                         event.recruitStatus))
-                .from(event, eventForm)
+                .from(event)
+                .leftJoin(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId),
-                        eventForm.eventId.eq(event.id),
                         event.isApprove.ne(false),
                         (event.name.contains(text)
                                 //todo : 기타 검색 조건 추가 필요
@@ -358,7 +358,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
             return null;
         }else{
             //year 조건 처리
-            return event.startTime.year().goe(year);
+            return event.startTime.year().eq(year);
         }
     }
 

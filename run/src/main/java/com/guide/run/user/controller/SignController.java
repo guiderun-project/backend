@@ -151,8 +151,8 @@ public class SignController {
 
     @DeleteMapping("/withdrawal")
     public ResponseEntity<String> withDrawal(@RequestBody WithdrawalRequest request, HttpServletRequest httpServletRequest){
-        String userId = jwtProvider.extractUserId(httpServletRequest);
-        userService.withDrawal(request, userId);
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        userService.withDrawal(request, privateId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 

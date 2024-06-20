@@ -77,6 +77,13 @@ public class EventLogicExceptionAdvice {
                 getMessage("ExistForm.msg")));
     }
 
+    //2208
+    @ExceptionHandler(NotDeleteEventException.class)
+    protected ResponseEntity<FailResult> NotDeleteEventException(NotDeleteEventException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("NotDeleteEvent.code"),
+                getMessage("NotDeleteEvent.msg")));
+    }
     private String getMessage(String code){
         return getMessage(code,null);
     }

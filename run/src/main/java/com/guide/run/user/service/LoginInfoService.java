@@ -1,6 +1,11 @@
 package com.guide.run.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.guide.run.global.exception.user.authorize.NotValidTmpTokenException;
+import com.guide.run.global.exception.user.dto.InvalidAuthNumException;
+import com.guide.run.global.exception.user.dto.NotExistAccountIdException;
+import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
+import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.naverCloud.SmsService;
@@ -48,9 +53,9 @@ public class LoginInfoService {
     @Transactional
     public void getNumberForAccountId(String phoneNum) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         String phone = userService.extractNumber(phoneNum);
-        //todo : 존재하지 않는 번호 에러로 변경해야 함.
-        User user = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistUserException::new);
+        User user = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
+        //todo : 네이버 클라우드 인증 완료 후 테스트 진행
         //인증번호 전송 api 실행
        // SmsResponse smsResponse = smsService.sendSms(
          //       MessageDto.builder()
@@ -61,28 +66,21 @@ public class LoginInfoService {
         //인증번호 저장
         //AuthNumber authNumber = new AuthNumber(phone, smsResponse.getAuthNum(), "accountId");
         AuthNumber authNumber = new AuthNumber(phone, "12345", "accountId");
-        AuthNumber authNumber1 = authNumberRepository.save(authNumber);
-        log.info(authNumber1.getAuthNum());
-        log.info(authNumber1.getPhone());
-        log.info(authNumber1.getType());
+        authNumberRepository.save(authNumber);
 
-        AuthNumber authNum = authNumberRepository.findById(authNumber.getPhone()).orElse(null);
-        log.info(authNum.getAuthNum());
     }
 
     @Transactional
     public void getNumberForPassword(AccountIdPhoneRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         String phone = userService.extractNumber(request.getPhoneNum());
 
-        //존재하지 않는 번호 에러로 변경해야 함.
-        User user1 = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistUserException::new);
+        User user1 = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
-        //존재하지 않는 아이디 에러로 변경해야 함.
-        SignUpInfo user2 = signUpInfoRepository.findByAccountId(request.getAccountId()).orElseThrow(NotExistUserException::new);
+        SignUpInfo user2 = signUpInfoRepository.findByAccountId(request.getAccountId()).orElseThrow(NotExistAccountIdException::new);
 
         //번호와 아이디 정보가 일치하는지 확인해야 함.
         if(!user1.getPrivateId().equals(user2.getPrivateId())){
-            throw new RuntimeException("정보가 일치하지 않는 에러");
+            throw new InvalidAccountIdAndPhoneException();
         }
 
         //인증번호 전송 api 실행
@@ -104,9 +102,9 @@ public class LoginInfoService {
         AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElse(null);//인증번호가 일치하지 않음 에러
 
         if(authNumber==null){
-            log.info("id 찾기 실패");
+            throw new InvalidAuthNumException();
         }
-        User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(NotExistUserException::new);
+        User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(InvalidAuthNumException::new);
         return TokenResponse.builder()
                 .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
                 .build();
@@ -115,8 +113,7 @@ public class LoginInfoService {
 
     @Transactional
     public FindAccountIdDto findAccountId(String token){
-        //잘못된 토큰 에러로 변경
-        TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(RuntimeException::new);
+        TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(NotValidTmpTokenException::new);
         if(tmpToken.getType().equals("accountId")){
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
@@ -132,8 +129,7 @@ public class LoginInfoService {
 
     @Transactional
     public void createNewPassword(String token, String password){
-        //잘못된 토큰 에러로 변경
-        TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(RuntimeException::new);
+        TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(NotValidTmpTokenException::new);
         if(tmpToken.getType().equals("password")){
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             //비밀번호 재설정 해줌.
@@ -149,7 +145,7 @@ public class LoginInfoService {
             signUpInfoRepository.save(newInfo);//저장
 
         }else{
-            throw new RuntimeException("다른 인증 토큰 에러");
+            throw new NotValidTmpTokenException();
         }
     }
 
