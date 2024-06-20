@@ -21,6 +21,7 @@ import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,8 +48,10 @@ public class EventService {
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
     private final EventLikeRepository eventLikeRepository;
+
+
     @Transactional
-    public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId){
+    public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId) {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
@@ -66,12 +70,7 @@ public class EventService {
                 .place(request.getPlace())
                 .status(EventStatus.EVENT_UPCOMING)
                 .content(request.getContent()).build());
-        eventLikeRepository.save(
-                EventLike.builder()
-                        .EventId(createdEvent.getId())
-                        .privateIds(new ArrayList<>())
-                        .build()
-        );
+
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
                 .isApprove(createdEvent.isApprove())
@@ -79,12 +78,12 @@ public class EventService {
     }
 
     @Transactional
-    public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId,Long eventId) {
+    public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId, Long eventId) {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if(event.getOrganizer().equals(privateId)){
+        if (event.getOrganizer().equals(privateId)) {
             Event updatedEvent = eventRepository.save(Event.builder()
                     .id(eventId)
                     .organizer(privateId)
@@ -110,13 +109,13 @@ public class EventService {
 
     //이벤트 모집 마감
     @Transactional
-    public void eventClose(String userId, Long eventId){
+    public void eventClose(String userId, Long eventId) {
         User user = userRepository.findUserByPrivateId(userId).
                 orElseThrow(NotExistUserException::new);
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
-        if(!event.getOrganizer().equals(userId)){
+        if (!event.getOrganizer().equals(userId)) {
             throw new NotEventOrganizerException();
         }
         //지금 시간 긁어서 이벤트 마감 시간으로 변경 + 이벤트 상태 변경.
@@ -126,24 +125,23 @@ public class EventService {
 
 
     @Transactional
-    public void eventDelete(String userId,Long eventId){
+    public void eventDelete(String userId, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
 
-        if(event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)){
+        if (event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)) {
             //todo : 매칭, 출석, 신청서, 파트너, 이벤트 좋아요, 댓글 전부 삭제해야 함.
             eventFormRepository.deleteAllByEventId(eventId);
 
             eventRepository.deleteById(eventId);
-            eventLikeRepository.deleteById(eventId);
-        }
-        else
+
+        } else
             throw new NotEventOrganizerException();
     }
 
     //todo : 파트너 정보 팝업에 추가
     @Transactional
-    public EventPopUpResponse eventPopUp(Long eventId, String privateId){
+    public EventPopUpResponse eventPopUp(Long eventId, String privateId) {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
@@ -154,7 +152,7 @@ public class EventService {
         boolean apply = false;
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
-        if(eventForm!=null){
+        if (eventForm != null) {
             apply = true;
         }
 
@@ -183,21 +181,21 @@ public class EventService {
         //매칭 여부로 파트너 정보 추가
         Matching matching;
         String partnerId;
-        if(eventForm.isMatching()){
-            if(user.getType().equals(UserType.GUIDE)){
+        if (eventForm.isMatching()) {
+            if (user.getType().equals(UserType.GUIDE)) {
                 matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
                 partnerId = matching.getViId();
-            }else{
+            } else {
                 matching = matchingRepository.findByEventIdAndViId(eventId, privateId);
                 partnerId = matching.getGuideId();
             }
 
             User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
-            response.setPartner(eventForm.isMatching(),partner.getName(), partner.getRecordDegree(), partner.getType());
+            response.setPartner(eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
         }
 
         //이벤트 시작 당일 전까지는 파트너 공개 안함.
-        if(LocalDate.now().isBefore(event.getStartTime().toLocalDate())){
+        if (LocalDate.now().isBefore(event.getStartTime().toLocalDate())) {
             response.setPartner(false, null, null, null);
         }
 
@@ -208,7 +206,86 @@ public class EventService {
         return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(userId)).build();
     }
 
-    public DetailEvent getDetailEvent(Long eventId, String userId) {
-        return new DetailEvent();
+    public DetailEvent getDetailEvent(Long eventId, String privateId) {
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
+        DetailEvent detailEvent;
+
+        boolean isCheckOrganizer = false;
+        if(organizer.getPrivateId().equals(privateId))
+            isCheckOrganizer = true;
+        Matching matching;
+        //미신청한 경우
+        if(form == null) {
+            detailEvent = new DetailEvent(
+                    eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                    organizer.getRecordDegree(),
+                    event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                    event.getStartTime().toLocalTime().toString().substring(0,5),
+                    event.getEndTime().toLocalTime().toString().substring(0,5),
+                    event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                    null,null,null,
+                    event.getContent(),isCheckOrganizer,false,event.getStatus()
+            );
+        }
+        //신청한 경우
+        else{
+            if(user.getType().equals(UserType.GUIDE)){
+                matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
+                if(matching == null){
+                    detailEvent = new DetailEvent(
+                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                        organizer.getRecordDegree(),
+                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalTime().toString().substring(0,5),
+                            event.getEndTime().toLocalTime().toString().substring(0,5),
+                        event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                        null,null,null,
+                        event.getContent(),isCheckOrganizer,true,event.getStatus());
+                }
+                else{
+                    User vi = userRepository.findUserByUserId(matching.getViId()).orElseThrow(NotExistUserException::new);
+                    detailEvent = new DetailEvent(
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            organizer.getRecordDegree(),
+                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalTime().toString().substring(0,5),
+                            event.getEndTime().toLocalTime().toString().substring(0,5),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            vi.getName(), vi.getType(), vi.getRecordDegree(),
+                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                }
+            }else{
+                matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getUserId()).get(0);
+                if(matching == null){
+                    detailEvent = new DetailEvent(
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            organizer.getRecordDegree(),
+                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalTime().toString().substring(0,5),
+                            event.getEndTime().toLocalTime().toString().substring(0,5),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            null,null,null,
+                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                }
+                else{
+                    User guide = userRepository.findUserByUserId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
+                    detailEvent = new DetailEvent(
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            organizer.getRecordDegree(),
+                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalTime().toString().substring(0,5),
+                            event.getEndTime().toLocalTime().toString().substring(0,5),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            guide.getName(), guide.getType(), guide.getRecordDegree(),
+                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                }
+            }
+        }
+
+
+        return detailEvent;
     }
 }

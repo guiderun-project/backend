@@ -14,17 +14,19 @@ import java.util.List;
 public class GetComment {
     private Long commentId;
     private String name;
+    private String userId;
     private UserType type;
     private String content;
     private LocalDateTime createdAt;
     private long likes;
 
-    public GetComment(Long commentId, String name, UserType type, String content, LocalDateTime createdAt, List<String> likes) {
+    public GetComment(Long commentId, String name,String userId, UserType type, String content, LocalDateTime createdAt, Long likes) {
         this.commentId = commentId;
         this.name = name;
+        this.userId = userId;
         this.type = type;
         this.content = content;
         this.createdAt = createdAt;
-        this.likes =likes.size();
+        this.likes =likes;
     }
 }

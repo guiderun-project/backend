@@ -3,6 +3,7 @@ package com.guide.run.event.service;
 import com.guide.run.event.entity.CommentLike;
 import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.response.LikeCountResponse;
+import com.guide.run.event.entity.dto.response.LikeResponse;
 import com.guide.run.event.entity.repository.CommentLikeRepository;
 import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventLikeRepository;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,48 +24,59 @@ public class EventLikeService {
     private final EventCommentRepository eventCommentRepository;
 
     @Transactional
-    public LikeCountResponse pressCommentLike(Long commentId, String privateId) {
-        CommentLike commentLike = commentLikeRepository.findById(commentId).orElseThrow(NotExistCommentException::new);
-        List<String> privateIds = commentLike.getPrivateIds();
-        if(privateIds.contains(privateId))
-            privateIds.remove(privateId);
-        else
-            privateIds.add(privateId);
-        commentLike.setPrivateIds(privateIds);
-        commentLikeRepository.save(commentLike);
-        return LikeCountResponse.builder().likes((long) privateIds.size()).build();
+    public LikeResponse pressCommentLike(Long commentId, String privateId) {
+        Optional<CommentLike> commentLike = commentLikeRepository.findByCommentIdAndPrivateId(commentId, privateId);
+        //좋아요 누른적 없음
+        if(commentLike.isEmpty()){
+            commentLikeRepository.save(CommentLike.builder().commentId(commentId).privateId(privateId).build());
+        }
+        //있음
+        else{
+            commentLikeRepository.delete(commentLike.get());
+        }
+
+        return LikeResponse.builder().likes(commentLikeRepository.countByCommentId(commentId)).build();
     }
 
-    public LikeCountResponse getCommentLikeCount(Long commentId) {
+    public LikeCountResponse getCommentLikeCount(Long commentId,String privateId) {
+        Optional<CommentLike> commentLike = commentLikeRepository.findByCommentIdAndPrivateId(commentId, privateId);
+        boolean isLiked;
+        if(commentLike.isEmpty())
+            isLiked=false;
+        else
+            isLiked=true;
+
         return LikeCountResponse.builder()
-                .likes((long) commentLikeRepository
-                        .findById(commentId)
-                        .orElseThrow(NotExistCommentException::new)
-                        .getPrivateIds()
-                        .size()
-                ).build();
+                .likes(commentLikeRepository.countByCommentId(commentId))
+                .isLiked(isLiked)
+                .build();
     }
+
 
     @Transactional
-    public LikeCountResponse pressEventLike(Long eventId, String privateId) {
-        EventLike eventLike = eventLikeRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        List<String> privateIds = eventLike.getPrivateIds();
-        if(privateIds.contains(privateId))
-            privateIds.remove(privateId);
-        else
-            privateIds.add(privateId);
-        eventLike.setPrivateIds(privateIds);
-        eventLikeRepository.save(eventLike);
-        return LikeCountResponse.builder().likes((long) privateIds.size()).build();
+    public LikeResponse pressEventLike(Long eventId, String privateId) {
+        Optional<EventLike> eventLike = eventLikeRepository.findByEventIdAndPrivateId(eventId, privateId);
+        //이벤트 좋아요가 없으면
+        if(eventLike.isEmpty()){
+            eventLikeRepository.save(EventLike.builder().eventId(eventId).privateId(privateId).build());
+        }
+        //있으면
+        else{
+            eventLikeRepository.delete(eventLike.get());
+        }
+        return LikeResponse.builder().likes(eventLikeRepository.countByEventId(eventId)).build();
     }
 
-    public LikeCountResponse getEventLikeCount(Long eventId) {
+    public LikeCountResponse getEventLikeCount(Long eventId,String privateId) {
+        Optional<EventLike> eventLike = eventLikeRepository.findByEventIdAndPrivateId(eventId, privateId);
+        boolean isLiked;
+        if(eventLike.isEmpty())
+            isLiked=false;
+        else
+            isLiked=true;
         return LikeCountResponse.builder()
-                .likes((long) eventLikeRepository
-                        .findById(eventId)
-                        .orElseThrow(NotExistEventException::new)
-                        .getPrivateIds()
-                        .size()
-                ).build();
+                .likes(eventLikeRepository.countByEventId(eventId))
+                .isLiked(isLiked)
+                .build();
     }
 }

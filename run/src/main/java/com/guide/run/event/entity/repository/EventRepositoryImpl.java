@@ -13,6 +13,7 @@ import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.UnknownException;
+import com.guide.run.partner.entity.matching.QMatching;
 import com.guide.run.partner.entity.partner.QPartner;
 import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.BooleanBuilder;
@@ -27,6 +28,7 @@ import java.util.List;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
+import static com.guide.run.partner.entity.matching.QMatching.matching;
 import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.user.entity.user.QUser.user;
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -124,10 +126,10 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
         return queryFactory.select(event.count())
                 .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
-                .fetch().size();
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId)))
+                .fetchOne();
     }
 
     @Override
@@ -139,8 +141,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 event.startTime.as("date"),
                 event.recruitStatus.as("recruitStatus")))
                 .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId).and(checkByPrivateId(privateId)))
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId)))
                 .orderBy(event.startTime.asc())
                 .offset(start)
                 .limit(limit)
@@ -178,6 +181,34 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetch();
     }
 
+    @Override
+    public List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .orderBy(event.startTime.asc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public DetailEvent getDetailEvent(Long eventId, String organizer) {
+        return queryFactory.select(Projections.constructor(DetailEvent.class,
+                event.id.as("eventId"),
+                event.organizer.as("organizer")
+                ))
+                .from(event)
+                .join(user).on(event.organizer.eq(organizer))
+                .where(event.id.eq(eventId))
+                .fetchOne();
+    }
+
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
         if(kind==null){
             return new BooleanBuilder();
@@ -192,6 +223,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         }
         return null;
     }
+
 
     private BooleanBuilder checkByType(EventType type){
         if(type==null){
@@ -211,7 +243,5 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             return new BooleanBuilder(eventForm.privateId.eq(privateId));
         }
     }
-
-
 
 }

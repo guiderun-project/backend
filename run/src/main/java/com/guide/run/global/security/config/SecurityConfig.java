@@ -3,6 +3,7 @@ package com.guide.run.global.security.config;
 import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.entity.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +44,7 @@ public class SecurityConfig {
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
                     .requestMatchers("/attendance-upload")
-                    .requestMatchers("/api/**");
+                    .requestMatchers("/api/*");
         };
     }
     @Bean
@@ -60,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/signup/duplicated").permitAll()
                         //.requestMatchers("/api/signup/**").hasRole("NEW")
                         //.requestMatchers("/api/user").hasRole("USER")
-                        .requestMatchers("/api/test3").authenticated()
+                        .requestMatchers("/api/event/calendar/**").hasRole(Role.ROLE_USER.getValue())
                         .anyRequest().permitAll())
 
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
