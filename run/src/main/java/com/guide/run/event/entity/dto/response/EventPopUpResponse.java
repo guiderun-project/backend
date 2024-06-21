@@ -43,7 +43,8 @@ public class EventPopUpResponse {
 
         private EventStatus status; //이벤트 status
 
-        public void setPartner(Boolean hasPartner, String partnerName, String partnerRecord, UserType partnerType){
+        public void setPartner(Boolean isApply, Boolean hasPartner, String partnerName, String partnerRecord, UserType partnerType){
+                this.isApply = isApply;
                 this.hasPartner = hasPartner;
                 this.partnerName = partnerName;
                 this.partnerRecord = partnerRecord;
