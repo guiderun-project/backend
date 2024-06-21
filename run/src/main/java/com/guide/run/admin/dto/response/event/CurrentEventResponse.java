@@ -13,5 +13,6 @@ public class CurrentEventResponse {
     private long eventId;
     private EventType eventType;
     private String title;
+    private String date;
     private EventRecruitStatus recruitStatus;
 }
