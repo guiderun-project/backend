@@ -197,17 +197,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetch();
     }
 
-    @Override
-    public DetailEvent getDetailEvent(Long eventId, String organizer) {
-        return queryFactory.select(Projections.constructor(DetailEvent.class,
-                event.id.as("eventId"),
-                event.organizer.as("organizer")
-                ))
-                .from(event)
-                .join(user).on(event.organizer.eq(organizer))
-                .where(event.id.eq(eventId))
-                .fetchOne();
-    }
+
 
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
         if(kind==null){

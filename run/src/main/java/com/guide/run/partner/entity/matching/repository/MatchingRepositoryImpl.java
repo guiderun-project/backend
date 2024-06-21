@@ -10,6 +10,8 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 import static com.guide.run.partner.entity.matching.QMatching.matching;
+import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
+import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
@@ -25,9 +27,11 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
         return queryFactory.select(Projections.constructor(MatchedGuideInfo.class,
                 user.userId.as("userId"),
                 user.type.as("type"),
-                user.name.as("name")))
+                user.name.as("name"),
+                attendance.isAttend.as("isAttended")))
                 .from(matching)
                 .join(user).on(user.userId.eq(matching.guideId))
+                .join(attendance).on(matching.guideId.eq(attendance.privateId).and(matching.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId).and(matching.viId.eq(viId)))
                 .fetch();
     }
@@ -37,9 +41,11 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
         return queryFactory.select(Projections.constructor(MatchedViInfo.class,
                         user.userId.as("userId"),
                         user.type.as("type"),
-                        user.name.as("name")))
+                        user.name.as("name"),
+                        attendance.isAttend.as("isAttended")))
                 .from(matching)
                 .join(user).on(user.userId.eq(matching.viId))
+                .join(attendance).on(matching.viId.eq(attendance.privateId).and(matching.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
                 .groupBy(matching.viId)
                 .fetch();

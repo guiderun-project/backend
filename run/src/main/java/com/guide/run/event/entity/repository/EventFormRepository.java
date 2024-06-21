@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface EventFormRepository extends JpaRepository <EventForm,Long> ,EventFormRepositoryAdmin {
+public interface EventFormRepository extends JpaRepository <EventForm,Long> ,EventFormRepositoryAdmin,EventFormRepositoryCustom {
     EventForm findByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByPrivateId(String privateId);

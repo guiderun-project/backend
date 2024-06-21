@@ -36,6 +36,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
                 .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
+                .orderBy(user.type.desc())
                 .fetch();
     }
 }
