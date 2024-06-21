@@ -28,4 +28,12 @@ public class Partner extends BaseEntity {
     @Convert(converter = LongListConverter.class)
     private List<Long> trainingIds = new ArrayList<>();
 
+    public void addContest(Long eventId){
+        this.contestIds.add(eventId);
+    }
+
+    public void addTraining(Long eventId){
+        this.trainingIds.add(eventId);
+    }
+
 }

@@ -32,15 +32,17 @@ public class MyPagePartner {
                          String recordDegree,
                          List<Long> trainingIds,
                          List<Long> contestIds,
-                         List<String> sendIds,
+                         long like,
+                         String sendId,
                          String privateId ) {
 
         this.userId = userId;
         this.img = img;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);;
         this.type = type.getValue();
         this.name = name;
         this.recordDegree = recordDegree;
+        this.like = (int)like;
 
         if(trainingIds==null){
             this.trainingCnt = 0;
@@ -53,12 +55,10 @@ public class MyPagePartner {
             this.contestCnt = contestIds.size();
         }
 
-        if(sendIds==null){
-            this.like = 0;
-            this.isLiked = false;
+        if(sendId.equals(privateId)){
+            this.isLiked = true;
         }else{
-            this.like = sendIds.size();
-            this.isLiked = sendIds.contains(privateId);
+            this.isLiked = false;
         }
     }
 }

@@ -27,7 +27,7 @@ public class AdminEventApplyItem {
                                String team,
                                LocalDateTime apply_time) {
         this.userId = userId;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);
         this.type = type;
         this.name = name;
         this.team = team;

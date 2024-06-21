@@ -1,6 +1,7 @@
 package com.guide.run.event.service;
 
 
+import com.guide.run.event.entity.Comment;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.EventLike;
@@ -10,18 +11,19 @@ import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.DetailEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
-import com.guide.run.event.entity.repository.EventFormRepository;
-import com.guide.run.event.entity.repository.EventLikeRepository;
-import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
+import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
+import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
@@ -34,6 +36,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,6 +51,10 @@ public class EventService {
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
     private final EventLikeRepository eventLikeRepository;
+    private final UnMatchingRepository unMatchingRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final EventCommentRepository eventCommentRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
 
     @Transactional
@@ -59,7 +66,7 @@ public class EventService {
                 .organizer(privateId)
                 .recruitStartDate(request.getRecruitStartDate())
                 .recruitEndDate(request.getRecruitEndDate())
-                .name(request.getTitle())
+                .name(request.getName())
                 .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
                 .isApprove(false)
                 .type(request.getEventType())
@@ -89,7 +96,7 @@ public class EventService {
                     .organizer(privateId)
                     .recruitStartDate(request.getRecruitStartDate())
                     .recruitEndDate(request.getRecruitEndDate())
-                    .name(request.getTitle())
+                    .name(request.getName())
                     .recruitStatus(event.getRecruitStatus())
                     .isApprove(event.isApprove())
                     .type(request.getEventType())
@@ -128,11 +135,23 @@ public class EventService {
     public void eventDelete(String userId, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
+        LocalDateTime now = LocalDateTime.now();
+        if(event.getEndTime().isBefore(now) ||event.getEndTime().isEqual(now)){
+            throw new NotDeleteEventException(); //종료된 이벤트는 삭제 못함.
+        }
 
         if (event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)) {
-            //todo : 매칭, 출석, 신청서, 파트너, 이벤트 좋아요, 댓글 전부 삭제해야 함.
+            //todo : 매칭, 출석, 신청서, 이벤트 좋아요, 댓글, 댓글 좋아요 전부 삭제해야 함. 파트너는 종료됐을 때 추가되기 때문에 삭제 안해도 됨.
             eventFormRepository.deleteAllByEventId(eventId);
-
+            matchingRepository.deleteAllByEventId(eventId);
+            attendanceRepository.deleteAllByEventId(eventId);
+            unMatchingRepository.deleteAllByEventId(eventId);
+            List<Comment> comments = eventCommentRepository.findAllByEventId(eventId);
+            
+            for(Comment c : comments){
+                commentLikeRepository.deleteAllByCommentId(c.getCommentId());
+            }
+            
             eventRepository.deleteById(eventId);
 
         } else
@@ -168,6 +187,7 @@ public class EventService {
                 .viCnt(event.getViCnt())
                 .guideCnt(event.getGuideCnt())
                 .place(event.getPlace())
+                .status(event.getStatus())
                 .content(event.getContent())
                 .updatedAt(LocalDate.from(event.getUpdatedAt()))
                 .isApply(apply)

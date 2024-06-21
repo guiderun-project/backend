@@ -5,11 +5,9 @@ import com.guide.run.admin.dto.response.user.NewUserResponse;
 import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
-import com.querydsl.core.types.ConstantImpl;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
@@ -172,8 +170,10 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 user.name,
                                 user.trainingCnt,
                                 user.competitionCnt.as("contestCnt"),
-                                partnerLike.sendIds.as("like"),
-                                Expressions.constant(privateId)
+                                ExpressionUtils.as(
+                                        JPAExpressions.select(partnerLike.count())
+                                                .from(partnerLike)
+                                                .where(user.privateId.eq(partnerLike.recId)),"like" )
                         )
                 ).from(user)
                 .leftJoin(partnerLike).on(user.privateId.eq(partnerLike.recId))

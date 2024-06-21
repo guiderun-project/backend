@@ -15,7 +15,7 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
     EventForm findByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByPrivateId(String privateId);
-
     void deleteAllByEventId(Long eventId);
+    void deleteAllByPrivateId(String privateId);
 
 }
