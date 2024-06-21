@@ -116,7 +116,7 @@ public class SmsService {
 
         return encodeBase64String;
     }
-    // 5자리의 난수를 조합 인증코드 만들기
+    // 5자리 수 조합 인증코드 만들기
     public static String createSmsKey() {
         StringBuffer key = new StringBuffer();
         Random rnd = new Random();
