@@ -46,6 +46,7 @@ public class S3Uploader {
     private String putS3(File uploadFile, String fileName) {
         log.info("s3에 저장");
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
+        log.info("저장까지 성공");
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
