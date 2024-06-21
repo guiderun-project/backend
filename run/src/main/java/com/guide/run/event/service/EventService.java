@@ -219,14 +219,20 @@ public class EventService {
             if (eventForm.isMatching()) {
                 if (user.getType().equals(UserType.GUIDE)) {
                     matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
-                    partnerId = matching.getViId();
+                    if(matching!=null){
+                        partnerId = matching.getViId();
+                        User partner = userRepository.findUserByPrivateId(partnerId).orElse(null);
+                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                    }
+
                 } else {
                     matching = matchingRepository.findByEventIdAndViId(eventId, privateId);
-                    partnerId = matching.getGuideId();
+                    if(matching!=null){
+                        partnerId = matching.getGuideId();
+                        User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
+                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                    }
                 }
-
-                User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
-                response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
             }
         }else{
             apply = false;
