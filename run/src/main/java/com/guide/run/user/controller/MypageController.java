@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -76,7 +77,7 @@ public class MypageController {
     }
 
     @GetMapping("/partner-list/count/{userId}")
-    public ResponseEntity<Count> getMypartnerCount(@PathVariable String userId){
+    public ResponseEntity<Count> getMyPartnerCount(@PathVariable String userId){
         Count response = Count.builder()
                 .count(mypageService.getMyPartnersCount(userId))
                 .build();
