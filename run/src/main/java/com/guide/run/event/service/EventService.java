@@ -168,11 +168,21 @@ public class EventService {
                 NotExistEventException::new
         );
 
+        User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElse(null);
+
+        String organizerRecord = null;
+        UserType organizerType = UserType.GUIDE;
+        String organizerName = null;
+
+        Matching matching;
+        String partnerId;
+
         boolean apply = false;
-        //신청 여부
-        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
-        if (eventForm != null) {
-            apply = true;
+
+        if(organizer!=null){
+            organizerName = organizer.getName();
+            organizerRecord = organizer.getRecordDegree();
+            organizerType = organizer.getType();
         }
 
 
@@ -180,6 +190,9 @@ public class EventService {
                 .eventId(event.getId())
                 .type(event.getType())
                 .name(event.getName())
+                .organizer(organizerName)
+                .organizerRecord(organizerRecord)
+                .organizerType(organizerType)
                 .recruitStatus(event.getRecruitStatus())
                 .date(LocalDate.from(event.getStartTime()))
                 .startTime(timeFormatter.getHHMM(event.getStartTime()))
@@ -192,31 +205,37 @@ public class EventService {
                 .updatedAt(LocalDate.from(event.getUpdatedAt()))
                 .isApply(apply)
                 //todo : 2차에서 추가된 부분
-                .hasPartner(eventForm.isMatching()) //파트너 존재 여부
+                .hasPartner(false) //파트너 존재 여부
                 .partnerName(null) //파트너 이름
                 .partnerRecord(null) //파트너 러닝등급
                 .partnerType(null) //파트너 장애여부
                 .build();
 
         //매칭 여부로 파트너 정보 추가
-        Matching matching;
-        String partnerId;
-        if (eventForm.isMatching()) {
-            if (user.getType().equals(UserType.GUIDE)) {
-                matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
-                partnerId = matching.getViId();
-            } else {
-                matching = matchingRepository.findByEventIdAndViId(eventId, privateId);
-                partnerId = matching.getGuideId();
-            }
+        //신청 여부
+        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        if (eventForm != null) {
+            apply = true;
+            if (eventForm.isMatching()) {
+                if (user.getType().equals(UserType.GUIDE)) {
+                    matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
+                    partnerId = matching.getViId();
+                } else {
+                    matching = matchingRepository.findByEventIdAndViId(eventId, privateId);
+                    partnerId = matching.getGuideId();
+                }
 
-            User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(NotExistUserException::new);
-            response.setPartner(eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
+                response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+            }
+        }else{
+            apply = false;
         }
+
 
         //이벤트 시작 당일 전까지는 파트너 공개 안함.
         if (LocalDate.now().isBefore(event.getStartTime().toLocalDate())) {
-            response.setPartner(false, null, null, null);
+            response.setPartner(apply, false, null, null, null);
         }
 
         return response;
