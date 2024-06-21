@@ -1,12 +1,14 @@
 package com.guide.run.partner.entity.partner.repository;
 
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
+import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.entity.type.UserType;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
@@ -14,6 +16,7 @@ import java.util.List;
 
 import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
+import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
@@ -36,10 +39,17 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 user.recordDegree,
                                 partner.trainingIds,
                                 partner.contestIds,
-                                partnerLike.sendIds,
+                                ExpressionUtils.as(
+                                        JPAExpressions.select(partnerLike.count())
+                                                .from(partnerLike)
+                                                .where(user.privateId.eq(partnerLike.recId)),"like" ),
+                                ExpressionUtils.as(
+                                        JPAExpressions.select(partnerLike.sendId)
+                                                .from(partnerLike)
+                                                .where(user.privateId.eq(partnerLike.recId),
+                                                        partnerLike.sendId.eq(privateId)),"sendId"),
                                 Expressions.constant(privateId)
                         )
-
                 )
                 .from(user)
                 .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
@@ -76,7 +86,10 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         user.type,
                         user.name,
                         user.recordDegree,
-                        partnerLike.sendIds
+                        ExpressionUtils.as(
+                                JPAExpressions.select(partnerLike.count())
+                                        .from(partnerLike)
+                                        .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
                 .from(user)
                 .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
@@ -116,7 +129,10 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         user.type,
                         user.name,
                         user.recordDegree,
-                        partnerLike.sendIds
+                        ExpressionUtils.as(
+                                JPAExpressions.select(partnerLike.count())
+                                        .from(partnerLike)
+                                        .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
                 .from(user)
                 .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
@@ -151,6 +167,27 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         return count;
     }
 
+    @Override
+    public List<AttendAndPartnerDto> getEndEventAttendanceAndPartner(long eventId) {
+        List<AttendAndPartnerDto> list = queryFactory.select(
+                        Projections.constructor(AttendAndPartnerDto.class,
+                                user.privateId,
+                                user.type,
+                                partner.viId,
+                                partner.guideId,
+                                attendance.isAttend,
+                                partner.trainingIds,
+                                partner.contestIds
+                        ))
+                .from(attendance)
+                .leftJoin(user).on(user.privateId.eq(attendance.privateId))
+                .leftJoin(partner).on(getUserType2(user.type, user.privateId))
+                .where(attendance.isAttend.eq(true),
+                        attendance.eventId.eq(eventId))
+                .fetch();
+        return list;
+    }
+
     private BooleanExpression getPartnerId(UserType type){
         if(type.equals(UserType.GUIDE)){
             return partner.viId.eq(user.privateId);
@@ -171,16 +208,15 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         }
     }
 
-    private BooleanExpression getPartnerLike(UserType type){
+    private BooleanExpression getUserType2(EnumPath<UserType> type, StringPath privateId){
         if(type.equals(UserType.GUIDE)){
-            return partnerLike.recId.eq(partner.viId);
+            return partner.guideId.eq(privateId);
         } else if (type.equals(UserType.VI)) {
-            return partnerLike.recId.eq(partner.guideId);
+            return partner.viId.eq(privateId);
         }else{
             return null;
         }
     }
-
 
     private OrderSpecifier partnerSortCond(String sort){
         if(sort.equals("RECENT")){ //최근순
@@ -193,9 +229,9 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
 
     private BooleanExpression getPartnerKind(String kind){
         if(kind.equals("COMPETITON")){
-        return partner.contestIds.isNotEmpty();
+            return Expressions.booleanTemplate("LENGTH({0}) > 0", partner.contestIds);
         } else if (kind.equals("TRAINING")) {
-            return partner.trainingIds.isNotEmpty();
+            return Expressions.booleanTemplate("LENGTH({0}) > 0", partner.trainingIds);
         }else{
             return null;
         }
