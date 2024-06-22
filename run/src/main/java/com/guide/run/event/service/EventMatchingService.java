@@ -33,6 +33,16 @@ public class EventMatchingService {
         Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, userId);
         if(existGuide!=null){
             matchingRepository.delete(existGuide);
+            long countMatchedGuideForVi = matchingRepository.countByEventIdAndViId(eventId, existGuide.getViId());
+            if(countMatchedGuideForVi==0){
+                User unMatchingVi = userRepository.findUserByUserId(existGuide.getViId()).orElseThrow(NotExistUserException::new);
+                unMatchingRepository.save(
+                        UnMatching.builder()
+                                .eventId(eventId)
+                                .privateId(unMatchingVi.getPrivateId())
+                                .build()
+                );
+            }
         }
         matchingRepository.save(
                 Matching.builder()
