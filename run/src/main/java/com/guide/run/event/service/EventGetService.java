@@ -70,7 +70,7 @@ public class EventGetService {
         }else{
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventFormRepository.countByPrivateIdAndIsApprove(privateId,true);
+                    return eventFormRepository.countByPrivateId(privateId);
                 }
                 else{
                     return eventRepository.getAllMyEventListCount(null,kind,privateId);
