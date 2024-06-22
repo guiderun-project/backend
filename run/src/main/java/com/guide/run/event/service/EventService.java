@@ -17,6 +17,8 @@ import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
+import com.guide.run.global.exception.event.dto.NotValidEventRecruitException;
+import com.guide.run.global.exception.event.dto.NotValidEventStartException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -63,12 +65,49 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
+        EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
+        EventStatus status = EventStatus.EVENT_UPCOMING;
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime start = timeFormatter.getDateTime(request.getDate(), request.getStartTime());
+        LocalDateTime end = timeFormatter.getDateTime(request.getDate(), request.getEndTime());
+
+        if(request.getRecruitStartDate().isAfter(request.getRecruitEndDate())){
+            throw new NotValidEventRecruitException();
+        }
+
+        if(request.getRecruitStartDate().isAfter(start.toLocalDate())){
+            throw new NotValidEventStartException();
+        }
+
+        if(start.isAfter(end) || start.isEqual(end)){
+            throw new NotValidEventStartException();
+        }
+
+        //오늘이면 오픈
+        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
+        }
+
+        //마감기간 지났으면 마감처리
+        if(request.getRecruitEndDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+        }
+
+        if(start.isEqual(now)||start.isAfter(now)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+            status = EventStatus.EVENT_OPEN;
+        }
+
+
         Event createdEvent = eventRepository.save(Event.builder()
                 .organizer(privateId)
                 .recruitStartDate(request.getRecruitStartDate())
                 .recruitEndDate(request.getRecruitEndDate())
                 .name(request.getName())
-                .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
+                .recruitStatus(recruitStatus)
                 .isApprove(true)
                 .type(request.getEventType())
                 .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
@@ -76,7 +115,7 @@ public class EventService {
                 .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
                 .maxNumG(request.getMinNumG())
                 .place(request.getPlace())
-                .status(EventStatus.EVENT_UPCOMING)
+                .status(status)
                 .content(request.getContent()).build());
 
         //자동 참가 처리
@@ -90,6 +129,7 @@ public class EventService {
                         .isMatching(false)
                         .build()
         );
+
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
                 .isApprove(createdEvent.isApprove())
@@ -101,6 +141,42 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
+        EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
+        EventStatus status = EventStatus.EVENT_UPCOMING;
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime start = timeFormatter.getDateTime(request.getDate(), request.getStartTime());
+        LocalDateTime end = timeFormatter.getDateTime(request.getDate(), request.getEndTime());
+
+        if(request.getRecruitStartDate().isAfter(request.getRecruitEndDate())){
+            throw new NotValidEventRecruitException();
+        }
+
+        if(request.getRecruitStartDate().isAfter(start.toLocalDate())){
+            throw new NotValidEventStartException();
+        }
+
+        if(start.isAfter(end) || start.isEqual(end)){
+            throw new NotValidEventStartException();
+        }
+
+        //오늘이면 오픈
+        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
+        }
+
+        //마감기간 지났으면 마감처리
+        if(request.getRecruitEndDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+        }
+
+        if(start.isEqual(now)||start.isAfter(now)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+            status = EventStatus.EVENT_OPEN;
+        }
+
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if (event.getOrganizer().equals(privateId)) {
             Event updatedEvent = eventRepository.save(Event.builder()
@@ -109,7 +185,7 @@ public class EventService {
                     .recruitStartDate(request.getRecruitStartDate())
                     .recruitEndDate(request.getRecruitEndDate())
                     .name(request.getName())
-                    .recruitStatus(event.getRecruitStatus())
+                    .recruitStatus(recruitStatus)
                     .isApprove(event.isApprove())
                     .type(request.getEventType())
                     .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
@@ -117,7 +193,13 @@ public class EventService {
                     .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
                     .maxNumG(request.getMinNumG())
                     .place(request.getPlace())
+                    .status(status)
                     .content(request.getContent()).build());
+
+            if(request.getRecruitStartDate().isBefore(today)|| request.getRecruitStartDate().isEqual(today)){
+                eventClose(privateId, updatedEvent.getId());
+            }
+
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())
                     .isApprove(updatedEvent.isApprove())
@@ -128,13 +210,13 @@ public class EventService {
 
     //이벤트 모집 마감
     @Transactional
-    public void eventClose(String userId, Long eventId) {
-        User user = userRepository.findUserByPrivateId(userId).
+    public void eventClose(String privateId, Long eventId) {
+        User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
-        if (!event.getOrganizer().equals(userId)) {
+        if (!event.getOrganizer().equals(privateId)) {
             throw new NotEventOrganizerException();
         }
         //지금 시간 긁어서 이벤트 마감 시간으로 변경 + 이벤트 상태 변경.
@@ -182,6 +264,7 @@ public class EventService {
 
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElse(null);
 
+        String organizerId = null;
         String organizerRecord = null;
         UserType organizerType = UserType.GUIDE;
         String organizerName = null;
@@ -192,6 +275,7 @@ public class EventService {
         boolean apply = false;
 
         if(organizer!=null){
+            organizerId = organizer.getUserId();
             organizerName = organizer.getName();
             organizerRecord = organizer.getRecordDegree();
             organizerType = organizer.getType();
@@ -202,6 +286,7 @@ public class EventService {
                 .eventId(event.getId())
                 .type(event.getType())
                 .name(event.getName())
+                .organizerId(organizerId)
                 .organizer(organizerName)
                 .organizerRecord(organizerRecord)
                 .organizerType(organizerType)
@@ -279,7 +364,9 @@ public class EventService {
         //미신청한 경우
         if(form == null) {
             detailEvent = new DetailEvent(
-                    eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                    eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                    organizer.getUserId(),
+                    organizer.getName(),organizer.getType(),
                     organizer.getRecordDegree(),
                     event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                     event.getStartTime().toLocalTime().toString().substring(0,5),
@@ -297,7 +384,9 @@ public class EventService {
                 matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
                 if(matching == null){
                     detailEvent = new DetailEvent(
-                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            organizer.getUserId(),
+                            organizer.getName(),organizer.getType(),
                         organizer.getRecordDegree(),
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
@@ -311,7 +400,9 @@ public class EventService {
                 else{
                     User vi = userRepository.findUserByUserId(matching.getViId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            organizer.getUserId(),
+                            organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
@@ -326,7 +417,9 @@ public class EventService {
                 matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getUserId()).get(0);
                 if(matching == null){
                     detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            organizer.getUserId(),
+                            organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
@@ -340,7 +433,9 @@ public class EventService {
                 else{
                     User guide = userRepository.findUserByUserId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),organizer.getName(),organizer.getType(),
+                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            organizer.getUserId(),
+                            organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
