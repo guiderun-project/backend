@@ -205,7 +205,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .otherwise(2);
 
 
-        if (cond.getTime()==0 || cond.getTime()==2) {
+        if (cond.getTime()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
         }
 
@@ -219,7 +219,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
         if (cond.getName_team()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
         }
 
         if(cond.getApproval()==0){
@@ -240,10 +239,13 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
         if (cond.getName_team()==1) {
             orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
         }
         if(cond.getApproval()==1){
             orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, roleOrder));
+        }
+
+        if (cond.getTime()==2) {
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
