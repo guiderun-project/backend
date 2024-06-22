@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class DetailEvent {
     private Long eventId;
     private EventType type;
@@ -28,8 +27,8 @@ public class DetailEvent {
     private String date;
     private String startTime;
     private String endTime;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
+    private LocalDate created_at;
+    private LocalDate updated_at;
     private String place;
     private int NumV;
     private int NumG;
@@ -42,4 +41,29 @@ public class DetailEvent {
     private boolean checkOrganizer;
     private boolean submit;
     private EventStatus status;
+
+    public DetailEvent(Long eventId, EventType type, String name, EventRecruitStatus recruitStatus, String organizer, UserType organizerType, String organizerPace, String date, String startTime, String endTime, LocalDateTime created_at, LocalDateTime updated_at, String place, int numV, int numG, String partner, UserType partnerType, String partnerPace, String details, boolean checkOrganizer, boolean submit, EventStatus status) {
+        this.eventId = eventId;
+        this.type = type;
+        this.name = name;
+        this.recruitStatus = recruitStatus;
+        this.organizer = organizer;
+        this.organizerType = organizerType;
+        this.organizerPace = organizerPace;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.created_at = created_at.toLocalDate();
+        this.updated_at = updated_at.toLocalDate();
+        this.place = place;
+        NumV = numV;
+        NumG = numG;
+        this.partner = partner;
+        this.partnerType = partnerType;
+        this.partnerPace = partnerPace;
+        this.details = details;
+        this.checkOrganizer = checkOrganizer;
+        this.submit = submit;
+        this.status = status;
+    }
 }

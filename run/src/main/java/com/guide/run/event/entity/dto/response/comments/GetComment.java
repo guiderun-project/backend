@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class GetComment {
     private String userId;
     private UserType type;
     private String content;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     private long likes;
 
     public GetComment(Long commentId, String name,String userId, UserType type, String content, LocalDateTime createdAt, Long likes) {
@@ -26,7 +27,7 @@ public class GetComment {
         this.userId = userId;
         this.type = type;
         this.content = content;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt.toLocalDate();
         this.likes =likes;
     }
 }
