@@ -55,7 +55,7 @@ public class MyPagePartner {
             this.contestCnt = contestIds.size();
         }
 
-        if(sendId.equals(privateId)){
+        if(sendId!=null && sendId.equals(privateId)){
             this.isLiked = true;
         }else{
             this.isLiked = false;
