@@ -91,6 +91,11 @@ public class EventService {
             recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
         }
 
+        //마감기간 지났으면 마감처리
+        if(request.getRecruitEndDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
+        }
+
         if(start.isEqual(now)||start.isAfter(now)){
             recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
             status = EventStatus.EVENT_OPEN;
@@ -160,6 +165,11 @@ public class EventService {
         //오늘이면 오픈
         if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isAfter(today)){
             recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
+        }
+
+        //마감기간 지났으면 마감처리
+        if(request.getRecruitEndDate().isAfter(today)){
+            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
         }
 
         if(start.isEqual(now)||start.isAfter(now)){
