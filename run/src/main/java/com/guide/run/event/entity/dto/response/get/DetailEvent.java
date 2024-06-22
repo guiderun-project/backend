@@ -31,8 +31,12 @@ public class DetailEvent {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
     private String place;
-    private int NumV;
-    private int NumG;
+    //모집인원
+    private int minNumV;
+    private int minNumG;
+    //참여인원
+    private int numV;
+    private int numG;
 
     private String partner;
     private UserType partnerType;
