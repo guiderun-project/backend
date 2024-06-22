@@ -12,6 +12,8 @@ import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.partner.entity.matching.UnMatching;
+import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -32,6 +34,7 @@ public class EventFormService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
+    private final UnMatchingRepository unMatchingRepository;
 
     @Transactional
     public Long createForm(CreateEventForm createForm, Long eventId, String userId) {
@@ -48,6 +51,9 @@ public class EventFormService {
                         .privateId(user.getPrivateId())
                         .isAttend(false)
                         .build()
+        );
+        unMatchingRepository.save(
+                UnMatching.builder().eventId(eventId).privateId(user.getPrivateId()).build()
         );
 
         return eventFormRepository.save(
@@ -80,8 +86,8 @@ public class EventFormService {
 
     public GetForm getForm(Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
-        User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
         return GetForm.builder()
                 .type(user.getType().getValue())
                 .name(user.getName())

@@ -23,9 +23,11 @@ import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
+import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
@@ -128,6 +130,16 @@ public class EventService {
                         .gender(user.getGender())
                         .isMatching(false)
                         .build()
+        );
+        unMatchingRepository.save(
+                UnMatching.builder().eventId(createdEvent.getId())
+                        .privateId(privateId).build()
+        );
+        attendanceRepository.save(
+                Attendance.builder().eventId(createdEvent.getId())
+                        .privateId(privateId)
+                        .isAttend(true)
+                        .date(createdEvent.getStartTime()).build()
         );
 
         return EventCreatedResponse.builder()
@@ -361,10 +373,11 @@ public class EventService {
         if(form == null) {
             detailEvent = new DetailEvent(
                     eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                    event.getRecruitStartDate(),event.getRecruitEndDate(),
                     organizer.getUserId(),
                     organizer.getName(),organizer.getType(),
                     organizer.getRecordDegree(),
-                    event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                    event.getStartTime().toLocalDate().toString(),
                     event.getStartTime().toLocalTime().toString().substring(0,5),
                     event.getEndTime().toLocalTime().toString().substring(0,5),
                     event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
@@ -381,10 +394,11 @@ public class EventService {
                 if(matching == null){
                     detailEvent = new DetailEvent(
                         eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                         organizer.getRecordDegree(),
-                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalDate().toString(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
                         event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
@@ -397,10 +411,11 @@ public class EventService {
                     User vi = userRepository.findUserByUserId(matching.getViId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
-                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalDate().toString(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
                             event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
@@ -414,10 +429,11 @@ public class EventService {
                 if(matching == null){
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
-                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalDate().toString(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
                             event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
@@ -430,10 +446,11 @@ public class EventService {
                     User guide = userRepository.findUserByUserId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
-                            event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
+                            event.getStartTime().toLocalDate().toString(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
                             event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
