@@ -22,14 +22,14 @@ public class EventDtoExceptionAdvice {
     //2000
     @ExceptionHandler(NotValidEventStartException.class)
     protected ResponseEntity<FailResult> NotValidEventStartException(NotValidEventStartException e){
-        return ResponseEntity.status(404).body(responseService.getFailResult(
+        return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidStart.code"),
                 getMessage("notValidStart.msg")));
     }
     //2001
     @ExceptionHandler(NotValidEventRecruitException.class)
     protected ResponseEntity<FailResult> NotValidEventRecruitException(NotValidEventRecruitException e){
-        return ResponseEntity.status(404).body(responseService.getFailResult(
+        return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidRecruit.code"),
                 getMessage("notValidRecruit.msg")));
     }

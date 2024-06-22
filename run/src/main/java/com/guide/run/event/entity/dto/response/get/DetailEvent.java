@@ -16,11 +16,14 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class DetailEvent {
     private Long eventId;
     private EventType type;
     private String name;
     private EventRecruitStatus recruitStatus;
+
+    private String organizerId;
     private String organizer;
     private UserType organizerType;
     private String organizerPace;
@@ -30,8 +33,12 @@ public class DetailEvent {
     private LocalDate created_at;
     private LocalDate updated_at;
     private String place;
-    private int NumV;
-    private int NumG;
+    //모집인원
+    private int minNumV;
+    private int minNumG;
+    //참여인원
+    private int numV;
+    private int numG;
 
     private String partner;
     private UserType partnerType;
@@ -42,11 +49,36 @@ public class DetailEvent {
     private boolean submit;
     private EventStatus status;
 
-    public DetailEvent(Long eventId, EventType type, String name, EventRecruitStatus recruitStatus, String organizer, UserType organizerType, String organizerPace, String date, String startTime, String endTime, LocalDateTime created_at, LocalDateTime updated_at, String place, int numV, int numG, String partner, UserType partnerType, String partnerPace, String details, boolean checkOrganizer, boolean submit, EventStatus status) {
+    public DetailEvent(Long eventId,
+                       EventType type,
+                       String name,
+                       EventRecruitStatus recruitStatus,
+                       String organizerId,
+                       String organizer,
+                       UserType organizerType,
+                       String organizerPace,
+                       String date,
+                       String startTime,
+                       String endTime,
+                       LocalDateTime created_at,
+                       LocalDateTime updated_at,
+                       String place,
+                       int minNumV,
+                       int minNumG,
+                       int numV,
+                       int numG,
+                       String partner,
+                       UserType partnerType,
+                       String partnerPace,
+                       String details,
+                       boolean checkOrganizer,
+                       boolean submit,
+                       EventStatus status) {
         this.eventId = eventId;
         this.type = type;
         this.name = name;
         this.recruitStatus = recruitStatus;
+        this.organizerId = organizerId;
         this.organizer = organizer;
         this.organizerType = organizerType;
         this.organizerPace = organizerPace;
@@ -56,8 +88,10 @@ public class DetailEvent {
         this.created_at = created_at.toLocalDate();
         this.updated_at = updated_at.toLocalDate();
         this.place = place;
-        NumV = numV;
-        NumG = numG;
+        this.minNumV = minNumV;
+        this.minNumG = minNumG;
+        this.numV = numV;
+        this.numG = numG;
         this.partner = partner;
         this.partnerType = partnerType;
         this.partnerPace = partnerPace;
