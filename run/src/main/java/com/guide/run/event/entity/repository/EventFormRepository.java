@@ -20,4 +20,6 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
 
 
     long countByPrivateId(String privateId);
+
+
 }
