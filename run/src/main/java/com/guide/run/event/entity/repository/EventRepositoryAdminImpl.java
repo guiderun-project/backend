@@ -11,10 +11,7 @@ import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.DateTimePath;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
@@ -358,8 +355,11 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         if(year==0){
             return null;
         }else{
-            //year 조건 처리
-            return event.startTime.year().eq(year);
+            // startTime에서 연도를 추출하는 NumberTemplate
+            NumberTemplate<Integer> yearTemplate = Expressions.numberTemplate(Integer.class, "YEAR({0})", event.startTime);
+
+            // 연도 비교 조건
+            return yearTemplate.eq(year);
         }
     }
 
