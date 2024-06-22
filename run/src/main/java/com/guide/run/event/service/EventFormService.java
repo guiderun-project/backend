@@ -80,8 +80,8 @@ public class EventFormService {
 
     public GetForm getForm(Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
-        User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
         return GetForm.builder()
                 .type(user.getType().getValue())
                 .name(user.getName())
