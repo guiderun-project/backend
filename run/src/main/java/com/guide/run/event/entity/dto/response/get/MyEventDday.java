@@ -14,6 +14,6 @@ public class MyEventDday {
 
     public MyEventDday(String name, LocalDateTime dDay) {
         this.name = name;
-        this.dDay = LocalDateTime.now().until(dDay, ChronoUnit.DAYS)+1L;
+        this.dDay = LocalDateTime.now().until(dDay, ChronoUnit.DAYS);
     }
 }
