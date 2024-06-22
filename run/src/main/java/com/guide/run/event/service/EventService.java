@@ -14,6 +14,7 @@ import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
@@ -68,7 +69,7 @@ public class EventService {
                 .recruitEndDate(request.getRecruitEndDate())
                 .name(request.getName())
                 .recruitStatus(EventRecruitStatus.RECRUIT_UPCOMING)
-                .isApprove(false)
+                .isApprove(true)
                 .type(request.getEventType())
                 .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
                 .endTime(timeFormatter.getDateTime(request.getDate(), request.getEndTime()))
@@ -78,6 +79,17 @@ public class EventService {
                 .status(EventStatus.EVENT_UPCOMING)
                 .content(request.getContent()).build());
 
+        //자동 참가 처리
+        EventForm eventForm = eventFormRepository.save(
+                EventForm.builder()
+                        .privateId(privateId)
+                        .eventId(createdEvent.getId())
+                        .type(user.getType())
+                        .age(user.getAge())
+                        .gender(user.getGender())
+                        .isMatching(false)
+                        .build()
+        );
         return EventCreatedResponse.builder()
                 .eventId(createdEvent.getId())
                 .isApprove(createdEvent.isApprove())
