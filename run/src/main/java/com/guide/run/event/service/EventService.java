@@ -313,7 +313,7 @@ public class EventService {
         //매칭 여부로 파트너 정보 추가
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
-        if (eventForm != null) {
+        if (( !organizer.getPrivateId().equals(privateId) )&& eventForm != null) {
             apply = true;
             if (eventForm.isMatching()) {
                 if (user.getType().equals(UserType.GUIDE)) {
