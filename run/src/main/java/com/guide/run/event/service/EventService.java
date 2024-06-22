@@ -87,16 +87,16 @@ public class EventService {
         }
 
         //오늘이면 오픈
-        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isAfter(today)){
+        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isBefore(today)){
             recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
         }
 
         //마감기간 지났으면 마감처리
-        if(request.getRecruitEndDate().isAfter(today)){
+        if(request.getRecruitEndDate().isBefore(today)){
             recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
         }
 
-        if(start.isEqual(now)||start.isAfter(now)){
+        if(start.isEqual(now)||start.isBefore(now)){
             recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
             status = EventStatus.EVENT_OPEN;
         }
@@ -163,16 +163,16 @@ public class EventService {
         }
 
         //오늘이면 오픈
-        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isAfter(today)){
+        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isBefore(today)){
             recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
         }
 
         //마감기간 지났으면 마감처리
-        if(request.getRecruitEndDate().isAfter(today)){
+        if(request.getRecruitEndDate().isBefore(today)){
             recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
         }
 
-        if(start.isEqual(now)||start.isAfter(now)){
+        if(start.isEqual(now)||start.isBefore(now)){
             recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
             status = EventStatus.EVENT_OPEN;
         }
@@ -195,10 +195,6 @@ public class EventService {
                     .place(request.getPlace())
                     .status(status)
                     .content(request.getContent()).build());
-
-            if(request.getRecruitStartDate().isBefore(today)|| request.getRecruitStartDate().isEqual(today)){
-                eventClose(privateId, updatedEvent.getId());
-            }
 
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())
@@ -313,7 +309,7 @@ public class EventService {
         //매칭 여부로 파트너 정보 추가
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
-        if (eventForm != null) {
+        if (( !organizer.getPrivateId().equals(privateId) )&& eventForm != null) {
             apply = true;
             if (eventForm.isMatching()) {
                 if (user.getType().equals(UserType.GUIDE)) {
