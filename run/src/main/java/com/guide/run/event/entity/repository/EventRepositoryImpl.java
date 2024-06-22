@@ -191,7 +191,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
-                .orderBy(event.startTime.asc())
+                .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
                 .fetch();
