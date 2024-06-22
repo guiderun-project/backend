@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface PartnerLikeRepository extends JpaRepository<PartnerLike, String>, PartnerLikeRepositoryCustom {
     Optional<PartnerLike> findByRecIdAndSendId(String partnerId, String privateId);
+    void deleteAllByRecId(String privateId);
+    void deleteAllBySendId(String privateId);
 }
