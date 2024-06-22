@@ -26,8 +26,8 @@ public class EventCommentRepositoryImpl implements  EventCommentRepositoryCustom
     public List<GetComment> findGetComments(int limit, int start, Long eventId,String userId) {
         return queryFactory.select(Projections.constructor(GetComment.class,
                 comment1.commentId.as("commentId"),
-                user.userId.as("userId"),
                 user.name.as("name"),
+                user.userId.as("userId"),
                 user.type.as("type"),
                 comment1.comment.as("content"),
                 comment1.createdAt.as("createdAt"),
