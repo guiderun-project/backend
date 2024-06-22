@@ -269,7 +269,7 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
+        User organizer = userRepository.findUserByUserId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
         DetailEvent detailEvent;
 
         boolean isCheckOrganizer = false;
