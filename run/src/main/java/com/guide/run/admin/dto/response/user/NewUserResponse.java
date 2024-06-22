@@ -19,7 +19,7 @@ public class NewUserResponse {
     private String name;
     private int trainingCnt;
     private int contestCnt;
-    private int like;
+    private long like;
 
     public NewUserResponse(String userId,
                            String img,
@@ -28,7 +28,7 @@ public class NewUserResponse {
                            String name,
                            int trainingCnt,
                            int contestCnt,
-                           int like) {
+                           long like) {
         this.userId = userId;
         this.img = img;
         this.role = role.getValue();
