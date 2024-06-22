@@ -22,6 +22,8 @@ public class DetailEvent {
     private EventType type;
     private String name;
     private EventRecruitStatus recruitStatus;
+
+    private String organizerId;
     private String organizer;
     private UserType organizerType;
     private String organizerPace;
@@ -51,6 +53,7 @@ public class DetailEvent {
                        EventType type,
                        String name,
                        EventRecruitStatus recruitStatus,
+                       String organizerId,
                        String organizer,
                        UserType organizerType,
                        String organizerPace,
@@ -75,6 +78,7 @@ public class DetailEvent {
         this.type = type;
         this.name = name;
         this.recruitStatus = recruitStatus;
+        this.organizerId = organizerId;
         this.organizer = organizer;
         this.organizerType = organizerType;
         this.organizerPace = organizerPace;

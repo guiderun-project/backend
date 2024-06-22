@@ -18,6 +18,8 @@ import java.time.LocalDate;
 public class EventPopUpResponse {
         private Long eventId;
         private EventType type;//이벤트 분류
+
+        private String organizerId; //주최자 아이디
         private String organizer ; //주최자 이름
         private UserType organizerType; //주최자 장애유무
         private String organizerRecord ; //주최자 러닝등급
