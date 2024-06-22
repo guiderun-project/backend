@@ -365,6 +365,7 @@ public class EventService {
         if(form == null) {
             detailEvent = new DetailEvent(
                     eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                    event.getRecruitStartDate(),event.getRecruitEndDate(),
                     organizer.getUserId(),
                     organizer.getName(),organizer.getType(),
                     organizer.getRecordDegree(),
@@ -385,6 +386,7 @@ public class EventService {
                 if(matching == null){
                     detailEvent = new DetailEvent(
                         eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                         organizer.getRecordDegree(),
@@ -401,6 +403,7 @@ public class EventService {
                     User vi = userRepository.findUserByUserId(matching.getViId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
@@ -418,6 +421,7 @@ public class EventService {
                 if(matching == null){
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
@@ -434,6 +438,7 @@ public class EventService {
                     User guide = userRepository.findUserByUserId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
+                            event.getRecruitStartDate(),event.getRecruitEndDate(),
                             organizer.getUserId(),
                             organizer.getName(),organizer.getType(),
                             organizer.getRecordDegree(),
