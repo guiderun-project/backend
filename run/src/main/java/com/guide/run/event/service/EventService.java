@@ -282,7 +282,9 @@ public class EventService {
                     event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                     event.getStartTime().toLocalTime().toString().substring(0,5),
                     event.getEndTime().toLocalTime().toString().substring(0,5),
-                    event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                    event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
+                    event.getMaxNumV(),event.getMaxNumG(), //모집 인원
+                    event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
                     null,null,null,
                     event.getContent(),isCheckOrganizer,false,event.getStatus()
             );
@@ -298,7 +300,9 @@ public class EventService {
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
-                        event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                        event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
+                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
+                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
                         null,null,null,
                         event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
@@ -310,7 +314,9 @@ public class EventService {
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
+                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
+                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
                             vi.getName(), vi.getType(), vi.getRecordDegree(),
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
@@ -323,7 +329,9 @@ public class EventService {
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
+                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
+                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
                             null,null,null,
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
@@ -335,7 +343,9 @@ public class EventService {
                             event.getStartTime().getYear()+"."+event.getStartTime().getMonthValue()+"."+event.getStartTime().getDayOfMonth(),
                             event.getStartTime().toLocalTime().toString().substring(0,5),
                             event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),event.getMaxNumV(),event.getMaxNumG(),
+                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
+                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
+                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
                             guide.getName(), guide.getType(), guide.getRecordDegree(),
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
