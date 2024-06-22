@@ -98,17 +98,17 @@ public class EventGetService {
                 throw new NotValidKindException();
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.getAllEventList(limit,start,null,RECRUIT_ALL);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,RECRUIT_ALL);
                 }
                 else{
-                    allEvents = eventRepository.getAllEventList(limit,start,null,kind);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,kind);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.getAllEventList(limit,start,type,RECRUIT_ALL);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,RECRUIT_ALL);
                 }
                 else{
-                    allEvents = eventRepository.getAllEventList(limit,start,type,kind);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,kind);
                 }
             }
         }else if(sort.equals("END")){

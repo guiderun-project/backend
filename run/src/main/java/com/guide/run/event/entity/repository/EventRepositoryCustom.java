@@ -24,4 +24,5 @@ public interface EventRepositoryCustom {
     List<Event> getSchedulerRecruit();
 
     List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus);
+    List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus);
 }
