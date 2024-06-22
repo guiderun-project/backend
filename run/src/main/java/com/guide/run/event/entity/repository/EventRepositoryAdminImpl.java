@@ -139,6 +139,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.id.as("eventId"),
                         event.type.as("eventType"),
                         event.name.as("title"),
+                        formattedDate(event.startTime).as("date"),
                         event.recruitStatus
                 ))
                 .from(event)

@@ -10,5 +10,7 @@ import java.util.Optional;
 
 public interface UnMatchingRepository extends JpaRepository<UnMatching, UnMatchingId> ,UnMatchingRepositoryCustom{
     Optional<UnMatching> findByPrivateId(String privateId);
+    void deleteAllByEventId(long eventId);
+    void deleteAllByPrivateId(String privateId);
 
 }

@@ -26,17 +26,13 @@ public class AdminPartnerResponse {
                                 UserType type,
                                 String name,
                                 String recordDegree,
-                                List<String> sendIds) {
+                                long like) {
         this.userId = userId;
         this.img = img;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);
         this.type = type;
         this.name = name;
         this.recordDegree = recordDegree;
-        if(sendIds==null){
-            this.like = 0;
-        }else{
-            this.like = sendIds.size();
-        }
+        this.like = (int) like;
     }
 }

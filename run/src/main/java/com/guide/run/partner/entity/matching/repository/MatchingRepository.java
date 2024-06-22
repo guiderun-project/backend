@@ -14,4 +14,6 @@ public interface MatchingRepository extends JpaRepository<Matching, MatchingId>,
     Optional<Matching> findByViId(String viId);
     List<Matching> findAllByEventIdAndViId(long eventId,String viId);
     void deleteAllByEventId(long eventId);
+    List<Matching> findAllByViId(String viId);
+    List<Matching> findAllByGuideId(String guideId);
 }

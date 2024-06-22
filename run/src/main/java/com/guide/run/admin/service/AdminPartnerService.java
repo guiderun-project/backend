@@ -51,26 +51,21 @@ public class AdminPartnerService {
 
     public PartnerTypeResponse getPartnerType(String userId){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        int contestCnt;
-        int trainingCnt;
+        int contestCnt = 0;
+        int trainingCnt = 0;
         if(user.getType().equals(UserType.GUIDE)){
-            Partner partner = partnerRepository.findByGuideId(user.getPrivateId()).orElse(null);
-            if(partner==null){
-                contestCnt=0;
-                trainingCnt=0;
-            }else{
-                contestCnt=partner.getContestIds().size();
-                trainingCnt=partner.getTrainingIds().size();
+            List<Partner> partnerList = partnerRepository.findAllByGuideId(user.getPrivateId());
+
+            for(Partner p : partnerList){
+                contestCnt+= p.getContestIds().size();
+                trainingCnt+=p.getTrainingIds().size();
             }
 
         }else{
-            Partner partner = partnerRepository.findByViId(user.getPrivateId()).orElse(null);
-            if(partner==null){
-                contestCnt=0;
-                trainingCnt=0;
-            }else{
-                contestCnt=partner.getContestIds().size();
-                trainingCnt=partner.getTrainingIds().size();
+            List<Partner> partnerList = partnerRepository.findAllByViId(user.getPrivateId());
+            for(Partner p : partnerList){
+                contestCnt+= p.getContestIds().size();
+                trainingCnt+=p.getTrainingIds().size();
             }
         }
 
