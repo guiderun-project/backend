@@ -209,6 +209,8 @@ public class EventService {
                 .date(LocalDate.from(event.getStartTime()))
                 .startTime(timeFormatter.getHHMM(event.getStartTime()))
                 .endTime(timeFormatter.getHHMM(event.getEndTime()))
+                .recruitVi(event.getMaxNumV())
+                .recruitGuide(event.getMaxNumG())
                 .viCnt(event.getViCnt())
                 .guideCnt(event.getGuideCnt())
                 .place(event.getPlace())
