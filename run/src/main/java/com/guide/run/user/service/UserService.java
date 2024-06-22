@@ -180,8 +180,10 @@ public class UserService {
             attendanceRepository.save(attendance);
         }
 
-        //파트너 좋아요 - 삭제
-        partnerLikeRepository.deleteById(privateId); //파트너 좋아요 받은 기록
+        //파트너 좋아요(받은 기록) - 삭제
+        partnerLikeRepository.deleteAllByRecId(privateId); //파트너 좋아요 받은 기록
+        //파트너 좋아요(준 기록) - 삭제
+        partnerLikeRepository.deleteAllBySendId(privateId); //파트너 좋아요 준 기록 삭제
 
         //이벤트 좋아요 - 삭제
         eventLikeRepository.deleteAllByPrivateId(privateId);
