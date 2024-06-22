@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event,Long>, EventRepositoryCustom, EventRepositoryAdmin {
@@ -26,5 +27,11 @@ public interface EventRepository extends JpaRepository<Event,Long>, EventReposit
 
     List<Event> findAllByTypeAndRecruitStatus(EventType type, EventRecruitStatus eventRecruitStatus);
 
+    long countByRecruitStatusNotAndIsApprove(EventRecruitStatus eventRecruitStatus, boolean isApprove);
 
+    long countByRecruitStatusAndIsApprove(EventRecruitStatus kind, boolean isApprove);
+
+    long countByTypeAndRecruitStatusNotAndIsApprove(EventType type, EventRecruitStatus eventRecruitStatus, boolean isApprove);
+
+    long countByTypeAndRecruitStatusAndIsApprove(EventType type, EventRecruitStatus kind, boolean isApprove);
 }

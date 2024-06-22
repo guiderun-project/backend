@@ -48,29 +48,29 @@ public class EventGetService {
         if(sort.equals("UPCOMING")){
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.findAllByRecruitStatusNot(RECRUIT_END).size();
+                    return eventRepository.countByRecruitStatusNotAndIsApprove(RECRUIT_END,true);
                 }
                 else{
-                    return eventRepository.findAllByRecruitStatus(kind).size();
+                    return eventRepository.countByRecruitStatusAndIsApprove(kind,true);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.findAllByTypeAndRecruitStatusNot(type, RECRUIT_END).size();
+                    return eventRepository.countByTypeAndRecruitStatusNotAndIsApprove(type, RECRUIT_END,true);
                 }
                 else{
-                    return eventRepository.findAllByTypeAndRecruitStatus(type,kind).size();
+                    return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type,kind,true);
                 }
             }
         }else if(sort.equals("END")){
             if(type.equals(TOTAL)){
-                return eventRepository.findAllByRecruitStatus(RECRUIT_END).size();
+                return eventRepository.countByRecruitStatusAndIsApprove(RECRUIT_END,true);
             }else{
-                return eventRepository.findAllByTypeAndRecruitStatus(type, RECRUIT_END).size();
+                return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type, RECRUIT_END,true);
             }
         }else{
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventFormRepository.findAllByPrivateId(privateId).size();
+                    return eventFormRepository.countByPrivateIdAndIsApprove(privateId,true);
                 }
                 else{
                     return eventRepository.getAllMyEventListCount(null,kind,privateId);
