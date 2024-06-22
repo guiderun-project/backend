@@ -1,5 +1,6 @@
 package com.guide.run.user.dto;
 
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class GlobalUserInfoDto {
     private String userId;
     private String name;
-    private String type;
+    private UserType type;
     private String role;
     private String gender;
     private String phoneNumber;
@@ -28,8 +29,8 @@ public class GlobalUserInfoDto {
         return GlobalUserInfoDto.builder()
                 .userId(user.getUserId())
                 .recordDegree(user.getRecordDegree())
-                .role(user.getRole().getValue())
-                .type(user.getType().getValue())
+                .role(user.getRole().getValue().substring(5))
+                .type(user.getType())
                 .name(user.getName())
                 .gender(user.getGender())
                 .phoneNumber(user.getPhoneNumber())

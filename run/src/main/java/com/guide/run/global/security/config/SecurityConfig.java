@@ -3,6 +3,7 @@ package com.guide.run.global.security.config;
 import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.user.entity.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -58,13 +59,8 @@ public class SecurityConfig {
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
-                        // .requestMatchers("/api/test").hasRole("VADMIN")
-                        //.requestMatchers("/api/test2").hasRole("VWAIT")
-                        //.requestMatchers("/api/admin/**").hasRole("ADMIN") //일단 각주 처리
-                        .requestMatchers("/api/signup/duplicated").permitAll()
-                        //.requestMatchers("/api/signup/**").hasRole("NEW")
-                        //.requestMatchers("/api/user").hasRole("USER")
-                        .requestMatchers("/api/test3").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/signup/**").hasRole("NEW")
                         .anyRequest().permitAll())
 
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),

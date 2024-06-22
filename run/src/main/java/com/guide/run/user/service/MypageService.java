@@ -105,21 +105,19 @@ public class MypageService {
         String phoneNum = "";
         String snsId = "";
         int like = 0;
+        boolean isliked = false;
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistEventException::new);
         User viewer = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        PartnerLike partnerLike = partnerLikeRepository.findByRecIdAndSendId(user.getPrivateId(), privateId).orElse(null);
+        like = (int) partnerLikeRepository.countPartnerLikeNum(user.getPrivateId());
+        if(partnerLike!=null){
+            isliked = true;
+        }
         if(viewer.getRole()== Role.ROLE_ADMIN || viewer.getPrivateId().equals(user.getPrivateId())){
             phoneNum = user.getPhoneNumber();
             snsId = user.getSnsId();
         }
 
-        PartnerLike partnerlike = partnerLikeRepository.findById(user.getPrivateId()).orElse(null);
-
-        if(partnerlike!=null && partnerlike.getSendIds()!=null){
-            if(!partnerlike.getSendIds().isEmpty()){
-                //좋아요 수 반환
-                like = partnerlike.getSendIds().size();
-            }
-        }
 
         ProfileResponse response = ProfileResponse.builder()
                 .userId(user.getUserId())
@@ -138,7 +136,7 @@ public class MypageService {
                 .competitionCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
                 .img(user.getImg())
-                .isLiked(partnerlike.getSendIds().contains(privateId))
+                .isLiked(isliked)
                 .like(like)
                 .build();
         return response;

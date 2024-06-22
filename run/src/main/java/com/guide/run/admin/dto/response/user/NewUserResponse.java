@@ -19,7 +19,6 @@ public class NewUserResponse {
     private String name;
     private int trainingCnt;
     private int contestCnt;
-    private Boolean isLiked;
     private int like;
 
     public NewUserResponse(String userId,
@@ -29,8 +28,7 @@ public class NewUserResponse {
                            String name,
                            int trainingCnt,
                            int contestCnt,
-                           List<String> like,
-                           String privateId) {
+                           int like) {
         this.userId = userId;
         this.img = img;
         this.role = role.getValue();
@@ -38,12 +36,7 @@ public class NewUserResponse {
         this.name = name;
         this.trainingCnt = trainingCnt;
         this.contestCnt = contestCnt;
-        if(like==null){
-            this.like = 0;
-            this.isLiked = false;
-        }else{
-            this.like = like.size();
-            this.isLiked = like.contains(privateId);
-        }
+        this.like = like;
+
     }
 }

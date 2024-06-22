@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface EventLikeRepository extends JpaRepository<EventLike,Long> {
     Optional<EventLike> findByEventIdAndPrivateId(Long eventId, String privateId);
     Long countByEventId(Long eventId);
+    void deleteAllByPrivateId(String privateId);
 }

@@ -21,7 +21,7 @@ public class PersonalInfoDto {
 
     public static PersonalInfoDto userToInfoDto(User user){
         return PersonalInfoDto.builder()
-                .role(user.getRole().getValue())
+                .role(user.getRole().getValue().substring(5))
                 .type(user.getType().getValue())
                 .name(user.getName())
                 .gender(user.getGender())
