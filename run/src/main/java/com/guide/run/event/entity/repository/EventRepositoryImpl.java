@@ -198,6 +198,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
 
+
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
         if(kind==null){
             return new BooleanBuilder();

@@ -1,6 +1,7 @@
 package com.guide.run.partner.entity.matching.repository;
 
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
+import com.guide.run.temp.member.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
+import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.*;
 
 public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
@@ -33,9 +35,11 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
         return queryFactory.select(Projections.constructor(NotMatchUserInfo.class,
                 user.userId.as("userId"),
                 user.type.as("type"),
-                user.name.as("name")))
+                user.name.as("name"),
+                attendance.isAttend.as("isAttended")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
+                .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(unMatching.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
                 .fetch();
     }

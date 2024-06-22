@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.response.match;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,4 +13,6 @@ public class MatchedGuideInfo {
     private String userId;
     private UserType type;
     private String name;
+    @JsonProperty(value = "isAttended")
+    private Boolean isAttended;
 }

@@ -2,6 +2,7 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.dto.request.form.CreateEventForm;
 import com.guide.run.event.entity.dto.response.form.CreatedForm;
+import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
 import com.guide.run.event.service.EventFormService;
 import com.guide.run.global.jwt.JwtProvider;
@@ -41,5 +42,10 @@ public class EventFormController {
                                            HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
         return ResponseEntity.ok().body(eventFormService.getForm(eventId,userId));
+    }
+    @GetMapping("/{eventId}/forms/all")
+    public ResponseEntity<GetAllForms> getAllForms(@PathVariable("eventId") Long eventId, HttpServletRequest request){
+        jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventFormService.getAllForms(eventId));
     }
 }

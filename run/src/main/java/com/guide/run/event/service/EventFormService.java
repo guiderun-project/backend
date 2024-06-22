@@ -4,6 +4,7 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 
 import com.guide.run.event.entity.dto.request.form.CreateEventForm;
+import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -13,6 +14,7 @@ import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
@@ -87,6 +89,13 @@ public class EventFormService {
                 .group(form.getHopeTeam())
                 .partner(form.getHopePartner())
                 .detail(form.getReferContent())
+                .build();
+    }
+
+    public GetAllForms getAllForms(Long eventId) {
+        return GetAllForms.builder()
+                .vi(eventFormRepository.findAllEventIdAndUserType(eventId, UserType.VI))
+                .guide(eventFormRepository.findAllEventIdAndUserType(eventId,UserType.GUIDE))
                 .build();
     }
 }

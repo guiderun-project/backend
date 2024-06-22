@@ -30,6 +30,10 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, userId);
+        if(existGuide!=null){
+            matchingRepository.delete(existGuide);
+        }
         matchingRepository.save(
                 Matching.builder()
                         .eventId(eventId)

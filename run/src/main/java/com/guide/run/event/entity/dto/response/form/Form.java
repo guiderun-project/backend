@@ -1,18 +1,15 @@
-package com.guide.run.event.entity.dto.response.match;
+package com.guide.run.event.entity.dto.response.form;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
+@Getter
 @Builder
-public class NotMatchUserInfo {
+public class Form {
     private String userId;
     private UserType type;
     private String name;
-    @JsonProperty(value = "isAttended")
-    private Boolean isAttended;
 }
