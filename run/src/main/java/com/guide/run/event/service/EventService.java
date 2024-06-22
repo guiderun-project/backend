@@ -23,9 +23,11 @@ import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
+import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
@@ -128,6 +130,16 @@ public class EventService {
                         .gender(user.getGender())
                         .isMatching(false)
                         .build()
+        );
+        unMatchingRepository.save(
+                UnMatching.builder().eventId(createdEvent.getId())
+                        .privateId(privateId).build()
+        );
+        attendanceRepository.save(
+                Attendance.builder().eventId(createdEvent.getId())
+                        .privateId(privateId)
+                        .isAttend(true)
+                        .date(createdEvent.getStartTime()).build()
         );
 
         return EventCreatedResponse.builder()
