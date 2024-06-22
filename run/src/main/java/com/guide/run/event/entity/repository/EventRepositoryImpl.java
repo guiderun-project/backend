@@ -210,6 +210,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE));
         } else if (kind.equals(RECRUIT_END)) {
             return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_END));
+        } else if(kind.equals(RECRUIT_ALL)){
+            return new BooleanBuilder(event.recruitStatus.ne(RECRUIT_END));
         }
         return null;
     }
