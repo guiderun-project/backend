@@ -193,11 +193,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
         NumberExpression<Integer> roleOrder = new CaseBuilder()
-                .when(user.role.eq(Role.ROLE_ADMIN)).then(0)
-                .when(user.role.eq(Role.ROLE_COACH)).then(1)
-                .when(user.role.eq(Role.ROLE_USER)).then(2)
-                .when(user.role.eq(Role.ROLE_WAIT)).then(3)
-                .otherwise(4);
+                .when(user.role.eq(Role.ROLE_WAIT)).then(0)
+                .otherwise(1);
 
         NumberExpression<Integer> typeOrder = new CaseBuilder()
                 .when(user.type.eq(UserType.VI)).then(0)
