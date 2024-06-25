@@ -425,7 +425,11 @@ public class EventService {
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
             }else{
-                matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getUserId()).get(0);
+                List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getUserId());
+                if(matchingList.size()==0)
+                    matching=null;
+                else
+                    matching= matchingList.get(0);
                 if(matching == null){
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
