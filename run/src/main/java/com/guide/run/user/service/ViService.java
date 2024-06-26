@@ -2,8 +2,6 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.temp.member.dto.CntDTO;
-import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
