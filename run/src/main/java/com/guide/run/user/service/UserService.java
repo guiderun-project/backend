@@ -62,7 +62,7 @@ public class UserService {
     private final EventFormRepository eventFormRepository;
 
     private final AttendanceRepository attendanceRepository;
-    private final TmpService tmpService;
+
 
     @Transactional
     public boolean getUserStatus(String privateId){
@@ -73,9 +73,6 @@ public class UserService {
                 return false;
             }
             else{
-                CntDTO cntDTO = tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
-                user.editUserCnt(cntDTO);
-                userRepository.save(user);
                 return true;
             }
         }else{

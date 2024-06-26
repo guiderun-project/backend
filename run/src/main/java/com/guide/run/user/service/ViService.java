@@ -32,7 +32,7 @@ public class ViService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    private final TmpService tmpService;
+
 
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
@@ -43,8 +43,6 @@ public class ViService {
         } else {
             String phoneNum = userService.extractNumber(viSignupDto.getPhoneNumber());
 
-            //가입 전 회원정보 연결
-            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User vi = User.builder()
                     .userId(userService.getUUID())
@@ -56,8 +54,8 @@ public class ViService {
                     .age(viSignupDto.getAge())
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
-                    .competitionCnt(cntDTO.getCompetitionCnt())
-                    .trainingCnt(cntDTO.getTrainingCnt())
+                    .competitionCnt(0)
+                    .trainingCnt(0)
                     .role(Role.ROLE_WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
