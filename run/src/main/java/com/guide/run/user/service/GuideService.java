@@ -32,7 +32,6 @@ public class GuideService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    private final TmpService tmpService;
 
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
@@ -43,8 +42,6 @@ public class GuideService {
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
 
-            //가입 전 회원정보 연결
-            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User guide = User.builder()
                     .userId(userService.getUUID())
@@ -56,8 +53,8 @@ public class GuideService {
                     .age(guideSignupDto.getAge())
                     .detailRecord(guideSignupDto.getDetailRecord())
                     .recordDegree(guideSignupDto.getRecordDegree())
-                    .competitionCnt(cntDTO.getCompetitionCnt())
-                    .trainingCnt(cntDTO.getTrainingCnt())
+                    .competitionCnt(0)
+                    .trainingCnt(0)
                     .snsId(guideSignupDto.getSnsId())
                     .isOpenSns(guideSignupDto.getIsOpenSns())
                     .role(Role.ROLE_WAIT)
