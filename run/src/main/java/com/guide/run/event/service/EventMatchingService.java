@@ -59,7 +59,7 @@ public class EventMatchingService {
                         .privateId(guide.getPrivateId())
                         .build()
         );
-        Optional<UnMatching> findVi = unMatchingRepository.findByPrivateId(vi.getPrivateId());
+        Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
         if(!findVi.isEmpty()){
             unMatchingRepository.delete(findVi.get());
         }
