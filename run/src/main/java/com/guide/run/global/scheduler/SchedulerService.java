@@ -266,7 +266,7 @@ public class SchedulerService {
         List<Attendance> attendances = attendanceRepository.getAttendanceTrue(e.getId(), true);
 
         for(Attendance a : attendances){
-            
+
             //출석한 유저 찾기
             User user = userRepository.findById(a.getPrivateId()).orElse(null);
 
@@ -300,16 +300,19 @@ public class SchedulerService {
     private void setPartnerList(Event e, User vi){
         log.info("setPartnerList");
         //매칭은 어차피 vi만 찾아서 반영하면 됨.
-        List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(e.getId(), vi.getUserId());
+        List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(e.getId(), vi.getPrivateId());
 
         for(Matching m : matchingList){
             User guide = userRepository.findUserByUserId(m.getGuideId()).orElse(null);
             if(guide!=null){
                 Partner partner = partnerRepository.findByViIdAndGuideId(vi.getPrivateId(),guide.getPrivateId()).orElse(null);
                 if(partner !=null){//파트너 정보가 이미 있을 때
+                    //log.info("기존 파트너 있음");
                     if(e.getType().equals(EventType.TRAINING)){
+                        //log.info("트레이닝 파트너 추가");
                         partner.addTraining(e.getId());
                     }else if(e.getType().equals(EventType.COMPETITION)){
+                        //log.info("대회 파트너 추가");
                         partner.addContest(e.getId());
                     }
                     partnerRepository.save(partner);
@@ -319,8 +322,10 @@ public class SchedulerService {
                     List<Long> trainingIds = new ArrayList<>();
 
                     if(e.getType().equals(EventType.COMPETITION)){
+                        //log.info("대회 파트너 추가");
                         contestIds.add(e.getId());
                     }else if(e.getType().equals(EventType.TRAINING)){
+                        //log.info("트레이닝 파트너 추가");
                         trainingIds.add(e.getId());
                     }
                     partnerRepository.save(
