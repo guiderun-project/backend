@@ -2,8 +2,6 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.temp.member.dto.CntDTO;
-import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
@@ -32,19 +30,16 @@ public class ViService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    private final TmpService tmpService;
 
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
+        log.info(privateId);
         if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
             //log.info("에러발생");
             throw new ExistUserException(); //기가입자나 이미 정보를 입력한 회원이 재요청한 경우 이므로 에러 코드 추가
         } else {
             String phoneNum = userService.extractNumber(viSignupDto.getPhoneNumber());
-
-            //가입 전 회원정보 연결
-            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User vi = User.builder()
                     .userId(userService.getUUID())
@@ -56,8 +51,8 @@ public class ViService {
                     .age(viSignupDto.getAge())
                     .detailRecord(viSignupDto.getDetailRecord())
                     .recordDegree(viSignupDto.getRecordDegree())
-                    .competitionCnt(cntDTO.getCompetitionCnt())
-                    .trainingCnt(cntDTO.getTrainingCnt())
+                    .competitionCnt(0)
+                    .trainingCnt(0)
                     .role(Role.ROLE_WAIT)
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())

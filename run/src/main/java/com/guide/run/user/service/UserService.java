@@ -14,10 +14,8 @@ import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.partner.entity.partner.repository.PartnerLikeRepository;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
-import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
-import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.Withdrawal;
@@ -28,7 +26,6 @@ import com.guide.run.user.repository.*;
 import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.withdrawal.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,7 +59,6 @@ public class UserService {
     private final EventFormRepository eventFormRepository;
 
     private final AttendanceRepository attendanceRepository;
-    private final TmpService tmpService;
 
     @Transactional
     public boolean getUserStatus(String privateId){
@@ -73,9 +69,6 @@ public class UserService {
                 return false;
             }
             else{
-                CntDTO cntDTO = tmpService.updateMember(user.getPhoneNumber(), user.getPrivateId());
-                user.editUserCnt(cntDTO);
-                userRepository.save(user);
                 return true;
             }
         }else{

@@ -3,8 +3,6 @@ package com.guide.run.user.service;
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.temp.member.dto.CntDTO;
-import com.guide.run.temp.member.service.TmpService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
@@ -32,8 +30,6 @@ public class GuideService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    private final TmpService tmpService;
-
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
@@ -42,9 +38,6 @@ public class GuideService {
             throw new ExistUserException();
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
-
-            //가입 전 회원정보 연결
-            CntDTO cntDTO = tmpService.updateMember(phoneNum, privateId);
 
             User guide = User.builder()
                     .userId(userService.getUUID())
@@ -56,8 +49,8 @@ public class GuideService {
                     .age(guideSignupDto.getAge())
                     .detailRecord(guideSignupDto.getDetailRecord())
                     .recordDegree(guideSignupDto.getRecordDegree())
-                    .competitionCnt(cntDTO.getCompetitionCnt())
-                    .trainingCnt(cntDTO.getTrainingCnt())
+                    .competitionCnt(0)
+                    .trainingCnt(0)
                     .snsId(guideSignupDto.getSnsId())
                     .isOpenSns(guideSignupDto.getIsOpenSns())
                     .role(Role.ROLE_WAIT)
