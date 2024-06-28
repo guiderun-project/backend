@@ -31,6 +31,7 @@ public class ViService {
     private final SignUpInfoRepository signUpInfoRepository;
 
 
+
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
         User user = userRepository.findById(privateId).orElse(null);

@@ -60,6 +60,7 @@ public class UserService {
 
     private final AttendanceRepository attendanceRepository;
 
+
     @Transactional
     public boolean getUserStatus(String privateId){
         User user = userRepository.findById(privateId).orElse(null);

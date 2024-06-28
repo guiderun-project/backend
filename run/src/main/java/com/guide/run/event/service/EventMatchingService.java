@@ -30,15 +30,25 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, userId);
+        Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
         if(existGuide!=null){
             matchingRepository.delete(existGuide);
+            long countMatchedGuideForVi = matchingRepository.countByEventIdAndViId(eventId, existGuide.getViId());
+            if(countMatchedGuideForVi==0){
+                User unMatchingVi = userRepository.findUserByPrivateId(existGuide.getViId()).orElseThrow(NotExistUserException::new);
+                unMatchingRepository.save(
+                        UnMatching.builder()
+                                .eventId(eventId)
+                                .privateId(unMatchingVi.getPrivateId())
+                                .build()
+                );
+            }
         }
         matchingRepository.save(
                 Matching.builder()
                         .eventId(eventId)
-                        .guideId(guide.getUserId())
-                        .viId(vi.getUserId())
+                        .guideId(guide.getPrivateId())
+                        .viId(vi.getPrivateId())
                         .viRecord(vi.getRecordDegree())
                         .guideRecord(guide.getRecordDegree())
                         .build()
@@ -49,7 +59,7 @@ public class EventMatchingService {
                         .privateId(guide.getPrivateId())
                         .build()
         );
-        Optional<UnMatching> findVi = unMatchingRepository.findByPrivateId(vi.getPrivateId());
+        Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
         if(!findVi.isEmpty()){
             unMatchingRepository.delete(findVi.get());
         }
@@ -64,8 +74,8 @@ public class EventMatchingService {
         matchingRepository.delete(
                 Matching.builder()
                         .eventId(eventId)
-                        .guideId(guide.getUserId())
-                        .viId(vi.getUserId())
+                        .guideId(guide.getPrivateId())
+                        .viId(vi.getPrivateId())
                         .viRecord(vi.getRecordDegree())
                         .guideRecord(guide.getRecordDegree())
                         .build()
@@ -76,7 +86,7 @@ public class EventMatchingService {
                         .privateId(guide.getPrivateId())
                         .build()
         );
-        Optional<Matching> findVi = matchingRepository.findByViId(viId);
+        Optional<Matching> findVi = matchingRepository.findByEventIdAndViId(eventId,viId);
         if(findVi.isEmpty()){
             unMatchingRepository.save(
                     UnMatching.builder()
@@ -102,14 +112,16 @@ public class EventMatchingService {
 
     public MatchedGuideCount getMatchedGuideCount(Long eventId, String viId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         return MatchedGuideCount.builder()
-                .guide(matchingRepository.findAllByEventIdAndViId(eventId,viId).size()).build();
+                .guide(matchingRepository.findAllByEventIdAndViId(eventId,vi.getPrivateId()).size()).build();
     }
 
     public MatchedGuideList getMatchedGuideList(Long eventId, String viId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         return MatchedGuideList.builder()
-                .guide(matchingRepository.findAllMatchedGuideByEventIdAndViId(eventId,viId))
+                .guide(matchingRepository.findAllMatchedGuideByEventIdAndViId(eventId,vi.getPrivateId()))
                 .build();
     }
 

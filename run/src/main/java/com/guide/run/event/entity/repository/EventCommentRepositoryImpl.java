@@ -38,7 +38,7 @@ public class EventCommentRepositoryImpl implements  EventCommentRepositoryCustom
                 .from(comment1)
                 .join(user).on(user.privateId.eq(comment1.privateId))
                 .where(comment1.eventId.eq(eventId))
-                .orderBy(comment1.createdAt.asc())
+                .orderBy(comment1.createdAt.desc())
                 .offset(start)
                 .limit(limit)
                 .fetch();
