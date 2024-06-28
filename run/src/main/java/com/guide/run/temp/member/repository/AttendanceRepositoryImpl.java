@@ -1,6 +1,7 @@
 package com.guide.run.temp.member.repository;
 
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfo;
+import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -37,6 +38,14 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 .join(user).on(attendance.privateId.eq(user.privateId))
                 .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
                 .orderBy(user.type.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<Attendance> getAttendanceTrue(Long eventId, boolean isAttend) {
+        return queryFactory.selectFrom(attendance)
+                .where(attendance.isAttend.eq(isAttend)
+                        ,attendance.eventId.eq(eventId))
                 .fetch();
     }
 }

@@ -44,6 +44,10 @@ public class Event extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
+    public void setCnt(int viCnt, int guideCnt){
+        this.viCnt = viCnt;
+        this.guideCnt = guideCnt;
+    }
     public void closeEvent(){
         this.recruitEndDate = LocalDate.now();
         this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;

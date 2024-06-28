@@ -30,7 +30,6 @@ public class GuideService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
@@ -39,7 +38,6 @@ public class GuideService {
             throw new ExistUserException();
         } else {
             String phoneNum = userService.extractNumber(guideSignupDto.getPhoneNumber());
-
 
             User guide = User.builder()
                     .userId(userService.getUUID())

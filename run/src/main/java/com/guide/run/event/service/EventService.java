@@ -4,7 +4,6 @@ package com.guide.run.event.service;
 import com.guide.run.event.entity.Comment;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
-import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
@@ -14,7 +13,6 @@ import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
-import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.dto.NotValidEventRecruitException;
@@ -22,11 +20,11 @@ import com.guide.run.global.exception.event.dto.NotValidEventStartException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.scheduler.SchedulerService;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
-import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.Role;
@@ -38,11 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +50,6 @@ public class EventService {
 
     private final MatchingRepository matchingRepository;
     private final TimeFormatter timeFormatter;
-    private final EventLikeRepository eventLikeRepository;
     private final UnMatchingRepository unMatchingRepository;
     private final AttendanceRepository attendanceRepository;
     private final EventCommentRepository eventCommentRepository;

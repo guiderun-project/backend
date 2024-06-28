@@ -26,7 +26,6 @@ import com.guide.run.user.repository.*;
 import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.withdrawal.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

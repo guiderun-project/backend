@@ -17,6 +17,7 @@ public class AdminPartnerResponse {
     private String role;
     private UserType type;
     private String name;
+
     private String recordDegree;
     private int like;
 

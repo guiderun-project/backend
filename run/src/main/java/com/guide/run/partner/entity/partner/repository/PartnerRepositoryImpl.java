@@ -211,10 +211,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
     private BooleanExpression getUserType2(EnumPath<UserType> type, StringPath privateId){
         if(type.equals(UserType.GUIDE)){
             return partner.guideId.eq(privateId);
-        } else if (type.equals(UserType.VI)) {
+        } else {
             return partner.viId.eq(privateId);
-        }else{
-            return null;
         }
     }
 

@@ -8,6 +8,7 @@ import com.guide.run.event.entity.dto.response.get.DetailEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.service.EventService;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.scheduler.SchedulerService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,16 +22,22 @@ public class EventController {
     private final JwtProvider jwtProvider;
     private final EventService eventService;
 
+    private final SchedulerService schedulerService;
+
     @PostMapping
     public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
         EventCreatedResponse eventCreatedResponse = eventService.eventCreate(request, privateId);
+        //스케줄러에 등록
+        schedulerService.createSchedule(eventCreatedResponse.getEventId());
         return ResponseEntity.status(HttpStatus.CREATED).body(eventCreatedResponse);
     }
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
         String priavateId = jwtProvider.extractUserId(httpServletRequest);
         EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(request, priavateId,eventId);
+        //스케줄러에 등록
+        schedulerService.createSchedule(eventUpdatedResponse.getEventId());
         return ResponseEntity.status(HttpStatus.OK).body(eventUpdatedResponse);
     }
 

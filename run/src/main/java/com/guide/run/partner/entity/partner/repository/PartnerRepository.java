@@ -12,4 +12,5 @@ public interface PartnerRepository extends JpaRepository<Partner, PartnerId>, Pa
     Optional<Partner> findByGuideId(String privateId);
     List<Partner> findAllByViId(String privateId);
     List<Partner> findAllByGuideId(String privateId);
+    Optional<Partner> findByViIdAndGuideId(String privateId1, String privateId2);
 }
