@@ -59,12 +59,12 @@ public class EventFormService {
         unMatchingRepository.save(
                 UnMatching.builder().eventId(eventId).privateId(user.getPrivateId()).build()
         );
-        if(user.getType().equals(UserType.GUIDE)){
-            event.setGuideCnt(event.getGuideCnt()+1);
-        }
-        else {
-            event.setViCnt(event.getViCnt()+1);
-        }
+        //if(user.getType().equals(UserType.GUIDE)){
+         //   event.setGuideCnt(event.getGuideCnt()+1);
+        //}
+        //else {
+         //   event.setViCnt(event.getViCnt()+1);
+        //}
 
         return eventFormRepository.save(
                 EventForm.builder()
@@ -121,12 +121,12 @@ public class EventFormService {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         eventFormRepository.delete(form);
-        if(user.getType().equals(UserType.GUIDE)){
-            event.setGuideCnt(event.getGuideCnt()-1);
-        }
-        else {
-            event.setViCnt(event.getViCnt()-1);
-        }
+        //if(user.getType().equals(UserType.GUIDE)){
+        //    event.setGuideCnt(event.getGuideCnt()-1);
+        //}
+        //else {
+        //    event.setViCnt(event.getViCnt()-1);
+        //}
 
         //create 당시 생긴 모든거 삭제 매칭도 뒤지고
         //출석 제거
