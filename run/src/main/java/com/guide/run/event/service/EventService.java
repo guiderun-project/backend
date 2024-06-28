@@ -325,18 +325,18 @@ public class EventService {
             apply = true;
             if (eventForm.isMatching()) {
                 if (user.getType().equals(UserType.GUIDE)) {
-                    matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getUserId());
+                    matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
                     if(matching!=null){
                         partnerId = matching.getViId();
-                        User partner = userRepository.findUserByUserId(partnerId).orElse(null);
+                        User partner = userRepository.findUserByPrivateId(partnerId).orElse(null);
                         response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
 
                 } else {
-                    matching = matchingRepository.findByEventIdAndViId(eventId, user.getUserId());
+                    matching = matchingRepository.findByEventIdAndViId(eventId, user.getPrivateId()).get();
                     if(matching!=null){
                         partnerId = matching.getGuideId();
-                        User partner = userRepository.findUserByUserId(partnerId).orElseThrow(null);
+                        User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
                         response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
                 }
@@ -408,7 +408,7 @@ public class EventService {
                         event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
                 else{
-                    User vi = userRepository.findUserByUserId(matching.getViId()).orElseThrow(NotExistUserException::new);
+                    User vi = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
                             event.getRecruitStartDate(),event.getRecruitEndDate(),
@@ -425,7 +425,7 @@ public class EventService {
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
             }else{
-                List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getUserId());
+                List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
                 if(matchingList.size()==0)
                     matching=null;
                 else
@@ -447,7 +447,7 @@ public class EventService {
                             event.getContent(),isCheckOrganizer,true,event.getStatus());
                 }
                 else{
-                    User guide = userRepository.findUserByUserId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
+                    User guide = userRepository.findUserByPrivateId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
                     detailEvent = new DetailEvent(
                             eventId,event.getType(),event.getName(),event.getRecruitStatus(),
                             event.getRecruitStartDate(),event.getRecruitEndDate(),

@@ -48,4 +48,11 @@ public class EventFormController {
         jwtProvider.extractUserId(request);
         return ResponseEntity.ok().body(eventFormService.getAllForms(eventId));
     }
+    @DeleteMapping("/{eventId}/form")
+    public ResponseEntity<String> deleteForm(@PathVariable("eventId") Long eventId,
+                                             HttpServletRequest request){
+        String privateId = jwtProvider.extractUserId(request);
+        eventFormService.deleteForm(eventId,privateId);
+        return ResponseEntity.ok("200 ok");
+    }
 }

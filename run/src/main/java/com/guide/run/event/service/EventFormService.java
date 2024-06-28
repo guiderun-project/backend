@@ -12,7 +12,9 @@ import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
+import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_OPEN;
 
@@ -35,6 +38,7 @@ public class EventFormService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
     private final UnMatchingRepository unMatchingRepository;
+    private final MatchingRepository matchingRepository;
 
     @Transactional
     public Long createForm(CreateEventForm createForm, Long eventId, String userId) {
@@ -55,6 +59,12 @@ public class EventFormService {
         unMatchingRepository.save(
                 UnMatching.builder().eventId(eventId).privateId(user.getPrivateId()).build()
         );
+        if(user.getType().equals(UserType.GUIDE)){
+            event.setGuideCnt(event.getGuideCnt()+1);
+        }
+        else {
+            event.setViCnt(event.getViCnt()+1);
+        }
 
         return eventFormRepository.save(
                 EventForm.builder()
@@ -103,5 +113,36 @@ public class EventFormService {
                 .vi(eventFormRepository.findAllEventIdAndUserType(eventId, UserType.VI))
                 .guide(eventFormRepository.findAllEventIdAndUserType(eventId,UserType.GUIDE))
                 .build();
+    }
+
+    @Transactional
+    public void deleteForm(Long eventId, String privateId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        eventFormRepository.delete(form);
+        if(user.getType().equals(UserType.GUIDE)){
+            event.setGuideCnt(event.getGuideCnt()-1);
+        }
+        else {
+            event.setViCnt(event.getViCnt()-1);
+        }
+
+        //create 당시 생긴 모든거 삭제 매칭도 뒤지고
+        //출석 제거
+        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, privateId);
+        attendanceRepository.delete(attendance);
+        //매칭 or 미매칭 제거
+        Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, eventId);
+        if(unMatching.isEmpty()){
+            Optional<Matching> matching = matchingRepository.findByEventIdAndViId(eventId,privateId);
+            if(matching.isEmpty()){
+                matchingRepository.delete(matchingRepository.findByEventIdAndGuideId(eventId,privateId));
+            }else{
+                matchingRepository.delete(matching.get());
+            }
+        }else{
+            unMatchingRepository.delete(unMatching.get());
+        }
     }
 }
