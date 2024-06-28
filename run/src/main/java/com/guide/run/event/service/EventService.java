@@ -32,6 +32,8 @@ import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService {
+    private static final Logger log = LoggerFactory.getLogger(EventService.class);
     private final EventRepository eventRepository;
 
     private final EventFormRepository eventFormRepository;
@@ -54,6 +57,7 @@ public class EventService {
     private final AttendanceRepository attendanceRepository;
     private final EventCommentRepository eventCommentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final EventLikeRepository eventLikeRepository;
 
 
     @Transactional
@@ -237,19 +241,28 @@ public class EventService {
         }
 
         if (event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)) {
+
             //todo : 매칭, 출석, 신청서, 이벤트 좋아요, 댓글, 댓글 좋아요 전부 삭제해야 함. 파트너는 종료됐을 때 추가되기 때문에 삭제 안해도 됨.
             eventFormRepository.deleteAllByEventId(eventId);
+            log.info("form deleted");
             matchingRepository.deleteAllByEventId(eventId);
+            log.info("matching deleted");
             attendanceRepository.deleteAllByEventId(eventId);
+            log.info("attendance deleted");
             unMatchingRepository.deleteAllByEventId(eventId);
+            log.info("unMatching deleted");
             List<Comment> comments = eventCommentRepository.findAllByEventId(eventId);
-            
+
             for(Comment c : comments){
                 commentLikeRepository.deleteAllByCommentId(c.getCommentId());
             }
-            
+            log.info("commentLike deleted");
+            eventCommentRepository.deleteAllByEventId(eventId);
+            log.info("comment deleted");
+            eventLikeRepository.deleteAllByEventId(eventId);
+            log.info("eventLike deleted");
             eventRepository.deleteById(eventId);
-
+            log.info("event deleted");
         } else
             throw new NotEventOrganizerException();
     }
