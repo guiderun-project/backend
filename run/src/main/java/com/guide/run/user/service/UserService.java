@@ -256,6 +256,7 @@ public class UserService {
         withdrawalRepository.save(withdrawal);
         String userId= user.getUserId();
         userRepository.deleteById(user.getPrivateId());
+        userRepository.flush();
 
         User newUser = User.builder()
                 .privateId(newId)
