@@ -155,10 +155,8 @@ public class UserService {
         }
         //댓글 - 삭제
         eventCommentRepository.deleteAllByPrivateId(privateId);
-
         //이벤트 신청서 - 삭제
         eventFormRepository.deleteAllByPrivateId(privateId);
-
         //출석 - newId로 변경
         List<Attendance> attendanceList = attendanceRepository.findAllByPrivateId(privateId);
 
@@ -256,11 +254,12 @@ public class UserService {
                 .deleteReasons(request.getReasons())
                 .build();
         withdrawalRepository.save(withdrawal);
-
+        String userId= user.getUserId();
+        userRepository.deleteById(user.getPrivateId());
 
         User newUser = User.builder()
                 .privateId(newId)
-                .userId(user.getUserId())
+                .userId(userId)
                 .name("탈퇴한 회원")
                 .recordDegree(null)
                 .gender(null)
