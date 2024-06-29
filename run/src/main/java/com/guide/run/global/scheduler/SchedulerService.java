@@ -95,6 +95,7 @@ public class SchedulerService {
     }
 
     //스케줄러 삭제 코드
+    @Transactional
     public void deleteSchedule(Long eventId){
         log.info("delete schedule");
         scheduleRepository.deleteAllByEventId(eventId);
@@ -142,7 +143,6 @@ public class SchedulerService {
 
     @Transactional
     @Async
-    @SchedulerLock(name = "eventStartLock", lockAtLeastFor = "PT59S", lockAtMostFor = "PT59S")
     public void setEventStart(Schedule schedule){
             log.info("setEventStart");
             String lockName = "eventStartLock-" + schedule.getEventId();
@@ -171,7 +171,6 @@ public class SchedulerService {
 
     @Transactional
     @Async
-    @SchedulerLock(name = "eventEndLock", lockAtLeastFor = "PT3M", lockAtMostFor = "PT3M")
     public void setEventEnd(Schedule schedule){
         log.info("setEventEnd");
         String lockName = "eventEndLock-" + schedule.getEventId();
@@ -203,7 +202,6 @@ public class SchedulerService {
 
     @Transactional
     @Async
-    @SchedulerLock(name = "recruitStartLock", lockAtLeastFor = "PT59S", lockAtMostFor = "PT59S")
     public void setRecruitStart(Schedule schedule){
         log.info("setRecruitStart");
         String lockName = "recruitStartLock-" + schedule.getEventId();
@@ -230,7 +228,6 @@ public class SchedulerService {
 
     @Transactional
     @Async
-    @SchedulerLock(name = "recruitEndLock", lockAtLeastFor = "PT59S", lockAtMostFor = "PT59S")
     public void setRecruitEnd(Schedule schedule){
         log.info("setRecruitEnd");
         String lockName = "recruitStartLock-" + schedule.getEventId();
