@@ -255,6 +255,7 @@ public class UserService {
                 .build();
         withdrawalRepository.save(withdrawal);
         String userId= user.getUserId();
+        UserType userType =user.getType();
         userRepository.deleteById(user.getPrivateId());
         userRepository.flush();
 
@@ -264,7 +265,7 @@ public class UserService {
                 .name("탈퇴한 회원")
                 .recordDegree(null)
                 .gender(null)
-                .type(null)
+                .type(userType)
                 .phoneNumber(null)
                 .age(0)
                 .isOpenNumber(false)
