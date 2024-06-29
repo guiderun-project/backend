@@ -34,4 +34,5 @@ public interface EventRepository extends JpaRepository<Event,Long>, EventReposit
     long countByTypeAndRecruitStatusNotAndIsApprove(EventType type, EventRecruitStatus eventRecruitStatus, boolean isApprove);
 
     long countByTypeAndRecruitStatusAndIsApprove(EventType type, EventRecruitStatus kind, boolean isApprove);
+    List<Event> findAllByOrganizer(String organizer);
 }
