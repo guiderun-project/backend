@@ -136,11 +136,7 @@ public class EventFormService {
         Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, eventId);
         if(unMatching.isEmpty()){
             Optional<Matching> matching = matchingRepository.findByEventIdAndViId(eventId,privateId);
-            if(matching.isEmpty()){
-                matchingRepository.delete(matchingRepository.findByEventIdAndGuideId(eventId,privateId));
-            }else{
-                matchingRepository.delete(matching.get());
-            }
+            matchingRepository.delete(matching.get());
         }else{
             unMatchingRepository.delete(unMatching.get());
         }
