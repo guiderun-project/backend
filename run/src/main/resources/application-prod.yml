@@ -38,3 +38,19 @@ spring:
 
 cors:
   origin: https://guiderun.org
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    credentials:
+      access-key: ${S3_ACCESS}
+      secret-key: ${S3_SECRET}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+coolsms:
+  apiKey: ${SMS_KEY}
+  apiSecret: ${SMS_SECRET}
+  senderNumber: ${SEND_NUMBER}
