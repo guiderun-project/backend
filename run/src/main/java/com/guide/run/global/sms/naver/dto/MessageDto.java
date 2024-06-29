@@ -1,4 +1,4 @@
-package com.guide.run.global.naverCloud.dto;
+package com.guide.run.global.sms.naver.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

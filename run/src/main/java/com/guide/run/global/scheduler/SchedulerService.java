@@ -102,7 +102,7 @@ public class SchedulerService {
     }
 
     public void addSchedule(Schedule schedule){
-        log.info("add schedule");
+        //log.info("add schedule");
         //스케줄 추가 코드
         //스케줄 상태에 따라 다르게 적용
 

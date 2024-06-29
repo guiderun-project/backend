@@ -8,13 +8,13 @@ import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
 import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.naverCloud.SmsService;
-import com.guide.run.global.naverCloud.dto.MessageDto;
-import com.guide.run.global.naverCloud.dto.SmsResponse;
+import com.guide.run.global.sms.cool.CoolSMS;
+import com.guide.run.global.sms.naver.NaverSMS;
 import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
+import com.guide.run.global.sms.naver.dto.SmsResponse;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -44,7 +45,7 @@ public class LoginInfoService {
     private final TmpTokenRepository tmpTokenRepository;
     private final UserService userService;
 
-    private final SmsService smsService;
+    private final CoolSMS smsService;
 
     private final JwtProvider jwtProvider;
 
@@ -55,17 +56,13 @@ public class LoginInfoService {
         String phone = userService.extractNumber(phoneNum);
         User user = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
-        //todo : 네이버 클라우드 인증 완료 후 테스트 진행
+        //인증번호 생성
+        String authNum = createSmsKey();
         //인증번호 전송 api 실행
-       // SmsResponse smsResponse = smsService.sendSms(
-         //       MessageDto.builder()
-           //             .to(phoneNum)
-             //           .build()
-        //);
+        smsService.sendOne(phone, authNum);
 
         //인증번호 저장
-        //AuthNumber authNumber = new AuthNumber(phone, smsResponse.getAuthNum(), "accountId");
-        AuthNumber authNumber = new AuthNumber(phone, "12345", "accountId");
+        AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId");
         authNumberRepository.save(authNumber);
 
     }
@@ -83,27 +80,21 @@ public class LoginInfoService {
             throw new InvalidAccountIdAndPhoneException();
         }
 
+        //인증번호 생성
+        String authNum = createSmsKey();
         //인증번호 전송 api 실행
-       // SmsResponse smsResponse = smsService.sendSms(
-          //      MessageDto.builder()
-            //            .to(request.getPhoneNum())
-              //          .build()
-        //);
+        smsService.sendOne(phone, authNum);
 
         //인증번호 저장
-        //AuthNumber authNumber = new AuthNumber(phone, smsResponse.getAuthNum(), "password");
-        AuthNumber authNumber = new AuthNumber(phone, "12345", "password");
+        AuthNumber authNumber = new AuthNumber(phone, authNum, "password");
         authNumberRepository.save(authNumber);
 
     }
 
     @Transactional
     public TokenResponse getToken(String authNum) {
-        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElse(null);//인증번호가 일치하지 않음 에러
+        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(InvalidAuthNumException::new);//인증번호가 일치하지 않음 에러
 
-        if(authNumber==null){
-            throw new InvalidAuthNumException();
-        }
         User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(InvalidAuthNumException::new);
         return TokenResponse.builder()
                 .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
@@ -123,7 +114,7 @@ public class LoginInfoService {
                     .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .build();
         }else{
-            throw new RuntimeException("다른 인증 토큰 에러");
+            throw new NotValidTmpTokenException();
         }
     }
 
@@ -147,6 +138,17 @@ public class LoginInfoService {
         }else{
             throw new NotValidTmpTokenException();
         }
+    }
+
+    // 5자리 수 조합 인증코드 만들기
+    public static String createSmsKey() {
+        StringBuffer key = new StringBuffer();
+        Random rnd = new Random();
+
+        for (int i = 0; i < 5; i++) { // 인증코드 5자리
+            key.append((rnd.nextInt(10)));
+        }
+        return key.toString();
     }
 
 

@@ -51,3 +51,8 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+
+coolsms:
+  apiKey: ${SMS_KEY}
+  apiSecret: ${SMS_SECRET}
+  senderNumber: ${SEND_NUMBER}
