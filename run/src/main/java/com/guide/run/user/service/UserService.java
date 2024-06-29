@@ -276,8 +276,6 @@ public class UserService {
                 .competitionCnt(0)
                 .img(null)
                 .build();
-
-        userRepository.deleteById(user.getPrivateId());
         userRepository.save(newUser);
 
     }
