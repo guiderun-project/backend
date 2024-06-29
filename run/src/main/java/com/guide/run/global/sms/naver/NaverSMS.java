@@ -1,18 +1,16 @@
-package com.guide.run.global.naverCloud;
+package com.guide.run.global.sms.naver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.guide.run.global.naverCloud.dto.MessageDto;
-import com.guide.run.global.naverCloud.dto.SmsRequest;
-import com.guide.run.global.naverCloud.dto.SmsResponse;
+import com.guide.run.global.sms.naver.dto.MessageDto;
+import com.guide.run.global.sms.naver.dto.SmsRequest;
+import com.guide.run.global.sms.naver.dto.SmsResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -30,7 +28,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class SmsService {
+public class NaverSMS {
     private String authNum = createSmsKey();
 
     //@Value("${naver.cloud.sms.accessKey}")
