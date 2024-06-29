@@ -8,13 +8,11 @@ import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
 import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSMS;
-import com.guide.run.global.sms.naver.NaverSMS;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
-import com.guide.run.global.sms.naver.dto.SmsResponse;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -45,7 +43,7 @@ public class LoginInfoService {
     private final TmpTokenRepository tmpTokenRepository;
     private final UserService userService;
 
-    private final CoolSMS smsService;
+    private final CoolSmsService smsService;
 
     private final JwtProvider jwtProvider;
 
