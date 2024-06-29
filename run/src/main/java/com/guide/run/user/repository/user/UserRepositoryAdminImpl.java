@@ -123,7 +123,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                         //이름, 기록, sns, 나이, 전화번호
                         (user.name.contains(text)
                                 .or(user.recordDegree.contains(text.toUpperCase()))
-                                .or(user.snsId.toUpperCase().contains(text.toUpperCase()))
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW)
@@ -151,7 +150,6 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                         //이름, 기록, sns, 나이, 전화번호
                         (user.name.contains(text)
                                 .or(user.recordDegree.contains(text.toUpperCase()))
-                                .or(user.snsId.toUpperCase().contains(text.toUpperCase()))
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW)
@@ -241,7 +239,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
             orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, roleOrder));
         }
 
-        if (cond.getTime()==2) {
+        if (cond.getTime()==2 && cond.getApproval()==2 && cond.getType()==2
+                && cond.getName_team()==2&& cond.getGender()==2) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
         }
 

@@ -141,7 +141,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 ))
                 .from(event)
                 .where(event.recruitStatus.ne(RECRUIT_END))
-                .orderBy(event.createdAt.desc())
+                .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
                 .fetch();
@@ -210,7 +210,6 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.organizer.eq(user.privateId),
                         (event.name.contains(text)
                                 .or(user.name.contains(text))
-                                .or(user.snsId.toUpperCase().contains(text.toUpperCase()))
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
                                 //기타 검색 조건 추가 필요
                                 )
@@ -231,7 +230,6 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.organizer.eq(user.privateId),
                         (event.name.contains(text)
                                 .or(user.name.contains(text))
-                                .or(user.snsId.toUpperCase().contains(text.toUpperCase()))
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
                                 //todo : 기타 검색 조건 추가 필요
                         )
@@ -254,10 +252,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .leftJoin(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId),
                         event.isApprove.ne(false),
-                        (event.name.contains(text)
-                                //todo : 기타 검색 조건 추가 필요
-
-                                )
+                        (event.name.contains(text))
                         )
                 .orderBy(event.createdAt.desc())
                 .offset(start)
@@ -275,9 +270,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
                         event.isApprove.ne(false),
-                        (event.name.contains(text)
-                                //todo : 기타 검색 조건 추가 필요
-                        )
+                        (event.name.contains(text))
                 )
                 .fetchOne();
         return count;
@@ -297,7 +290,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
 
-        if (cond.getTime()==0 || cond.getTime()==2) {
+        if (cond.getTime()==0) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
         }
 
@@ -325,14 +318,13 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
             orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.updatedAt));
         }
 
-        if (cond.getName()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.name));
-        }
-
         if (cond.getOrganizer()==1) {
             orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
         }
 
+        if(cond.getOrganizer()==2 && cond.getTime()==2 && cond.getApproval()==2 && cond.getName()==2){
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
+        }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
     }
