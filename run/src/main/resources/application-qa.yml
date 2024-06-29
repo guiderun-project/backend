@@ -37,6 +37,11 @@ spring:
         token: https://nid.naver.com/oauth2.0/token
         profile: https://openapi.naver.com/v1/nid/me
 
+  coolsms:
+    apiKey: ${SMS_KEY}
+    apiSecret: ${SMS_SECRET}
+    senderNumber: ${SEND_NUMBER}
+
 cors:
   origin: https://guide-run-qa.netlify.app
 
@@ -52,7 +57,3 @@ cloud:
     stack:
       auto: false
 
-coolsms:
-  apiKey: ${SMS_KEY}
-  apiSecret: ${SMS_SECRET}
-  senderNumber: ${SEND_NUMBER}
