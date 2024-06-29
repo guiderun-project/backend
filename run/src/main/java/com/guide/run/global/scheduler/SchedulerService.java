@@ -19,8 +19,6 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.core.SimpleLock;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -36,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -98,9 +95,9 @@ public class SchedulerService {
     }
 
     //스케줄러 삭제 코드
-    public void deleteSchedule(Event event){
+    public void deleteSchedule(Long eventId){
         log.info("delete schedule");
-        scheduleRepository.deleteAllByEventId(event.getId());
+        scheduleRepository.deleteAllByEventId(eventId);
     }
 
     public void addSchedule(Schedule schedule){
@@ -149,7 +146,8 @@ public class SchedulerService {
     public void setEventStart(Schedule schedule){
             log.info("setEventStart");
             String lockName = "eventStartLock-" + schedule.getEventId();
-            if (!lockService.isLockActive(lockName)
+            schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+            if ( schedule!=null && !lockService.isLockActive(lockName)
                     && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
                 try {
                     Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
@@ -177,7 +175,8 @@ public class SchedulerService {
     public void setEventEnd(Schedule schedule){
         log.info("setEventEnd");
         String lockName = "eventEndLock-" + schedule.getEventId();
-        if (!lockService.isLockActive(lockName)
+        schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        if ( schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
             try{
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
@@ -208,7 +207,8 @@ public class SchedulerService {
     public void setRecruitStart(Schedule schedule){
         log.info("setRecruitStart");
         String lockName = "recruitStartLock-" + schedule.getEventId();
-        if (!lockService.isLockActive(lockName)
+        schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        if ( schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
@@ -234,7 +234,8 @@ public class SchedulerService {
     public void setRecruitEnd(Schedule schedule){
         log.info("setRecruitEnd");
         String lockName = "recruitStartLock-" + schedule.getEventId();
-        if (!lockService.isLockActive(lockName)
+        schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        if (schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
