@@ -1,10 +1,8 @@
 package com.guide.run.user.service;
 
 import com.guide.run.event.entity.Comment;
-import com.guide.run.event.entity.repository.CommentLikeRepository;
-import com.guide.run.event.entity.repository.EventCommentRepository;
-import com.guide.run.event.entity.repository.EventFormRepository;
-import com.guide.run.event.entity.repository.EventLikeRepository;
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.repository.*;
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -57,7 +55,7 @@ public class UserService {
     private final CommentLikeRepository commentLikeRepository;
     private final EventLikeRepository eventLikeRepository;
     private final EventFormRepository eventFormRepository;
-
+    private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
 
 
@@ -258,6 +256,11 @@ public class UserService {
         UserType userType =user.getType();
         userRepository.deleteById(user.getPrivateId());
         userRepository.flush();
+        List<Event> allEvent = eventRepository.findAllByOrganizer(privateId);
+        for(Event e : allEvent){
+            e.setOrganizer(newId);
+            eventRepository.save(e);
+        }
 
         User newUser = User.builder()
                 .privateId(newId)

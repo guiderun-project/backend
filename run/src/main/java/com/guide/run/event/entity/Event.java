@@ -53,6 +53,10 @@ public class Event extends BaseEntity {
         this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
     }
 
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
+    }
+
     public void approvalEvent(Boolean isApprove){
         this.isApprove = isApprove;
     }
