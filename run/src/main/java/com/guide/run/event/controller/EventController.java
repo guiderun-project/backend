@@ -53,6 +53,7 @@ public class EventController {
         String userId = jwtProvider.extractUserId(request);
 
         eventService.eventDelete(userId,eventId);
+        schedulerService.deleteSchedule(eventId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
