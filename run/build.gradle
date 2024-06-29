@@ -29,6 +29,8 @@ repositories {
 dependencies {
 	//implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
+	implementation 'net.nurigo:sdk:4.3.0' //sms 전송용
+
 	implementation ("net.javacrumbs.shedlock:shedlock-spring:5.13.0") //스케줄러 lock 전용
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.13.0")
 
