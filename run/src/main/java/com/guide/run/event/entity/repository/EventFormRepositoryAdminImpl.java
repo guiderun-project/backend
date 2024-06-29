@@ -3,10 +3,14 @@ package com.guide.run.event.entity.repository;
 import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.response.event.AdminEventApplyItem;
 import com.guide.run.user.entity.QWithdrawal;
+import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
@@ -56,6 +60,12 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
     private OrderSpecifier[] createOrderSpec(EventApplyCond cond){
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
 
+
+        NumberExpression<Integer> typeOrder = new CaseBuilder()
+                .when(user.type.eq(UserType.VI)).then(0)
+                .when(user.type.eq(UserType.GUIDE)).then(1)
+                .otherwise(2);
+
         if(cond.getTime()==0){
             orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, eventForm.createdAt));
         }
@@ -65,7 +75,7 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
         }
 
         if(cond.getType_name()==0){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.type));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
         }
 
         if(cond.getTime()==1){
@@ -78,7 +88,7 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
 
         if(cond.getType_name()==1){
             orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.name));
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.type));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
         }
 
         if(cond.getTeam()==2 && cond.getType_name()==2 && cond.getTime()==2){
