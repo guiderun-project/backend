@@ -1,6 +1,8 @@
 package com.guide.run.temp.member.service;
 
 import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.partner.entity.matching.Matching;
@@ -53,6 +55,7 @@ public class ExcelService2 {
     private final ViRepository viRepository;
     private final GuideRepository guideRepository;
     private final MatchingRepository matchingRepository;
+    private final EventFormRepository eventFormRepository;
     private final UserService userService;
 
 
@@ -161,11 +164,26 @@ public class ExcelService2 {
                                 .privateId(user.getPrivateId())
                                 .build();
 
+                        EventForm eventForm = EventForm.builder()
+                                .eventId(event.getId())
+                                .isMatching(false)
+                                .hopeTeam(user.getRecordDegree())
+                                .gender(user.getGender())
+                                .age(user.getAge())
+                                .type(user.getType())
+                                .privateId(user.getPrivateId())
+                                .hopePartner("")
+                                .referContent("")
+                                .build();
                         attendanceRepository.save(attendance);
+                        eventFormRepository.save(eventForm);
+
                         if(event.getType().equals(EventType.COMPETITION)){
                             user.addContestCnt(1);
+                            event.setViCnt(1);
                         }else{
                             user.addTrainingCnt(1);
+                            event.setGuideCnt(1);
                         }
                         userRepository.save(user);
                     }
@@ -200,9 +218,16 @@ public class ExcelService2 {
                     guideUser = userRepository.findUserByPhoneNumber(guidePhone).orElse(null);
                 }
 
+                //vi랑 guide 둘 다 없을 때.
                 if ((vi == null || viUser == null) && (guide == null || guideUser == null)) {
                     continue;
                 } else if (vi == null || viUser == null) {
+                    Attendance attendance = Attendance.builder()
+                            .isAttend(true)
+                            .privateId(tmpVi.getPrivateId())
+                            .eventId(dto.getEventId())
+                            .build();
+                    attendanceRepository.save(attendance);
                     Matching matching = Matching.builder()
                             .eventId(dto.getEventId())
                             .viId(tmpVi.getPrivateId())
@@ -233,6 +258,12 @@ public class ExcelService2 {
                     partnerRepository.save(partner);
 
                 } else if (guide == null || guideUser == null) {
+                    Attendance attendance = Attendance.builder()
+                            .isAttend(true)
+                            .privateId(tmpGuide.getPrivateId())
+                            .eventId(dto.getEventId())
+                            .build();
+                    attendanceRepository.save(attendance);
                     Matching matching = Matching.builder()
                             .eventId(dto.getEventId())
                             .viId(viUser.getPrivateId())

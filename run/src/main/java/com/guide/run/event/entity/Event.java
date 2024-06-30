@@ -66,11 +66,11 @@ public class Event extends BaseEntity {
     }
 
     public void setViCnt(int viCnt) {
-        this.viCnt = viCnt;
+        this.viCnt += viCnt;
     }
 
     public void setGuideCnt(int guideCnt) {
-        this.guideCnt = guideCnt;
+        this.guideCnt += guideCnt;
     }
 
     public void changeRecruit(EventRecruitStatus recruitStatus){
