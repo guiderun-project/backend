@@ -235,20 +235,22 @@ public class ExcelService2 {
             if (e != null) {
                 Member memberVi = null;
                 Member memberGuide = null;
+                User applyVi = null;
+                User applyGuide = null;
                 if(dto.getViId().equals("null")){
                     memberVi = null;
                 }else{
                     memberVi = memberRepository.findById(Long.valueOf(dto.getViId())).orElse(null);
+                    applyVi = userRepository.findUserByPhoneNumber(memberVi.getPhoneNumber()).orElse(null);
+
                 }
                 if(dto.getGuideId().equals("null")){
                     memberGuide = null;
                 }else{
                    memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
+                   applyGuide= userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
+
                 }
-
-                User applyVi = userRepository.findUserByPhoneNumber(memberVi.getPhoneNumber()).orElse(null);
-                User applyGuide = userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
-
                 //둘 다 미가입
                 if(memberVi !=null && memberGuide !=null && applyVi==null && applyGuide==null) {
                     Matching matching = Matching.builder()
