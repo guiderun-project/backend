@@ -254,6 +254,7 @@ public class UserService {
         withdrawalRepository.save(withdrawal);
         String userId= user.getUserId();
         UserType userType =user.getType();
+        String gender = user.getGender();
         userRepository.deleteById(user.getPrivateId());
         userRepository.flush();
         List<Event> allEvent = eventRepository.findAllByOrganizer(privateId);
@@ -267,7 +268,7 @@ public class UserService {
                 .userId(userId)
                 .name("탈퇴한 회원")
                 .recordDegree(null)
-                .gender(null)
+                .gender(gender)
                 .type(userType)
                 .phoneNumber(null)
                 .age(0)

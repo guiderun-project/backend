@@ -7,6 +7,7 @@ import com.guide.run.temp.member.dto.MatchingTmpDTO;
 import com.guide.run.temp.member.dto.MemberDTO;
 import com.guide.run.temp.member.service.ExcelService;
 import com.guide.run.temp.member.service.ExcelService2;
+import com.guide.run.temp.member.service.MoveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class ExcelController {
 
     private final ExcelService excelService;
     private final ExcelService2 excelService2;
+    private final MoveService moveService;
     @GetMapping("/healty")
     public ResponseEntity healthCheck(){
         return ResponseEntity.ok().body("");}
@@ -128,5 +130,9 @@ public class ExcelController {
         } catch (IOException e) {
             return new ResponseEntity<>("실패 " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    @GetMapping("/tmp/moveUser")
+    public void moveUer(){
+        moveService.move();
     }
 }
