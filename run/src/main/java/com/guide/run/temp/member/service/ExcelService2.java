@@ -241,14 +241,18 @@ public class ExcelService2 {
                     memberVi = null;
                 }else{
                     memberVi = memberRepository.findById(Long.valueOf(dto.getViId())).orElse(null);
-                    applyVi = userRepository.findUserByPhoneNumber(memberVi.getPhoneNumber()).orElse(null);
+                    if(memberVi!=null){
+                        applyVi = userRepository.findUserByPhoneNumber(memberVi.getPhoneNumber()).orElse(null);
+                    }
 
                 }
                 if(dto.getGuideId().equals("null")){
                     memberGuide = null;
                 }else{
                    memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
-                   applyGuide= userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
+                   if(memberGuide!=null){
+                       applyGuide= userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
+                   }
 
                 }
                 //둘 다 미가입
