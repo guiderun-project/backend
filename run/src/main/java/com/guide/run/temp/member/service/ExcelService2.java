@@ -72,7 +72,7 @@ public class ExcelService2 {
                 if (row.getRowNum() <1971) {
                     continue;
                 }
-                if(row.getRowNum()>=2015){
+                if(row.getRowNum()>=2016){
                     break;
                 }
 
@@ -233,8 +233,19 @@ public class ExcelService2 {
             Event e = eventRepository.findById(dto.getEventId()).orElse(null);
 
             if (e != null) {
-                Member memberVi = memberRepository.findById(Long.valueOf(dto.getViId())).orElse(null);
-                Member memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
+                Member memberVi = null;
+                Member memberGuide = null;
+                if(dto.getViId().equals("null")){
+                    memberVi = null;
+                }else{
+                    memberVi = memberRepository.findById(Long.valueOf(dto.getViId())).orElse(null);
+                }
+                if(dto.getGuideId().equals("null")){
+                    memberGuide = null;
+                }else{
+                   memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
+                }
+
                 User applyVi = userRepository.findUserByPhoneNumber(memberVi.getPhoneNumber()).orElse(null);
                 User applyGuide = userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
 
@@ -370,7 +381,7 @@ public class ExcelService2 {
                 }
 
                 //vi가 null
-                else if(dto.getViId()=="null") {
+                else if(dto.getViId().equals("null")) {
 
                     if(applyGuide!=null) {
                         UnMatching unMatching = UnMatching.builder()
@@ -390,7 +401,7 @@ public class ExcelService2 {
                     }
 
                     //guide가 null
-                }else if(dto.getGuideId()=="null") {
+                }else if(dto.getGuideId().equals("null")) {
                     if(applyVi!=null) {
                         UnMatching unMatching = UnMatching.builder()
                                 .eventId(dto.getEventId())
