@@ -315,7 +315,7 @@ public class ExcelService2 {
 
     private LocalDateTime getDateTime(Cell cell){
         //log.info(cell.getStringCellValue());
-        return LocalDateTime.parse(cell.getStringCellValue());
+        return cell.getLocalDateTimeCellValue();
     }
 
     private User createViAndGuide(UserType type){
@@ -328,6 +328,7 @@ public class ExcelService2 {
                     .privateId(viId)
                     .name("미가입 VI")
                     .phoneNumber("01022222222")
+                    .userId("vi1234")
                     .recordDegree("E")
                     .type(UserType.VI)
                     .role(Role.ROLE_USER)
@@ -366,6 +367,7 @@ public class ExcelService2 {
                     .name("미가입 GUIDE")
                     .phoneNumber("01011111111")
                     .type(UserType.GUIDE)
+                    .userId("guide1234")
                     .recordDegree("E")
                     .role(Role.ROLE_USER)
                     .competitionCnt(0)
