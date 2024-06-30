@@ -68,6 +68,10 @@ public class SchedulerService {
         log.info("create Schedule");
         Schedule schedule = scheduleRepository.findByEventId(eventId);
         Event event = eventRepository.findById(eventId).orElse(null);
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+
 
         if(schedule!=null){
             schedule.changeTime(
@@ -106,16 +110,19 @@ public class SchedulerService {
         //스케줄 추가 코드
         //스케줄 상태에 따라 다르게 적용
 
-        if(schedule.getRecruitStatus().equals(ScheduleStatus.PENDING)){
+        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
+        if(schedule.getRecruitStart().isEqual(today) || schedule.getRecruitStart().isAfter(today)){
             addRecruitStartTask(schedule);
         }
-        if(schedule.getRecruitStatus().equals(ScheduleStatus.OPEN)){
+        else if(schedule.getRecruitEnd().isEqual(today) || schedule.getRecruitEnd().isAfter(today)){
             addRecruitEndTask(schedule);
         }
-        if(schedule.getEventStatus().equals(ScheduleStatus.PENDING)){
+        else if(schedule.getEventStart().isEqual(now) || schedule.getEventStart().isAfter(now)){
            addEventStartTask(schedule);
         }
-        if(schedule.getEventStatus().equals(ScheduleStatus.OPEN)){
+        else if(schedule.getEventStart().isBefore(now)){
             addEventEndTask(schedule);
         }
     }
