@@ -115,7 +115,8 @@ public class SchedulerService {
             || schedule.getRecruitStatus().equals(ScheduleStatus.PENDING)){
             addRecruitStartTask(schedule);
         }
-        else if(schedule.getRecruitEnd().isEqual(today) || schedule.getRecruitEnd().isAfter(today)
+        //30일까지 모집 마감. 마감체크일=31일. 오늘보다 마감일이 멀 때.
+        else if(schedule.getRecruitEnd().isAfter(today)
             || schedule.getRecruitStatus().equals(ScheduleStatus.OPEN)){
             addRecruitEndTask(schedule);
         }
