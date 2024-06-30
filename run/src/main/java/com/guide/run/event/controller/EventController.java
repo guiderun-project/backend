@@ -45,6 +45,7 @@ public class EventController {
     public ResponseEntity<String> eventClose(@PathVariable Long eventId, HttpServletRequest request){
         String privateId = jwtProvider.extractUserId(request);
         eventService.eventClose(privateId, eventId);
+        schedulerService.createSchedule(eventId);
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 
