@@ -15,10 +15,8 @@ import lombok.NoArgsConstructor;
 @IdClass(MatchingId.class)
 public class Matching {
     @Id
-    @JoinColumn(name="EVENT_ID")
     private long eventId;
     @Id
-    @JoinColumn(name = "GUIDE_ID")
     private String guideId;
 
     private String guideRecord;
