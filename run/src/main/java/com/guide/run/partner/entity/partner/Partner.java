@@ -17,10 +17,8 @@ import java.util.List;
 @IdClass(PartnerId.class)
 public class Partner extends BaseEntity {
     @Id
-    @JoinColumn(name="VI_ID")
     private String viId;
     @Id
-    @JoinColumn(name = "GUIDE_ID")
     private String guideId;
 
     @Convert(converter = LongListConverter.class)
