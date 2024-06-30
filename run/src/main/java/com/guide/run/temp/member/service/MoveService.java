@@ -81,6 +81,7 @@ public class MoveService {
                         .competitionCnt(0)
                         .trainingCnt(0)
                         .build();
+                userRepository.save(user);
                 Guide guide = Guide.builder()
                         .guidingPace("")
                         .isGuideExp(false)
