@@ -71,8 +71,6 @@ public class SchedulerService {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
 
-
-
         if(schedule!=null){
             schedule.changeTime(
                     event.getStartTime(),
@@ -87,7 +85,7 @@ public class SchedulerService {
                     .eventEnd(event.getEndTime())
                     .recruitStart(event.getRecruitStartDate())
                     //모집 종료는 하루 더해야 함.
-                    .recruitEnd(event.getRecruitEndDate())
+                    .recruitEnd(event.getRecruitEndDate().plusDays(1))
                     .eventStatus(ScheduleStatus.PENDING)
                     .recruitStatus(ScheduleStatus.PENDING)
                     .build();
@@ -113,16 +111,20 @@ public class SchedulerService {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
 
-        if(schedule.getRecruitStart().isEqual(today) || schedule.getRecruitStart().isAfter(today)){
+        if(schedule.getRecruitStart().isEqual(today) || schedule.getRecruitStart().isAfter(today)
+            || schedule.getRecruitStatus().equals(ScheduleStatus.PENDING)){
             addRecruitStartTask(schedule);
         }
-        else if(schedule.getRecruitEnd().isEqual(today) || schedule.getRecruitEnd().isAfter(today)){
+        //30일까지 모집 마감. 마감체크일=31일. 오늘보다 마감일이 멀 때.
+        else if(schedule.getRecruitEnd().isAfter(today)
+            || schedule.getRecruitStatus().equals(ScheduleStatus.OPEN)){
             addRecruitEndTask(schedule);
         }
-        else if(schedule.getEventStart().isEqual(now) || schedule.getEventStart().isAfter(now)){
+        else if(schedule.getEventStart().isEqual(now) || schedule.getEventStart().isAfter(now)
+        || schedule.getEventStatus().equals(ScheduleStatus.PENDING)){
            addEventStartTask(schedule);
         }
-        else if(schedule.getEventStart().isBefore(now)){
+        else if(schedule.getEventStart().isBefore(now) || schedule.getEventStatus().equals(ScheduleStatus.OPEN)){
             addEventEndTask(schedule);
         }
     }
