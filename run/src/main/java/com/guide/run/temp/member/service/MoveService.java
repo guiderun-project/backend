@@ -76,7 +76,7 @@ public class MoveService {
                         .gender(m.getGender())
                         .name("미가입 Guide")
                         .recordDegree("E")
-                        .type(UserType.VI)
+                        .type(UserType.GUIDE)
                         .role(Role.ROLE_USER)
                         .competitionCnt(0)
                         .trainingCnt(0)
