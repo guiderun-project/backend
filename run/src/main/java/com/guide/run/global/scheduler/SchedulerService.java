@@ -161,6 +161,7 @@ public class SchedulerService {
                 try {
                     Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                     LocalDateTime now = LocalDateTime.now();
+                    log.info("lockName="+lockName+", "+e.getStartTime());
                     if(e==null){
                         scheduleRepository.delete(schedule);
                     }
@@ -192,6 +193,7 @@ public class SchedulerService {
             try{
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDateTime now = LocalDateTime.now();
+                log.info("lockName="+lockName+", "+e.getEndTime());
                 if(e==null){
                     scheduleRepository.delete(schedule);
                 }
@@ -220,12 +222,14 @@ public class SchedulerService {
     public void setRecruitStart(Schedule schedule){
         log.info("setRecruitStart");
         String lockName = "recruitStartLock-" + schedule.getEventId();
+
         schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
         if ( schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDate today = LocalDate.now();
+                log.info("lockName="+lockName+", "+e.getRecruitStartDate());
                 if(e==null){
                     scheduleRepository.delete(schedule);
                 }
@@ -255,6 +259,7 @@ public class SchedulerService {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDate today = LocalDate.now();
+                log.info("lockName="+lockName+", "+e.getRecruitEndDate());
                 if(e==null){
                     scheduleRepository.delete(schedule);
                 }
