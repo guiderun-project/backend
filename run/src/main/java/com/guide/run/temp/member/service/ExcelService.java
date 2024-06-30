@@ -43,7 +43,7 @@ public class ExcelService {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>=449){
+                if(row.getRowNum()>=448){
                     break;
                 }
 
