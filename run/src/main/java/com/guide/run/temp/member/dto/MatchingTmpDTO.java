@@ -9,8 +9,8 @@ import lombok.*;
 @Setter
 public class MatchingTmpDTO {
     private long eventId;
-    private long guideId;
-    private long viId;
+    private String guideId;
+    private String viId;
     private String guideRecord;
     private String viRecord;
 }
