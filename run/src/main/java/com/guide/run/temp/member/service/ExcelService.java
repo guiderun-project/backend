@@ -320,4 +320,6 @@ public class ExcelService {
             return EventType.COMPETITION;
         }
     }
+
+    
 }

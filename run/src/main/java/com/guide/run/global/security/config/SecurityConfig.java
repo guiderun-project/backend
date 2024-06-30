@@ -48,6 +48,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/sms/**")
                     .requestMatchers("/api/accountId")
                     .requestMatchers("/api/new-password")
+                    .requestMatchers("/tmp/**")
                     .requestMatchers("/api/login");
         };
     }
