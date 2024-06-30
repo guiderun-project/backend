@@ -29,6 +29,7 @@ import com.guide.run.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -146,18 +147,28 @@ public class ExcelService2 {
     //출석 반영
     @Transactional
     public void saveAtt(List<AttDTO> attDTOS){
-        for(AttDTO a : attDTOS){
-            Member member = memberRepository.findById(a.getPrivateId()).orElse(null);
-            if(member!=null){
-                String phone = userService.extractNumber(member.getPhoneNumber());
-                User user = userRepository.findUserByPhoneNumber(phone).orElse(null);
-                if(user!=null){
-                    Attendance attendance = Attendance.builder()
-                            .eventId(a.getEventId())
-                            .isAttend(true)
-                            .privateId(user.getPrivateId())
-                            .build();
-                    attendanceRepository.save(attendance);
+        for(AttDTO a : attDTOS) {
+            Event event = eventRepository.findById(a.getEventId()).orElse(null);
+            if (event != null) {
+                Member member = memberRepository.findById(a.getPrivateId()).orElse(null);
+                if (member != null) {
+                    String phone = userService.extractNumber(member.getPhoneNumber());
+                    User user = userRepository.findUserByPhoneNumber(phone).orElse(null);
+                    if (user != null) {
+                        Attendance attendance = Attendance.builder()
+                                .eventId(a.getEventId())
+                                .isAttend(true)
+                                .privateId(user.getPrivateId())
+                                .build();
+
+                        attendanceRepository.save(attendance);
+                        if(event.getType().equals(EventType.COMPETITION)){
+                            user.addContestCnt(1);
+                        }else{
+                            user.addTrainingCnt(1);
+                        }
+                        userRepository.save(user);
+                    }
                 }
             }
         }
@@ -235,8 +246,8 @@ public class ExcelService2 {
 
                     if (partner == null) {
                         partner = Partner.builder()
-                                .viId(tmpVi.getPrivateId())
-                                .guideId(guideUser.getPrivateId())
+                                .viId(viUser.getPrivateId())
+                                .guideId(tmpGuide.getPrivateId())
                                 .trainingIds(new ArrayList<>())
                                 .contestIds(new ArrayList<>())
                                 .build();
