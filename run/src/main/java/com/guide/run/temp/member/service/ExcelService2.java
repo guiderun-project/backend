@@ -437,7 +437,7 @@ public class ExcelService2 {
 
     private LocalDateTime getDateTime(Cell cell){
         //log.info(cell.getStringCellValue());
-        return cell.getLocalDateTimeCellValue();
+        return LocalDateTime.parse(cell.getStringCellValue());
     }
 
 }
