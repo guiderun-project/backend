@@ -41,8 +41,6 @@ public class Schedule {
         this.eventEnd = endTime;
         this.recruitStart = recruitStart;
         this.recruitEnd = recruitEnd;
-        this.eventStatus = ScheduleStatus.PENDING;
-        this.recruitStatus = ScheduleStatus.PENDING;
     }
 
     public void changeEventStatus(ScheduleStatus status){
