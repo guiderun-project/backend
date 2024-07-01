@@ -17,13 +17,8 @@ import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.entity.Member;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.temp.member.repository.MemberRepository;
-import com.guide.run.user.entity.ArchiveData;
-import com.guide.run.user.entity.SignUpInfo;
-import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
 import com.guide.run.user.repository.SignUpInfoRepository;
@@ -33,7 +28,6 @@ import com.guide.run.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -249,10 +243,10 @@ public class ExcelService2 {
                 if(dto.getGuideId().equals("null")){
                     memberGuide = null;
                 }else{
-                   memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
-                   if(memberGuide!=null){
-                       applyGuide= userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
-                   }
+                    memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
+                    if(memberGuide!=null){
+                        applyGuide= userRepository.findUserByPhoneNumber(memberGuide.getPhoneNumber()).orElse(null);
+                    }
 
                 }
                 //둘 다 미가입
