@@ -9,6 +9,7 @@ import com.guide.run.temp.member.service.ExcelService;
 import com.guide.run.temp.member.service.ExcelService2;
 import com.guide.run.temp.member.service.MoveService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+@Slf4j
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -142,5 +144,6 @@ public class ExcelController {
     @GetMapping("/tmp/missA")
     public void missA(){
         moveService.misA();
+        log.info("");
     }
 }
