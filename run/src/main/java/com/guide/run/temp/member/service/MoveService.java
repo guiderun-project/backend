@@ -1,7 +1,9 @@
 package com.guide.run.temp.member.service;
 
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.entity.Member;
 import com.guide.run.temp.member.repository.AttendanceRepository;
@@ -36,6 +38,8 @@ public class MoveService {
     private final UserService userService;
     private final MatchingRepository matchingRepository;
     private final AttendanceRepository attendanceRepository;
+    private final UnMatchingRepository unMatchingRepository;
+
     public void move() {
         List<User> allUser = userRepository.findAll();
         for(User u: allUser){
@@ -106,6 +110,7 @@ public class MoveService {
         for(long i = 1; i<47; i++) {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
+
             for(Attendance a : attendances){
                 boolean isExist =false;
                 String privateId = a.getPrivateId();
@@ -115,11 +120,28 @@ public class MoveService {
                         break;
                     }
                 }
-                if(!isExist) {
-                    User user = userRepository.findUserByPrivateId(privateId).orElse(null);
-                    System.out.println("eventId : " + i + ", privateId : " + privateId + ", " + "userType : " + user.getType());
+
+                if(!isExist){
+                    Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, i);
+                    if(unMatching.isEmpty()) {
+                        if(privateId.startsWith("kakao")){
+                            User user = userRepository.findUserByPrivateId(privateId).orElse(null);
+                            Member member = memberRepository.findByPhoneNumber(user.getPhoneNumber()).orElse(null);
+                            if(member!=null) {
+                                privateId = String.valueOf(member.getId());
+                                System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                            }
+                        }
+                        else{
+                            System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    public void misA() {
+
     }
 }
