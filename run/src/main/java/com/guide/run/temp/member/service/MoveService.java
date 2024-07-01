@@ -103,18 +103,16 @@ public class MoveService {
     }
 
     public void misMatch() {
-        List<Matching> matchAll = matchingRepository.findAll();
-
-        for (Matching m : matchAll){
-            List<Attendance> attendances = attendanceRepository.findAllByEventId(m.getEventId());
-            String guideId = m.getGuideId();
-            String viId = m.getViId();
+        for(long i = 1; i<47; i++) {
+            List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
+            List<Matching> matchings = matchingRepository.findAllByEventId(i);
             for(Attendance a : attendances){
-                String privateId = a.getPrivateId();
-
-                if(viId != privateId && guideId != privateId){
-                    User user = userRepository.findUserByPrivateId(privateId).orElse(null);
-                    System.out.println("eventId : " + m.getEventId() + " privateId : "+privateId +" type : "+user.getType());
+                for(Matching m : matchings){
+                    String privateId = a.getPrivateId();
+                    if(!privateId.equals(m.getGuideId()) && !privateId.equals(m.getViId()) ){
+                        User user = userRepository.findUserByPrivateId(privateId).orElse(null);
+                        System.out.println("eventId : "+i +", privateId : "+privateId+", "+"userType : "+user.getType());
+                    }
                 }
             }
         }
