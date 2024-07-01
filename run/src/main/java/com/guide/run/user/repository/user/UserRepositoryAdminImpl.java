@@ -34,7 +34,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .where(
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW),
-                        user.name.contains("미가입").isFalse()
+                        user.name.contains("미가입").not()
                 )
                 .fetchOne();
 
@@ -76,7 +76,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .where(
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW),
-                        user.name.contains("미가입").isFalse()
+                        user.name.contains("미가입").not()
                 )
                 .orderBy(
                     createOrderSpec(cond)
@@ -128,7 +128,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW),
-                        user.name.contains("미가입").isFalse()
+                        user.name.contains("미가입").not()
 
 
                 )
@@ -156,7 +156,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW),
-                        user.name.contains("미가입").isFalse()
+                        user.name.contains("미가입").not()
                 ).fetchOne();
         return count;
     }
@@ -181,7 +181,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .leftJoin(partnerLike).on(user.privateId.eq(partnerLike.recId))
                 .where(user.role.ne(Role.ROLE_DELETE),
                         user.role.ne(Role.ROLE_NEW),
-                        user.name.contains("미가입").isFalse())
+                        user.name.contains("미가입").not())
                 .offset(start)
                 .limit(limit)
                 .orderBy(user.createdAt.desc())
