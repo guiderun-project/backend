@@ -34,7 +34,7 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
                         user.role,
                         user.type,
                         user.name,
-                        user.recordDegree,
+                        eventForm.hopeTeam,
                         eventForm.createdAt
                 ))
                 .from(eventForm, user)
@@ -87,7 +87,6 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
         }
 
         if(cond.getType_name()==1){
-            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.name));
             orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
         }
 
