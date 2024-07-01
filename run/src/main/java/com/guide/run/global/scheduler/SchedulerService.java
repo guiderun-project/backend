@@ -68,15 +68,32 @@ public class SchedulerService {
         log.info("create Schedule");
         Schedule schedule = scheduleRepository.findByEventId(eventId);
         Event event = eventRepository.findById(eventId).orElse(null);
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
+
+        ScheduleStatus recruitStatus = ScheduleStatus.PENDING;
+        ScheduleStatus eventStatus = ScheduleStatus.PENDING;
+
+        //이벤트 모집 상태, 시작 상태에 따라 변경.
+        if(event.getRecruitStatus().equals(EventRecruitStatus.RECRUIT_CLOSE)){
+            recruitStatus = ScheduleStatus.END;
+        }
+
+        if(event.getRecruitStatus().equals(EventRecruitStatus.RECRUIT_OPEN)){
+            recruitStatus = ScheduleStatus.OPEN;
+        }
+
+        if(event.getStatus().equals(EventStatus.EVENT_OPEN)){
+            recruitStatus = ScheduleStatus.END;
+            eventStatus = ScheduleStatus.OPEN;
+        }
 
         if(schedule!=null){
             schedule.changeTime(
                     event.getStartTime(),
                     event.getEndTime(),
                     event.getRecruitStartDate(),
-                    event.getRecruitEndDate()
+                    event.getRecruitEndDate().plusDays(1),
+                    recruitStatus,
+                    eventStatus
             );
         }else{
             schedule = Schedule.builder()
@@ -86,8 +103,8 @@ public class SchedulerService {
                     .recruitStart(event.getRecruitStartDate())
                     //모집 종료는 하루 더해야 함.
                     .recruitEnd(event.getRecruitEndDate().plusDays(1))
-                    .eventStatus(ScheduleStatus.PENDING)
-                    .recruitStatus(ScheduleStatus.PENDING)
+                    .eventStatus(eventStatus)
+                    .recruitStatus(recruitStatus)
                     .build();
         }
 
@@ -108,23 +125,18 @@ public class SchedulerService {
         //스케줄 추가 코드
         //스케줄 상태에 따라 다르게 적용
 
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
-
-        if(schedule.getRecruitStart().isEqual(today) || schedule.getRecruitStart().isAfter(today)
-            || schedule.getRecruitStatus().equals(ScheduleStatus.PENDING)){
+        if(schedule.getRecruitStatus().equals(ScheduleStatus.PENDING)){
             addRecruitStartTask(schedule);
         }
-        //30일까지 모집 마감. 마감체크일=31일. 오늘보다 마감일이 멀 때.
-        else if(schedule.getRecruitEnd().isAfter(today)
-            || schedule.getRecruitStatus().equals(ScheduleStatus.OPEN)){
+        else if(schedule.getEventStatus().equals(ScheduleStatus.PENDING)){
+            addEventStartTask(schedule);
+        }
+
+        if(schedule.getRecruitStatus().equals(ScheduleStatus.OPEN)){
             addRecruitEndTask(schedule);
         }
-        else if(schedule.getEventStart().isEqual(now) || schedule.getEventStart().isAfter(now)
-        || schedule.getEventStatus().equals(ScheduleStatus.PENDING)){
-           addEventStartTask(schedule);
-        }
-        else if(schedule.getEventStart().isBefore(now) || schedule.getEventStatus().equals(ScheduleStatus.OPEN)){
+
+        if(schedule.getEventStatus().equals(ScheduleStatus.OPEN)){
             addEventEndTask(schedule);
         }
     }
@@ -137,6 +149,7 @@ public class SchedulerService {
     private void addRecruitEndTask(Schedule schedule){
         Runnable recruitEndTask = () -> setRecruitEnd(schedule);
         taskScheduler.schedule(recruitEndTask, toInstantDate(schedule.getRecruitEnd()));
+
     }
 
     private void addEventStartTask(Schedule schedule){
