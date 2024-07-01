@@ -33,7 +33,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 .select(user.count()).from(user)
                 .where(
                         user.role.ne(Role.ROLE_DELETE),
-                        user.role.ne(Role.ROLE_NEW)
+                        user.role.ne(Role.ROLE_NEW),
+                        user.name.contains("미가입").isFalse()
                 )
                 .fetchOne();
 
@@ -74,7 +75,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 ).from(user)
                 .where(
                         user.role.ne(Role.ROLE_DELETE),
-                        user.role.ne(Role.ROLE_NEW)
+                        user.role.ne(Role.ROLE_NEW),
+                        user.name.contains("미가입").isFalse()
                 )
                 .orderBy(
                     createOrderSpec(cond)
@@ -125,7 +127,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 .or(user.recordDegree.contains(text.toUpperCase()))
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
-                        user.role.ne(Role.ROLE_NEW)
+                        user.role.ne(Role.ROLE_NEW),
+                        user.name.contains("미가입").isFalse()
 
 
                 )
@@ -152,7 +155,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                                 .or(user.recordDegree.contains(text.toUpperCase()))
                                 .or(user.phoneNumber.contains(text))),
                         user.role.ne(Role.ROLE_DELETE),
-                        user.role.ne(Role.ROLE_NEW)
+                        user.role.ne(Role.ROLE_NEW),
+                        user.name.contains("미가입").isFalse()
                 ).fetchOne();
         return count;
     }
@@ -176,7 +180,8 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
                 ).from(user)
                 .leftJoin(partnerLike).on(user.privateId.eq(partnerLike.recId))
                 .where(user.role.ne(Role.ROLE_DELETE),
-                        user.role.ne(Role.ROLE_NEW))
+                        user.role.ne(Role.ROLE_NEW),
+                        user.name.contains("미가입").isFalse())
                 .offset(start)
                 .limit(limit)
                 .orderBy(user.createdAt.desc())
