@@ -123,31 +123,20 @@ public class MoveService {
 
                 if(!isExist){
                     Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, i);
-                    if(unMatching.isEmpty())
+                    if(unMatching.isEmpty()) {
+                        if(privateId.startsWith("kakao")){
+                            User user = userRepository.findUserByPrivateId(privateId).orElse(null);
+                            Member member = memberRepository.findByPhoneNumber(user.getPhoneNumber()).orElse(null);
+                            privateId=String.valueOf(member.getId());
+                        }
                         System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
-                }
-            }
-
-
-            for(Matching mm : matchings){
-                boolean isExist2 =false;
-                String guideId = mm.getGuideId();
-                String viId = mm.getViId();
-                String privateId2=null;
-                for(Attendance aa: attendances){
-                    privateId2 = aa.getPrivateId();
-                    if(guideId.equals(privateId2) || viId.equals(privateId2)){
-                        isExist2=true;
-                        break;
                     }
                 }
-
-                if(!isExist2){
-                    System.out.println("NotExistAttend ExistMatching eventId : " + i + ", privateId : " + privateId2);
-                }
             }
-
-
         }
+    }
+
+    public void misA() {
+
     }
 }

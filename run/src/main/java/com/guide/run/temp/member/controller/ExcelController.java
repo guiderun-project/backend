@@ -139,4 +139,8 @@ public class ExcelController {
     public void missMatch(){
         moveService.misMatch();
     }
+    @GetMapping("/tmp/missA")
+    public void missA(){
+        moveService.misA();
+    }
 }
