@@ -274,7 +274,7 @@ public class ExcelService2 {
 
                     if (e.getType().equals(EventType.COMPETITION)){
                         partner.addContest(e.getId());
-                    }else{
+                    }else if(e.getType().equals(EventType.TRAINING)){
                         partner.addTraining(e.getId());
                     }
 
@@ -307,7 +307,7 @@ public class ExcelService2 {
 
                     if (e.getType().equals(EventType.COMPETITION)){
                         partner.addContest(e.getId());
-                    }else{
+                    }else if(e.getType().equals(EventType.TRAINING)){
                         partner.addTraining(e.getId());
                     }
 
@@ -340,7 +340,7 @@ public class ExcelService2 {
 
                     if (e.getType().equals(EventType.COMPETITION)){
                         partner.addContest(e.getId());
-                    }else{
+                    }else if(e.getType().equals(EventType.TRAINING)){
                         partner.addTraining(e.getId());
                     }
 
@@ -373,7 +373,7 @@ public class ExcelService2 {
 
                     if (e.getType().equals(EventType.COMPETITION)){
                         partner.addContest(e.getId());
-                    }else{
+                    }else if(e.getType().equals(EventType.TRAINING)){
                         partner.addTraining(e.getId());
                     }
 
