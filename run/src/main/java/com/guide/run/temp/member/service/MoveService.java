@@ -122,11 +122,13 @@ public class MoveService {
                 if(!isExist) {
                     Member member = memberRepository.findById(Long.valueOf(privateId)).orElse(null);
                     user = userRepository.findUserByPhoneNumber(member.getPhoneNumber()).orElse(null);
-                    privateId = user.getPrivateId();
-                    for(Matching m : matchings){
-                        if(privateId.equals(m.getGuideId()) || privateId.equals(m.getViId())){
-                            isExist2=true;
-                            break;
+                    if(user != null) {
+                        privateId = user.getPrivateId();
+                        for (Matching m : matchings) {
+                            if (privateId.equals(m.getGuideId()) || privateId.equals(m.getViId())) {
+                                isExist2 = true;
+                                break;
+                            }
                         }
                     }
                 }
