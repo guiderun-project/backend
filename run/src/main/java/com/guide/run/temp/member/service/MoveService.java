@@ -107,6 +107,7 @@ public class MoveService {
     }
 
     public void misMatch() {
+        System.out.println("-------ExistAttend notExistMatching-------");
         for(long i = 1; i<47; i++) {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
@@ -122,6 +123,7 @@ public class MoveService {
                 }
 
                 if(!isExist){
+                    //언매칭에 있는애들은 출력하지 않는다
                     Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, i);
                     if(unMatching.isEmpty()) {
                         if(privateId.startsWith("kakao")){
@@ -129,11 +131,11 @@ public class MoveService {
                             Member member = memberRepository.findByPhoneNumber(user.getPhoneNumber()).orElse(null);
                             if(member!=null) {
                                 privateId = String.valueOf(member.getId());
-                                System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                                System.out.println("eventId : " + i + ", privateId : " + privateId);
                             }
                         }
                         else{
-                            System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                            System.out.println("eventId : " + i + ", privateId : " + privateId);
                         }
                     }
                 }
@@ -142,6 +144,47 @@ public class MoveService {
     }
 
     public void misA() {
+        System.out.println("-------NotExistAttend ExistMatching-------");
+        for(long i = 1; i<47; i++) {
+            List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
+            List<Matching> matchings = matchingRepository.findAllByEventId(i);
 
+            for(Matching m : matchings){
+                boolean isExist = false;
+                String viId= m.getViId();
+                String guideId = m.getGuideId();
+                for(Attendance a : attendances){
+                    String privateId = a.getPrivateId();
+                    if(privateId.equals(viId) || privateId.equals(guideId)){
+                        isExist =true;
+                        break;
+                    }else{
+                        Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, i);
+                        if(!unMatching.isEmpty()){
+                            isExist=true;
+                            break;
+                        }
+                    }
+                }
+                if(!isExist){
+                    if(viId.startsWith("kakao")){
+                        User vi = userRepository.findUserByPrivateId(viId).orElse(null);
+                        Member viMem = memberRepository.findByPhoneNumber(vi.getPhoneNumber()).orElse(null);
+                        if(viMem!=null){
+                            viId=String.valueOf(viMem.getId());
+                        }
+                    }
+                    if(guideId.startsWith("kakao")){
+                        User guide = userRepository.findUserByPrivateId(guideId).orElse(null);
+                        Member guideMem = memberRepository.findByPhoneNumber(guide.getPhoneNumber()).orElse(null);
+                        if(guideMem!=null){
+                            guideId=String.valueOf(guideMem.getId());
+                        }
+                    }
+                    System.out.println("eventId : " +i +", guideId : "+guideId+",  viId : "+viId);
+                }
+            }
+
+        }
     }
 }
