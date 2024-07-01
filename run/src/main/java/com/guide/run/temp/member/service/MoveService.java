@@ -1,7 +1,9 @@
 package com.guide.run.temp.member.service;
 
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.entity.Member;
 import com.guide.run.temp.member.repository.AttendanceRepository;
@@ -36,6 +38,7 @@ public class MoveService {
     private final UserService userService;
     private final MatchingRepository matchingRepository;
     private final AttendanceRepository attendanceRepository;
+    private final UnMatchingRepository unMatchingRepository;
 
     public void move() {
         List<User> allUser = userRepository.findAll();
@@ -119,7 +122,9 @@ public class MoveService {
                 }
 
                 if(!isExist){
-                    System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                    Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, i);
+                    if(unMatching.isEmpty())
+                        System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
                 }
             }
 
