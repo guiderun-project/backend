@@ -36,6 +36,7 @@ public class MoveService {
     private final UserService userService;
     private final MatchingRepository matchingRepository;
     private final AttendanceRepository attendanceRepository;
+
     public void move() {
         List<User> allUser = userRepository.findAll();
         for(User u: allUser){
@@ -106,18 +107,31 @@ public class MoveService {
         for(long i = 1; i<47; i++) {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
+            User user=null;
             for(Attendance a : attendances){
                 boolean isExist =false;
+                boolean isExist2 = false;
                 String privateId = a.getPrivateId();
                 for(Matching m : matchings){
                     if(privateId.equals(m.getGuideId()) || privateId.equals(m.getViId()) ){
                         isExist =true;
+                        isExist2 =true;
                         break;
                     }
                 }
                 if(!isExist) {
-                    User user = userRepository.findUserByPrivateId(privateId).orElse(null);
-                    System.out.println("eventId : " + i + ", privateId : " + privateId + ", " + "userType : " + user.getType());
+                    Member member = memberRepository.findById(Long.valueOf(privateId)).orElse(null);
+                    user = userRepository.findUserByPhoneNumber(member.getPhoneNumber()).orElse(null);
+                    privateId = user.getPrivateId();
+                    for(Matching m : matchings){
+                        if(privateId.equals(m.getGuideId()) || privateId.equals(m.getViId())){
+                            isExist2=true;
+                            break;
+                        }
+                    }
+                }
+                if(!isExist2){
+                    System.out.println("eventId : " + i + ", privateId : " + privateId+ ", " + "userType : " + user.getType());
                 }
             }
         }
