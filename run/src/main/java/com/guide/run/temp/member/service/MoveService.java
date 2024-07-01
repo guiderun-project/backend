@@ -127,9 +127,11 @@ public class MoveService {
                         if(privateId.startsWith("kakao")){
                             User user = userRepository.findUserByPrivateId(privateId).orElse(null);
                             Member member = memberRepository.findByPhoneNumber(user.getPhoneNumber()).orElse(null);
-                            privateId=String.valueOf(member.getId());
+                            if(member!=null) {
+                                privateId = String.valueOf(member.getId());
+                                System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                            }
                         }
-                        System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
                     }
                 }
             }
