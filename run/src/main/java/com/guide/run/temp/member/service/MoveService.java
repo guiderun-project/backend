@@ -107,36 +107,42 @@ public class MoveService {
         for(long i = 1; i<47; i++) {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
-            User user=null;
 
             for(Attendance a : attendances){
                 boolean isExist =false;
-                boolean isExist2 = false;
                 String privateId = a.getPrivateId();
                 for(Matching m : matchings){
                     if(privateId.equals(m.getGuideId()) || privateId.equals(m.getViId()) ){
                         isExist =true;
-                        isExist2 =true;
                         break;
                     }
                 }
-                if(!isExist) {
-                    Member member = memberRepository.findById(Long.valueOf(privateId)).orElse(null);
-                    user = userRepository.findUserByPhoneNumber(member.getPhoneNumber()).orElse(null);
-                    if(user != null) {
-                        privateId = user.getPrivateId();
-                        for (Matching m : matchings) {
-                            if (privateId.equals(m.getGuideId()) || privateId.equals(m.getViId())) {
-                                isExist2 = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if(!isExist2){
-                    System.out.println("eventId : " + i + ", privateId : " + privateId);
+
+                if(!isExist){
+                    System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
                 }
             }
+
+
+            for(Matching mm : matchings){
+                boolean isExist2 =false;
+                String guideId = mm.getGuideId();
+                String viId = mm.getViId();
+                String privateId2=null;
+                for(Attendance aa: attendances){
+                    privateId2 = aa.getPrivateId();
+                    if(guideId.equals(privateId2) || viId.equals(privateId2)){
+                        isExist2=true;
+                        break;
+                    }
+                }
+
+                if(!isExist2){
+                    System.out.println("NotExistAttend ExistMatching eventId : " + i + ", privateId : " + privateId2);
+                }
+            }
+
+
         }
     }
 }
