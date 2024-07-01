@@ -15,4 +15,5 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Attendan
     void deleteAllByEventId(long eventId);
 
     List<Attendance> findAllByEventIdAndIsAttend(long eventId, boolean attend);
+    List<Attendance> findAllByEventId(Long eventId);
 }

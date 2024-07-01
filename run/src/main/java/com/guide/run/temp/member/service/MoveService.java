@@ -1,6 +1,10 @@
 package com.guide.run.temp.member.service;
 
+import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.entity.Member;
+import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.temp.member.repository.MemberRepository;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
@@ -30,6 +34,8 @@ public class MoveService {
     private final GuideRepository guideRepository;
     private final ViRepository viRepository;
     private final UserService userService;
+    private final MatchingRepository matchingRepository;
+    private final AttendanceRepository attendanceRepository;
     public void move() {
         List<User> allUser = userRepository.findAll();
         for(User u: allUser){
@@ -94,5 +100,23 @@ public class MoveService {
             }
         }
 
+    }
+
+    public void misMatch() {
+        List<Matching> matchAll = matchingRepository.findAll();
+
+        for (Matching m : matchAll){
+            List<Attendance> attendances = attendanceRepository.findAllByEventId(m.getEventId());
+            String guideId = m.getGuideId();
+            String viId = m.getViId();
+            for(Attendance a : attendances){
+                String privateId = a.getPrivateId();
+
+                if(viId != privateId && guideId != privateId){
+                    User user = userRepository.findUserByPrivateId(privateId).orElse(null);
+                    System.out.println("eventId : " + m.getEventId() + " privateId : "+privateId +" type : "+user.getType());
+                }
+            }
+        }
     }
 }
