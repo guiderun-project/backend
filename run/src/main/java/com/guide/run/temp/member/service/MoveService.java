@@ -132,6 +132,9 @@ public class MoveService {
                                 System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
                             }
                         }
+                        else{
+                            System.out.println("ExistAttend notExistMatching eventId : " + i + ", privateId : " + privateId);
+                        }
                     }
                 }
             }
