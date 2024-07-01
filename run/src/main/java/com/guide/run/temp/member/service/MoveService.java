@@ -108,6 +108,7 @@ public class MoveService {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
             User user=null;
+
             for(Attendance a : attendances){
                 boolean isExist =false;
                 boolean isExist2 = false;
@@ -133,7 +134,7 @@ public class MoveService {
                     }
                 }
                 if(!isExist2){
-                    System.out.println("eventId : " + i + ", privateId : " + privateId+ ", " + "userType : " + user.getType());
+                    System.out.println("eventId : " + i + ", privateId : " + privateId);
                 }
             }
         }
