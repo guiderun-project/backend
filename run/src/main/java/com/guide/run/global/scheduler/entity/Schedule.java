@@ -36,11 +36,15 @@ public class Schedule {
     public void changeTime(LocalDateTime startTime,
                            LocalDateTime endTime,
                            LocalDate recruitStart,
-                           LocalDate recruitEnd){
+                           LocalDate recruitEnd,
+                           ScheduleStatus recruitStatus,
+                           ScheduleStatus eventStatus){
         this.eventStart= startTime;
         this.eventEnd = endTime;
         this.recruitStart = recruitStart;
         this.recruitEnd = recruitEnd;
+        this.recruitStatus = recruitStatus;
+        this.eventStatus = eventStatus;
     }
 
     public void changeEventStatus(ScheduleStatus status){
