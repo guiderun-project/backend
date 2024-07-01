@@ -107,12 +107,17 @@ public class MoveService {
             List<Attendance> attendances = attendanceRepository.findAllByEventId(i);
             List<Matching> matchings = matchingRepository.findAllByEventId(i);
             for(Attendance a : attendances){
+                boolean isExist =false;
+                String privateId = a.getPrivateId();
                 for(Matching m : matchings){
-                    String privateId = a.getPrivateId();
-                    if(!privateId.equals(m.getGuideId()) && !privateId.equals(m.getViId()) ){
-                        User user = userRepository.findUserByPrivateId(privateId).orElse(null);
-                        System.out.println("eventId : "+i +", privateId : "+privateId+", "+"userType : "+user.getType());
+                    if(privateId.equals(m.getGuideId()) || privateId.equals(m.getViId()) ){
+                        isExist =true;
+                        break;
                     }
+                }
+                if(!isExist) {
+                    User user = userRepository.findUserByPrivateId(privateId).orElse(null);
+                    System.out.println("eventId : " + i + ", privateId : " + privateId + ", " + "userType : " + user.getType());
                 }
             }
         }
