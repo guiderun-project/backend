@@ -96,7 +96,6 @@ public class LoginInfoService {
         TokenResponse response = TokenResponse.builder()
                 .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
                 .build();
-        authNumberRepository.deleteAuthNumberByAuthNum(authNum); //인증번호 저장 기록 삭제
         return response;
     }
 
@@ -108,7 +107,6 @@ public class LoginInfoService {
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
 
-            tmpTokenRepository.deleteTmpTokenByToken(token);
             //가입 아이디 찾고 return
             return FindAccountIdDto.builder()
                     .accountId(info.getAccountId())
@@ -135,8 +133,7 @@ public class LoginInfoService {
             newInfo.hashPassword(passwordEncoder); //암호화
 
             signUpInfoRepository.save(newInfo);//저장
-
-            tmpTokenRepository.deleteTmpTokenByToken(token);
+            
         }else{
             throw new NotValidTmpTokenException();
         }
