@@ -92,11 +92,12 @@ public class LoginInfoService {
     @Transactional
     public TokenResponse getToken(String authNum) {
         AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(InvalidAuthNumException::new);//인증번호가 일치하지 않음 에러
-
         User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(InvalidAuthNumException::new);
-        return TokenResponse.builder()
+        TokenResponse response = TokenResponse.builder()
                 .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
                 .build();
+        authNumberRepository.deleteAuthNumberByAuthNum(authNum); //인증번호 저장 기록 삭제
+        return response;
     }
 
 
@@ -106,6 +107,8 @@ public class LoginInfoService {
         if(tmpToken.getType().equals("accountId")){
             User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
+
+            tmpTokenRepository.deleteTmpTokenByToken(token);
             //가입 아이디 찾고 return
             return FindAccountIdDto.builder()
                     .accountId(info.getAccountId())
@@ -133,6 +136,7 @@ public class LoginInfoService {
 
             signUpInfoRepository.save(newInfo);//저장
 
+            tmpTokenRepository.deleteTmpTokenByToken(token);
         }else{
             throw new NotValidTmpTokenException();
         }
