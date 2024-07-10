@@ -17,8 +17,12 @@ import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.entity.Member;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.temp.member.repository.MemberRepository;
+import com.guide.run.user.entity.ArchiveData;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
+import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
 import com.guide.run.user.repository.SignUpInfoRepository;
@@ -231,7 +235,7 @@ public class ExcelService2 {
                 Member memberGuide = null;
                 User applyVi = null;
                 User applyGuide = null;
-                if(dto.getViId().equals("null")){
+                if(dto.getViId().contains("null")){
                     memberVi = null;
                 }else{
                     memberVi = memberRepository.findById(Long.valueOf(dto.getViId())).orElse(null);
@@ -240,7 +244,7 @@ public class ExcelService2 {
                     }
 
                 }
-                if(dto.getGuideId().equals("null")){
+                if(dto.getGuideId().contains("null")){
                     memberGuide = null;
                 }else{
                     memberGuide = memberRepository.findById(Long.valueOf(dto.getGuideId())).orElse(null);
@@ -381,42 +385,196 @@ public class ExcelService2 {
                 }
 
                 //vi가 null
-                else if(dto.getViId().equals("null")) {
+                else if(dto.getViId().contains("null")) {
+
+                    User nullVi = User.builder()
+                            .userId(userService.getUUID())
+                            .privateId(dto.getViId())
+                            .name("미가입 VI")
+                            .gender("MALE")
+                            .recordDegree("E")
+                            .type(UserType.VI)
+                            .role(Role.ROLE_USER)
+                            .competitionCnt(0)
+                            .trainingCnt(0)
+                            .build();
+                    userRepository.save(nullVi);
+
+                    Vi nullViData = Vi.builder()
+                            .guideName("")
+                            .privateId(dto.getViId())
+                            .isRunningExp(false)
+                            .build();
+                    viRepository.save(nullViData);
+
+                    ArchiveData archiveData = ArchiveData.builder()
+                            .privateId(dto.getViId())
+                            .hopePrefs("")
+                            .portraitRights(false)
+                            .privacy(false)
+                            .runningPlace("")
+                            .motive("")
+                            .build();
+                    archiveDataRepository.save(archiveData);
 
                     if(applyGuide!=null) {
-                        UnMatching unMatching = UnMatching.builder()
+                        Matching matching = Matching.builder()
                                 .eventId(dto.getEventId())
-                                .privateId(applyGuide.getPrivateId())
+                                .viId(nullVi.getPrivateId())
+                                .viRecord(nullVi.getRecordDegree())
+                                .guideRecord(dto.getGuideRecord())
+                                .guideId(applyGuide.getPrivateId())
                                 .build();
 
-                        unMatchingRepository.save(unMatching);
+                        matchingRepository.save(matching);
+
+                        Partner partner = partnerRepository.findByViIdAndGuideId(nullVi.getPrivateId(), applyGuide.getPrivateId()).orElse(null);
+
+                        //파트너 신규 생성 시
+                        if (partner == null) {
+                            partner = Partner.builder()
+                                    .viId(nullVi.getPrivateId())
+                                    .guideId(applyGuide.getPrivateId())
+                                    .trainingIds(new ArrayList<>())
+                                    .contestIds(new ArrayList<>())
+                                    .build();
+                        }
+
+                        if (e.getType().equals(EventType.COMPETITION)){
+                            partner.addContest(e.getId());
+                        }else if(e.getType().equals(EventType.TRAINING)){
+                            partner.addTraining(e.getId());
+                        }
+
+                        partnerRepository.save(partner);
 
                     }else if (memberGuide!=null) {
-                        UnMatching unMatching = UnMatching.builder()
+                        Matching matching = Matching.builder()
                                 .eventId(dto.getEventId())
-                                .privateId(String.valueOf(memberGuide.getId()))
+                                .viId(nullVi.getPrivateId())
+                                .viRecord(nullVi.getRecordDegree())
+                                .guideRecord(dto.getGuideRecord())
+                                .guideId(String.valueOf(memberGuide.getId()))
                                 .build();
 
-                        unMatchingRepository.save(unMatching);
+                        matchingRepository.save(matching);
+
+                        Partner partner = partnerRepository.findByViIdAndGuideId(nullVi.getPrivateId(), String.valueOf(memberGuide.getId())).orElse(null);
+
+                        //파트너 신규 생성 시
+                        if (partner == null) {
+                            partner = Partner.builder()
+                                    .viId(nullVi.getPrivateId())
+                                    .guideId(String.valueOf(memberGuide.getId()))
+                                    .trainingIds(new ArrayList<>())
+                                    .contestIds(new ArrayList<>())
+                                    .build();
+                        }
+
+                        if (e.getType().equals(EventType.COMPETITION)){
+                            partner.addContest(e.getId());
+                        }else if(e.getType().equals(EventType.TRAINING)){
+                            partner.addTraining(e.getId());
+                        }
+
+                        partnerRepository.save(partner);
                     }
 
                     //guide가 null
-                }else if(dto.getGuideId().equals("null")) {
+                }else if(dto.getGuideId().contains("null")) {
+                    ArchiveData archiveData = ArchiveData.builder()
+                            .privateId(dto.getGuideId())
+                            .hopePrefs("")
+                            .portraitRights(false)
+                            .privacy(false)
+                            .runningPlace("")
+                            .motive("")
+                            .build();
+                    archiveDataRepository.save(archiveData);
+
+                    User nullGuide = User.builder()
+                            .userId(userService.getUUID())
+                            .privateId(dto.getGuideId())
+                            .gender("MALE")
+                            .name("미가입 Guide")
+                            .recordDegree("E")
+                            .type(UserType.GUIDE)
+                            .role(Role.ROLE_USER)
+                            .competitionCnt(0)
+                            .trainingCnt(0)
+                            .build();
+                    userRepository.save(nullGuide);
+                    Guide guideData = Guide.builder()
+                            .guidingPace("")
+                            .isGuideExp(false)
+                            .viName("")
+                            .viCount("")
+                            .viRecord("")
+                            .privateId(nullGuide.getPrivateId())
+                            .build();
+                    guideRepository.save(guideData);
+
                     if(applyVi!=null) {
-                        UnMatching unMatching = UnMatching.builder()
+                        Matching matching = Matching.builder()
                                 .eventId(dto.getEventId())
-                                .privateId(applyVi.getPrivateId())
+                                .viId(applyVi.getPrivateId())
+                                .viRecord(applyVi.getRecordDegree())
+                                .guideRecord(nullGuide.getRecordDegree())
+                                .guideId(nullGuide.getPrivateId())
                                 .build();
 
-                        unMatchingRepository.save(unMatching);
+                        matchingRepository.save(matching);
+
+                        Partner partner = partnerRepository.findByViIdAndGuideId(applyVi.getPrivateId(), nullGuide.getPrivateId() ).orElse(null);
+
+                        //파트너 신규 생성 시
+                        if (partner == null) {
+                            partner = Partner.builder()
+                                    .viId(applyVi.getPrivateId())
+                                    .guideId(nullGuide.getPrivateId())
+                                    .trainingIds(new ArrayList<>())
+                                    .contestIds(new ArrayList<>())
+                                    .build();
+                        }
+
+                        if (e.getType().equals(EventType.COMPETITION)){
+                            partner.addContest(e.getId());
+                        }else if(e.getType().equals(EventType.TRAINING)){
+                            partner.addTraining(e.getId());
+                        }
+
+                        partnerRepository.save(partner);
 
                     }else if (memberVi!=null) {
-                        UnMatching unMatching = UnMatching.builder()
+                        Matching matching = Matching.builder()
                                 .eventId(dto.getEventId())
-                                .privateId(String.valueOf(memberVi.getId()))
+                                .viId(String.valueOf(memberVi.getId()))
+                                .viRecord(memberVi.getRecordDegree())
+                                .guideRecord(nullGuide.getRecordDegree())
+                                .guideId(nullGuide.getPrivateId())
                                 .build();
 
-                        unMatchingRepository.save(unMatching);
+                        matchingRepository.save(matching);
+
+                        Partner partner = partnerRepository.findByViIdAndGuideId(String.valueOf(memberVi.getId()), nullGuide.getPrivateId() ).orElse(null);
+
+                        //파트너 신규 생성 시
+                        if (partner == null) {
+                            partner = Partner.builder()
+                                    .viId(String.valueOf(memberVi.getId()))
+                                    .guideId(nullGuide.getPrivateId())
+                                    .trainingIds(new ArrayList<>())
+                                    .contestIds(new ArrayList<>())
+                                    .build();
+                        }
+
+                        if (e.getType().equals(EventType.COMPETITION)){
+                            partner.addContest(e.getId());
+                        }else if(e.getType().equals(EventType.TRAINING)){
+                            partner.addTraining(e.getId());
+                        }
+
+                        partnerRepository.save(partner);
                     }
                 }
 
