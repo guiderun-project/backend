@@ -417,6 +417,18 @@ public class ExcelService2 {
                             .build();
                     archiveDataRepository.save(archiveData);
 
+
+                    Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(e.getId(), nullVi.getPrivateId());
+
+                    if(attendance==null){
+                        attendance = Attendance.builder()
+                                .eventId(e.getId())
+                                .date(e.getStartTime())
+                                .isAttend(true)
+                                .privateId(nullVi.getPrivateId())
+                                .build();
+                    }
+
                     if(applyGuide!=null) {
                         Matching matching = Matching.builder()
                                 .eventId(dto.getEventId())
@@ -513,6 +525,17 @@ public class ExcelService2 {
                             .privateId(nullGuide.getPrivateId())
                             .build();
                     guideRepository.save(guideData);
+
+                    Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(e.getId(), nullGuide.getPrivateId());
+
+                    if(attendance==null){
+                        attendance = Attendance.builder()
+                                .eventId(e.getId())
+                                .date(e.getStartTime())
+                                .isAttend(true)
+                                .privateId(nullGuide.getPrivateId())
+                                .build();
+                    }
 
                     if(applyVi!=null) {
                         Matching matching = Matching.builder()
