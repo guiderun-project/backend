@@ -70,7 +70,7 @@ public class ExcelService2 {
                 if (row.getRowNum() <1971) {
                     continue;
                 }
-                if(row.getRowNum()>=2016){
+                if(row.getRowNum()>=2015){
                     break;
                 }
 
@@ -110,7 +110,7 @@ public class ExcelService2 {
                 if (row.getRowNum() <2) {
                     continue;
                 }
-                if(row.getRowNum()>=1348){
+                if(row.getRowNum()>=1354){
                     break;
                 }
 
@@ -418,6 +418,7 @@ public class ExcelService2 {
                     archiveDataRepository.save(archiveData);
 
 
+
                     Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(e.getId(), nullVi.getPrivateId());
 
                     if(attendance==null){
@@ -427,6 +428,8 @@ public class ExcelService2 {
                                 .isAttend(true)
                                 .privateId(nullVi.getPrivateId())
                                 .build();
+
+                        attendanceRepository.save(attendance);
                     }
 
                     if(applyGuide!=null) {
