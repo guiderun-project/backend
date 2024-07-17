@@ -67,7 +67,7 @@ public class ExcelService2 {
             Sheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
-                if (row.getRowNum() <1971) {
+                if (row.getRowNum() <2) {
                     continue;
                 }
                 if(row.getRowNum()>=2015){
