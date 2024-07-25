@@ -1,10 +1,7 @@
 package com.guide.run.temp.member.controller;
 
 
-import com.guide.run.temp.member.dto.AttDTO;
-import com.guide.run.temp.member.dto.EventTMPDTO;
-import com.guide.run.temp.member.dto.MatchingTmpDTO;
-import com.guide.run.temp.member.dto.MemberDTO;
+import com.guide.run.temp.member.dto.*;
 import com.guide.run.temp.member.service.ExcelService;
 import com.guide.run.temp.member.service.ExcelService2;
 import com.guide.run.temp.member.service.MoveService;
@@ -88,11 +85,6 @@ public class ExcelController {
         }
     }
 
-    //이벤트 id 44번만 출석 반영
-    //member에서 id 찾고 그 전화번호로 유저 찾기.
-    //없을 경우 패스.
-    //있을 경우 출석 정보 추가해줌.
-    //파트너 정보, member에서 id 찾고 그 전화번호로 유저 찾아서 id 바꿔주기..
 
     @GetMapping("/tmp/excel/attendance")
     public ResponseEntity<String> uploadAttendance2(@RequestParam("file") MultipartFile file){
@@ -145,5 +137,20 @@ public class ExcelController {
     public void missA(){
         moveService.misA();
         log.info("");
+    }
+
+    @GetMapping("/tmp/null")
+    public ResponseEntity<String> saveNull(@RequestParam("file") MultipartFile file){
+        try {
+            List<MemberDTO2> dataList = excelService2.readNullData(file);
+            if (dataList != null && !dataList.isEmpty()) {
+                excelService2.saveNull(dataList);
+                return new ResponseEntity<>("성공", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("파일 오류", HttpStatus.BAD_REQUEST);
+            }
+        } catch (IOException e) {
+            return new ResponseEntity<>("실패 " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
