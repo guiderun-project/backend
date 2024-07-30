@@ -343,7 +343,7 @@ public class EventService {
                     }
 
                 } else {
-                    matching = matchingRepository.findByEventIdAndViId(eventId, user.getPrivateId()).get();
+                    matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId()).get(0);
                     if(matching!=null){
                         //매칭이 있을 때
                         apply = true;
