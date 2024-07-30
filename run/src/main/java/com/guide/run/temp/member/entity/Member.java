@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "member")
 public class Member{
     @Id
-    private String id;
+    private Long id;
     private String name;
     private String type;
     private String gender;
