@@ -288,6 +288,7 @@ public class EventService {
         String partnerId;
 
         boolean apply = false;
+        boolean hasPartner = false;
 
         if(organizer!=null){
             organizerId = organizer.getUserId();
@@ -337,7 +338,8 @@ public class EventService {
                         apply = true;
                         partnerId = matching.getViId();
                         User partner = userRepository.findUserByPrivateId(partnerId).orElse(null);
-                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                        hasPartner = true;
+                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
 
                 } else {
@@ -345,9 +347,10 @@ public class EventService {
                     if(matching!=null){
                         //매칭이 있을 때
                         apply = true;
+                        hasPartner = true;
                         partnerId = matching.getGuideId();
                         User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
-                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
                 }
             }
