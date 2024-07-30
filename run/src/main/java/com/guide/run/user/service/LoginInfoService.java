@@ -133,14 +133,14 @@ public class LoginInfoService {
             newInfo.hashPassword(passwordEncoder); //암호화
 
             signUpInfoRepository.save(newInfo);//저장
-
+            
         }else{
             throw new NotValidTmpTokenException();
         }
     }
 
     // 5자리 수 조합 인증코드 만들기
-    public String createSmsKey() {
+    public static String createSmsKey() {
         StringBuffer key = new StringBuffer();
         Random rnd = new Random();
 

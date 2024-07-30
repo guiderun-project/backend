@@ -240,7 +240,7 @@ public class ExcelService {
                 //privateId, eventId, date
                 Cell idCell = row.getCell(1);
                 if(idCell !=null){
-                    dto.setPrivateId(getStringValue(idCell));
+                    dto.setPrivateId(getLongValue(idCell));
                 }
 
                 Cell eventIdCell = row.getCell(2);
