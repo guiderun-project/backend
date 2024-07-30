@@ -135,8 +135,14 @@ public class EventFormService {
         //매칭 or 미매칭 제거
         Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, eventId);
         if(unMatching.isEmpty()){
-            Optional<Matching> matching = matchingRepository.findByEventIdAndViId(eventId,privateId);
-            matchingRepository.delete(matching.get());
+            Matching matching;
+            if(user.getType().equals(UserType.VI)) {
+                matching = matchingRepository.findByEventIdAndViId(eventId, privateId).get();
+            }
+            else{
+                matching = matchingRepository.findByEventIdAndGuideId(eventId,privateId);
+            }
+            matchingRepository.delete(matching);
         }else{
             unMatchingRepository.delete(unMatching.get());
         }
