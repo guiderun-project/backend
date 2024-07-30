@@ -126,8 +126,7 @@ public class EventFormService {
         //}
         //else {
         //    event.setViCnt(event.getViCnt()-1);
-        //}
-
+        //
         //create 당시 생긴 모든거 삭제 매칭도 뒤지고
         //출석 제거
         Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, privateId);
