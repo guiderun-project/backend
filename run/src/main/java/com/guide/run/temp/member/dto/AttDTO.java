@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttDTO {
-    private String privateId;
+    private Long privateId;
     private Long eventId;
     private boolean isAttend;
     private LocalDateTime date;
