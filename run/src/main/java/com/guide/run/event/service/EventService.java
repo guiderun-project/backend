@@ -288,6 +288,7 @@ public class EventService {
         String partnerId;
 
         boolean apply = false;
+        boolean hasPartner = false;
 
         if(organizer!=null){
             organizerId = organizer.getUserId();
@@ -329,34 +330,30 @@ public class EventService {
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         if (( !organizer.getPrivateId().equals(privateId) )&& eventForm != null) {
-            apply = true;
-            if (eventForm.isMatching()) {
+            //주최자가 아니고 이벤트 신청서가 있을 때.
                 if (user.getType().equals(UserType.GUIDE)) {
                     matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
                     if(matching!=null){
+                        //매칭이 있을 때
+                        apply = true;
                         partnerId = matching.getViId();
                         User partner = userRepository.findUserByPrivateId(partnerId).orElse(null);
-                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                        hasPartner = true;
+                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
 
                 } else {
-                    matching = matchingRepository.findByEventIdAndViId(eventId, user.getPrivateId()).get();
+                    matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId()).get(0);
                     if(matching!=null){
+                        //매칭이 있을 때
+                        apply = true;
+                        hasPartner = true;
                         partnerId = matching.getGuideId();
                         User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
-                        response.setPartner(apply, eventForm.isMatching(), partner.getName(), partner.getRecordDegree(), partner.getType());
+                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
                     }
                 }
             }
-        }else{
-            apply = false;
-        }
-
-
-        //이벤트 시작 당일 전까지는 파트너 공개 안함.
-        if (LocalDate.now().isBefore(event.getStartTime().toLocalDate())) {
-            response.setPartner(apply, false, null, null, null);
-        }
 
         return response;
     }

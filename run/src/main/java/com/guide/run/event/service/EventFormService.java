@@ -23,6 +23,7 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Optional;
 
 import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_OPEN;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventFormService {
@@ -126,11 +128,11 @@ public class EventFormService {
         //}
         //else {
         //    event.setViCnt(event.getViCnt()-1);
-        //}
-
+        //
         //create 당시 생긴 모든거 삭제 매칭도 뒤지고
         //출석 제거
         Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, privateId);
+        log.info("eventId : "+event+", privateId : "+privateId);
         attendanceRepository.delete(attendance);
         //매칭 or 미매칭 제거
         Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, eventId);
