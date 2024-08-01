@@ -343,14 +343,22 @@ public class EventService {
                     }
 
                 } else {
-                    matching = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId()).get(0);
-                    if(matching!=null){
-                        //매칭이 있을 때
-                        apply = true;
-                        hasPartner = true;
-                        partnerId = matching.getGuideId();
-                        User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
-                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
+                    List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
+                    if (matchings.size() == 0) {
+                        //매칭이 없을 때
+                        apply = false;
+                        hasPartner = false;
+                        response.setPartner(apply, hasPartner, null, null, null);
+                    } else {
+                        matching =matchings.get(0);
+                        if (matching != null) {
+                            //매칭이 있을 때
+                            apply = true;
+                            hasPartner = true;
+                            partnerId = matching.getGuideId();
+                            User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
+                            response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
+                        }
                     }
                 }
             }
