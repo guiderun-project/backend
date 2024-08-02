@@ -7,6 +7,7 @@ import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.security.user.CustomUserDetailsService;
 import com.guide.run.global.redis.RefreshToken;
 import com.guide.run.global.redis.RefreshTokenRepository;
+import com.guide.run.user.dto.request.RefreshTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -34,7 +35,7 @@ public class JwtProvider {
     private String secretKey;
    // public static final long TOKEN_VALID_TIME = 1000L * 60 * 30 ; // 30분
     public static final long TOKEN_VALID_TIME = 1000L *60 *60 ;
-    public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 365; // 365일
+    public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 365 * 50; // 50년
 
     public static final long TMP_VALID_TIME = 1000L*60*30; //문자인증 후 주는 임시토큰 30분
 
@@ -130,5 +131,10 @@ public class JwtProvider {
                 .compact(), privateId, type);
         tmpTokenRepository.save(token);
         return token.getToken();
+    }
+
+    public String getPrivateIdForRefreshToken(RefreshTokenDto refreshToken) {
+        RefreshToken token = refreshTokenRepository.findById(refreshToken.getRefreshToken()).orElseThrow(() -> new NotValidRefreshTokenException());
+        return token.getPrivateId();
     }
 }
