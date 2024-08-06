@@ -43,7 +43,7 @@ public class DetailEvent {
     //참여인원
     private int numV;
     private int numG;
-    private boolean isApply;
+    private Boolean isApply;
     private boolean hasPartner;
     private List<EventDetailPartner> partner;
 
