@@ -6,6 +6,7 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
+import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.DetailEvent;
@@ -39,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -277,6 +279,7 @@ public class EventService {
                 NotExistEventException::new
         );
 
+        //개최자 찾기
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElse(null);
 
         String organizerId = null;
@@ -285,7 +288,7 @@ public class EventService {
         String organizerName = null;
 
         Matching matching;
-        String partnerId;
+        List<EventPopUpPartner> partnerList = new ArrayList<>();
 
         boolean apply = false;
         boolean hasPartner = false;
@@ -321,44 +324,57 @@ public class EventService {
                 .isApply(apply)
                 //todo : 2차에서 추가된 부분
                 .hasPartner(false) //파트너 존재 여부
-                .partnerName(null) //파트너 이름
-                .partnerRecord(null) //파트너 러닝등급
-                .partnerType(null) //파트너 장애여부
+                .partner(partnerList)
                 .build();
 
         //매칭 여부로 파트너 정보 추가
         //신청 여부
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
-        if (( !organizer.getPrivateId().equals(privateId) )&& eventForm != null) {
-            //주최자가 아니고 이벤트 신청서가 있을 때.
-                if (user.getType().equals(UserType.GUIDE)) {
+        if (eventForm != null) {
+            //이벤트 신청서가 있을 때.
+            apply = true;
+                if (user.getType().equals(UserType.GUIDE)) {//가이드일 때
                     matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
                     if(matching!=null){
                         //매칭이 있을 때
-                        apply = true;
-                        partnerId = matching.getViId();
-                        User partner = userRepository.findUserByPrivateId(partnerId).orElse(null);
+                        User partner = userRepository.findUserByPrivateId(matching.getViId()).orElse(null);
                         hasPartner = true;
-                        response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
+
+                        EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
+                                .partnerType(partner.getType())
+                                .partnerName(partner.getName())
+                                .partnerRecord(partner.getRecordDegree())
+                                .build();
+                        partnerList.add(partnerInfo);
+
+
+                        response.setPartner(apply, hasPartner, partnerList);
+                    }else{
+                        hasPartner = false;
+                        response.setPartner(apply, hasPartner, partnerList);
                     }
 
-                } else {
+                } else { //vi일 때
                     List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
                     if (matchings.size() == 0) {
                         //매칭이 없을 때
-                        apply = false;
                         hasPartner = false;
-                        response.setPartner(apply, hasPartner, null, null, null);
+                        response.setPartner(apply, hasPartner, partnerList);
                     } else {
-                        matching =matchings.get(0);
-                        if (matching != null) {
                             //매칭이 있을 때
-                            apply = true;
                             hasPartner = true;
-                            partnerId = matching.getGuideId();
-                            User partner = userRepository.findUserByPrivateId(partnerId).orElseThrow(null);
-                            response.setPartner(apply, hasPartner, partner.getName(), partner.getRecordDegree(), partner.getType());
-                        }
+
+                            for(Matching m : matchings){
+                                User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(null);
+                                EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
+                                        .partnerType(partner.getType())
+                                        .partnerName(partner.getName())
+                                        .partnerRecord(partner.getRecordDegree())
+                                        .build();
+                                partnerList.add(partnerInfo);
+                            }
+
+                            response.setPartner(apply, hasPartner, partnerList);
                     }
                 }
             }
