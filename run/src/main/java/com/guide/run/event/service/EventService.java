@@ -349,6 +349,9 @@ public class EventService {
 
 
                         response.setPartner(apply, hasPartner, partnerList);
+                    }else{
+                        hasPartner = false;
+                        response.setPartner(apply, hasPartner, partnerList);
                     }
 
                 } else { //vi일 때
@@ -360,7 +363,6 @@ public class EventService {
                     } else {
                             //매칭이 있을 때
                             hasPartner = true;
-
 
                             for(Matching m : matchings){
                                 User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(null);
