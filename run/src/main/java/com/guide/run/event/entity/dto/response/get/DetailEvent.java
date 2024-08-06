@@ -44,11 +44,11 @@ public class DetailEvent {
     private int numV;
     private int numG;
     private Boolean isApply;
-    private boolean hasPartner;
+    private Boolean hasPartner;
     private List<EventDetailPartner> partner;
 
     private String details;
-    private boolean checkOrganizer;
+    private Boolean checkOrganizer;
     private EventStatus status;
 
 
