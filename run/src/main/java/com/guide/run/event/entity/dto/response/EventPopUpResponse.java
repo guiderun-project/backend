@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -39,18 +40,16 @@ public class EventPopUpResponse {
 
         private Boolean isApply; //신청 여부
         private Boolean hasPartner; //파트너 존재 여부
-        private String partnerName; //파트너 이름
-        private String partnerRecord; //파트너 러닝 등급
-        private UserType partnerType; //파트너 타입(가이드인지 vi인지)
+
+        private List<EventPopUpPartner> partner;
 
         private EventStatus status; //이벤트 status
 
-        public void setPartner(Boolean isApply, Boolean hasPartner, String partnerName, String partnerRecord, UserType partnerType){
+
+        public void setPartner(Boolean isApply, Boolean hasPartner, List<EventPopUpPartner> partner){
                 this.isApply = isApply;
                 this.hasPartner = hasPartner;
-                this.partnerName = partnerName;
-                this.partnerRecord = partnerRecord;
-                this.partnerType = partnerType;
+                this.partner = partner;
         }
 
 }
