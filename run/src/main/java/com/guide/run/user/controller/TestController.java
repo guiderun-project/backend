@@ -1,20 +1,25 @@
 package com.guide.run.user.controller;
 
 
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.scheduler.SchedulerService;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequiredArgsConstructor
 public class TestController {
     private final UserRepository userRepository;
+    private final SchedulerService schedulerService;
+
+    private final EventRepository eventRepository;
+
     //USER 권한 테스트
     @GetMapping("/api/test")
     public String test(){
@@ -47,6 +52,16 @@ public class TestController {
         userRepository.save(user);
         userRepository.save(user2);
         return "생성 완료";
+    }
+
+    @GetMapping("event/schedule/{eventId}")
+    public String eventSchedule(@PathVariable Long eventId){
+        Event test = eventRepository.findById(eventId).orElse(null);
+        if(test!=null){
+            schedulerService.setEventResult(test);
+        }
+
+        return "성공";
     }
 
 }
