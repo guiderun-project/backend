@@ -332,12 +332,11 @@ public class EventService {
         EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         if (eventForm != null) {
             //이벤트 신청서가 있을 때.
-
+            apply = true;
                 if (user.getType().equals(UserType.GUIDE)) {//가이드일 때
                     matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
                     if(matching!=null){
                         //매칭이 있을 때
-                        apply = true;
                         User partner = userRepository.findUserByPrivateId(matching.getViId()).orElse(null);
                         hasPartner = true;
 
@@ -356,12 +355,10 @@ public class EventService {
                     List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
                     if (matchings.size() == 0) {
                         //매칭이 없을 때
-                        apply = false;
                         hasPartner = false;
                         response.setPartner(apply, hasPartner, partnerList);
                     } else {
                             //매칭이 있을 때
-                            apply = true;
                             hasPartner = true;
 
 
