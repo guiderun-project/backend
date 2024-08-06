@@ -343,7 +343,7 @@ public class EventService {
 
                         EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
                                 .partnerType(partner.getType())
-                                .partnerName(partner.getRecordDegree())
+                                .partnerName(partner.getName())
                                 .partnerRecord(partner.getRecordDegree())
                                 .build();
                         partnerList.add(partnerInfo);
@@ -369,7 +369,7 @@ public class EventService {
                                 User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(null);
                                 EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
                                         .partnerType(partner.getType())
-                                        .partnerName(partner.getRecordDegree())
+                                        .partnerName(partner.getName())
                                         .partnerRecord(partner.getRecordDegree())
                                         .build();
                                 partnerList.add(partnerInfo);
