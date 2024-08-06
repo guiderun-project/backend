@@ -9,6 +9,7 @@ import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
+import com.guide.run.user.dto.request.RefreshTokenDto;
 import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
@@ -57,6 +58,7 @@ public class SignController {
         boolean isExist = userService.getUserStatus(privateId);
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
+                .refreshToken(jwtProvider.createRefreshToken(privateId))
                 .isExist(isExist)
                 .build();
     }
@@ -85,6 +87,7 @@ public class SignController {
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
+                .refreshToken(jwtProvider.createRefreshToken(privateId))
                 .isExist(isExist)
                 .build();
     }
@@ -124,19 +127,18 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+    public ReissuedAccessTokenDto accessTokenReissue(@RequestBody RefreshTokenDto refreshToken,HttpServletRequest request){
         try {
-            Cookie[] cookies = request.getCookies();
-            String privateId = jwtProvider.getPrivateIdForCookie(cookies);
+            String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
             boolean isExist = userService.getUserStatus(privateId);
             return ReissuedAccessTokenDto.builder()
                     .accessToken(jwtProvider.createAccessToken(privateId))
                     .isExist(isExist)
                     .build();
-        }catch (Exception e){
+        }catch (NotValidRefreshTokenException e){
             log.error("refresh 토큰이 없습니다");
+            throw new NotValidRefreshTokenException();
         }
-        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인
@@ -166,6 +168,7 @@ public class SignController {
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
+                .refreshToken(jwtProvider.createRefreshToken(privateId))
                 .isExist(isExist)
                 .build();
     }

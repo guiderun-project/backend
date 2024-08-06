@@ -1,6 +1,7 @@
 package com.guide.run.event.entity.dto.response.get;
 
 
+import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -13,10 +14,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DetailEvent {
     private Long eventId;
     private EventType type;
@@ -40,69 +43,13 @@ public class DetailEvent {
     //참여인원
     private int numV;
     private int numG;
+    private Boolean isApply;
+    private Boolean hasPartner;
+    private List<EventDetailPartner> partner;
 
-    private String partner;
-    private UserType partnerType;
-    private String partnerPace;
     private String details;
-
-    private boolean checkOrganizer;
-    private boolean submit;
+    private Boolean checkOrganizer;
     private EventStatus status;
 
-    public DetailEvent(Long eventId,
-                       EventType type,
-                       String name,
-                       EventRecruitStatus recruitStatus,
-                       LocalDate recruitStartDate,
-                       LocalDate recruitEndDate,
-                       String organizerId,
-                       String organizer,
-                       UserType organizerType,
-                       String organizerPace,
-                       String date,
-                       String startTime,
-                       String endTime,
-                       LocalDateTime created_at,
-                       LocalDateTime updated_at,
-                       String place,
-                       int minNumV,
-                       int minNumG,
-                       int numV,
-                       int numG,
-                       String partner,
-                       UserType partnerType,
-                       String partnerPace,
-                       String details,
-                       boolean checkOrganizer,
-                       boolean submit,
-                       EventStatus status) {
-        this.eventId = eventId;
-        this.type = type;
-        this.name = name;
-        this.recruitStatus = recruitStatus;
-        this.recruitStartDate = recruitStartDate;
-        this.recruitEndDate = recruitEndDate;
-        this.organizerId = organizerId;
-        this.organizer = organizer;
-        this.organizerType = organizerType;
-        this.organizerPace = organizerPace;
-        this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.created_at = created_at.toLocalDate();
-        this.updated_at = updated_at.toLocalDate();
-        this.place = place;
-        this.minNumV = minNumV;
-        this.minNumG = minNumG;
-        this.numV = numV;
-        this.numG = numG;
-        this.partner = partner;
-        this.partnerType = partnerType;
-        this.partnerPace = partnerPace;
-        this.details = details;
-        this.checkOrganizer = checkOrganizer;
-        this.submit = submit;
-        this.status = status;
-    }
+
 }
