@@ -10,6 +10,7 @@ import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.get.DetailEvent;
+import com.guide.run.event.entity.dto.response.get.EventDetailPartner;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -392,109 +393,174 @@ public class EventService {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
         DetailEvent detailEvent;
-
+        List<EventDetailPartner> eventDetailPartnerList =new ArrayList<>();
         boolean isCheckOrganizer = false;
         if(organizer.getPrivateId().equals(privateId))
             isCheckOrganizer = true;
         Matching matching;
         //미신청한 경우
         if(form == null) {
-            detailEvent = new DetailEvent(
-                    eventId,event.getType(),event.getName(),event.getRecruitStatus(),
-                    event.getRecruitStartDate(),event.getRecruitEndDate(),
-                    organizer.getUserId(),
-                    organizer.getName(),organizer.getType(),
-                    organizer.getRecordDegree(),
-                    event.getStartTime().toLocalDate().toString(),
-                    event.getStartTime().toLocalTime().toString().substring(0,5),
-                    event.getEndTime().toLocalTime().toString().substring(0,5),
-                    event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
-                    event.getMaxNumV(),event.getMaxNumG(), //모집 인원
-                    event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
-                    null,null,null,
-                    event.getContent(),isCheckOrganizer,false,event.getStatus()
-            );
+            detailEvent = DetailEvent.builder()
+                    .eventId(eventId)
+                    .type(event.getType())
+                    .name(event.getName())
+                    .recruitStatus(event.getRecruitStatus())
+                    .recruitStartDate(event.getRecruitStartDate())
+                    .recruitEndDate(event.getRecruitEndDate())
+                    .organizerId(organizer.getUserId())
+                    .organizer(organizer.getName())
+                    .organizerType(organizer.getType())
+                    .organizerPace(organizer.getRecordDegree())
+                    .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
+                    .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
+                    .created_at(LocalDate.from(event.getCreatedAt()))
+                    .updated_at(LocalDate.from(event.getUpdatedAt()))
+                    .place(event.getPlace())
+                    .minNumV(event.getMaxNumV())
+                    .minNumG(event.getMaxNumG())
+                    .numG(event.getGuideCnt())
+                    .numV(event.getViCnt())
+                    .isApply(false)
+                    .hasPartner(false)
+                    .partner(eventDetailPartnerList)
+                    .details(event.getContent())
+                    .checkOrganizer(isCheckOrganizer)
+                    .status(event.getStatus()).build();
         }
         //신청한 경우
         else{
             if(user.getType().equals(UserType.GUIDE)){
                 matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
                 if(matching == null){
-                    detailEvent = new DetailEvent(
-                        eventId,event.getType(),event.getName(),event.getRecruitStatus(),
-                            event.getRecruitStartDate(),event.getRecruitEndDate(),
-                            organizer.getUserId(),
-                            organizer.getName(),organizer.getType(),
-                        organizer.getRecordDegree(),
-                            event.getStartTime().toLocalDate().toString(),
-                            event.getStartTime().toLocalTime().toString().substring(0,5),
-                            event.getEndTime().toLocalTime().toString().substring(0,5),
-                        event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
-                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
-                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
-                        null,null,null,
-                        event.getContent(),isCheckOrganizer,true,event.getStatus());
+                    detailEvent = DetailEvent.builder()
+                            .eventId(eventId)
+                            .type(event.getType())
+                            .name(event.getName())
+                            .recruitStatus(event.getRecruitStatus())
+                            .recruitStartDate(event.getRecruitStartDate())
+                            .recruitEndDate(event.getRecruitEndDate())
+                            .organizerId(organizer.getUserId())
+                            .organizer(organizer.getName())
+                            .organizerType(organizer.getType())
+                            .organizerPace(organizer.getRecordDegree())
+                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
+                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
+                            .created_at(LocalDate.from(event.getCreatedAt()))
+                            .updated_at(LocalDate.from(event.getUpdatedAt()))
+                            .place(event.getPlace())
+                            .minNumV(event.getMaxNumV())
+                            .minNumG(event.getMaxNumG())
+                            .numG(event.getGuideCnt())
+                            .numV(event.getViCnt())
+                            .isApply(true)
+                            .hasPartner(false)
+                            .partner(eventDetailPartnerList)
+                            .details(event.getContent())
+                            .checkOrganizer(isCheckOrganizer)
+                            .status(event.getStatus()).build();
                 }
                 else{
                     User vi = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
-                    detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
-                            event.getRecruitStartDate(),event.getRecruitEndDate(),
-                            organizer.getUserId(),
-                            organizer.getName(),organizer.getType(),
-                            organizer.getRecordDegree(),
-                            event.getStartTime().toLocalDate().toString(),
-                            event.getStartTime().toLocalTime().toString().substring(0,5),
-                            event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
-                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
-                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
-                            vi.getName(), vi.getType(), vi.getRecordDegree(),
-                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                    eventDetailPartnerList.add(EventDetailPartner.builder()
+                            .partnerType(vi.getType())
+                            .partnerRecord(vi.getRecordDegree())
+                            .partnerName(vi.getName())
+                            .build());
+                    detailEvent = DetailEvent.builder()
+                            .eventId(eventId)
+                            .type(event.getType())
+                            .name(event.getName())
+                            .recruitStatus(event.getRecruitStatus())
+                            .recruitStartDate(event.getRecruitStartDate())
+                            .recruitEndDate(event.getRecruitEndDate())
+                            .organizerId(organizer.getUserId())
+                            .organizer(organizer.getName())
+                            .organizerType(organizer.getType())
+                            .organizerPace(organizer.getRecordDegree())
+                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
+                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
+                            .created_at(LocalDate.from(event.getCreatedAt()))
+                            .updated_at(LocalDate.from(event.getUpdatedAt()))
+                            .place(event.getPlace())
+                            .minNumV(event.getMaxNumV())
+                            .minNumG(event.getMaxNumG())
+                            .numG(event.getGuideCnt())
+                            .numV(event.getViCnt())
+                            .isApply(true)
+                            .hasPartner(true)
+                            .partner(eventDetailPartnerList)
+                            .details(event.getContent())
+                            .checkOrganizer(isCheckOrganizer)
+                            .status(event.getStatus()).build();
                 }
             }else{
                 List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
-                if(matchingList.size()==0)
-                    matching=null;
-                else
-                    matching= matchingList.get(0);
-                if(matching == null){
-                    detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
-                            event.getRecruitStartDate(),event.getRecruitEndDate(),
-                            organizer.getUserId(),
-                            organizer.getName(),organizer.getType(),
-                            organizer.getRecordDegree(),
-                            event.getStartTime().toLocalDate().toString(),
-                            event.getStartTime().toLocalTime().toString().substring(0,5),
-                            event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
-                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
-                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
-                            null,null,null,
-                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                if(matchingList.size()==0){
+                    detailEvent = DetailEvent.builder()
+                            .eventId(eventId)
+                            .type(event.getType())
+                            .name(event.getName())
+                            .recruitStatus(event.getRecruitStatus())
+                            .recruitStartDate(event.getRecruitStartDate())
+                            .recruitEndDate(event.getRecruitEndDate())
+                            .organizerId(organizer.getUserId())
+                            .organizer(organizer.getName())
+                            .organizerType(organizer.getType())
+                            .organizerPace(organizer.getRecordDegree())
+                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
+                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
+                            .created_at(LocalDate.from(event.getCreatedAt()))
+                            .updated_at(LocalDate.from(event.getUpdatedAt()))
+                            .place(event.getPlace())
+                            .minNumV(event.getMaxNumV())
+                            .minNumG(event.getMaxNumG())
+                            .numG(event.getGuideCnt())
+                            .numV(event.getViCnt())
+                            .isApply(true)
+                            .hasPartner(false)
+                            .partner(eventDetailPartnerList)
+                            .details(event.getContent())
+                            .checkOrganizer(isCheckOrganizer)
+                            .status(event.getStatus()).build();
                 }
                 else{
-                    User guide = userRepository.findUserByPrivateId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
-                    detailEvent = new DetailEvent(
-                            eventId,event.getType(),event.getName(),event.getRecruitStatus(),
-                            event.getRecruitStartDate(),event.getRecruitEndDate(),
-                            organizer.getUserId(),
-                            organizer.getName(),organizer.getType(),
-                            organizer.getRecordDegree(),
-                            event.getStartTime().toLocalDate().toString(),
-                            event.getStartTime().toLocalTime().toString().substring(0,5),
-                            event.getEndTime().toLocalTime().toString().substring(0,5),
-                            event.getCreatedAt(),event.getUpdatedAt(),event.getPlace(),
-                            event.getMaxNumV(),event.getMaxNumG(), //모집 인원
-                            event.getViCnt(),event.getGuideCnt(), //실제 참여 인원
-                            guide.getName(), guide.getType(), guide.getRecordDegree(),
-                            event.getContent(),isCheckOrganizer,true,event.getStatus());
+                    for(Matching m : matchingList){
+                        User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
+                        eventDetailPartnerList.add(EventDetailPartner.builder()
+                                .partnerType(guide.getType())
+                                .partnerRecord(guide.getRecordDegree())
+                                .partnerName(guide.getName())
+                                .build());
+                    }
+                    detailEvent = DetailEvent.builder()
+                            .eventId(eventId)
+                            .type(event.getType())
+                            .name(event.getName())
+                            .recruitStatus(event.getRecruitStatus())
+                            .recruitStartDate(event.getRecruitStartDate())
+                            .recruitEndDate(event.getRecruitEndDate())
+                            .organizerId(organizer.getUserId())
+                            .organizer(organizer.getName())
+                            .organizerType(organizer.getType())
+                            .organizerPace(organizer.getRecordDegree())
+                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
+                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
+                            .created_at(LocalDate.from(event.getCreatedAt()))
+                            .updated_at(LocalDate.from(event.getUpdatedAt()))
+                            .place(event.getPlace())
+                            .minNumV(event.getMaxNumV())
+                            .minNumG(event.getMaxNumG())
+                            .numG(event.getGuideCnt())
+                            .numV(event.getViCnt())
+                            .isApply(true)
+                            .hasPartner(true)
+                            .partner(eventDetailPartnerList)
+                            .details(event.getContent())
+                            .checkOrganizer(isCheckOrganizer)
+                            .status(event.getStatus()).build();
                 }
             }
         }
-
-
         return detailEvent;
     }
 }
