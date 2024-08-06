@@ -68,7 +68,7 @@ public class JwtProvider {
                 .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact(), privateId);
-        refreshTokenRepository.save(refreshToken);
+        //refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }
     public Authentication getAuthentication(String token){
