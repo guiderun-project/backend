@@ -7,6 +7,7 @@ import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.entity.partner.Partner;
@@ -142,8 +143,8 @@ public class UserService {
             newId = createWithdrawalId();
             check = withdrawalRepository.findById(newId).orElse(null);
         }
-        //미매칭 - 삭제
-        unMatchingRepository.deleteAllByPrivateId(privateId);
+
+
 
         //댓글 좋아요 - 삭제
         List<Comment> commentList = eventCommentRepository.findAllByPrivateId(privateId);
@@ -155,6 +156,18 @@ public class UserService {
         eventCommentRepository.deleteAllByPrivateId(privateId);
         //이벤트 신청서 - 삭제
         eventFormRepository.deleteAllByPrivateId(privateId);
+        
+        //미매칭 - newId로 변경
+        List<UnMatching> unMatchings = unMatchingRepository.findAllByPrivateId(privateId);
+        for(UnMatching un : unMatchings){
+            UnMatching unMatching = UnMatching.builder()
+                    .eventId(un.getEventId())
+                    .privateId(newId)
+                    .build();
+            unMatchingRepository.delete(un);
+            unMatchingRepository.save(unMatching);
+        }
+        
         //출석 - newId로 변경
         List<Attendance> attendanceList = attendanceRepository.findAllByPrivateId(privateId);
 
@@ -266,7 +279,7 @@ public class UserService {
         User newUser = User.builder()
                 .privateId(newId)
                 .userId(userId)
-                .name("탈퇴한 회원")
+                .name("알 수 없음")
                 .recordDegree(null)
                 .gender(gender)
                 .type(userType)
