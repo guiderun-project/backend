@@ -13,4 +13,6 @@ public interface UnMatchingRepository extends JpaRepository<UnMatching, UnMatchi
     void deleteAllByEventId(long eventId);
     void deleteAllByPrivateId(String privateId);
 
+    List<UnMatching> findAllByPrivateId(String privateId);
+
 }
