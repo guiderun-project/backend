@@ -11,5 +11,6 @@ import lombok.Getter;
 public class ParticipationInfo {
     private String userId;
     private UserType type;
+    private String applyRecord;
     private String name;
 }

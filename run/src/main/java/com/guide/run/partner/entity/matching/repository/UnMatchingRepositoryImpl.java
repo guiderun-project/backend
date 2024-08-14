@@ -36,6 +36,7 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 user.userId.as("userId"),
                 user.type.as("type"),
                 user.name.as("name"),
+                user.recordDegree.as("applyRecord"),
                 attendance.isAttend.as("isAttended")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))

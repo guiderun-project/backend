@@ -25,6 +25,7 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
         return queryFactory.select(Projections.constructor(Form.class,
                 user.userId.as("userId"),
                 user.type.as("type"),
+                user.recordDegree.as("applyRecord"),
                 user.name.as("name")))
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId))

@@ -11,5 +11,6 @@ import lombok.Getter;
 public class Form {
     private String userId;
     private UserType type;
+    private String applyRecord;
     private String name;
 }
