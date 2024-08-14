@@ -33,6 +33,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
         return queryFactory.select(Projections.constructor(ParticipationInfo.class,
                 user.userId.as("userId"),
                 user.type.as("type"),
+                user.recordDegree.as("applyRecord"),
                 user.name.as("name")))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))

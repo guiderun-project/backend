@@ -67,33 +67,33 @@ public class EventMatchingService {
     }
 
     @Transactional
-    public void deleteMatchUser(Long eventId, String viId, String userId) {
+    public void deleteMatchUser(Long eventId, String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
-        User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        matchingRepository.delete(
-                Matching.builder()
-                        .eventId(eventId)
-                        .guideId(guide.getPrivateId())
-                        .viId(vi.getPrivateId())
-                        .viRecord(vi.getRecordDegree())
-                        .guideRecord(guide.getRecordDegree())
-                        .build()
-        );
-        unMatchingRepository.save(
-                UnMatching.builder()
-                        .eventId(eventId)
-                        .privateId(guide.getPrivateId())
-                        .build()
-        );
-        Optional<Matching> findVi = matchingRepository.findByEventIdAndViId(eventId,viId);
-        if(findVi.isEmpty()){
-            unMatchingRepository.save(
-                    UnMatching.builder()
-                            .eventId(eventId)
-                            .privateId(vi.getPrivateId())
-                            .build()
-            );
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        String privateId = user.getPrivateId();
+        if(user.getType()==UserType.VI){
+            List<Matching> allMatching = matchingRepository.findAllByEventIdAndViId(eventId, privateId);
+            for(Matching m : allMatching){
+                matchingRepository.delete(m);
+                unMatchingRepository.save(
+                        UnMatching.builder()
+                                .privateId(m.getGuideId())
+                                .eventId(eventId)
+                                .build()
+                );
+            }
+        }else{
+            Matching m = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
+            matchingRepository.delete(m);
+            matchingRepository.flush();
+            if(matchingRepository.findAllByEventIdAndViId(eventId,m.getViId()).size()==0){
+                unMatchingRepository.save(
+                        UnMatching.builder()
+                                .eventId(eventId)
+                                .privateId(m.getViId())
+                                .build()
+                );
+            }
         }
     }
 
