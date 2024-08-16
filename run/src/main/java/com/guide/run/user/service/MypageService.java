@@ -126,6 +126,7 @@ public class MypageService {
                 .gender(user.getGender())
                 .recordDegree(user.getRecordDegree())
                 .detailRecord(user.getDetailRecord())
+                .role(user.getRole().getValue().substring(5))
 
                 .phoneNumber(phoneNum)
                 .isOpenNumber(user.getIsOpenNumber())
