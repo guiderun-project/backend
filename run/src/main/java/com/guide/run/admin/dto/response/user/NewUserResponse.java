@@ -31,7 +31,7 @@ public class NewUserResponse {
                            long like) {
         this.userId = userId;
         this.img = img;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);
         this.type = type;
         this.name = name;
         this.trainingCnt = trainingCnt;
