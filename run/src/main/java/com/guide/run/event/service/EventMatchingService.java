@@ -95,6 +95,7 @@ public class EventMatchingService {
             unMatchingRepository.save(
                     UnMatching.builder()
                             .privateId(m.getGuideId())
+                            .eventId(eventId)
                             .build()
             );
             matchingRepository.flush();
