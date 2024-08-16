@@ -82,6 +82,13 @@ public class EventMatchingService {
                                 .build()
                 );
             }
+
+            unMatchingRepository.save(
+                    UnMatching.builder()
+                            .privateId(user.getPrivateId())
+                            .eventId(eventId)
+                            .build()
+            );
         }else{
             Matching m = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
             matchingRepository.delete(m);
