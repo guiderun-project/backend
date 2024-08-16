@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserInfoController {
     private final GetUserInfoService getUserInfoService;
-    @GetMapping("/user/info/all")
+    @GetMapping("api/user/info/all")
     public ResponseEntity<UserInfoAllResponse> getUserInfoAll(){
         return ResponseEntity.ok(getUserInfoService.getUserInfoAll());
     }
