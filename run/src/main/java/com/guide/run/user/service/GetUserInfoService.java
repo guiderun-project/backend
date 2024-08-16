@@ -35,7 +35,7 @@ public class GetUserInfoService {
         for(User u : userList) {
             ArchiveData archiveData = archiveDataRepository.findById(u.getPrivateId()).orElse(null);
 
-            if (!u.getRole().equals(Role.ROLE_DELETE) || !u.getRole().equals(Role.ROLE_NEW)) {
+            if (!u.getRole().equals(Role.ROLE_DELETE) && !u.getRole().equals(Role.ROLE_NEW)) {
                 if (u.getType().equals(UserType.VI)) {
                     Vi vi = viRepository.findById(u.getPrivateId()).orElse(null);
                     if (archiveData != null && vi != null) {
