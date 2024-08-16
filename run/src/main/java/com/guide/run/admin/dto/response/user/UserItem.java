@@ -49,7 +49,7 @@ public class UserItem {
                     String update_time) {
         this.userId = userId;
         this.img = img;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);
         this.age = age;
         this.type = type.getValue();
         this.name = name;
