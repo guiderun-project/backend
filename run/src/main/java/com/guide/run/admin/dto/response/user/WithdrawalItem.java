@@ -33,7 +33,7 @@ public class WithdrawalItem {
                           String update_date,
                           String update_time) {
         this.userId = userId;
-        this.role = role.getValue();
+        this.role = role.getValue().substring(5);
         this.type = type;
         this.name = name;
         this.team = team;

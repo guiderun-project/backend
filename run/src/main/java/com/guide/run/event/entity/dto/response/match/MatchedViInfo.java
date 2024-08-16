@@ -13,6 +13,7 @@ public class MatchedViInfo {
     private String userId;
     private UserType type;
     private String name;
+    private String applyRecord;
     @JsonProperty(value = "isAttended")
     private Boolean isAttended;
 }

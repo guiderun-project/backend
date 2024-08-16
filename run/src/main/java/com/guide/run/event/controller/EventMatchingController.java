@@ -28,13 +28,12 @@ public class EventMatchingController {
         eventMatchingService.matchUser(eventId,viId,userId);
         return ResponseEntity.ok().body("200 ok");
     }
-    @DeleteMapping("{eventId}/match/{viId}/{userId}")
+    @DeleteMapping("{eventId}/match/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable("eventId") Long eventId,
-                                            @PathVariable("viId") String viId,
                                             @PathVariable("userId") String userId,
                                             HttpServletRequest request){
         jwtProvider.extractUserId(request);
-        eventMatchingService.deleteMatchUser(eventId,viId,userId);
+        eventMatchingService.deleteMatchUser(eventId,userId);
         return ResponseEntity.ok().body("200 ok");
     }
     @GetMapping("{eventId}/match/not/count")
