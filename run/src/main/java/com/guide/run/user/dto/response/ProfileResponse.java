@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProfileResponse {
     private String userId;
+    private String role;
     private String name;
     private UserType type;
     private String gender;
