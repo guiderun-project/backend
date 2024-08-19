@@ -139,6 +139,11 @@ public class SchedulerService {
         if(schedule.getEventStatus().equals(ScheduleStatus.OPEN)){
             addEventEndTask(schedule);
         }
+
+        //이벤트 종료 후 파트너, 출석 등 반영
+        if(schedule.getEventStatus().equals(ScheduleStatus.END)){
+            addEventEndReportTask(schedule);
+        }
     }
 
     private void addRecruitStartTask(Schedule schedule){
@@ -160,6 +165,12 @@ public class SchedulerService {
     private void addEventEndTask(Schedule schedule){
         Runnable eventEndTask = () -> setEventEnd(schedule);
         taskScheduler.schedule(eventEndTask, toInstant(schedule.getEventEnd()));
+    }
+
+    private void addEventEndReportTask(Schedule schedule){
+        Runnable eventEndReportTask = () -> setEventEndReport(schedule);
+        //이벤트 마감 다음날에 파트너, 출석 반영.
+        taskScheduler.schedule(eventEndReportTask, toInstantDate(schedule.getEventEnd().toLocalDate().plusDays(1)));
     }
 
 
@@ -200,6 +211,41 @@ public class SchedulerService {
     public void setEventEnd(Schedule schedule){
         log.info("setEventEnd");
         String lockName = "eventEndLock-" + schedule.getEventId();
+        schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
+        if ( schedule!=null && !lockService.isLockActive(lockName)
+                && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
+            try{
+                Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
+                LocalDateTime now = LocalDateTime.now();
+                log.info("lockName="+lockName+", "+e.getEndTime());
+                if(e==null){
+                    scheduleRepository.delete(schedule);
+                }
+                else if ( (e.getEndTime().isBefore(now)  || e.getEndTime().isEqual(now) )) {
+                    //종료시간과 현재 시간 비교해서 시간 같거나 지났으면 종료로 변경. + 종료 시 이벤트 모집 상태도 종료로 바꿔줌.
+                    e.changeStatus(EventStatus.EVENT_END);
+                    e.changeRecruit(EventRecruitStatus.RECRUIT_END);
+
+                    eventRepository.save(e);
+                    schedule.changeEventStatus(ScheduleStatus.END);
+                    schedule.changeRecruitStatus(ScheduleStatus.END);
+                    //파트너, 출석 반영 태스크 등록
+                    addEventEndReportTask(scheduleRepository.save(schedule));
+
+                }
+            }finally {
+                lockService.releaseLock(lockName);
+            }
+        }else{
+            log.info(lockName);
+        }
+    }
+
+    @Transactional
+    @Async
+    public void setEventEndReport(Schedule schedule){
+        log.info("setEventEndReport");
+        String lockName = "eventEndLockReport-" + schedule.getEventId();
         schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
         if ( schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
