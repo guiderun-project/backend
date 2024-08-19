@@ -386,7 +386,7 @@ public class SchedulerService {
         List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(e.getId(), vi.getPrivateId());
 
         for(Matching m : matchingList){
-            User guide = userRepository.findUserByUserId(m.getGuideId()).orElse(null);
+            User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElse(null);
             if(guide!=null){
                 Partner partner = partnerRepository.findByViIdAndGuideId(vi.getPrivateId(),guide.getPrivateId()).orElse(null);
                 if(partner !=null){//파트너 정보가 이미 있을 때
