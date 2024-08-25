@@ -38,9 +38,8 @@ public class S3Uploader {
         String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
 
         String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
-        String imgUrl = "https://guiderun-qa.s3.ap-northeast-2.amazonaws.com/"+fileName;
         removeNewFile(uploadFile);
-        return imgUrl;
+        return uploadImageUrl;
     }
 
     // S3로 업로드
