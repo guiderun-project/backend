@@ -25,6 +25,8 @@ public class S3Uploader {
     private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    @Value("${cloud.aws.url.cloudFront}")
+    private String cloudFrontUrl;
 
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
         log.info("업로드 접근");
@@ -38,8 +40,9 @@ public class S3Uploader {
         String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
 
         String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
+        String urlPath = cloudFrontUrl + fileName;
         removeNewFile(uploadFile);
-        return uploadImageUrl;
+        return urlPath;
     }
 
     // S3로 업로드
