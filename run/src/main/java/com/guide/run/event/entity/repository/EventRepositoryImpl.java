@@ -74,7 +74,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
                     .where(event.recruitStatus.ne(RECRUIT_END).and(event.isApprove.eq(true)).and(event.startTime.year().eq(year)))
-                    .orderBy(event.endTime.desc())
+                    .orderBy(event.endTime.asc())
                     .offset(0)
                     .limit(4)
                     .fetch();
