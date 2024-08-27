@@ -58,3 +58,4 @@ cloud:
       auto: false
     url:
       cloudFront: ${CLOUD_FRONT_URL}
+

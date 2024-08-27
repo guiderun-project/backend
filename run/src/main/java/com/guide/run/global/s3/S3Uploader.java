@@ -40,7 +40,9 @@ public class S3Uploader {
         log.info("파일 업로드");
         String fileName = dirName + "/" + UUID.randomUUID() + uploadFile.getName();   // S3에 저장된 파일 이름
 
+
         putS3(uploadFile, fileName); // s3로 업로드
+
         String urlPath = cloudFrontUrl + fileName;
         removeNewFile(uploadFile);
         return urlPath;
