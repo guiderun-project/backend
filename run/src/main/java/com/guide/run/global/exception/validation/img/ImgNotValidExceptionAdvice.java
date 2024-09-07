@@ -10,6 +10,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,10 +20,16 @@ public class ImgNotValidExceptionAdvice {
     private final ResponseService responseService;
     //7001
     @ExceptionHandler(ImgNotValidException.class)
-    protected ResponseEntity<FailResult> NotApprovedUserException(ImgNotValidException e){
+    protected ResponseEntity<FailResult> ImgNotValidException(ImgNotValidException e){
         return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notValidImgFormat.code"),
                 getMessage("notValidImgFormat.msg")));
+    }
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    protected ResponseEntity<FailResult> MaxUploadSizeExceededException(MaxUploadSizeExceededException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("exceededImgSize.code"),
+                getMessage("exceededImgSize.msg")));
     }
 
     private String getMessage(String code){
