@@ -48,7 +48,7 @@ spring:
     senderNumber: ${SEND_NUMBER}
 
 cors:
-  origin: http://localhost:8080
+  origin: http://localhost:3000
 
 cloud:
   aws:
