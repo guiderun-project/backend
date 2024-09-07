@@ -5,6 +5,12 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
 
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+      resolve-lazily: true
+
   jpa:
     hibernate:
       ddl-auto: validate
