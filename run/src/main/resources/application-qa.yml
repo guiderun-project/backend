@@ -35,8 +35,8 @@ spring:
         profile: https://www.googleapis.com/oauth2/v3/userinfo
 
     naver:
-      client_id: MaLmA8dihBCzDqsfr0iY
-      client_secret: VIlICBy6vh
+      client_id: aa
+      client_secret: aa
       redirect: http://localhost:8080/social/login/naver
       url:
         login: https://nid.naver.com/oauth2.0/authorize
