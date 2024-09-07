@@ -62,4 +62,6 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+    url:
+      cloudFront: ${CLOUD_FRONT_URL}
 
