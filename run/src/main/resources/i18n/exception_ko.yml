@@ -142,6 +142,9 @@ notAuthorityCoach:
 notValidImgFormat:
   code: "7001"
   msg: "지원하지 않는 파일 양식입니다."
+exceededImgSize:
+  code: "7002"
+  msg: "최대 업로드 용량을 초과했습니다."
 
 
 
