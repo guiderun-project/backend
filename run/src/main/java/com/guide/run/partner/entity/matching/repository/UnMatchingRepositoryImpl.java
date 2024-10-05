@@ -1,5 +1,6 @@
 package com.guide.run.partner.entity.matching.repository;
 
+import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
 import com.guide.run.temp.member.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
 import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.*;
@@ -36,10 +38,11 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 user.userId.as("userId"),
                 user.type.as("type"),
                 user.name.as("name"),
-                user.recordDegree.as("applyRecord"),
+                eventForm.hopeTeam.as("applyRecord"),
                 attendance.isAttend.as("isAttended")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
+                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
                 .fetch();
