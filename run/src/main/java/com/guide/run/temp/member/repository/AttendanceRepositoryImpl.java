@@ -10,8 +10,8 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 import static com.guide.run.event.entity.QEventForm.eventForm;
-import static com.guide.run.temp.member.entity.QAttendance.*;
-import static com.guide.run.user.entity.user.QUser.*;
+import static com.guide.run.temp.member.entity.QAttendance.attendance;
+import static com.guide.run.user.entity.user.QUser.user;
 
 public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
     private final JPAQueryFactory queryFactory;
