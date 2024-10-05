@@ -37,8 +37,8 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 eventForm.hopeTeam.as("applyRecord"),
                 user.name.as("name")))
                 .from(attendance)
-                .join(user).on(attendance.privateId.eq(user.privateId))
-                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)).and(eventForm.eventId.eq(eventId)))
+                .join(user).on(attendance.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
+                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
                 .orderBy(user.type.desc())
                 .fetch();
     }
