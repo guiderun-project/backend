@@ -42,7 +42,7 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 attendance.isAttend.as("isAttended")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
-                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId))
+                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
                 .fetch();

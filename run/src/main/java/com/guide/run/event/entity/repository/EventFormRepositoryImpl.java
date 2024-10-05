@@ -28,7 +28,7 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                 eventForm.hopeTeam.as("applyRecord"),
                 user.name.as("name")))
                 .from(eventForm)
-                .join(user).on(eventForm.privateId.eq(user.privateId))
+                .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
                 .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
                 .fetch();
     }
