@@ -38,7 +38,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 user.name.as("name")))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
-                .join(eventForm).on(attendance.privateId.eq(eventForm.privateId))
+                .join(eventForm).on(attendance.privateId.eq(eventForm.privateId)).on(user.privateId.eq(eventForm.privateId))
                 .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
                 .orderBy(user.type.desc())
                 .fetch();
