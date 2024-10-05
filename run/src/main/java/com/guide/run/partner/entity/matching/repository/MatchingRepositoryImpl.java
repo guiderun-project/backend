@@ -1,5 +1,6 @@
 package com.guide.run.partner.entity.matching.repository;
 
+import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
 import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
 import com.guide.run.user.entity.type.UserType;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.partner.entity.matching.QMatching.matching;
 import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
 import static com.guide.run.temp.member.entity.QAttendance.attendance;
@@ -28,11 +30,12 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 user.userId.as("userId"),
                 user.type.as("type"),
                 user.name.as("name"),
-                user.recordDegree.as("applyRecord"),
+                eventForm.as("applyRecord"),
                 attendance.isAttend.as("isAttended")))
                 .from(matching)
                 .where(matching.eventId.eq(eventId).and(matching.viId.eq(viId)))
                 .join(user).on(user.privateId.eq(matching.guideId))
+                .join(eventForm).on(user.privateId.eq(eventForm.privateId))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .fetch();
     }
@@ -43,10 +46,11 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                         user.userId.as("userId"),
                         user.type.as("type"),
                         user.name.as("name"),
-                        user.recordDegree.as("applyRecord"),
+                        eventForm.as("applyRecord"),
                         attendance.isAttend.as("isAttended")))
                 .from(matching)
                 .join(user).on(user.privateId.eq(matching.viId))
+                .join(eventForm).on(user.privateId.eq(eventForm.privateId))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
                 .distinct()
