@@ -1,5 +1,10 @@
 package com.guide.run.temp.member.repository;
 
+
+import static com.guide.run.event.entity.QEventForm.eventForm;
+import static com.guide.run.temp.member.entity.QAttendance.attendance;
+import static com.guide.run.user.entity.user.QUser.user;
+
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfo;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.user.entity.type.UserType;
@@ -9,9 +14,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
-import static com.guide.run.event.entity.QEventForm.eventForm;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
-import static com.guide.run.user.entity.user.QUser.user;
+
 
 public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
     private final JPAQueryFactory queryFactory;
