@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.temp.member.entity.QAttendance.*;
 import static com.guide.run.user.entity.user.QUser.*;
 
@@ -33,11 +34,11 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
         return queryFactory.select(Projections.constructor(ParticipationInfo.class,
                 user.userId.as("userId"),
                 user.type.as("type"),
-                user.recordDegree.as("applyRecord"),
+                eventForm.hopeTeam.as("applyRecord"),
                 user.name.as("name")))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
-                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
+                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)).and(eventForm.eventId.eq(eventId)))
                 .orderBy(user.type.desc())
                 .fetch();
     }
