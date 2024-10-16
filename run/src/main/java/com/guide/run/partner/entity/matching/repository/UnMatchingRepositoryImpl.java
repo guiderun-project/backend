@@ -39,7 +39,8 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 user.type.as("type"),
                 user.name.as("name"),
                 eventForm.hopeTeam.as("applyRecord"),
-                attendance.isAttend.as("isAttended")))
+                attendance.isAttend.as("isAttended"),
+                user.recordDegree.as("recordDegree")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
                 .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
