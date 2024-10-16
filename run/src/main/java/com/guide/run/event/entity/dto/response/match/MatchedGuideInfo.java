@@ -16,4 +16,5 @@ public class MatchedGuideInfo {
     private String applyRecord;
     @JsonProperty(value = "isAttended")
     private Boolean isAttended;
+    private String recordDegree;
 }

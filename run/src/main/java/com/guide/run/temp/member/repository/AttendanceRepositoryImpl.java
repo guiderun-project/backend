@@ -38,6 +38,7 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 user.userId.as("userId"),
                 user.type.as("type"),
                 eventForm.hopeTeam.as("applyRecord"),
+                user.recordDegree.as("recordDegree"),
                 user.name.as("name")))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
