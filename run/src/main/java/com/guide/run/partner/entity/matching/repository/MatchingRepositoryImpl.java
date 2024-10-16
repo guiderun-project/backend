@@ -31,7 +31,8 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 user.type.as("type"),
                 user.name.as("name"),
                 eventForm.hopeTeam.as("applyRecord"),
-                attendance.isAttend.as("isAttended")))
+                attendance.isAttend.as("isAttended"),
+                user.recordDegree.as("recordDegree")))
                 .from(matching)
                 .where(matching.eventId.eq(eventId).and(matching.viId.eq(viId)))
                 .join(user).on(user.privateId.eq(matching.guideId))
@@ -47,7 +48,8 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                         user.type.as("type"),
                         user.name.as("name"),
                         eventForm.hopeTeam.as("applyRecord"),
-                        attendance.isAttend.as("isAttended")))
+                        attendance.isAttend.as("isAttended"),
+                        user.recordDegree.as("recordDegree")))
                 .from(matching)
                 .join(user).on(user.privateId.eq(matching.viId))
                 .join(eventForm).on(user.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
