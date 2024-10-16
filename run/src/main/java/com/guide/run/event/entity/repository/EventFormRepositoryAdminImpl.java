@@ -35,7 +35,8 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
                         user.type,
                         user.name,
                         eventForm.hopeTeam,
-                        eventForm.createdAt
+                        eventForm.createdAt,
+                        user.recordDegree
                 ))
                 .from(eventForm, user)
                 .where(eventForm.privateId.eq(user.privateId),

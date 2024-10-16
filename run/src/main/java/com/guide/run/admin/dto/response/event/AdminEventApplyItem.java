@@ -19,18 +19,21 @@ public class AdminEventApplyItem {
     private String name;
     private String team;
     private String apply_time;
+    private String recordDegree;
 
     public AdminEventApplyItem(String userId,
                                Role role,
                                UserType type,
                                String name,
                                String team,
-                               LocalDateTime apply_time) {
+                               LocalDateTime apply_time,
+                               String recordDegree) {
         this.userId = userId;
         this.role = role.getValue().substring(5);
         this.type = type;
         this.name = name;
         this.team = team;
         this.apply_time = apply_time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
+        this.recordDegree=recordDegree;
     }
 }
