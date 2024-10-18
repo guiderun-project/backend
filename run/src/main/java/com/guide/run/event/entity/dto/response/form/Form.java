@@ -13,4 +13,5 @@ public class Form {
     private UserType type;
     private String applyRecord;
     private String name;
+    private String recordDegree;
 }

@@ -12,5 +12,6 @@ public class ParticipationInfo {
     private String userId;
     private UserType type;
     private String applyRecord;
+    private String recordDegree;
     private String name;
 }
