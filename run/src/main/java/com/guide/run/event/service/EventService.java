@@ -127,6 +127,7 @@ public class EventService {
                         .privateId(privateId)
                         .eventId(createdEvent.getId())
                         .type(user.getType())
+                        .hopeTeam(user.getRecordDegree())
                         .age(user.getAge())
                         .gender(user.getGender())
                         .isMatching(false)
