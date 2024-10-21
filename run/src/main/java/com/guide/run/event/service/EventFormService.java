@@ -137,8 +137,34 @@ public class EventFormService {
         //매칭 or 미매칭 제거
         Optional<UnMatching> unMatching = unMatchingRepository.findByPrivateIdAndEventId(privateId, eventId);
         if(unMatching.isEmpty()){
-            Optional<Matching> matching = matchingRepository.findByEventIdAndViId(eventId,privateId);
-            matchingRepository.delete(matching.get());
+            //guide가 취소한 경우 vi와 연결된 guide가 더이상 없는 경우 unmatching보내줘야함
+            if(user.getType()==UserType.GUIDE) {
+                Matching m = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
+                matchingRepository.delete(m);
+                matchingRepository.flush();
+
+                if(matchingRepository.findAllByEventIdAndViId(eventId,m.getViId()).size()==0){
+                    unMatchingRepository.save(
+                            UnMatching.builder()
+                                    .eventId(eventId)
+                                    .privateId(m.getViId())
+                                    .build()
+                    );
+                }
+            }
+            //vi가 취소한 경우 연결된 guide들 unmatching으로 넣어줘야함
+            else{
+                List<Matching> matchingByEventIdAndViId = matchingRepository.findAllByEventIdAndViId(eventId, privateId);
+                for(Matching m : matchingByEventIdAndViId){
+                    matchingRepository.delete(m);
+                    unMatchingRepository.save(
+                            UnMatching.builder()
+                                    .privateId(m.getGuideId())
+                                    .eventId(eventId)
+                                    .build()
+                    );
+                }
+            }
         }else{
             unMatchingRepository.delete(unMatching.get());
         }
