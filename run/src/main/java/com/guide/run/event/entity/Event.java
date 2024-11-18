@@ -44,6 +44,7 @@ public class Event extends BaseEntity {
     private int guideCnt; //실제 모집된 guide 수
     @Enumerated(EnumType.STRING)
     private EventStatus status;
+    @Enumerated(EnumType.STRING)
     private EventCategory eventCategory; // 이벤트 유형 ,팀 구분하는 방식 그룹별,팀별,디폴트 분류
 
     public void setCnt(int viCnt, int guideCnt){
