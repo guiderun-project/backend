@@ -71,7 +71,7 @@ public class EventService {
 
         EventCategory eventCategory;
         if(request.getEventCategory()==null){
-            eventCategory = EventCategory.General;
+            eventCategory = EventCategory.GENERAL;
         }else{
             eventCategory = request.getEventCategory();
         }
@@ -166,7 +166,7 @@ public class EventService {
 
         EventCategory eventCategory;
         if(request.getEventCategory()==null){
-            eventCategory = EventCategory.General;
+            eventCategory = EventCategory.GENERAL;
         }else{
             eventCategory = request.getEventCategory();
         }
