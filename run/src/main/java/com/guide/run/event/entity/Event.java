@@ -1,5 +1,6 @@
 package com.guide.run.event.entity;
 
+import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -43,6 +44,7 @@ public class Event extends BaseEntity {
     private int guideCnt; //실제 모집된 guide 수
     @Enumerated(EnumType.STRING)
     private EventStatus status;
+    private EventCategory eventCategory; // 이벤트 유형 ,팀 구분하는 방식 그룹별,팀별,디폴트 분류
 
     public void setCnt(int viCnt, int guideCnt){
         this.viCnt = viCnt;

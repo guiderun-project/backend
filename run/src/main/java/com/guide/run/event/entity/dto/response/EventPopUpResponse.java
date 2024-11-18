@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.response;
 
+import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -44,6 +45,7 @@ public class EventPopUpResponse {
         private List<EventPopUpPartner> partner;
 
         private EventStatus status; //이벤트 status
+        private EventCategory eventCategory;
 
 
         public void setPartner(Boolean isApply, Boolean hasPartner, List<EventPopUpPartner> partner){

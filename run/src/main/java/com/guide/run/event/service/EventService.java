@@ -13,6 +13,7 @@ import com.guide.run.event.entity.dto.response.get.DetailEvent;
 import com.guide.run.event.entity.dto.response.get.EventDetailPartner;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
+import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.global.converter.TimeFormatter;
@@ -68,6 +69,12 @@ public class EventService {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
+        EventCategory eventCategory;
+        if(request.getEventCategory()==null){
+            eventCategory = EventCategory.General;
+        }else{
+            eventCategory = request.getEventCategory();
+        }
         EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
         EventStatus status = EventStatus.EVENT_UPCOMING;
 
@@ -119,6 +126,7 @@ public class EventService {
                 .maxNumG(request.getMinNumG())
                 .place(request.getPlace())
                 .status(status)
+                .eventCategory(eventCategory)
                 .content(request.getContent()).build());
 
         //자동 참가 처리
@@ -131,6 +139,7 @@ public class EventService {
                         .age(user.getAge())
                         .gender(user.getGender())
                         .isMatching(false)
+                        .eventCategory(eventCategory)
                         .build()
         );
         unMatchingRepository.save(
@@ -154,6 +163,13 @@ public class EventService {
     public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId, Long eventId) {
         User user = userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
+
+        EventCategory eventCategory;
+        if(request.getEventCategory()==null){
+            eventCategory = EventCategory.General;
+        }else{
+            eventCategory = request.getEventCategory();
+        }
 
         EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
         EventStatus status = EventStatus.EVENT_UPCOMING;
@@ -208,7 +224,8 @@ public class EventService {
                     .maxNumG(request.getMinNumG())
                     .place(request.getPlace())
                     .status(status)
-                    .content(request.getContent()).build());
+                    .content(request.getContent())
+                    .eventCategory(eventCategory).build());
 
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())
@@ -327,6 +344,7 @@ public class EventService {
                 //todo : 2차에서 추가된 부분
                 .hasPartner(false) //파트너 존재 여부
                 .partner(partnerList)
+                .eventCategory(event.getEventCategory())
                 .build();
 
         //매칭 여부로 파트너 정보 추가
@@ -427,7 +445,8 @@ public class EventService {
                     .partner(eventDetailPartnerList)
                     .details(event.getContent())
                     .checkOrganizer(isCheckOrganizer)
-                    .status(event.getStatus()).build();
+                    .status(event.getStatus())
+                    .eventCategory(event.getEventCategory()).build();
         }
         //신청한 경우
         else{
@@ -460,7 +479,8 @@ public class EventService {
                             .partner(eventDetailPartnerList)
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus()).build();
+                            .status(event.getStatus())
+                            .eventCategory(event.getEventCategory()).build();
                 }
                 else{
                     User vi = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
@@ -495,7 +515,8 @@ public class EventService {
                             .partner(eventDetailPartnerList)
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus()).build();
+                            .status(event.getStatus())
+                            .eventCategory(event.getEventCategory()).build();
                 }
             }else{
                 List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
@@ -526,7 +547,8 @@ public class EventService {
                             .partner(eventDetailPartnerList)
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus()).build();
+                            .status(event.getStatus())
+                            .eventCategory(event.getEventCategory()).build();
                 }
                 else{
                     for(Matching m : matchingList){
@@ -563,7 +585,8 @@ public class EventService {
                             .partner(eventDetailPartnerList)
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus()).build();
+                            .status(event.getStatus())
+                            .eventCategory(event.getEventCategory()).build();
                 }
             }
         }
