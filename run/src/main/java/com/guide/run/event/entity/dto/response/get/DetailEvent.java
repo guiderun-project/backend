@@ -2,6 +2,7 @@ package com.guide.run.event.entity.dto.response.get;
 
 
 import com.guide.run.event.entity.dto.response.EventPopUpPartner;
+import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -50,6 +51,6 @@ public class DetailEvent {
     private String details;
     private Boolean checkOrganizer;
     private EventStatus status;
-
+    private EventCategory eventCategory;
 
 }

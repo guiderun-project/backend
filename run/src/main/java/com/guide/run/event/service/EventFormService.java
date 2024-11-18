@@ -79,6 +79,7 @@ public class EventFormService {
                         .hopeTeam(createForm.getGroup())
                         .referContent(createForm.getDetail())
                         .isMatching(false)
+                        .eventCategory(event.getEventCategory())
                         .build()
         ).getId();
     }
@@ -90,7 +91,7 @@ public class EventFormService {
             throw new NotValidDurationException();
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
-        form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail());
+        form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail(),event.getEventCategory());
         return eventFormRepository.save(
                 form
         ).getId();
@@ -107,6 +108,7 @@ public class EventFormService {
                 .group(form.getHopeTeam())
                 .partner(form.getHopePartner())
                 .detail(form.getReferContent())
+                .eventCategory(form.getEventCategory())
                 .build();
     }
 
