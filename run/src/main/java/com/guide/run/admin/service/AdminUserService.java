@@ -125,7 +125,7 @@ public class AdminUserService {
                 .recordDegree(user.getRecordDegree())
                 .build();
 
-        coolSmsService.sendToNewUser(user.getPhoneNumber());
+        coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),user.getType().getValue(), user.getRecordDegree());
         return response;
     }
 
