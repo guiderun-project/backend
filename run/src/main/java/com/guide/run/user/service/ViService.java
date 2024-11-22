@@ -105,7 +105,7 @@ public class ViService {
                     .userStatus(newVi.getRole().getValue())
                     .build();
 
-            coolSmsService.sendToAdmin(senderNumber, user.getType().getValue(), user.getName());
+            coolSmsService.sendToAdmin(senderNumber, vi.getType().getValue(), vi.getName());
             return response;
         }
     }
