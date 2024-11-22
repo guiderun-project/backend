@@ -110,7 +110,7 @@ public class GuideService {
                     .userStatus(newUser.getRole().getValue())
                     .build();
 
-            coolSmsService.sendToAdmin(senderNumber);
+            coolSmsService.sendToAdmin(senderNumber, user.getType().getValue(), user.getName());
             return response;
         }
     }
