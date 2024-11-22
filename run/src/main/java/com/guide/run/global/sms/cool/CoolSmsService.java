@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.KakaoOption;
 import net.nurigo.sdk.message.model.Message;
+import net.nurigo.sdk.message.model.MessageType;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
@@ -55,6 +56,7 @@ public class CoolSmsService {
         // 발신번호 및 수신번호는 반드시 01012345678 형태
         message.setFrom(senderNumber);
         message.setTo(to);
+        message.setType(MessageType.ATA);
 
         KakaoOption kakaoOption = new KakaoOption();
         
@@ -75,7 +77,7 @@ public class CoolSmsService {
         // 발신번호 및 수신번호는 반드시 01012345678 형태
         message.setFrom(senderNumber);
         message.setTo(to);
-
+        message.setType(MessageType.ATA);
         KakaoOption kakaoOption = new KakaoOption();
 
         //채널 아이디
