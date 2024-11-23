@@ -8,7 +8,7 @@ import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
 import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsService;
+import com.guide.run.global.sms.cool.CoolSmsController;
 import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
@@ -43,7 +43,7 @@ public class LoginInfoService {
     private final TmpTokenRepository tmpTokenRepository;
     private final UserService userService;
 
-    private final CoolSmsService smsService;
+    private final CoolSmsController smsService;
 
     private final JwtProvider jwtProvider;
 
