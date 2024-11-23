@@ -1,7 +1,9 @@
 package com.guide.run.global.sms.cool;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.KakaoOption;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.model.MessageType;
@@ -38,6 +40,11 @@ public class CoolSMSKakaoController {
     private String signupApprovalMsgId; //회원가입 승인 완료 메세지 id
 
     private DefaultMessageService messageService;
+
+    @PostConstruct
+    private void init(){
+        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
+    }
 
     //신규 회원 가입 시 관리자에게 알림
     @PostMapping("/send-one-ata")
