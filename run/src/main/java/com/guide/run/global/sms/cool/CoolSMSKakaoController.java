@@ -41,41 +41,15 @@ public class CoolSMSKakaoController {
 
     //신규 회원 가입 시 관리자에게 알림
     @PostMapping("/send-one-ata")
-    public SingleMessageSentResponse sendToAdmin(String to, String status, String name) {
-        Message message = new Message();
-        // 발신번호 및 수신번호는 반드시 01012345678 형태
-        message.setFrom(senderNumber);
-        message.setTo(to);
-        message.setType(MessageType.ATA);
-
-        KakaoOption kakaoOption = new KakaoOption();
-
-        //채널 아이디
-        kakaoOption.setPfId(kakaoChId);
-        //템플릿 아이디
-        kakaoOption.setTemplateId(signupCompletionMsgId);
-
-        HashMap<String, String> variables = new HashMap<>();
-        variables.put("#{disability_status}", status);
-        variables.put("#{username_new}", name);
-        kakaoOption.setVariables(variables);
-
-        message.setKakaoOptions(kakaoOption);
+    public SingleMessageSentResponse sendATA(Message message) {
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
-
-        log.info("Sender Number: {}", senderNumber);
-        log.info("Receiver Number: {}", to);
-        log.info("PF ID: {}", kakaoChId);
-        log.info("Template ID: {}", signupCompletionMsgId);
-
 
         return response;
     }
 
     //신규 회원 승인 후 알림
-    @PostMapping("/send-one-ata")
-    public SingleMessageSentResponse sendToNewUser(String to, String name, String status, String team) {
+    public void sendToNewUser(String to, String name, String status, String team) {
         Message message = new Message();
         // 발신번호 및 수신번호는 반드시 01012345678 형태
         message.setFrom(senderNumber);
@@ -97,12 +71,31 @@ public class CoolSMSKakaoController {
 
         message.setKakaoOptions(kakaoOption);
 
-        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
+        sendATA(message);
+    }
 
-        log.info("Sender Number: {}", senderNumber);
-        log.info("Receiver Number: {}", to);
-        log.info("PF ID: {}", kakaoChId);
-        log.info("Template ID: {}", signupApprovalMsgId);
-        return response;
+    public void sendToAdmin(String to, String status, String name) {
+        Message message = new Message();
+        // 발신번호 및 수신번호는 반드시 01012345678 형태
+        message.setFrom(senderNumber);
+        message.setTo(to);
+        message.setType(MessageType.ATA);
+
+        KakaoOption kakaoOption = new KakaoOption();
+
+        //채널 아이디
+        kakaoOption.setPfId(kakaoChId);
+        //템플릿 아이디
+        kakaoOption.setTemplateId(signupCompletionMsgId);
+
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("#{disability_status}", status);
+        variables.put("#{username_new}", name);
+        kakaoOption.setVariables(variables);
+
+        message.setKakaoOptions(kakaoOption);
+
+        sendATA(message);
+
     }
 }
