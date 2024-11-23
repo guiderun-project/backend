@@ -2,7 +2,8 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsService;
+import com.guide.run.global.sms.cool.CoolSMSKakaoController;
+import com.guide.run.global.sms.cool.CoolSmsController;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
@@ -32,7 +33,7 @@ public class ViService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
 
-    private final CoolSmsService coolSmsService;
+    private final CoolSMSKakaoController coolSMSKakaoController;
 
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
@@ -105,7 +106,7 @@ public class ViService {
                     .userStatus(newVi.getRole().getValue())
                     .build();
 
-            coolSmsService.sendToAdmin(senderNumber, vi.getType().getValue(), vi.getName());
+            coolSMSKakaoController.sendToAdmin(senderNumber, vi.getType().getValue(), vi.getName());
             return response;
         }
     }
