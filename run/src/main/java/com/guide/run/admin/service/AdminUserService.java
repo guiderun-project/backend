@@ -11,7 +11,8 @@ import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsService;
+import com.guide.run.global.sms.cool.CoolSMSKakaoController;
+import com.guide.run.global.sms.cool.CoolSmsController;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.Guide;
@@ -38,7 +39,7 @@ public class AdminUserService {
     private final ArchiveDataRepository archiveDataRepository;
     private final TimeFormatter timeFormatter;
     private final JwtProvider jwtProvider;
-    private final CoolSmsService coolSmsService;
+    private final CoolSMSKakaoController coolSMSKakaoController;
 
     public List<UserItem> getUserList(int start, int limit, UserSortCond cond){
        List<UserItem> response =  userRepository.sortAdminUser(start, limit, cond);
@@ -125,7 +126,7 @@ public class AdminUserService {
                 .recordDegree(user.getRecordDegree())
                 .build();
 
-        coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),user.getType().getValue(), user.getRecordDegree());
+        coolSMSKakaoController.sendToNewUser(user.getPhoneNumber(), user.getName(),user.getType().getValue(), user.getRecordDegree());
         return response;
     }
 
