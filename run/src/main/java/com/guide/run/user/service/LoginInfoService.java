@@ -8,11 +8,11 @@ import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
 import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsController;
 import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -43,7 +43,7 @@ public class LoginInfoService {
     private final TmpTokenRepository tmpTokenRepository;
     private final UserService userService;
 
-    private final CoolSmsController smsService;
+    private final CoolSmsService smsService;
 
     private final JwtProvider jwtProvider;
 
@@ -57,7 +57,7 @@ public class LoginInfoService {
         //인증번호 생성
         String authNum = createSmsKey();
         //인증번호 전송 api 실행
-        smsService.sendOne(phone, authNum);
+        smsService.sendSMS(phone, authNum);
 
         //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId");
@@ -81,7 +81,7 @@ public class LoginInfoService {
         //인증번호 생성
         String authNum = createSmsKey();
         //인증번호 전송 api 실행
-        smsService.sendOne(phone, authNum);
+        smsService.sendSMS(phone, authNum);
 
         //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "password");
