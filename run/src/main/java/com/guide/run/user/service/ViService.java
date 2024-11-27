@@ -2,6 +2,7 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
@@ -13,6 +14,7 @@ import com.guide.run.user.repository.*;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,9 @@ public class ViService {
 
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final CoolSmsService coolSmsService;
+    @Value("${spring.coolsms.senderNumber}")
+    private String senderNumber;
 
 
 
@@ -98,6 +103,8 @@ public class ViService {
                     .userId(newVi.getUserId())
                     .userStatus(newVi.getRole().getValue())
                     .build();
+
+            coolSmsService.sendToAdmin(senderNumber, vi.getType().getValue(), vi.getName());
 
             return response;
         }
