@@ -57,7 +57,7 @@ public class LoginInfoService {
         //인증번호 생성
         String authNum = createSmsKey();
         //인증번호 전송 api 실행
-        smsService.sendOne(phone, authNum);
+        smsService.sendSMS(phone, authNum);
 
         //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId");
@@ -81,7 +81,7 @@ public class LoginInfoService {
         //인증번호 생성
         String authNum = createSmsKey();
         //인증번호 전송 api 실행
-        smsService.sendOne(phone, authNum);
+        smsService.sendSMS(phone, authNum);
 
         //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "password");
