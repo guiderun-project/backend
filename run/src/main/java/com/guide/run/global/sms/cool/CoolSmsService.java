@@ -11,18 +11,14 @@ import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController
-@RequestMapping("/kakao")
-public class CoolSMSKakaoController {
+@Service
+public class CoolSmsService {
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
 
@@ -46,9 +42,7 @@ public class CoolSMSKakaoController {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
     }
 
-    //신규 회원 가입 시 관리자에게 알림
-    @PostMapping("/send-one-ata")
-    public SingleMessageSentResponse sendATA(Message message) {
+    public SingleMessageSentResponse sendOne(Message message) {
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
 
@@ -78,9 +72,10 @@ public class CoolSMSKakaoController {
 
         message.setKakaoOptions(kakaoOption);
 
-        sendATA(message);
+        sendOne(message);
     }
 
+    //신규 가입 후 관리자에게 알림
     public void sendToAdmin(String to, String status, String name) {
         Message message = new Message();
         // 발신번호 및 수신번호는 반드시 01012345678 형태
@@ -102,7 +97,17 @@ public class CoolSMSKakaoController {
 
         message.setKakaoOptions(kakaoOption);
 
-        sendATA(message);
+        sendOne(message);
 
+    }
+
+    public void sendSMS(String to, String verificationCode) {
+        Message message = new Message();
+        // 발신번호 및 수신번호는 반드시 01012345678 형태
+        message.setFrom(senderNumber);
+        message.setTo(to);
+        message.setText("[Guide Run Project] 인증번호를 입력해주세요\n" + verificationCode);
+
+        sendOne(message);
     }
 }
