@@ -12,6 +12,7 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
@@ -113,7 +114,11 @@ public class AdminUserService {
         if(request.getIsApprove()){
             user.approveUser(Role.ROLE_USER, request.getRecordDegree());
             userRepository.save(user);
-            coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),user.getType().getValue(), user.getRecordDegree());
+            if(user.getType().equals(UserType.GUIDE)){
+                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"가이드러너", user.getRecordDegree());
+            } else if (user.getType().equals(UserType.VI)) {
+                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"시각장애러너", user.getRecordDegree());
+            }
             isApprove = true;
         }else{
             user.approveUser(Role.ROLE_REJECT, user.getRecordDegree());
