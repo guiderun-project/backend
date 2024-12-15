@@ -71,8 +71,9 @@ public class SecurityConfig {
                                 "/api/login/**",
                                 "/api/accountId/**",
                                 "/api/withdrawal/**",
-                                "/api/new-password/**")
-                        .permitAll()
+                                "/api/new-password/**",
+                                "/api/user/img")
+                        .hasAnyRole("ADMIN", "USER", "COACH", "WAIT", "REJECT")
 
                         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER", "COACH")
 
