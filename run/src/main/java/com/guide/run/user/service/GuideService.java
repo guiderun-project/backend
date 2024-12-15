@@ -37,6 +37,9 @@ public class GuideService {
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
 
+    @Value("${spring.coolsms.adminNumber}")
+    private String adminNumber;
+
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
         User user = userRepository.findById(privateId).orElse(null);
@@ -111,6 +114,7 @@ public class GuideService {
                     .build();
 
             coolSmsService.sendToAdmin(senderNumber, "가이드러너", guide.getName());
+            coolSmsService.sendToAdmin(adminNumber, "가이드러너", guide.getName());
             return response;
         }
     }
