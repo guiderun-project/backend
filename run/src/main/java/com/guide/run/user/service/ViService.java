@@ -34,12 +34,6 @@ public class ViService {
     private final CoolSmsService coolSmsService;
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
-
-    private final CoolSmsService coolSmsService;
-
-    @Value("${spring.coolsms.senderNumber}")
-    private String senderNumber;
-
     @Value("${spring.coolsms.adminNumber}")
     private String adminNumber;
 
