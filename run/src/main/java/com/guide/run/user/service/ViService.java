@@ -37,6 +37,9 @@ public class ViService {
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
 
+    @Value("${spring.coolsms.adminNumber}")
+    private String adminNumber;
+
 
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
@@ -106,6 +109,7 @@ public class ViService {
                     .build();
 
             coolSmsService.sendToAdmin(senderNumber, "시각장애러너", vi.getName());
+            coolSmsService.sendToAdmin(adminNumber, "시각장애러너", vi.getName());
             return response;
         }
     }

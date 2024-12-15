@@ -45,6 +45,7 @@ spring:
     apiKey: ${SMS_KEY}
     apiSecret: ${SMS_SECRET}
     senderNumber: ${SEND_NUMBER}
+    adminNumber: ${ADMIN_NUMBER}
     kakaoChId: ${KAKAO_CH_ID}
     signupCompletionMsgId: ${SIGNUP_COMPLETE_MSG}
     signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
