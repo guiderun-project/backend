@@ -63,15 +63,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/signup/**").hasRole("NEW")
                         .requestMatchers(
-                                "/api/user/personal/**",
-                                "/api/user/permission/**",
-                                "/api/user/running/**",
                                 "/api/sms/**",
                                 "/api/oauth/**",
                                 "/api/login/**",
                                 "/api/accountId/**",
+                                "/api/new-password/**").permitAll()
+                        .requestMatchers(
+                                "/api/user/personal/**",
+                                "/api/user/permission/**",
+                                "/api/user/running/**",
                                 "/api/withdrawal/**",
-                                "/api/new-password/**",
                                 "/api/user/img/**")
                         .hasAnyRole("ADMIN", "USER", "COACH", "WAIT", "REJECT")
 
