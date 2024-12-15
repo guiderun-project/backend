@@ -1,6 +1,7 @@
 package com.guide.run.event.entity.dto.response.form;
 
 
+import com.guide.run.event.entity.type.EventCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,4 +16,5 @@ public class GetForm {
     private String group;
     private String partner;
     private String detail;
+    private EventCategory eventCategory;
 }

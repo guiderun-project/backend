@@ -2,7 +2,9 @@ package com.guide.run.admin.service;
 
 import com.guide.run.admin.dto.condition.UserSortCond;
 import com.guide.run.admin.dto.request.ApproveRequest;
-import com.guide.run.admin.dto.response.*;
+import com.guide.run.admin.dto.response.GuideApplyResponse;
+import com.guide.run.admin.dto.response.UserApprovalResponse;
+import com.guide.run.admin.dto.response.ViApplyResponse;
 import com.guide.run.admin.dto.response.user.NewUserResponse;
 import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.event.entity.dto.response.get.Count;
@@ -18,10 +20,8 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.ArchiveDataRepository;
 import com.guide.run.user.repository.GuideRepository;
-import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.ViRepository;
-import com.nimbusds.jwt.JWTParser;
-import jakarta.servlet.http.HttpServletRequest;
+import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,6 +107,7 @@ public class AdminUserService {
         return response;
     }
 
+    //todo : 승인 후 회원에게 알림톡 전송
     @Transactional
     public UserApprovalResponse approveUser(String userId, ApproveRequest request){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);

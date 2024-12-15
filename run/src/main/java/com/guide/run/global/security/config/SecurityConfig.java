@@ -62,6 +62,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/signup/**").hasRole("NEW")
+                        .requestMatchers(
+                                "/api/sms/**",
+                                "/api/oauth/**",
+                                "/api/login/**",
+                                "/api/accountId/**",
+                                "/api/new-password/**").permitAll()
+                        .requestMatchers(
+                                "/api/user/personal/**",
+                                "/api/user/permission/**",
+                                "/api/user/running/**",
+                                "/api/withdrawal/**",
+                                "/api/user/img/**")
+                        .hasAnyRole("ADMIN", "USER", "COACH", "WAIT", "REJECT")
+
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER", "COACH")
+
                         .anyRequest().permitAll())
 
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),

@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.request;
 
+import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,4 +21,5 @@ public class EventCreateRequest {
     private int minNumG;//guide 모집 인원
     private String place;//이벤트 장소
     private String content;//이벤트 내용
+    private EventCategory eventCategory; //이벤트 유형
 }
