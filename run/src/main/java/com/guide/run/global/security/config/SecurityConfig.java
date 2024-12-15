@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 "/api/accountId/**",
                                 "/api/withdrawal/**",
                                 "/api/new-password/**",
-                                "/api/user/img")
+                                "/api/user/img/**")
                         .hasAnyRole("ADMIN", "USER", "COACH", "WAIT", "REJECT")
 
                         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER", "COACH")
