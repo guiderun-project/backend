@@ -31,6 +31,9 @@ public class ViService {
 
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final CoolSmsService coolSmsService;
+    @Value("${spring.coolsms.senderNumber}")
+    private String senderNumber;
 
     private final CoolSmsService coolSmsService;
 

@@ -6,12 +6,15 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
-import com.guide.run.user.entity.*;
+import com.guide.run.user.entity.ArchiveData;
+import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.repository.*;
+import com.guide.run.user.repository.ArchiveDataRepository;
+import com.guide.run.user.repository.GuideRepository;
+import com.guide.run.user.repository.SignUpInfoRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,10 @@ public class GuideService {
     private final UserService userService;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final CoolSmsService coolSmsService;
+
+    @Value("${spring.coolsms.senderNumber}")
+    private String senderNumber;
 
     private final CoolSmsService coolSmsService;
 
