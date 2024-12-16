@@ -16,6 +16,7 @@ import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.dto.request.WithdrawalRequest;
+import com.guide.run.user.dto.response.ATAInfo;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.Withdrawal;
 import com.guide.run.user.entity.type.UserType;
@@ -59,6 +60,23 @@ public class UserService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
 
+
+    @Transactional
+    public ATAInfo signUpATAInfo(String privateId){
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        ATAInfo ataInfo = ATAInfo.builder()
+                .userName(user.getName())
+                .build();
+
+        if(user.getType().equals(UserType.VI)) {
+            ataInfo.setUserType("시각장애러너");
+        } else {
+            ataInfo.setUserType("가이드러너");
+        }
+
+        return ataInfo;
+    }
 
     @Transactional
     public boolean getUserStatus(String privateId){

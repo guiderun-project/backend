@@ -115,16 +115,20 @@ public class AdminUserService {
         if(request.getIsApprove()){
             user.approveUser(Role.ROLE_USER, request.getRecordDegree());
             userRepository.save(user);
-            if(user.getType().equals(UserType.GUIDE)){
-                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"가이드러너", user.getRecordDegree());
-            } else if (user.getType().equals(UserType.VI)) {
-                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"시각장애러너", user.getRecordDegree());
-            }
             isApprove = true;
         }else{
             user.approveUser(Role.ROLE_REJECT, user.getRecordDegree());
             userRepository.save(user);
         }
+
+        if(isApprove){
+            if(user.getType().equals(UserType.GUIDE)){
+                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"가이드러너", user.getRecordDegree());
+            } else if (user.getType().equals(UserType.VI)) {
+                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"시각장애러너", user.getRecordDegree());
+            }
+        }
+
         UserApprovalResponse response = UserApprovalResponse.builder()
                 .userId(user.getUserId())
                 .isApprove(isApprove)
