@@ -117,6 +117,8 @@ public class SignController {
         }else{
             SignupResponse response = guideService.guideSignup(privateId, guideSignupDto);
             ATAInfo ataInfo = userService.signUpATAInfo(privateId);
+            log.info(ataInfo.getAdminNumber());
+            log.info(ataInfo.getSenderNumber());
             coolSmsService.sendToAdmin(ataInfo.getSenderNumber(), ataInfo.getUserType(), ataInfo.getUserName());
             coolSmsService.sendToAdmin(ataInfo.getAdminNumber(), ataInfo.getUserType(), ataInfo.getUserName());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

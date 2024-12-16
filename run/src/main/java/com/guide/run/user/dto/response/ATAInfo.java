@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 @AllArgsConstructor
 @Builder
 public class ATAInfo {
-    @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
-    @Value("${spring.coolsms.adminNumber}")
     private String adminNumber;
 
     @Setter
