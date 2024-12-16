@@ -27,6 +27,7 @@ import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.withdrawal.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +61,18 @@ public class UserService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
 
+    @Value("${spring.coolsms.senderNumber}")
+    private String senderNumber;
+    @Value("${spring.coolsms.adminNumber}")
+    private String adminNumber;
 
     @Transactional
     public ATAInfo signUpATAInfo(String privateId){
         User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
 
         ATAInfo ataInfo = ATAInfo.builder()
+                .senderNumber(senderNumber)
+                .adminNumber(adminNumber)
                 .userName(user.getName())
                 .build();
 
