@@ -6,6 +6,7 @@ import com.guide.run.event.entity.repository.*;
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
@@ -16,6 +17,7 @@ import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.temp.member.repository.AttendanceRepository;
 import com.guide.run.user.dto.request.WithdrawalRequest;
+import com.guide.run.user.dto.response.ATAInfo;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.Withdrawal;
 import com.guide.run.user.entity.type.UserType;
@@ -26,14 +28,12 @@ import com.guide.run.user.repository.user.UserRepository;
 import com.guide.run.user.repository.withdrawal.WithdrawalRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 
 @RequiredArgsConstructor
@@ -59,6 +59,36 @@ public class UserService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
 
+    private final CoolSmsService coolSmsService;
+
+    @Value("${spring.coolsms.senderNumber}")
+    private String senderNumber;
+    @Value("${spring.coolsms.adminNumber}")
+    private String adminNumber;
+
+    @Transactional
+    public void signUpATA(String privateId){
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        ArrayList<String> tolist = new ArrayList<>();
+
+        tolist.add(senderNumber);
+        tolist.add(adminNumber);
+
+        ATAInfo ataInfo = ATAInfo.builder()
+                .toList(tolist)
+                .userName(user.getName())
+                .build();
+
+        if(user.getType().equals(UserType.VI)) {
+            ataInfo.setUserType("시각장애러너");
+        } else {
+            ataInfo.setUserType("가이드러너");
+        }
+
+        coolSmsService.sendToAdmin(ataInfo.getToList(), ataInfo.getUserType(), ataInfo.getUserName());
+
+    }
 
     @Transactional
     public boolean getUserStatus(String privateId){

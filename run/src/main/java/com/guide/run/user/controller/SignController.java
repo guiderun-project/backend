@@ -4,6 +4,7 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
@@ -11,6 +12,7 @@ import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
 import com.guide.run.user.dto.request.RefreshTokenDto;
 import com.guide.run.user.dto.request.WithdrawalRequest;
+import com.guide.run.user.dto.response.ATAInfo;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -94,11 +96,12 @@ public class SignController {
 
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
-        String userId = jwtProvider.extractUserId(httpServletRequest);
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
         if(userService.isAccountIdExist(viSignupDto.getAccountId())){
             throw new DuplicatedUserIdException();
         }else{
-            SignupResponse response = viService.viSignup(userId, viSignupDto);
+            SignupResponse response = viService.viSignup(privateId, viSignupDto);
+            userService.signUpATA(privateId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
@@ -106,11 +109,12 @@ public class SignController {
 
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
-        String userId = jwtProvider.extractUserId(httpServletRequest);
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
         if(userService.isAccountIdExist(guideSignupDto.getAccountId())){
             throw new DuplicatedUserIdException();
         }else{
-            SignupResponse response = guideService.guideSignup(userId, guideSignupDto);
+            SignupResponse response = guideService.guideSignup(privateId, guideSignupDto);
+            userService.signUpATA(privateId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }

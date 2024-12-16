@@ -1,9 +1,11 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
+import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.ViSignupDto;
+import com.guide.run.user.dto.response.ATAInfo;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
@@ -31,11 +33,7 @@ public class ViService {
 
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
-    private final CoolSmsService coolSmsService;
-    @Value("${spring.coolsms.senderNumber}")
-    private String senderNumber;
-    @Value("${spring.coolsms.adminNumber}")
-    private String adminNumber;
+
 
 
     @Transactional
@@ -105,9 +103,10 @@ public class ViService {
                     .userStatus(newVi.getRole().getValue())
                     .build();
 
-            coolSmsService.sendToAdmin(senderNumber, "시각장애러너", vi.getName());
-            coolSmsService.sendToAdmin(adminNumber, "시각장애러너", vi.getName());
+
             return response;
         }
     }
+
+
 }
