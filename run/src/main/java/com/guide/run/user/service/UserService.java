@@ -6,6 +6,7 @@ import com.guide.run.event.entity.repository.*;
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
@@ -32,10 +33,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 
 @RequiredArgsConstructor
@@ -61,18 +59,24 @@ public class UserService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
 
+    private final CoolSmsService coolSmsService;
+
     @Value("${spring.coolsms.senderNumber}")
     private String senderNumber;
     @Value("${spring.coolsms.adminNumber}")
     private String adminNumber;
 
     @Transactional
-    public ATAInfo signUpATAInfo(String privateId){
+    public void signUpATA(String privateId){
         User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
 
+        ArrayList<String> tolist = new ArrayList<>();
+
+        tolist.add(senderNumber);
+        tolist.add(adminNumber);
+
         ATAInfo ataInfo = ATAInfo.builder()
-                .senderNumber(senderNumber)
-                .adminNumber(adminNumber)
+                .toList(tolist)
                 .userName(user.getName())
                 .build();
 
@@ -82,7 +86,8 @@ public class UserService {
             ataInfo.setUserType("가이드러너");
         }
 
-        return ataInfo;
+        coolSmsService.sendToAdmin(ataInfo.getToList(), ataInfo.getUserType(), ataInfo.getUserName());
+
     }
 
     @Transactional

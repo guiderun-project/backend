@@ -51,7 +51,7 @@ public class SignController {
     private final UserService userService;
     private final ViService viService;
     private final GuideService guideService;
-    private final CoolSmsService coolSmsService;
+
 
     @PostMapping("/login")
     public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
@@ -101,9 +101,7 @@ public class SignController {
             throw new DuplicatedUserIdException();
         }else{
             SignupResponse response = viService.viSignup(privateId, viSignupDto);
-            ATAInfo ataInfo = userService.signUpATAInfo(privateId);
-            coolSmsService.sendToAdmin(ataInfo.getSenderNumber(), ataInfo.getUserType(), ataInfo.getUserName());
-            coolSmsService.sendToAdmin(ataInfo.getAdminNumber(), ataInfo.getUserType(), ataInfo.getUserName());
+            userService.signUpATA(privateId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
@@ -116,11 +114,7 @@ public class SignController {
             throw new DuplicatedUserIdException();
         }else{
             SignupResponse response = guideService.guideSignup(privateId, guideSignupDto);
-            ATAInfo ataInfo = userService.signUpATAInfo(privateId);
-            log.info(ataInfo.getAdminNumber());
-            log.info(ataInfo.getSenderNumber());
-            coolSmsService.sendToAdmin(ataInfo.getSenderNumber(), ataInfo.getUserType(), ataInfo.getUserName());
-            coolSmsService.sendToAdmin(ataInfo.getAdminNumber(), ataInfo.getUserType(), ataInfo.getUserName());
+            userService.signUpATA(privateId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
