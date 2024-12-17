@@ -54,10 +54,26 @@ public class SignController {
 
 
     @PostMapping("/login")
-    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request,HttpServletRequest httpServletRequest,
+                                      HttpServletResponse httpServletResponse){
 
         String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
         boolean isExist = userService.getUserStatus(privateId);
+
+        boolean isExistCookie =false;
+
+
+        if(httpServletRequest.getCookies() !=null){
+            for(Cookie cookie: httpServletRequest.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
+            }
+        }
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", httpServletResponse, privateId);
+        }
+
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
