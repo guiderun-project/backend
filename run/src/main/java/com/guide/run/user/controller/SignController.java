@@ -147,18 +147,22 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(@RequestBody RefreshTokenDto refreshToken,HttpServletRequest request){
-        try {
-            String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
-            boolean isExist = userService.getUserStatus(privateId);
-            return ReissuedAccessTokenDto.builder()
-                    .accessToken(jwtProvider.createAccessToken(privateId))
-                    .isExist(isExist)
-                    .build();
-        }catch (NotValidRefreshTokenException e){
-            log.error("refresh 토큰이 없습니다");
-            throw new NotValidRefreshTokenException();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    String refreshToken=cookie.getValue();
+                    String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
+                    boolean isExist = userService.getUserStatus(privateId);
+                    return ReissuedAccessTokenDto.builder()
+                            .accessToken(jwtProvider.createAccessToken(privateId))
+                            .isExist(isExist)
+                            .build();
+                }
+            }
         }
+        log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
+        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인

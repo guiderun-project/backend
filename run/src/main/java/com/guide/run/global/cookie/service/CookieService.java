@@ -14,6 +14,7 @@ public class CookieService {
     private final JwtProvider jwtProvider;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
+                .domain(".guide-run-qa.netlify.app")
                 .sameSite("None")
                 .secure(true)
                 .httpOnly(true)
