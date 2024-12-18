@@ -68,7 +68,7 @@ public class JwtProvider {
                 .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact(), privateId);
-        //refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
     }
     public Authentication getAuthentication(String token){
@@ -135,6 +135,9 @@ public class JwtProvider {
 
     public String getPrivateIdForRefreshToken(RefreshTokenDto refreshToken) {
         RefreshToken token = refreshTokenRepository.findById(refreshToken.getRefreshToken()).orElseThrow(() -> new NotValidRefreshTokenException());
+        return token.getPrivateId();
+    }public String getPrivateIdForRefreshToken(String refreshToken) {
+        RefreshToken token = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new NotValidRefreshTokenException());
         return token.getPrivateId();
     }
 }
