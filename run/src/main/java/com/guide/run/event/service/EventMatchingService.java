@@ -199,7 +199,7 @@ public class EventMatchingService {
     }
 
     public int autoMatchBetweenTwoGroup(int startIdx,Long eventId,List<Form> viList,List<Form> guideList){
-        if(startIdx==viList.size()-1){
+        if(startIdx==viList.size()){
             return startIdx;
         }
         for(Form f: viList){
