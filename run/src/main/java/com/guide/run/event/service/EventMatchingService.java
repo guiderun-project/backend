@@ -199,22 +199,19 @@ public class EventMatchingService {
     }
 
     public int autoMatchBetweenTwoGroup(int startIdx,Long eventId,List<Form> viList,List<Form> guideList){
-        if(startIdx==viList.size()){
-            return startIdx;
-        }
-        for(Form f: viList){
+        for(int i = startIdx ; startIdx<viList.size() ; i++){
             if(guideList.size()==0) {
                 return startIdx;
             }
             Form guideForm = guideList.get(0);
             User guide = userRepository.findUserByUserId(guideForm.getUserId()).orElseThrow(NotExistUserException::new);
-            User vi = userRepository.findUserByUserId(f.getUserId()).orElseThrow(NotExistUserException::new);
+            User vi = userRepository.findUserByUserId(viList.get(i).getUserId()).orElseThrow(NotExistUserException::new);
             matchingRepository.save(
                     Matching.builder()
                             .eventId(eventId)
                             .guideId(guide.getPrivateId())
                             .viId(vi.getPrivateId())
-                            .viRecord(f.getApplyRecord())
+                            .viRecord(viList.get(i).getApplyRecord())
                             .guideRecord(guideForm.getApplyRecord())
                             .build()
             );
