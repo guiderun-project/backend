@@ -207,11 +207,13 @@ public class EventMatchingService {
                 return startIdx;
             }
             Form guideForm = guideList.get(0);
+            User guide = userRepository.findUserByUserId(guideForm.getUserId()).orElseThrow(NotExistUserException::new);
+            User vi = userRepository.findUserByUserId(f.getUserId()).orElseThrow(NotExistUserException::new);
             matchingRepository.save(
                     Matching.builder()
                             .eventId(eventId)
-                            .guideId(guideForm.getUserId())
-                            .viId(f.getUserId())
+                            .guideId(guide.getPrivateId())
+                            .viId(vi.getPrivateId())
                             .viRecord(f.getApplyRecord())
                             .guideRecord(guideForm.getApplyRecord())
                             .build()
@@ -219,7 +221,7 @@ public class EventMatchingService {
             unMatchingRepository.delete(
                     UnMatching.builder()
                             .eventId(eventId)
-                            .privateId(guideForm.getUserId())
+                            .privateId(guide.getPrivateId())
                             .build()
             );
             Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(f.getUserId(),eventId);
