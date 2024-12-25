@@ -19,7 +19,7 @@ spring:
   social:
     kakao:
       client_id: ${KAKAO_CLIENT_ID}
-      redirect: https://guide-run-qa.netlify.app/oauth
+      redirect: https://dev.guiderun.org/oauth
       url:
         login: https://kauth.kakao.com/oauth/authorize  # 로그인 진행 사이트
         token: https://kauth.kakao.com/oauth/token  # access token을 발급 받는  url , 필요한 정보를 담아 보내야 함
@@ -52,7 +52,7 @@ spring:
     signupCompletionMsgId: ${SIGNUP_COMPLETE_MSG}
     signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
 cors:
-  origin: https://guide-run-qa.netlify.app
+  origin: https://dev.guiderun.org
 
 cloud:
   aws:

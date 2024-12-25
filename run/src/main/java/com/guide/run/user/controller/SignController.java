@@ -35,8 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.CommunicationException;
 import javax.security.auth.RefreshFailedException;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
 maxAge = 3600,
 allowCredentials = "true")
 
