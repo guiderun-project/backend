@@ -75,5 +75,12 @@ public class EventMatchingController {
         jwtProvider.extractUserId(request);
         return ResponseEntity.ok().body(eventMatchingService.getMatchedViList(eventId));
     }
+    @PostMapping("{eventId}/match/auto")
+    public ResponseEntity<String> autoMatchUsers(@PathVariable("eventId") Long eventId,
+                                                 HttpServletRequest request){
+        jwtProvider.extractUserId(request);
+        eventMatchingService.autoMatchUsers(eventId);
+        return ResponseEntity.ok().body("200 ok");
+    }
 
 }
