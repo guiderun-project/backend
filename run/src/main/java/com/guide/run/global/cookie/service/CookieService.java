@@ -15,7 +15,6 @@ public class CookieService {
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
         int maxAge = 24 * 60 * 60 * 365;
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
-                .domain("guiderun.shop")
                 .maxAge(maxAge)
                 .sameSite("None")
                 .secure(true)
