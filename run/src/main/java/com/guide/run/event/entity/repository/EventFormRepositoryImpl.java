@@ -33,4 +33,17 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                 .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
                 .fetch();
     }
+    @Override
+    public List<Form> findAllEventIdAndUserTypeAndHopeTeam(Long eventId, UserType userType,String hopeTeam) {
+        return queryFactory.select(Projections.constructor(Form.class,
+                        user.userId.as("userId"),
+                        user.type.as("type"),
+                        eventForm.hopeTeam.as("applyRecord"),
+                        user.name.as("name"),
+                        user.recordDegree.as("recordDegree")))
+                .from(eventForm)
+                .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
+                .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)).and(eventForm.hopeTeam.eq(hopeTeam)))
+                .fetch();
+    }
 }

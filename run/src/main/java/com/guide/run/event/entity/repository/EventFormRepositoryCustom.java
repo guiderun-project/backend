@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface EventFormRepositoryCustom {
     List<Form> findAllEventIdAndUserType(Long eventId, UserType userType);
+    List<Form> findAllEventIdAndUserTypeAndHopeTeam(Long eventId, UserType userType,String hopeTeam);
 }

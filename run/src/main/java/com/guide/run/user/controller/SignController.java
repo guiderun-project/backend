@@ -35,8 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.CommunicationException;
 import javax.security.auth.RefreshFailedException;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
 maxAge = 3600,
 allowCredentials = "true")
 
@@ -54,10 +53,26 @@ public class SignController {
 
 
     @PostMapping("/login")
-    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request){
+    public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request,HttpServletRequest httpServletRequest,
+                                      HttpServletResponse httpServletResponse){
 
         String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
         boolean isExist = userService.getUserStatus(privateId);
+
+        boolean isExistCookie =false;
+
+
+        if(httpServletRequest.getCookies() !=null){
+            for(Cookie cookie: httpServletRequest.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    isExistCookie=true;
+                }
+            }
+        }
+        if(!isExistCookie) {
+            cookieService.createCookie("refreshToken", httpServletResponse, privateId);
+        }
+
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
@@ -131,18 +146,22 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(@RequestBody RefreshTokenDto refreshToken,HttpServletRequest request){
-        try {
-            String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
-            boolean isExist = userService.getUserStatus(privateId);
-            return ReissuedAccessTokenDto.builder()
-                    .accessToken(jwtProvider.createAccessToken(privateId))
-                    .isExist(isExist)
-                    .build();
-        }catch (NotValidRefreshTokenException e){
-            log.error("refresh 토큰이 없습니다");
-            throw new NotValidRefreshTokenException();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
+        if(request.getCookies() !=null){
+            for(Cookie cookie: request.getCookies()){
+                if(cookie.getName().equals("refreshToken")){
+                    String refreshToken=cookie.getValue();
+                    String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
+                    boolean isExist = userService.getUserStatus(privateId);
+                    return ReissuedAccessTokenDto.builder()
+                            .accessToken(jwtProvider.createAccessToken(privateId))
+                            .isExist(isExist)
+                            .build();
+                }
+            }
         }
+        log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
+        throw new NotValidRefreshTokenException();
     }
 
     //아이디 중복확인

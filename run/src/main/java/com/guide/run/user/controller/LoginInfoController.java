@@ -14,8 +14,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
+@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
         maxAge = 3600,
         allowCredentials = "true")
 @RestController
