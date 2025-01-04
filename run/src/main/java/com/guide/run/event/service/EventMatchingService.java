@@ -34,8 +34,8 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        EventForm viForm = eventFormRepository.findByEventIdAndPrivateId(eventId, viId);
-        EventForm guideForm = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
+        EventForm viForm = eventFormRepository.findByEventIdAndPrivateId(eventId, vi.getPrivateId());
+        EventForm guideForm = eventFormRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
         Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
         if(existGuide!=null){
             matchingRepository.delete(existGuide);
