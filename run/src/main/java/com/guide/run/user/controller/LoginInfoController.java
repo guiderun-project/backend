@@ -2,10 +2,8 @@ package com.guide.run.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guide.run.event.service.EventService;
-import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.request.*;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -16,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,7 +67,7 @@ public class LoginInfoController {
         return ResponseEntity.ok("");
     }
     @PostMapping("/logout")
-    public ResponseEntity<String> createNewPassword(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response){
         String privateId = jwtProvider.extractUserId(request);
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
