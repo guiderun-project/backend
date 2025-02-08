@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static com.guide.run.event.service.EventService.log;
 
 @CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
         maxAge = 3600,
@@ -36,7 +35,6 @@ import static com.guide.run.event.service.EventService.log;
 public class LoginInfoController {
     private final LoginInfoService loginInfoService;
     private final JwtProvider jwtProvider;
-    private final CookieService cookieService;
     private static final Logger log = LoggerFactory.getLogger(EventService.class);
 
     //인증번호 요청(아이디 찾기)
