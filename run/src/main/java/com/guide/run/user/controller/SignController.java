@@ -21,6 +21,8 @@ import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -146,21 +148,37 @@ public class SignController {
                 .build();
     }
     @GetMapping("/oauth/login/reissue")
-    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request){
-        if(request.getCookies() !=null){
-            for(Cookie cookie: request.getCookies()){
-                if(cookie.getName().equals("refreshToken")){
-                    String refreshToken=cookie.getValue();
-                    String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
-                    boolean isExist = userService.getUserStatus(privateId);
-                    return ReissuedAccessTokenDto.builder()
-                            .accessToken(jwtProvider.createAccessToken(privateId))
-                            .isExist(isExist)
-                            .build();
+    public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request, HttpServletResponse response){
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    String refreshToken = cookie.getValue();
+                    try {
+                        // refresh 토큰의 유효성 및 만료 여부 체크 (만료된 경우 예외 발생)
+                        String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
+                        boolean isExist = userService.getUserStatus(privateId);
+
+                        // 유효한 토큰인 경우 엑세스 토큰 재발급
+                        return ReissuedAccessTokenDto.builder()
+                                .accessToken(jwtProvider.createAccessToken(privateId))
+                                .isExist(isExist)
+                                .build();
+                    } catch (ExpiredJwtException e) {
+                        // refresh 토큰이 만료된 경우
+                        cookieService.deleteRefreshTokenCookie(response);
+                        log.error("토큰 만료 privateId: {}", jwtProvider.extractUserId(request));
+                        throw new NotValidRefreshTokenException();
+                    } catch (JwtException e) {
+                        // 토큰 파싱 에러
+                        cookieService.deleteRefreshTokenCookie(response);
+                        log.error("토큰 파싱 에러 privateId: {}", jwtProvider.extractUserId(request));
+                        throw new NotValidRefreshTokenException();
+                    }
                 }
             }
         }
-        log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
+        log.error("Refresh 토큰이 존재하지 않습니다. privateId: {}", jwtProvider.extractUserId(request));
         throw new NotValidRefreshTokenException();
     }
 
