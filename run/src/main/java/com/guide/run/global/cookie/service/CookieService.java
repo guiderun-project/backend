@@ -29,6 +29,8 @@ public class CookieService {
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         Cookie deleteCookie = new Cookie("refreshToken", null);
         deleteCookie.setPath("/");
+        deleteCookie.setHttpOnly(true);
+        deleteCookie.setSecure(true);
         deleteCookie.setMaxAge(0);
         response.addCookie(deleteCookie);
     }
@@ -40,13 +42,15 @@ public class CookieService {
         updatedCookie.setMaxAge(cookie.getMaxAge());
         updatedCookie.setHttpOnly(cookie.isHttpOnly());
         updatedCookie.setSecure(cookie.getSecure());
-        response.addCookie(updatedCookie);
-
 
         //기존 쿠키 삭제
         Cookie deleteCookie = new Cookie("refreshToken", null);
         deleteCookie.setPath("/api/oauth/login");
+        deleteCookie.setHttpOnly(cookie.isHttpOnly());
+        deleteCookie.setSecure(cookie.getSecure());
         deleteCookie.setMaxAge(0);
+
         response.addCookie(deleteCookie);
+        response.addCookie(updatedCookie);
     }
 }
