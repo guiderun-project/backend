@@ -71,34 +71,22 @@ public class LoginInfoController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response){
         String privateId = jwtProvider.extractUserId(request);
-        boolean refreshTokenFound = false;
-        
+
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
-                    refreshTokenFound = true;
                     refreshTokenRepository.deleteById(cookie.getValue());
-                    log.info("삭제된 refresh 토큰: {}", cookie.getValue());
+                    log.info(cookie.getValue());
+                    Cookie removedCookie = new Cookie("refreshToken", null);
+                    removedCookie.setPath("/");
+                    removedCookie.setMaxAge(0);
+                    response.addCookie(removedCookie);
                 }
             }
         }else {
             log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
             throw new NotValidRefreshTokenException();
         }
-
-        Cookie removedCookieOld = new Cookie("refreshToken", null);
-        removedCookieOld.setPath("/api/oauth/login"); // 기존 잘못된 경로
-        removedCookieOld.setMaxAge(0);
-        removedCookieOld.setHttpOnly(true);
-        removedCookieOld.setSecure(true);
-        response.addCookie(removedCookieOld);
-
-        Cookie removedCookieRoot = new Cookie("refreshToken", null);
-        removedCookieRoot.setPath("/"); // 새롭게 지정한 경로
-        removedCookieRoot.setMaxAge(0);
-        removedCookieRoot.setHttpOnly(true);
-        removedCookieRoot.setSecure(true);
-        response.addCookie(removedCookieRoot);
 
         return ResponseEntity.ok("");
     }
