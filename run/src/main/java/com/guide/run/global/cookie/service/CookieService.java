@@ -32,4 +32,21 @@ public class CookieService {
         deleteCookie.setMaxAge(0);
         response.addCookie(deleteCookie);
     }
+
+    public void deleteOldCookieAndMakeNewCookie(HttpServletResponse response, Cookie cookie) {
+        Cookie updatedCookie = new Cookie("refreshToken", cookie.getValue());
+        updatedCookie.setPath("/"); // 새 경로 설정
+        // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
+        updatedCookie.setMaxAge(cookie.getMaxAge());
+        updatedCookie.setHttpOnly(cookie.isHttpOnly());
+        updatedCookie.setSecure(cookie.getSecure());
+        response.addCookie(updatedCookie);
+
+
+        //기존 쿠키 삭제
+        Cookie deleteCookie = new Cookie("refreshToken", null);
+        deleteCookie.setPath("/api/oauth/login");
+        deleteCookie.setMaxAge(0);
+        response.addCookie(deleteCookie);
+    }
 }
