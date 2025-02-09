@@ -71,9 +71,16 @@ public class LoginInfoController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response){
         String privateId = jwtProvider.extractUserId(request);
+        
+        //기존 쿠키 삭제
+        Cookie deleteCookieOld = new Cookie("refreshToken", null);
+        deleteCookieOld.setPath("/api/oauth/login");
+        deleteCookieOld.setMaxAge(0);
+        response.addCookie(deleteCookieOld);
+        
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
-                if(cookie.getName().equals("refreshToken")){
+                if(cookie.getName().equals("refreshToken") && cookie.getPath().equals("/")){
                     refreshTokenRepository.deleteById(cookie.getValue());
                     log.info(cookie.getValue());
                     Cookie removedCookie = new Cookie("refreshToken", null);
