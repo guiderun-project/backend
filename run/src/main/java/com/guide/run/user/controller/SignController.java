@@ -153,8 +153,11 @@ public class SignController {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("refreshToken".equals(cookie.getName())) {
+                    // 잘못된 경로("/api/oauth/login")에 저장된 쿠키 삭제
+                    if(cookie.getPath().equals("/api/oauth/login")) deleteOldRefreshTokenCookie(response);
                     String refreshToken = cookie.getValue();
                     try {
+
                         // refresh 토큰의 유효성 및 만료 여부 체크 (만료된 경우 예외 발생)
                         String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
                         boolean isExist = userService.getUserStatus(privateId);
@@ -212,5 +215,12 @@ public class SignController {
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
                 .isExist(isExist)
                 .build();
+    }
+
+    private void deleteOldRefreshTokenCookie(HttpServletResponse response) {
+        Cookie oldCookie = new Cookie("refreshToken", null);
+        oldCookie.setPath("/api/oauth/login"); // 잘못 저장된 경로
+        oldCookie.setMaxAge(0);
+        response.addCookie(oldCookie);
     }
 }
