@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class CookieService {
     private final JwtProvider jwtProvider;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
-        int maxAge = 24 * 60 * 60 * 365;
+        int maxAge = 24 * 60 * 60 * 30;
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
                 .maxAge(maxAge)
                 .sameSite("None")
