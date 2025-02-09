@@ -77,6 +77,7 @@ public class LoginInfoController {
                     refreshTokenRepository.deleteById(cookie.getValue());
                     log.info(cookie.getValue());
                     Cookie removedCookie = new Cookie("refreshToken", null);
+                    removedCookie.setPath("/");
                     removedCookie.setMaxAge(0);
                     response.addCookie(removedCookie);
                 }
