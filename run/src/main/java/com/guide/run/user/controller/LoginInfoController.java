@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guide.run.event.service.EventService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.request.*;
 import com.guide.run.user.dto.response.FindAccountIdDto;
 import com.guide.run.user.dto.response.TokenResponse;
@@ -32,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 public class LoginInfoController {
     private final LoginInfoService loginInfoService;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
     private static final Logger log = LoggerFactory.getLogger(EventService.class);
 
     //인증번호 요청(아이디 찾기)
@@ -72,6 +74,7 @@ public class LoginInfoController {
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
+                    refreshTokenRepository.deleteById(cookie.getValue());
                     Cookie removedCookie = new Cookie("refreshToken", null);
                     removedCookie.setMaxAge(0);
                     response.addCookie(removedCookie);
