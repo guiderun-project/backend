@@ -1,7 +1,6 @@
 package com.guide.run.global.cookie.service;
 
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.redis.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,8 +27,6 @@ public class CookieService {
 
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         Cookie deleteCookie = new Cookie("refreshToken", null);
-        deleteCookie.setPath("/api/oauth/login");
-        deleteCookie.setHttpOnly(true);
         deleteCookie.setMaxAge(0);
         response.addCookie(deleteCookie);
     }
