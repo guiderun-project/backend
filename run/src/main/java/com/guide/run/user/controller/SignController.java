@@ -154,7 +154,10 @@ public class SignController {
             for (Cookie cookie : cookies) {
                 if ("refreshToken".equals(cookie.getName())) {
                     // 잘못된 경로("/api/oauth/login")에 저장된 쿠키 삭제
-                    if(cookie.getPath().equals("/api/oauth/login")) deleteOldRefreshTokenCookie(response);
+                    if("/api/oauth/login".equals(cookie.getPath())){
+                        deleteOldRefreshTokenCookie(response);
+                    }
+
                     String refreshToken = cookie.getValue();
                     try {
 
