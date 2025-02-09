@@ -67,6 +67,8 @@ public class SignController {
         if(httpServletRequest.getCookies() !=null){
             for(Cookie cookie: httpServletRequest.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
+                    //기존 쿠키 만료 처리 및 새 쿠키 생성
+                    cookieService.deleteOldCookieAndMakeNewCookie(httpServletResponse, cookie);
                     isExistCookie=true;
                 }
             }
@@ -95,6 +97,7 @@ public class SignController {
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
+                    cookieService.deleteOldCookieAndMakeNewCookie(response, cookie);
                     isExistCookie=true;
                 }
             }
@@ -160,16 +163,8 @@ public class SignController {
                         String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
                         boolean isExist = userService.getUserStatus(privateId);
 
-                        if (!"/".equals(cookie.getPath())) {
-                            Cookie updatedCookie = new Cookie("refreshToken", refreshToken);
-                            updatedCookie.setPath("/"); // 새 경로 설정
-                            // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
-                            updatedCookie.setMaxAge(cookie.getMaxAge());
-                            updatedCookie.setHttpOnly(cookie.isHttpOnly());
-                            updatedCookie.setSecure(cookie.getSecure());
-                            response.addCookie(updatedCookie);
-                            log.info("쿠키 경로 '/' 로 변경 privateId: {}", privateId);
-                        }
+                        //기존 쿠키 만료 처리 및 새 쿠키 생성
+                        cookieService.deleteOldCookieAndMakeNewCookie(response, cookie);
 
                         // 유효한 토큰인 경우 엑세스 토큰 재발급
                         return ReissuedAccessTokenDto.builder()
