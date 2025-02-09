@@ -153,11 +153,6 @@ public class SignController {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("refreshToken".equals(cookie.getName())) {
-                    // 잘못된 경로("/api/oauth/login")에 저장된 쿠키 삭제
-                    if("/api/oauth/login".equals(cookie.getPath())){
-                        deleteOldRefreshTokenCookie(response);
-                    }
-
                     String refreshToken = cookie.getValue();
                     try {
 
@@ -165,11 +160,23 @@ public class SignController {
                         String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
                         boolean isExist = userService.getUserStatus(privateId);
 
+                        if (!"/".equals(cookie.getPath())) {
+                            Cookie updatedCookie = new Cookie("refreshToken", refreshToken);
+                            updatedCookie.setPath("/"); // 새 경로 설정
+                            // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
+                            updatedCookie.setMaxAge(cookie.getMaxAge());
+                            updatedCookie.setHttpOnly(cookie.isHttpOnly());
+                            updatedCookie.setSecure(cookie.getSecure());
+                            response.addCookie(updatedCookie);
+                            log.info("쿠키 경로 '/' 로 변경 privateId: {}", privateId);
+                        }
+
                         // 유효한 토큰인 경우 엑세스 토큰 재발급
                         return ReissuedAccessTokenDto.builder()
                                 .accessToken(jwtProvider.createAccessToken(privateId))
                                 .isExist(isExist)
                                 .build();
+
                     } catch (ExpiredJwtException e) {
                         // refresh 토큰이 만료된 경우
                         cookieService.deleteRefreshTokenCookie(response);
@@ -220,10 +227,4 @@ public class SignController {
                 .build();
     }
 
-    private void deleteOldRefreshTokenCookie(HttpServletResponse response) {
-        Cookie oldCookie = new Cookie("refreshToken", null);
-        oldCookie.setPath("/api/oauth/login"); // 잘못 저장된 경로
-        oldCookie.setMaxAge(0);
-        response.addCookie(oldCookie);
-    }
 }
