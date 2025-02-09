@@ -17,7 +17,7 @@ public class CookieService {
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
                 .maxAge(maxAge)
                 .sameSite("None")
-                .path("/api/oauth/login")
+                .path("/")
                 .secure(true)
                 .httpOnly(true)
                 .build();
@@ -28,7 +28,7 @@ public class CookieService {
 
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
         Cookie deleteCookie = new Cookie("refreshToken", null);
-        deleteCookie.setPath("/api/oauth/login");
+        deleteCookie.setPath("/");
         deleteCookie.setMaxAge(0);
         response.addCookie(deleteCookie);
     }
