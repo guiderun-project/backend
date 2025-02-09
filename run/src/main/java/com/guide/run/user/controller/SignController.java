@@ -153,11 +153,6 @@ public class SignController {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("refreshToken".equals(cookie.getName())) {
-                    // 잘못된 경로("/api/oauth/login")에 저장된 쿠키 삭제
-                    if("/api/oauth/login".equals(cookie.getPath())){
-                        deleteOldRefreshTokenCookie(response);
-                    }
-
                     String refreshToken = cookie.getValue();
                     try {
 
@@ -165,11 +160,20 @@ public class SignController {
                         String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
                         boolean isExist = userService.getUserStatus(privateId);
 
+
+                        // 만약 기존 쿠키의 경로가 "/api/oauth/login"이라면, 삭제
+                        if (cookie.getPath() != null && "/api/oauth/login".equals(cookie.getPath())) {
+                            deleteOldRefreshTokenCookie(response);
+                            //"/" 경로를 기본으로 하는 쿠키 생성.
+                            cookieService.createCookie("refreshToken", response, privateId);
+                        }
+
                         // 유효한 토큰인 경우 엑세스 토큰 재발급
                         return ReissuedAccessTokenDto.builder()
                                 .accessToken(jwtProvider.createAccessToken(privateId))
                                 .isExist(isExist)
                                 .build();
+
                     } catch (ExpiredJwtException e) {
                         // refresh 토큰이 만료된 경우
                         cookieService.deleteRefreshTokenCookie(response);
