@@ -68,25 +68,43 @@ public class LoginInfoController {
         loginInfoService.createNewPassword(newPasswordDto.getToken(),newPasswordDto.getNewPassword());
         return ResponseEntity.ok("");
     }
+
+    //로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
         String privateId = jwtProvider.extractUserId(request);
-        if(request.getCookies() !=null){
-            for(Cookie cookie: request.getCookies()){
-                if(cookie.getName().equals("refreshToken")){
-                    refreshTokenRepository.deleteById(cookie.getValue());
-                    log.info(cookie.getValue());
+        boolean refreshTokenFound = false;
+
+        // 쿠키가 있는지 확인
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshTokenFound = true;
+                    String refreshToken = cookie.getValue();
+
+                    // DB 또는 저장소에서 리프레시 토큰 삭제
+                    refreshTokenRepository.deleteById(refreshToken);
+                    log.info("Deleted refresh token: {}", refreshToken);
+
                     Cookie removedCookie = new Cookie("refreshToken", null);
-                    removedCookie.setMaxAge(0);
+                    removedCookie.setPath("/api/oauth/login");
+                    removedCookie.setHttpOnly(true);
+                    removedCookie.setMaxAge(0);      // 즉시 만료
                     response.addCookie(removedCookie);
+
                 }
             }
-        }else {
-            log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
-            throw new NotValidRefreshTokenException();
+        }
+
+        // 리프레시 토큰 쿠키가 없으면
+        if (!refreshTokenFound) {
+            log.error("Refresh 토큰이 없습니다. privateId: {}", privateId);
+            throw new NotValidRefreshTokenException("Refresh token not found");
         }
 
         return ResponseEntity.ok("");
     }
+
 
 }
