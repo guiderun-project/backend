@@ -81,9 +81,12 @@ public class LoginInfoController {
                     response.addCookie(removedCookie);
                 }
             }
+        }else {
+            log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
+            throw new NotValidRefreshTokenException();
         }
-        log.error("refresh 토큰이 없습니다. privateId :" + jwtProvider.extractUserId(request));
-        throw new NotValidRefreshTokenException();
+
+        return ResponseEntity.ok("");
     }
 
 }
