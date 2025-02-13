@@ -79,6 +79,8 @@ public class LoginInfoController {
                     log.info(cookie.getValue());
                     Cookie removedCookie = new Cookie("refreshToken", null);
                     removedCookie.setPath("/");
+                    removedCookie.setHttpOnly(true);
+                    removedCookie.setSecure(true);
                     removedCookie.setMaxAge(0);
                     response.addCookie(removedCookie);
                 }

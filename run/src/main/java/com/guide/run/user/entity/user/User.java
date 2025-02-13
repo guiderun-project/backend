@@ -44,6 +44,8 @@ public class User extends BaseEntity {
     private int competitionCnt; //참여한 대회 수
     
     private String img;//프로필 이미지 링크
+
+    private String id1365; //1365 아이디
     
     public void editUser(String name,
                          String gender,
@@ -51,7 +53,8 @@ public class User extends BaseEntity {
                          boolean openNumber,
                          int age,
                          String snsId,
-                         boolean openSns) {
+                         boolean openSns,
+                         String id1365) {
         this.name = name;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
@@ -59,6 +62,7 @@ public class User extends BaseEntity {
         this.age = age;
         this.snsId = snsId;
         this.isOpenSns = openSns;
+        this.id1365 = id1365;
     }
 
     public void editRunningInfo(String recordDegree, String detailRecord){
@@ -85,6 +89,10 @@ public class User extends BaseEntity {
     }
     public void editImg(String img){
         this.img = img;
+    }
+
+    public void editId1365(String id1365){
+        this.id1365 = id1365;
     }
 }
 

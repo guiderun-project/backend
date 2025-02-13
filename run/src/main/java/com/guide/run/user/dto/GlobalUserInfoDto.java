@@ -24,6 +24,7 @@ public class GlobalUserInfoDto {
     private Boolean isOpenNumber;
     private Boolean isOpenSns;
     private String img; //2차 이미지 링크 추가
+    private String id1365; //1365 아이디
 
     public static GlobalUserInfoDto userToInfoDto(User user){
         return GlobalUserInfoDto.builder()
@@ -39,6 +40,7 @@ public class GlobalUserInfoDto {
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
                 .img(user.getImg())
+                .id1365(user.getId1365())
                 .build();
     }
 }

@@ -57,4 +57,6 @@ public class ViSignupDto {
     private boolean privacy;
     @NotNull
     private boolean portraitRights;
+
+    private String id1365;
 }
