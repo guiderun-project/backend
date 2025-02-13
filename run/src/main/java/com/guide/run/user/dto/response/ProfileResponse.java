@@ -32,4 +32,6 @@ public class ProfileResponse {
     private Boolean isLiked;
     private int like;
 
+    private String id1365;
+
 }

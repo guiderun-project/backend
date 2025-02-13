@@ -62,6 +62,7 @@ public class ViService {
                     .type(UserType.VI)
                     .snsId(viSignupDto.getSnsId())
                     .isOpenSns(viSignupDto.getIsOpenSns())
+                    .id1365(viSignupDto.getId1365())
                     .build();
 
             Vi viInfo = Vi.builder()

@@ -19,6 +19,7 @@ import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -139,6 +140,8 @@ public class MypageService {
                 .img(user.getImg())
                 .isLiked(isliked)
                 .like(like)
+
+                .id1365(user.getId1365())
                 .build();
         return response;
     }
@@ -162,5 +165,13 @@ public class MypageService {
             }
         });
         return myPagePartners;
+    }
+
+    @Transactional
+    public String add1365(String id1365, String privateId){
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        user.editId1365(id1365);
+        userRepository.save(user);
+        return user.getId1365();
     }
 }

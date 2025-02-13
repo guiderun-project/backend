@@ -18,6 +18,7 @@ public class PersonalInfoDto {
     private int age;
     private String snsId;
     private Boolean isOpenSns;
+    private String id1365;
 
     public static PersonalInfoDto userToInfoDto(User user){
         return PersonalInfoDto.builder()
@@ -30,6 +31,7 @@ public class PersonalInfoDto {
                 .snsId(user.getSnsId())
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
+                .id1365(user.getId1365())
                 .build();
     }
 }

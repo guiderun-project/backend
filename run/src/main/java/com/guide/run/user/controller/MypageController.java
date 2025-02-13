@@ -89,4 +89,11 @@ public class MypageController {
     public ResponseEntity<EventTypeCountDto> getEventTypeCount(@PathVariable String userId){
         return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(userId));
     }
+
+    @PostMapping("/personal/1365id")
+    public ResponseEntity<String> add1365(HttpServletRequest httpServletRequest, @RequestParam String id1365){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        mypageService.add1365(id1365, privateId);
+        return ResponseEntity.ok().body("");
+    }
 }
