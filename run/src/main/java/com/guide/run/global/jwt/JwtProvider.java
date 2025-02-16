@@ -136,8 +136,22 @@ public class JwtProvider {
     public String getPrivateIdForRefreshToken(RefreshTokenDto refreshToken) {
         RefreshToken token = refreshTokenRepository.findById(refreshToken.getRefreshToken()).orElseThrow(() -> new NotValidRefreshTokenException());
         return token.getPrivateId();
-    }public String getPrivateIdForRefreshToken(String refreshToken) {
+    }
+    public String getPrivateIdForRefreshToken(String refreshToken) {
         RefreshToken token = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new NotValidRefreshTokenException());
         return token.getPrivateId();
+    }
+
+    public Date getExpirationFromRefreshToken(String refreshToken) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(refreshToken)
+                    .getBody()
+                    .getExpiration();
+        } catch (ExpiredJwtException e) {
+            // 이미 만료된 경우에도 만료일을 반환할 수 있음
+            return e.getClaims().getExpiration();
+        }
     }
 }
