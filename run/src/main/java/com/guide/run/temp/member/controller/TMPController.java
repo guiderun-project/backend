@@ -42,40 +42,51 @@ public class TMPController {
 
     @Transactional
     public void processEvent(Event event) {
-        // 해당 이벤트의 모든 출석 내역 조회
-        List<Attendance> attendances = attendanceRepository.findAllByEventId(event.getId());
-        attendances.forEach(attendance -> {
-            if (!attendance.isAttend()) {
-                return;
-            }
-            userRepository.findById(attendance.getPrivateId()).ifPresent(user -> {
-                if (user.getType().equals(UserType.VI)) {
-                    processAttendanceForUser(attendance, event, user);
+            //이벤트 출석 내역 불러옴
+            List<Attendance> attendances = attendanceRepository.findAllByEventId(event.getId());
+
+            for (Attendance attendance : attendances) {
+                User user = userRepository.findById(attendance.getPrivateId()).orElse(null);
+                if (user != null && attendance.isAttend()) { //출석했고 유저 있음
+                    if (user.getType().equals(UserType.VI)) {
+                        //이벤트 매칭 내역도 불러옴
+                        List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(attendance.getEventId(), user.getPrivateId());
+                        //히스토리 추가. 근데 이미 있는 이벤트면 추가 안함.
+                        for (Matching matching : matchings) {
+                            Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId()).orElse(null);
+                            if (partner != null) {
+                                if (!partner.getTrainingIds().contains(matching.getEventId()) && !partner.getContestIds().contains(matching.getEventId())) {
+                                    if (event.getType().equals(EventType.TRAINING)) {
+                                        partner.addTraining(matching.getEventId());
+                                        partnerRepository.save(partner);
+                                    } else {
+                                        partner.addContest(matching.getEventId());
+                                        partnerRepository.save(partner);
+                                    }
+                                }
+                            } else {
+                                partner = Partner.builder()
+                                        .viId(matching.getViId())
+                                        .guideId(matching.getGuideId())
+                                        .contestIds(new ArrayList<>())
+                                        .trainingIds(new ArrayList<>())
+                                        .build();
+                                if (event.getType().equals(EventType.TRAINING)) {
+                                    partner.addTraining(matching.getEventId());
+                                    partnerRepository.save(partner);
+                                } else {
+                                    partner.addContest(matching.getEventId());
+                                    partnerRepository.save(partner);
+                                }
+                            }
+                        }
+                    }
+
+
                 }
-            });
-        });
+            }
     }
 
-    @Transactional
-    public void processAttendanceForUser(Attendance attendance, Event event, User user) {
-        // 해당 출석에 대한 매칭 내역 조회
-        List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(attendance.getEventId(), user.getPrivateId());
-        matchings.forEach(matching -> processMatching(matching, event));
-    }
-
-    @Transactional
-    public void processMatching(Matching matching, Event event) {
-        Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId()).orElse(null);
-        if (partner == null) {
-            partner = Partner.builder()
-                    .viId(matching.getViId())
-                    .guideId(matching.getGuideId())
-                    .contestIds(new ArrayList<>())
-                    .trainingIds(new ArrayList<>())
-                    .build();
-        }
-        addEventToPartner(partner, matching.getEventId(), event.getType().equals(EventType.TRAINING));
-    }
 
     @Transactional
     public void addEventToPartner(Partner partner, Long eventId, boolean isTraining) {
@@ -130,4 +141,10 @@ public class TMPController {
         e.setCnt(viCnt, guideCnt);
         eventRepository.save(e);
     }
+
+
 }
+
+
+
+
