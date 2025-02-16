@@ -402,8 +402,8 @@ public class EventService {
         return response;
     }
 
-    public MyEventDdayResponse getMyEventDday(String userId) {
-        return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(userId)).build();
+    public MyEventDdayResponse getMyEventDday(String privateId) {
+        return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(privateId)).build();
     }
 
     public DetailEvent getDetailEvent(Long eventId, String privateId) {

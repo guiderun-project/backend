@@ -66,9 +66,9 @@ public class EventController {
     }
     @GetMapping("/dday")
     public ResponseEntity<MyEventDdayResponse> getMyEventDday(HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
+        String privateId = jwtProvider.extractUserId(request);
         return ResponseEntity.ok().
-                body(eventService.getMyEventDday(userId));
+                body(eventService.getMyEventDday(privateId));
     }
     @GetMapping("/{eventId}")
     public ResponseEntity<DetailEvent> getDetailEvent(@PathVariable("eventId")Long eventId,
