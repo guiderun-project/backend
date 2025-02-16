@@ -17,14 +17,15 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController("/tmp")
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @Log4j2
 public class TMPController {
     private final AttendanceRepository attendanceRepository;
