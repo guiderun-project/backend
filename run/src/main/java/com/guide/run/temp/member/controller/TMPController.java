@@ -23,96 +23,85 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/tmp")
-@Log4j2
-public class TMPController {
-    private final AttendanceRepository attendanceRepository;
-    private final UserRepository userRepository;
-    private final EventRepository eventRepository;
-    private final MatchingRepository matchingRepository;
-    private final PartnerRepository partnerRepository;
+    @RestController
+    @RequiredArgsConstructor
+    @RequestMapping("/tmp")
+    @Log4j2
+    public class TMPController {
+        private final AttendanceRepository attendanceRepository;
+        private final UserRepository userRepository;
+        private final EventRepository eventRepository;
+        private final MatchingRepository matchingRepository;
+        private final PartnerRepository partnerRepository;
 
-    @GetMapping("/schedule/all")
-    public ResponseEntity<String> addSchedule() {
-        eventRepository.findAll().forEach(this::processEvent);
-        return ResponseEntity.ok("스케줄 추가 완료");
-    }
+        @GetMapping("/schedule/all")
+        public ResponseEntity<String> addSchedule() {
+            eventRepository.findAll().forEach(this::processEvent);
+            return ResponseEntity.ok("스케줄 추가 완료");
+        }
 
-    @Transactional
-    public void processEvent(Event event) {
-            //이벤트 출석 내역 불러옴
+        @Transactional
+        public void processEvent(Event event) {
+            log.info("이벤트 반영 시작 - eventId: {}", event.getId());
             List<Attendance> attendances = attendanceRepository.findAllByEventId(event.getId());
 
-            log.info("이벤트 반영 시작 - eventId : {} ", event.getId());
             for (Attendance attendance : attendances) {
-                log.info("출석 확인 시작 - eventId : {}", event.getId());
+                log.info("출석 확인 시작 - eventId: {}", event.getId());
                 User user = userRepository.findById(attendance.getPrivateId()).orElse(null);
-                if (user != null && attendance.isAttend()) { //출석했고 유저 있음
-                    if (user.getType().equals(UserType.VI)) {
-                        //이벤트 매칭 내역도 불러옴
-                        List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(attendance.getEventId(), user.getPrivateId());
-                        //히스토리 추가. 근데 이미 있는 이벤트면 추가 안함.
-                        for (Matching matching : matchings) {
-                            log.info("매칭 반영 시작 - eventId : {} ", event.getId());
-                            Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId()).orElse(null);
-                            if (partner != null) {
-                                if (!partner.getTrainingIds().contains(matching.getEventId()) && !partner.getContestIds().contains(matching.getEventId())) {
-                                    if (event.getType().equals(EventType.TRAINING)) {
-                                        partner.addTraining(matching.getEventId());
-                                        log.info("트레이닝 파트너 저장 - eventId : {} ", event.getId());
-                                        partnerRepository.save(partner);
-                                    } else {
-                                        log.info("대회 파트너 저장 - eventId : {} ", event.getId());
-                                        partner.addContest(matching.getEventId());
-                                        partnerRepository.save(partner);
-                                    }
-                                }
-                            } else {
-                                partner = Partner.builder()
-                                        .viId(matching.getViId())
-                                        .guideId(matching.getGuideId())
-                                        .contestIds(new ArrayList<>())
-                                        .trainingIds(new ArrayList<>())
-                                        .build();
-                                if (event.getType().equals(EventType.TRAINING)) {
-                                    log.info("트레이닝 파트너 저장2 - eventId : {} ", event.getId());
-                                    partner.addTraining(matching.getEventId());
-                                    partnerRepository.save(partner);
-                                } else {
-                                    log.info("대회 파트너 저장2 - eventId : {} ", event.getId());
-                                    partner.addContest(matching.getEventId());
-                                    partnerRepository.save(partner);
-                                }
-                            }
-                        }
-                    }
 
+                // 출석 여부와 사용자 존재 여부 확인
+                if (user == null || !attendance.isAttend()) {
+                    continue;
+                }
 
+                // NPE 방지를 위해 안전하게 비교
+                if (!UserType.VI.equals(user.getType())) {
+                    continue;
+                }
+
+                // 해당 사용자의 매칭 내역 불러오기
+                List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(attendance.getEventId(), user.getPrivateId());
+                for (Matching matching : matchings) {
+                    log.info("매칭 반영 시작 - eventId: {}", event.getId());
+
+                    // 파트너 조회. 존재하지 않으면 신규 생성
+                    Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
+                            .orElseGet(() -> Partner.builder()
+                                    .viId(matching.getViId())
+                                    .guideId(matching.getGuideId())
+                                    .contestIds(new ArrayList<>())
+                                    .trainingIds(new ArrayList<>())
+                                    .build());
+
+                    boolean isTraining = EventType.TRAINING.equals(event.getType());
+                    addEventToPartner(partner, matching.getEventId(), isTraining);
                 }
             }
+            log.info("이벤트 반영 완료 - eventId: {}", event.getId());
+        }
 
-        log.info("이벤트 반영 완료 - eventId : {} ", event.getId());
-    }
-
-
-    @Transactional
-    public void addEventToPartner(Partner partner, Long eventId, boolean isTraining) {
-        // 해당 이벤트가 이미 기록되어 있는지 체크 후 없으면 추가
-        List<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
-        if (!eventIds.contains(eventId)) {
-            if (isTraining) {
-                partner.addTraining(eventId);
+        /**
+         * 파트너 엔티티에 이벤트 id를 추가하는 메서드
+         * (이미 추가되어 있다면 추가하지 않습니다.)
+         */
+        @Transactional
+        public void addEventToPartner(Partner partner, Long eventId, boolean isTraining) {
+            List<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+            if (!eventIds.contains(eventId)) {
+                if (isTraining) {
+                    partner.addTraining(eventId);
+                    log.info("트레이닝 파트너 저장 - eventId: {}", eventId);
+                } else {
+                    partner.addContest(eventId);
+                    log.info("대회 파트너 저장 - eventId: {}", eventId);
+                }
+                partnerRepository.save(partner);
             } else {
-                partner.addContest(eventId);
+                log.info("파트너에 이미 해당 이벤트가 존재함 - eventId: {}", eventId);
             }
-            partnerRepository.save(partner);
         }
     }
 
-
-}
 
 
 
