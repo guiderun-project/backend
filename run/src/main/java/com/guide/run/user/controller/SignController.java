@@ -73,7 +73,6 @@ public class SignController {
         }
         if(!isExistCookie) {
             cookieService.createCookie("refreshToken", httpServletResponse, privateId);
-            log.info("로그인 후 쿠키 생성");
         }
 
         return LoginResponse.builder()
@@ -102,7 +101,6 @@ public class SignController {
         }
         if(!isExistCookie) {
             cookieService.createCookie("refreshToken", response, privateId);
-            log.info("카카오 로그인 후 쿠키 생성");
         }
 
 
