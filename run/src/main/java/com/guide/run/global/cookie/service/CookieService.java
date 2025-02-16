@@ -2,11 +2,11 @@ package com.guide.run.global.cookie.service;
 
 import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
@@ -22,18 +22,17 @@ public class CookieService {
                 .httpOnly(true)
                 .build();
 
+
         response.setHeader("Set-Cookie", cookie.toString());
     }
 
     public void deleteRefreshTokenCookie(HttpServletResponse response) {
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                .maxAge(0)
-                .path("/")
-                .sameSite("None")
-                .secure(true)
-                .httpOnly(true)
-                .build();
-        response.setHeader("Set-Cookie", deleteCookie.toString());
+        Cookie deleteCookie = new Cookie("refreshToken", null);
+        deleteCookie.setPath("/");
+        deleteCookie.setHttpOnly(true);
+        deleteCookie.setSecure(true);
+        deleteCookie.setMaxAge(0);
+        response.addCookie(deleteCookie);
     }
 
     public void deleteOldCookieAndMakeNewCookie(HttpServletResponse response, Cookie cookie) {
