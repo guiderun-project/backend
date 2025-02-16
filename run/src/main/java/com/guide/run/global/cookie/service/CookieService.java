@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 @RequiredArgsConstructor
 public class CookieService {
@@ -36,10 +38,16 @@ public class CookieService {
     }
 
     public void deleteOldCookieAndMakeNewCookie(HttpServletResponse response, Cookie cookie) {
+
+        Date expirationDate = jwtProvider.getExpirationFromRefreshToken(cookie.getValue());
+        long currentTimeMillis = System.currentTimeMillis();
+        int remainingTimeSeconds = (int) ((expirationDate.getTime() - currentTimeMillis) / 1000);
+
         Cookie updatedCookie = new Cookie("refreshToken", cookie.getValue());
         updatedCookie.setPath("/"); // 새 경로 설정
+
         // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
-        updatedCookie.setMaxAge(cookie.getMaxAge());
+        updatedCookie.setMaxAge(remainingTimeSeconds);
         updatedCookie.setHttpOnly(cookie.isHttpOnly());
         updatedCookie.setSecure(cookie.getSecure());
 
