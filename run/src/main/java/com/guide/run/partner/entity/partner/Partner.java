@@ -34,4 +34,11 @@ public class Partner extends BaseEntity {
         this.trainingIds.add(eventId);
     }
 
+    public void removeContest(Long eventId){
+        this.contestIds.remove(eventId);
+    }
+    public void removeTraining(Long eventId){
+        this.trainingIds.remove(eventId);
+    }
+
 }
