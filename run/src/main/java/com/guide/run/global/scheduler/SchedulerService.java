@@ -265,7 +265,7 @@ public class SchedulerService {
                     schedule.changeEventStatus(ScheduleStatus.END);
                     schedule.changeRecruitStatus(ScheduleStatus.END);
                     //파트너, 출석 반영
-                    setEventResult(e);
+                    //setEventResult(e);
                     scheduleRepository.delete(schedule);//이벤트 종료 후 스케줄 삭제
                 }
             }finally {
@@ -337,93 +337,6 @@ public class SchedulerService {
         }
     }
 
-
-    //이벤트 파트너, 참여인원 반영
-    @Transactional
-    public void setEventResult(Event e){
-        log.info("setEventResult");
-        int viCnt = 0;
-        int guideCnt = 0;
-
-        //출석 리스트
-        List<Attendance> attendances = attendanceRepository.getAttendanceTrue(e.getId(), true);
-
-        for(Attendance a : attendances){
-
-            //출석한 유저 찾기
-            User user = userRepository.findById(a.getPrivateId()).orElse(null);
-
-            if(user!=null) {
-                if (user.getType().equals(UserType.VI)) {
-                    //참여 vi 수 증가
-                    viCnt += 1;
-                    setPartnerList(e, user);//파트너 정보 반영
-
-                } else if (user.getType().equals(UserType.GUIDE)) {
-                    guideCnt += 1;
-                }
-
-                //참여 이벤트 개수 반영
-                if (e.getType().equals(EventType.TRAINING)) {
-                    user.addTrainingCnt(1);
-                } else if (e.getType().equals(EventType.COMPETITION)) {
-                    user.addContestCnt(1);
-                }
-
-                userRepository.save(user);
-            }
-        }
-
-        //참여 인원 반영
-        e.setCnt(viCnt, guideCnt);
-        eventRepository.save(e);
-    }
-
-
-    private void setPartnerList(Event e, User vi){
-        log.info("setPartnerList");
-        //매칭은 어차피 vi만 찾아서 반영하면 됨.
-        List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(e.getId(), vi.getPrivateId());
-
-        for(Matching m : matchingList){
-            User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElse(null);
-            if(guide!=null){
-                Partner partner = partnerRepository.findByViIdAndGuideId(vi.getPrivateId(),guide.getPrivateId()).orElse(null);
-                if(partner !=null){//파트너 정보가 이미 있을 때
-                    //log.info("기존 파트너 있음");
-                    if(e.getType().equals(EventType.TRAINING)){
-                        //log.info("트레이닝 파트너 추가");
-                        partner.addTraining(e.getId());
-                    }else if(e.getType().equals(EventType.COMPETITION)){
-                        //log.info("대회 파트너 추가");
-                        partner.addContest(e.getId());
-                    }
-                    partnerRepository.save(partner);
-
-                }else{//파트너 정보가 없을 때
-                    List<Long> contestIds = new ArrayList<>();
-                    List<Long> trainingIds = new ArrayList<>();
-
-                    if(e.getType().equals(EventType.COMPETITION)){
-                        //log.info("대회 파트너 추가");
-                        contestIds.add(e.getId());
-                    }else if(e.getType().equals(EventType.TRAINING)){
-                        //log.info("트레이닝 파트너 추가");
-                        trainingIds.add(e.getId());
-                    }
-                    partnerRepository.save(
-                            Partner.builder()
-                                    .viId(vi.getPrivateId())
-                                    .guideId(guide.getPrivateId())
-                                    .contestIds(contestIds)
-                                    .trainingIds(trainingIds)
-                                    .build()
-                    );
-                }
-            }
-
-        }
-    }
 
     private Instant toInstant(LocalDateTime localDateTime){
         return localDateTime.atZone(KOREA).toInstant();

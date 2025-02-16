@@ -54,14 +54,4 @@ public class TestController {
         return "생성 완료";
     }
 
-    @GetMapping("event/schedule/{eventId}")
-    public String eventSchedule(@PathVariable Long eventId){
-        Event test = eventRepository.findById(eventId).orElse(null);
-        if(test!=null){
-            schedulerService.setEventResult(test);
-        }
-
-        return "성공";
-    }
-
 }
