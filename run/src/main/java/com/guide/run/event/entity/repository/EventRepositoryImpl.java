@@ -1,21 +1,14 @@
 package com.guide.run.event.entity.repository;
 
-import com.guide.run.admin.dto.EventDto;
 import com.guide.run.event.entity.Event;
-
-import com.guide.run.event.entity.QEvent;
-import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
 import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
-import com.guide.run.event.entity.dto.response.get.*;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
+import com.guide.run.event.entity.dto.response.get.MyEvent;
+import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
-import com.guide.run.global.converter.TimeFormatter;
-import com.guide.run.global.exception.UnknownException;
-import com.guide.run.partner.entity.matching.QMatching;
-import com.guide.run.partner.entity.partner.QPartner;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -28,9 +21,6 @@ import java.util.List;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
-import static com.guide.run.partner.entity.matching.QMatching.matching;
-import static com.guide.run.partner.entity.partner.QPartner.partner;
-import static com.guide.run.user.entity.user.QUser.user;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class EventRepositoryImpl implements EventRepositoryCustom{
@@ -56,7 +46,11 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.eq(eventRecruitStatus).and(event.isApprove.eq(true)).and(event.startTime.year().eq(year)))
+                    .where(event.recruitStatus.eq(eventRecruitStatus)
+                            .and(event.isApprove.eq(true))
+                            .and(event.startTime.year().eq(year))
+                            .and(event.id.eq(eventForm.eventId))
+                            .and(eventForm.privateId.eq(privateId)))
                     .orderBy(event.endTime.desc())
                     .offset(0)
                     .limit(4)
@@ -73,7 +67,11 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.ne(RECRUIT_END).and(event.isApprove.eq(true)).and(event.startTime.year().eq(year)))
+                    .where(event.recruitStatus.ne(RECRUIT_END)
+                            .and(event.isApprove.eq(true))
+                            .and(event.startTime.year().eq(year))
+                            .and(event.id.eq(eventForm.eventId))
+                            .and(eventForm.privateId.eq(privateId)))
                     .orderBy(event.endTime.asc())
                     .offset(0)
                     .limit(4)
