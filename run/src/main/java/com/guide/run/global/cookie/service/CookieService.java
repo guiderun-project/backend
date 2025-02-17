@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CookieService {
@@ -39,6 +41,7 @@ public class CookieService {
         Cookie updatedCookie = new Cookie("refreshToken", cookie.getValue());
         updatedCookie.setPath("/"); // 새 경로 설정
         // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
+        log.error("쿠키만료시간 " +cookie.getMaxAge());
         updatedCookie.setMaxAge(cookie.getMaxAge());
         updatedCookie.setHttpOnly(cookie.isHttpOnly());
         updatedCookie.setSecure(cookie.getSecure());
