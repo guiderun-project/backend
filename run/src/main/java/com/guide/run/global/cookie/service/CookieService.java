@@ -14,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CookieService {
     private final JwtProvider jwtProvider;
+    int maxAge = 24 * 60 * 60 * 30;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
-        int maxAge = 24 * 60 * 60 * 30;
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
                 .maxAge(maxAge)
                 .sameSite("None")
@@ -42,7 +42,7 @@ public class CookieService {
         updatedCookie.setPath("/"); // 새 경로 설정
         // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
         log.error("쿠키만료시간 " +cookie.getMaxAge());
-        updatedCookie.setMaxAge(cookie.getMaxAge());
+        updatedCookie.setMaxAge(maxAge);
         updatedCookie.setHttpOnly(cookie.isHttpOnly());
         updatedCookie.setSecure(cookie.getSecure());
 
