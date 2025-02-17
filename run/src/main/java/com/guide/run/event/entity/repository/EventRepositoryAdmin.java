@@ -4,6 +4,7 @@ import com.guide.run.admin.dto.EventDto;
 import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.condition.EventSortCond;
+import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.AdminEventApplyItem;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
@@ -30,5 +31,7 @@ public interface EventRepositoryAdmin {
 
     List<EventHistoryDto> searchUserEventHistory(String privateId, String text, int start, int limit);
     long searchUserEventHistoryCount(String privateId, String text);
+
+    List<Guide1365Response> getGuide1365(long eventId);
 
 }

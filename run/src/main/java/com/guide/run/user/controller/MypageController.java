@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.dto.GlobalUserInfoDto;
+import com.guide.run.user.dto.request.Add1365Dto;
 import com.guide.run.user.dto.response.MyPageEventList;
 import com.guide.run.user.dto.response.MyPagePartnerList;
 import com.guide.run.user.dto.response.ProfileResponse;
@@ -88,5 +89,12 @@ public class MypageController {
     @GetMapping("event-type/count/{userId}")
     public ResponseEntity<EventTypeCountDto> getEventTypeCount(@PathVariable String userId){
         return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(userId));
+    }
+
+    @PostMapping("/personal/1365id")
+    public ResponseEntity<String> add1365(HttpServletRequest httpServletRequest, @RequestBody Add1365Dto add1365Dto){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        mypageService.add1365(add1365Dto.getId1365(), privateId);
+        return ResponseEntity.ok().body("");
     }
 }

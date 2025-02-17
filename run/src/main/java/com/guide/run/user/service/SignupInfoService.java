@@ -206,7 +206,8 @@ public class SignupInfoService {
                 dto.getIsOpenNumber(),
                 dto.getAge(),
                 dto.getSnsId(),
-                dto.getIsOpenSns()
+                dto.getIsOpenSns(),
+                dto.getId1365()
         );
 
         return PersonalInfoDto.userToInfoDto(user);

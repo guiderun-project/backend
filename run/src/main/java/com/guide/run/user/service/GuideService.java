@@ -61,6 +61,7 @@ public class GuideService {
                     .isOpenSns(guideSignupDto.getIsOpenSns())
                     .role(Role.ROLE_WAIT)
                     .type(UserType.GUIDE)
+                    .id1365(guideSignupDto.getId1365())
                     .build();
 
             Guide guideInfo = Guide.builder()

@@ -59,4 +59,6 @@ public class GuideSignupDto {
     private boolean privacy;
     @NotNull
     private boolean portraitRights;
+
+    private String id1365;
 }

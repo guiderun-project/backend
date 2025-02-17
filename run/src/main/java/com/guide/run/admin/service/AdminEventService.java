@@ -6,6 +6,7 @@ import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.request.ApprovalEvent;
+import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.AbsentDto;
 import com.guide.run.admin.dto.response.event.AdminEventApplyList;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
@@ -148,6 +149,10 @@ public class AdminEventService {
         return Count.builder()
                 .count(eventFormRepository.getEventApplyCount(eventId))
                 .build();
+    }
+
+    public List<Guide1365Response> getGuide1365(long eventId){
+        return eventRepository.getGuide1365(eventId);
     }
 
 

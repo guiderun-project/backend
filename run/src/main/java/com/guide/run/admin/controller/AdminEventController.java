@@ -4,12 +4,15 @@ import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.request.ApprovalEvent;
+import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.*;
 import com.guide.run.admin.service.AdminEventService;
 import com.guide.run.event.entity.dto.response.get.Count;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -116,5 +119,11 @@ public class AdminEventController {
         return ResponseEntity.ok(adminEventService.getEventApplyCount(eventId));
     }
 
+
+    @GetMapping("/event/{eventId}/guide/1365id")
+    public ResponseEntity<List<Guide1365Response>> getGuide1365(@PathVariable long eventId){
+
+        return ResponseEntity.ok(adminEventService.getGuide1365(eventId));
+    }
 
 }
