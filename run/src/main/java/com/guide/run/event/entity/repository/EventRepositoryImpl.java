@@ -113,7 +113,10 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
+                .where(
+                        event.id.eq(eventForm.eventId),
+                        eventForm.privateId.eq(privateId),
+                        event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
                 .orderBy(event.startTime.desc())
                 .fetch();
 
@@ -126,7 +129,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
-                        .and(eventForm.privateId.eq(privateId)))
+                        .and(eventForm.privateId.eq(privateId))
+                        .and(eventForm.eventId.eq(event.id)))
                 .fetchOne();
     }
 
@@ -141,7 +145,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
-                        .and(eventForm.privateId.eq(privateId)))
+                        .and(eventForm.privateId.eq(privateId))
+                        .and(eventForm.eventId.eq(event.id)))
                 .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
@@ -149,14 +154,17 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public List<MyEventDday> getMyEventDday(String userId) {
+    public List<MyEventDday> getMyEventDday(String privateId) {
         return queryFactory.select(Projections.constructor(MyEventDday.class,
                 event.name.as("name"),
                 event.startTime.as("dDay")))
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(userId))
-                .where(event.recruitStatus.ne(RECRUIT_END).and(event.isApprove.eq(true)))
+                        eventForm.privateId.eq(privateId))
+                .where(event.recruitStatus.ne(RECRUIT_END)
+                        .and(event.isApprove.eq(true))
+                        .and(eventForm.eventId.eq(event.id))
+                        .and(eventForm.privateId.eq(privateId)))
                 .orderBy(event.startTime.asc())
                 .limit(2)
                 .fetch();

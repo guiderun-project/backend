@@ -38,7 +38,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
     @Override
     public long countMyEventAfterYear(String privateId, String kind, int year) {
         long count = queryFactory.select(event.count())
-                .from(event, eventForm)
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(
                         //privateId 조건 처리
                         eventForm.privateId.eq(privateId),
@@ -68,7 +69,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 formattedDate(event.startTime).as("date"),
                                 event.recruitStatus)
                 )
-                .from(event, eventForm)
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(
                         //privateId 조건 처리
                         eventForm.privateId.eq(privateId),
@@ -163,7 +165,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.name.as("name"),
                         formattedDate(event.startTime).as("startDate"),
                         event.recruitStatus))
-                .from(event, eventForm)
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
                         eventHistoryCond(kind))
@@ -179,7 +182,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
         long count = queryFactory
                 .select(event.count())
-                .from(event, eventForm)
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
                         eventHistoryCond(kind))
@@ -254,7 +258,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                         event.recruitStatus))
                 .from(event)
                 .leftJoin(eventForm).on(eventForm.eventId.eq(event.id))
-                .where(eventForm.privateId.eq(privateId),
+                .where(eventForm.eventId.eq(event.id),
+                        eventForm.privateId.eq(privateId),
                         event.isApprove.ne(false),
                         (event.name.contains(text))
                         )
@@ -270,8 +275,10 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
         long count = queryFactory
                 .select(event.count())
-                .from(event, eventForm)
-                .where(eventForm.privateId.eq(privateId),
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(
+                        eventForm.privateId.eq(privateId),
                         eventForm.eventId.eq(event.id),
                         event.isApprove.ne(false),
                         (event.name.contains(text))
