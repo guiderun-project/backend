@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -22,9 +24,9 @@ public class Partner extends BaseEntity {
     private String guideId;
 
     @Convert(converter = LongListConverter.class)
-    private List<Long> contestIds = new ArrayList<>();
+    private Set<Long> contestIds = new HashSet<>();
     @Convert(converter = LongListConverter.class)
-    private List<Long> trainingIds = new ArrayList<>();
+    private Set<Long> trainingIds = new HashSet<>();
 
     public void addContest(Long eventId){
         this.contestIds.add(eventId);
