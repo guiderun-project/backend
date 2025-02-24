@@ -31,7 +31,7 @@ public class ImgService {
                 imgUrl = s3Uploader.upload(file, "user");
                 user.editImg(imgUrl);
                 if(user.getImg()!=null) {
-                    s3Uploader.deleteBeforeFile(user.getImg());
+                    s3Uploader.deleteFile(user.getImg());
                 }
                 return imgUrl;
             }catch (Exception e){
