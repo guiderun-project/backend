@@ -230,12 +230,10 @@ public class EventAttendService {
     public void removeEventPartner(Partner partner, Long eventId, boolean isTraining) {
      Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
 
+        // null이면 그냥 리턴하거나 초기화 후 처리
         if (eventIds == null) {
-            if (isTraining) {
-                partner.resetTraining();
-            } else {
-                partner.resetContest();
-            }
+            log.info("파트너에 해당 이벤트가 존재하지 않음 : {}", eventId);
+            return;
         }
 
      if (eventIds.contains(eventId)) {
