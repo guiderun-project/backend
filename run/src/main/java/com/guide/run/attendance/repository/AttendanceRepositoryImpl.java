@@ -1,10 +1,11 @@
 package com.guide.run.attendance.repository;
 
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.event.entity.QEventForm.eventForm;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
+import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfo;
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.user.entity.type.UserType;
