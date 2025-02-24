@@ -47,7 +47,8 @@ public class TMPController {
 
     @Transactional
     public void processEvent(Event event) {
-        if (event == null || event.getId() == null) {
+
+        if (event == null || event.getId() == null || event.getId() <=31) {
             log.warn("유효하지 않은 이벤트가 전달됨. event: {}", event);
             return;
         }

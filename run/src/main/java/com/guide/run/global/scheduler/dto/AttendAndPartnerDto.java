@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor
@@ -17,16 +18,16 @@ public class AttendAndPartnerDto {
     private String partnerId;
     private UserType userType;
     private boolean isAttend;
-    private List<Long> trainingIds;
-    private List<Long> contestIds;
+    private Set<Long> trainingIds;
+    private Set<Long> contestIds;
 
     public AttendAndPartnerDto(String privateId,
                                UserType type,
                                String viId,
                                String guideId,
                                boolean isAttend,
-                               List<Long> trainingIds,
-                               List<Long> contestIds) {
+                               Set<Long> trainingIds,
+                               Set<Long> contestIds) {
         this.privateId = privateId;
 
         if(type.equals(UserType.VI)){

@@ -46,7 +46,7 @@ public class EventAttendService {
         if(attendance.isAttend()){
             if(user.getType().equals(UserType.VI)){
                 setAttendViPartnerList(eventId, user);
-            }else{
+            }else if(user.getType().equals(UserType.GUIDE)){
                 setAttendGuidePartner(eventId, user);
             }
             attendanceRepository.save(
@@ -62,7 +62,7 @@ public class EventAttendService {
         else{
             if(user.getType().equals(UserType.VI)){
                 setNotAttendViPartnerList(eventId, user);
-            }else{
+            }else if(user.getType().equals(UserType.GUIDE)){
                 setNotAttendGuidePartner(eventId, user);
             }
             attendanceRepository.save(
