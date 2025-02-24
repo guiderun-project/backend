@@ -1,13 +1,17 @@
 package com.guide.run.partner.entity.partner;
 
-import com.guide.run.global.converter.LongListConverter;
+import com.guide.run.global.converter.SetStringConverter;
 import com.guide.run.global.entity.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -23,9 +27,9 @@ public class Partner extends BaseEntity {
     @Id
     private String guideId;
 
-    @Convert(converter = LongListConverter.class)
+    @Convert(converter = SetStringConverter.class)
     private Set<Long> contestIds = new HashSet<>();
-    @Convert(converter = LongListConverter.class)
+    @Convert(converter = SetStringConverter.class)
     private Set<Long> trainingIds = new HashSet<>();
 
     public void addContest(Long eventId){
