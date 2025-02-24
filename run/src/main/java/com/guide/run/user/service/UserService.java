@@ -321,6 +321,7 @@ public class UserService {
                 .role(Role.ROLE_DELETE)
                 .snsId(null)
                 .isOpenSns(false)
+                .type(userType)
                 .trainingCnt(0)
                 .competitionCnt(0)
                 .img(null)
