@@ -90,6 +90,7 @@ public class S3Uploader {
             //String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
             log.info("Deleting file from S3: " + fileName);
             log.info("file name is" + fileName.substring(cloudFrontUrl.length()));
+            log.info("file name is" + fileName.substring(cloudFrontUrl.length()-1));
             amazonS3.deleteObject(bucket, fileName.substring(cloudFrontUrl.length()));
         }
         catch (Exception e) {
