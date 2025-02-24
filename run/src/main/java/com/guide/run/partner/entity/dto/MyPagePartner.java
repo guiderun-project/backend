@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -30,8 +31,8 @@ public class MyPagePartner {
                          UserType type,
                          String name,
                          String recordDegree,
-                         List<Long> trainingIds,
-                         List<Long> contestIds,
+                         Set<Long> trainingIds,
+                         Set<Long> contestIds,
                          long like,
                          String sendId,
                          String privateId ) {
