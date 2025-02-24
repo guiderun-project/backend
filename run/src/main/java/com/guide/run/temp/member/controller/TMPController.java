@@ -2,6 +2,7 @@ package com.guide.run.temp.member.controller;
 
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
+import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
@@ -34,16 +35,21 @@ import java.util.Set;
         private final EventRepository eventRepository;
         private final MatchingRepository matchingRepository;
         private final PartnerRepository partnerRepository;
+        private final AttendService attendService;
 
         @GetMapping("/schedule/all")
         public ResponseEntity<String> addSchedule() {
             eventRepository.findAll().forEach(this::processEvent);
+            userRepository.findAll().forEach(user -> {
+                attendService.countAttendEvent(user.getPrivateId());
+            });
             return ResponseEntity.ok("스케줄 추가 완료");
         }
 
         @Transactional
         public void processEvent(Event event) {
             log.info("이벤트 반영 시작 - eventId: {}", event.getId());
+            attendService.countAttendUser(event.getId(), true);
             List<Attendance> attendances = attendanceRepository.findAllByEventId(event.getId());
 
             for (Attendance attendance : attendances) {
@@ -106,6 +112,8 @@ import java.util.Set;
                 log.info("파트너에 이미 해당 이벤트가 존재함 - eventId: {}", eventId);
             }
         }
+
+
     }
 
 
