@@ -3,7 +3,6 @@ package com.guide.run.global.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,16 +87,17 @@ public class S3Uploader {
     public void deleteFile(String fileName) {
         try {
             // URL 디코딩을 통해 원래의 파일 이름을 가져옴.
-            String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            log.info("Deleting file from S3: " + decodedFileName);
-            amazonS3.deleteObject(bucket, decodedFileName);
-        } catch (UnsupportedEncodingException e) {
+            //String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
+            log.info("Deleting file from S3: " + fileName);
+            log.info("file name is" + fileName.substring(cloudFrontUrl.length()-1));
+            amazonS3.deleteObject(bucket, fileName.substring(cloudFrontUrl.length()-1));
+        }
+        catch (Exception e) {
             log.error("Error while decoding the file name: {}", e.getMessage());
         }
-    }
-
-    public void deleteBeforeFile(String fileName){
-        DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName.substring(cloudFrontUrl.length()-1));
-        amazonS3.deleteObject(request);
+        /*
+        catch (UnsupportedEncodingException e) {
+            log.error("Error while decoding the file name: {}", e.getMessage());
+        }*/
     }
 }
