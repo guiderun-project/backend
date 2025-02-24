@@ -201,6 +201,15 @@ public class EventAttendService {
     @Transactional
     public void addEventPartner(Partner partner, Long eventId, boolean isTraining) {
         Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+
+        if (eventIds == null) {
+            if (isTraining) {
+                partner.resetTraining();
+            } else {
+                partner.resetContest();
+            }
+        }
+
         if (!eventIds.contains(eventId)) {
             if (isTraining) {
                 partner.addTraining(eventId);
@@ -220,6 +229,15 @@ public class EventAttendService {
     @Transactional
     public void removeEventPartner(Partner partner, Long eventId, boolean isTraining) {
      Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+
+        if (eventIds == null) {
+            if (isTraining) {
+                partner.resetTraining();
+            } else {
+                partner.resetContest();
+            }
+        }
+
      if (eventIds.contains(eventId)) {
          if(isTraining){
              partner.removeTraining(eventId);

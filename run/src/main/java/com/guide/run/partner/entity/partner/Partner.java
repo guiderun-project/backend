@@ -47,4 +47,12 @@ public class Partner extends BaseEntity {
         this.trainingIds.remove(eventId);
     }
 
+    public void resetTraining(){
+        this.trainingIds = new HashSet<>();
+    }
+
+    public void resetContest(){
+        this.contestIds = new HashSet<>();
+    }
+
 }
