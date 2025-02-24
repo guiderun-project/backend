@@ -1,6 +1,7 @@
 package com.guide.run.event.service;
 
 
+import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Comment;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
@@ -23,13 +24,12 @@ import com.guide.run.global.exception.event.dto.NotValidEventStartException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.global.scheduler.SchedulerService;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
-import com.guide.run.temp.member.entity.Attendance;
-import com.guide.run.temp.member.repository.AttendanceRepository;
+import com.guide.run.attendance.entity.Attendance;
+import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
@@ -62,6 +62,8 @@ public class EventService {
     private final EventCommentRepository eventCommentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final EventLikeRepository eventLikeRepository;
+
+    private final AttendService attendService;
 
 
     @Transactional
@@ -288,7 +290,7 @@ public class EventService {
             throw new NotEventOrganizerException();
     }
 
-    //todo : 파트너 정보 팝업에 추가
+
     @Transactional
     public EventPopUpResponse eventPopUp(Long eventId, String privateId) {
         User user = userRepository.findUserByPrivateId(privateId).
@@ -297,6 +299,9 @@ public class EventService {
         Event event = eventRepository.findById(eventId).orElseThrow(
                 NotExistEventException::new
         );
+        
+        //출석 인원 반영
+        attendService.countAttendUser(eventId,true);
 
         //개최자 찾기
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElse(null);
@@ -411,7 +416,13 @@ public class EventService {
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
+
+        //출석 인원 반영
+        attendService.countAttendUser(eventId,true);
+
         DetailEvent detailEvent;
+
+
         List<EventDetailPartner> eventDetailPartnerList =new ArrayList<>();
         boolean isCheckOrganizer = false;
         if(organizer.getPrivateId().equals(privateId))
@@ -592,4 +603,5 @@ public class EventService {
         }
         return detailEvent;
     }
+
 }

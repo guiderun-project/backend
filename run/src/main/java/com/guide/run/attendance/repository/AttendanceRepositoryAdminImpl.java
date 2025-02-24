@@ -1,4 +1,4 @@
-package com.guide.run.temp.member.repository;
+package com.guide.run.attendance.repository;
 
 import com.guide.run.admin.dto.response.event.AbsentDto;
 import com.guide.run.user.entity.type.UserType;

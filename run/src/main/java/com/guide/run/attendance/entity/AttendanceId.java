@@ -1,4 +1,4 @@
-package com.guide.run.temp.member.entity;
+package com.guide.run.attendance.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

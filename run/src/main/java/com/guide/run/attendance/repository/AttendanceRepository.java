@@ -1,7 +1,7 @@
-package com.guide.run.temp.member.repository;
+package com.guide.run.attendance.repository;
 
-import com.guide.run.temp.member.entity.Attendance;
-import com.guide.run.temp.member.entity.AttendanceId;
+import com.guide.run.attendance.entity.Attendance;
+import com.guide.run.attendance.entity.AttendanceId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,4 +16,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Attendan
 
     List<Attendance> findAllByEventIdAndIsAttend(long eventId, boolean attend);
     List<Attendance> findAllByEventId(Long eventId);
+
+    List<Attendance> findAllByPrivateIdAndIsAttend(String privateId,boolean isAttend);
 }
