@@ -54,7 +54,7 @@ public class EventAttendService {
                             .eventId(eventId)
                             .privateId(user.getPrivateId())
                             .isAttend(false)
-                            .date(null)
+                            .date(LocalDateTime.now())
                             .build()
             );
 
