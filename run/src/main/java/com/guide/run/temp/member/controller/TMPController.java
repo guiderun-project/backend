@@ -65,7 +65,7 @@ public class TMPController {
             User user = userRepository.findById(attendance.getPrivateId()).orElse(null);
 
             // 사용자 존재 여부 및 출석 여부 체크
-            if (user == null) {
+            if (user == null || user.getType() == null) {
                 log.warn("사용자 정보 없음 - privateId: {}", attendance.getPrivateId());
                 continue;
             }
