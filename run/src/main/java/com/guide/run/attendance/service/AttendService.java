@@ -34,7 +34,7 @@ public class AttendService {
         List<Attendance> attendances = attendanceRepository.findAllByEventIdAndIsAttend(eventId, isAttend);
         for(Attendance attendance : attendances) {
             User user = userRepository.findById(attendance.getPrivateId()).orElse(null);
-            if(user != null) {
+            if(user != null && user.getType() != null) {
                 if(user.getType().equals(UserType.VI)){
                     viCnt++;
                 }else if(user.getType().equals(UserType.GUIDE)){
