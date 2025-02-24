@@ -30,6 +30,9 @@ public class ImgService {
             try{
                 imgUrl = s3Uploader.upload(file, "user");
                 user.editImg(imgUrl);
+                if(user.getImg()!=null) {
+                    s3Uploader.deleteBeforeFile(user.getImg());
+                }
                 return imgUrl;
             }catch (Exception e){
                 throw new RuntimeException("이미지 저장 실패");

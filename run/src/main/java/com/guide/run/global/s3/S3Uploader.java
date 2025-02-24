@@ -3,6 +3,7 @@ package com.guide.run.global.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,5 +94,10 @@ public class S3Uploader {
         } catch (UnsupportedEncodingException e) {
             log.error("Error while decoding the file name: {}", e.getMessage());
         }
+    }
+
+    public void deleteBeforeFile(String fileName){
+        DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName.substring(cloudFrontUrl.length()-2));
+        amazonS3.deleteObject(request);
     }
 }
