@@ -75,9 +75,9 @@ public class User extends BaseEntity {
         this.recordDegree = recordDegree;
     }
 
-    public void editUserCnt(CntDTO cntDTO){
-        this.trainingCnt += cntDTO.getTrainingCnt();
-        this.competitionCnt += cntDTO.getCompetitionCnt();
+    public void editUserCnt(int trainingCnt, int competitionCnt){
+        this.trainingCnt = trainingCnt;
+        this.competitionCnt = competitionCnt;
     }
 
     public void addTrainingCnt(int trainingCnt){

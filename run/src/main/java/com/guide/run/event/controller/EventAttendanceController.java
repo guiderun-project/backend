@@ -6,7 +6,6 @@ import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
 import com.guide.run.event.service.EventAttendService;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.temp.member.repository.AttendanceRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

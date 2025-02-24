@@ -1,6 +1,7 @@
 package com.guide.run.partner.entity.partner.repository;
 
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
+import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.entity.type.UserType;
@@ -14,9 +15,9 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class PartnerRepositoryImpl implements PartnerRepositoryCustom{

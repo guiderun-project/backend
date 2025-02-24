@@ -5,10 +5,10 @@ import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
+import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
-import com.guide.run.temp.member.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Order;
@@ -22,10 +22,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
