@@ -45,9 +45,9 @@ public class EventAttendService {
         Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
         if(attendance.isAttend()){
             if(user.getType().equals(UserType.VI)){
-                setAttendViPartnerList(eventId, user);
+                setNotAttendViPartnerList(eventId, user);
             }else if(user.getType().equals(UserType.GUIDE)){
-                setAttendGuidePartner(eventId, user);
+                setNotAttendGuidePartner(eventId, user);
             }
             attendanceRepository.save(
                     Attendance.builder()
@@ -61,9 +61,9 @@ public class EventAttendService {
         }
         else{
             if(user.getType().equals(UserType.VI)){
-                setNotAttendViPartnerList(eventId, user);
+                setAttendViPartnerList(eventId, user);
             }else if(user.getType().equals(UserType.GUIDE)){
-                setNotAttendGuidePartner(eventId, user);
+                setAttendGuidePartner(eventId, user);
             }
             attendanceRepository.save(
                     Attendance.builder()
