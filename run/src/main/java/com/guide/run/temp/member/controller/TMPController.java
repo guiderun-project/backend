@@ -1,5 +1,7 @@
 package com.guide.run.temp.member.controller;
 
+import com.guide.run.attendance.entity.Attendance;
+import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
@@ -7,8 +9,6 @@ import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
-import com.guide.run.attendance.entity.Attendance;
-import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-    @RestController
+@RestController
     @RequiredArgsConstructor
     @RequestMapping("/tmp")
     @Log4j2
@@ -64,17 +65,22 @@ import java.util.List;
                 for (Matching matching : matchings) {
                     log.info("매칭 반영 시작 - eventId: {}", event.getId());
 
-                    // 파트너 조회. 존재하지 않으면 신규 생성
-                    Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
-                            .orElseGet(() -> Partner.builder()
-                                    .viId(matching.getViId())
-                                    .guideId(matching.getGuideId())
-                                    .contestIds(new ArrayList<>())
-                                    .trainingIds(new ArrayList<>())
-                                    .build());
+                    boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(event.getId(), matching.getGuideId()).isAttend();
 
-                    boolean isTraining = EventType.TRAINING.equals(event.getType());
-                    addEventToPartner(partner, matching.getEventId(), isTraining);
+                    //출석한 파트너인지 확인
+                    if(isAttend) {
+                        // 파트너 조회. 존재하지 않으면 신규 생성
+                        Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
+                                .orElseGet(() -> Partner.builder()
+                                        .viId(matching.getViId())
+                                        .guideId(matching.getGuideId())
+                                        .contestIds(new HashSet<>())
+                                        .trainingIds(new HashSet<>())
+                                        .build());
+
+                        boolean isTraining = EventType.TRAINING.equals(event.getType());
+                        addEventToPartner(partner, matching.getEventId(), isTraining);
+                    }
                 }
             }
             log.info("이벤트 반영 완료 - eventId: {}", event.getId());
@@ -86,7 +92,7 @@ import java.util.List;
          */
         @Transactional
         public void addEventToPartner(Partner partner, Long eventId, boolean isTraining) {
-            List<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+            Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
             if (!eventIds.contains(eventId)) {
                 if (isTraining) {
                     partner.addTraining(eventId);

@@ -104,12 +104,85 @@ public class EventAttendService {
     public void setAttendPartnerList(long eventId, User vi){
         log.info("setAttendPartnerList - privateId : {}", vi.getPrivateId());
         Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+        //매칭된 회원 조회
+        List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, vi.getPrivateId());
+        for (Matching matching : matchings) {
+
+            boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getGuideId()).isAttend();
+
+            //출석한 파트너일 경우
+            if(isAttend){
+                // 파트너 조회. 존재하지 않으면 신규 생성
+                Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
+                        .orElseGet(() -> Partner.builder()
+                                .viId(matching.getViId())
+                                .guideId(matching.getGuideId())
+                                .contestIds(new HashSet<>())
+                                .trainingIds(new HashSet<>())
+                                .build());
+
+                boolean isTraining = EventType.TRAINING.equals(e.getType());
+                addEventPartner(partner, matching.getEventId(), isTraining);
+            }
+
+        }
 
     }
 
     @Transactional
     public void setNotAttendPartnerList(long eventId, User vi){
         log.info("setNotAttendPartnerList - privateId : {}", vi.getPrivateId());
+        Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+
+        //매칭된 회원 조회
+        List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, vi.getPrivateId());
+        for (Matching matching : matchings) {
+            // 파트너 조회 후 해당 이벤트가 있으면 삭제.
+            Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId()).orElse(null);
+
+            if(partner!=null){
+                boolean isTraining = EventType.TRAINING.equals(e.getType());
+                removeEventPartner(partner, matching.getEventId(), isTraining);
+            }
+        }
+
+    }
+
+    @Transactional
+    public void addEventPartner(Partner partner, Long eventId, boolean isTraining) {
+        Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+        if (!eventIds.contains(eventId)) {
+            if (isTraining) {
+                partner.addTraining(eventId);
+                log.info("트레이닝 파트너 저장 - eventId: {}", eventId);
+            } else {
+                partner.addContest(eventId);
+                log.info("대회 파트너 저장 - eventId: {}", eventId);
+            }
+            partnerRepository.save(partner);
+        } else {
+            log.info("파트너에 이미 해당 이벤트가 존재함 - eventId: {}", eventId);
+        }
+
+        partnerRepository.save(partner);
+    }
+
+    @Transactional
+    public void removeEventPartner(Partner partner, Long eventId, boolean isTraining) {
+     Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
+     if (eventIds.contains(eventId)) {
+         if(isTraining){
+             partner.removeTraining(eventId);
+             log.info("트레이닝 파트너 삭제 - eventId: {}", eventId);
+         }else{
+             partner.removeContest(eventId);
+             log.info("대회 파트너 삭제 - eventId: {}", eventId);
+         }
+     }else{
+         log.info("파트너에 해당 이벤트가 존재하지 않음 : {}", eventId);
+     }
+
+     partnerRepository.save(partner);
 
     }
 
