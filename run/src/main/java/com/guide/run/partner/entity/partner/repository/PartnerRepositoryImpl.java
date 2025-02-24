@@ -53,8 +53,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         )
                 )
                 .from(user)
-                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
-                .leftJoin(partner).on(getUserType(userType, privateId))
+                .join(partner).on(getUserType(userType, privateId))
                 .orderBy(
                         partnerSortCond(sort)
                 )
@@ -93,8 +92,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
                 .from(user)
-                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
-                .leftJoin(partner).on(getUserType(type,privateId))
+                .join(partner).on(getUserType(type,privateId))
                 .where(
                         getPartnerId(type),
                         getPartnerKind(kind)
@@ -136,8 +134,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
                 .from(user)
-                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
-                .leftJoin(partner).on(getUserType(type,privateId))
+                .join(partner).on(getUserType(type,privateId))
                 .where(
                         getPartnerId(type),
                         (user.name.contains(text)
