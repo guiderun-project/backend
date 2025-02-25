@@ -22,7 +22,7 @@ import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
 import static com.guide.run.user.entity.user.QUser.user;
 
-public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
+public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     public PartnerRepositoryImpl(EntityManager em) {
@@ -31,67 +31,56 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
 
     @Override
     public List<MyPagePartner> findMyPartner(String privateId, String sort, int limit, int start, UserType userType) {
-        List<MyPagePartner> result = queryFactory
-                .select(
-                        Projections.constructor(MyPagePartner.class,
-                                user.userId,
-                                user.img,
-                                user.role,
-                                user.type,
-                                user.name,
-                                user.recordDegree,
-                                partner.trainingIds,
-                                partner.contestIds,
-                                ExpressionUtils.as(
-                                        JPAExpressions.select(partnerLike.count())
-                                                .from(partnerLike)
-                                                .where(user.privateId.eq(partnerLike.recId)),"like" ),
-                                ExpressionUtils.as(
-                                        JPAExpressions.select(partnerLike.sendId)
-                                                .from(partnerLike)
-                                                .where(user.privateId.eq(partnerLike.recId),
-                                                        partnerLike.sendId.eq(privateId)),"sendId"),
-                                Expressions.constant(privateId)
-                        )
-                )
+        return queryFactory
+                .select(Projections.constructor(MyPagePartner.class,
+                        user.userId,
+                        user.img,
+                        user.role,
+                        user.type,
+                        user.name,
+                        user.recordDegree,
+                        partner.trainingIds,
+                        partner.contestIds,
+                        ExpressionUtils.as(
+                                JPAExpressions.select(partnerLike.count())
+                                        .from(partnerLike)
+                                        .where(user.privateId.eq(partnerLike.recId)), "like"),
+                        ExpressionUtils.as(
+                                JPAExpressions.select(partnerLike.sendId)
+                                        .from(partnerLike)
+                                        .where(user.privateId.eq(partnerLike.recId),
+                                                partnerLike.sendId.eq(privateId)), "sendId"),
+                        Expressions.constant(privateId)
+                ))
                 .from(partner)
-                .join(user).on(
-                        user.privateId.eq(
-                                userType.equals(UserType.GUIDE) ? partner.viId : partner.guideId
-                        )
-                )
+                .join(user).on(partnerUserJoin(userType))
                 .where(
-                        userType.equals(UserType.GUIDE)
-                                ? partner.guideId.eq(privateId)
-                                : partner.viId.eq(privateId),
+                        partnerUserWhere(userType, privateId),
                         getPartnerKind("all")
                 )
-                .orderBy(
-                        partnerSortCond(sort)
-                )
+                .orderBy(partnerSortCond(sort))
                 .offset(start)
                 .limit(limit)
                 .fetch();
-        return result;
     }
 
     @Override
     public long countMyPartner(String privateId, UserType userType) {
-        long size = queryFactory
+        Long count = queryFactory
                 .select(partner.count())
                 .from(partner)
-                .where(getUserType(userType, privateId),
-                        getPartnerKind("all"))
+                .where(
+                        partnerUserWhere(userType, privateId),
+                        getPartnerKind("all")
+                )
                 .fetchOne();
-        return size;
+        return count != null ? count : 0;
     }
-
 
     @Override
     public List<AdminPartnerResponse> getAdminPartner(String privateId, UserType type, String kind, int limit, int start) {
-        List<AdminPartnerResponse> responses = queryFactory
-                .select(Projections.constructor(
-                        AdminPartnerResponse.class,
+        return queryFactory
+                .select(Projections.constructor(AdminPartnerResponse.class,
                         user.userId,
                         user.img,
                         user.role,
@@ -101,52 +90,37 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         ExpressionUtils.as(
                                 JPAExpressions.select(partnerLike.count())
                                         .from(partnerLike)
-                                        .where(user.privateId.eq(partnerLike.recId)),"like" )
+                                        .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(
-                        user.privateId.eq(
-                                type.equals(UserType.GUIDE) ? partner.viId : partner.guideId
-                        )
-                )
+                .join(user).on(partnerUserJoin(type))
                 .where(
-                        type.equals(UserType.GUIDE)
-                                ? partner.guideId.eq(privateId)
-                                : partner.viId.eq(privateId),
-                        getPartnerKind("all")
+                        partnerUserWhere(type, privateId),
+                        getPartnerKind(kind)
                 )
                 .offset(start)
                 .limit(limit)
                 .orderBy(partner.updatedAt.desc())
                 .fetch();
-        return responses;
     }
 
     @Override
     public long countAdminPartner(String privateId, UserType type, String kind) {
-        long response = queryFactory
+        Long count = queryFactory
                 .select(partner.count())
                 .from(partner)
-                .join(user).on(
-                        user.privateId.eq(
-                                type.equals(UserType.GUIDE) ? partner.viId : partner.guideId
-                        )
-                )
                 .where(
-                        type.equals(UserType.GUIDE)
-                                ? partner.guideId.eq(privateId)
-                                : partner.viId.eq(privateId),
-                        getPartnerKind("all")
+                        partnerUserWhere(type, privateId),
+                        getPartnerKind(kind)
                 )
                 .fetchOne();
-        return response;
+        return count != null ? count : 0;
     }
 
     @Override
     public List<AdminPartnerResponse> searchAdminPartner(String privateId, UserType type, String text, int limit, int start) {
-        List<AdminPartnerResponse> responses = queryFactory
-                .select(Projections.constructor(
-                        AdminPartnerResponse.class,
+        return queryFactory
+                .select(Projections.constructor(AdminPartnerResponse.class,
                         user.userId,
                         user.img,
                         user.role,
@@ -156,102 +130,105 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         ExpressionUtils.as(
                                 JPAExpressions.select(partnerLike.count())
                                         .from(partnerLike)
-                                        .where(user.privateId.eq(partnerLike.recId)),"like" )
+                                        .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(getPartnerId(type))
+                .join(user).on(partnerUserJoin(type))
                 .where(
-                        getUserType(type, privateId),
-                        (user.name.contains(text)
-                                .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                        )
+                        partnerUserWhere(type, privateId),
+                        searchCondition(text)
                 )
                 .offset(start)
                 .limit(limit)
                 .orderBy(partner.updatedAt.desc())
                 .fetch();
-        return responses;
     }
 
     @Override
     public long searchAdminPartnerCount(String privateId, UserType type, String text) {
-        long count = queryFactory
+        Long count = queryFactory
                 .select(partner.count())
                 .from(partner)
+                .join(user).on(partnerUserJoin(type))
                 .where(
-                        getUserType(type, privateId),
-                        (user.name.contains(text)
-                                .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                                //todo : 검색 조건 추가 필요
-                        )
+                        partnerUserWhere(type, privateId),
+                        searchCondition(text)
                 )
                 .fetchOne();
-        return count;
+        return count != null ? count : 0;
     }
 
     @Override
     public List<AttendAndPartnerDto> getEndEventAttendanceAndPartner(long eventId) {
-        List<AttendAndPartnerDto> list = queryFactory.select(
-                        Projections.constructor(AttendAndPartnerDto.class,
-                                user.privateId,
-                                user.type,
-                                partner.viId,
-                                partner.guideId,
-                                attendance.isAttend,
-                                partner.trainingIds,
-                                partner.contestIds
-                        ))
+        return queryFactory
+                .select(Projections.constructor(AttendAndPartnerDto.class,
+                        user.privateId,
+                        user.type,
+                        partner.viId,
+                        partner.guideId,
+                        attendance.isAttend,
+                        partner.trainingIds,
+                        partner.contestIds
+                ))
                 .from(attendance)
                 .leftJoin(user).on(user.privateId.eq(attendance.privateId))
                 .leftJoin(partner).on(getUserType2(user.type, user.privateId))
-                .where(attendance.isAttend.eq(true),
-                        attendance.eventId.eq(eventId))
+                .where(
+                        attendance.isAttend.eq(true),
+                        attendance.eventId.eq(eventId)
+                )
                 .fetch();
-        return list;
     }
 
-    private BooleanExpression getPartnerId(UserType type){
-        if(type.equals(UserType.GUIDE)){
-            return partner.viId.eq(user.privateId);
-        }else if(type.equals(UserType.VI)){
-            return partner.guideId.eq(user.privateId);
-        }else{
-            return null;
-        }
+    // ── HELPER METHODS ──
+
+    /**
+     * 조인 조건: 사용자 타입에 따라 partner와 user의 연결 조건을 결정.
+     * - GUIDE: partner.viId = user.privateId
+     * - VI: partner.guideId = user.privateId
+     */
+    private BooleanExpression partnerUserJoin(UserType type) {
+        return user.privateId.eq(type.equals(UserType.GUIDE) ? partner.viId : partner.guideId);
     }
 
-    private BooleanExpression getUserType(UserType type, String privateId){
-        if(type.equals(UserType.GUIDE)){
-            return partner.guideId.eq(privateId);
-        } else {
-            return partner.viId.eq(privateId);
-        }
+    /**
+     * where 조건: 현재 사용자의 partner 데이터 필터링.
+     * - GUIDE: partner.guideId = privateId
+     * - VI: partner.viId = privateId
+     */
+    private BooleanExpression partnerUserWhere(UserType type, String privateId) {
+        return type.equals(UserType.GUIDE)
+                ? partner.guideId.eq(privateId)
+                : partner.viId.eq(privateId);
     }
 
-    private BooleanExpression getUserType2(EnumPath<UserType> type, StringPath privateId){
-        if(type.equals(UserType.GUIDE)){
-            return partner.guideId.eq(privateId);
-        } else {
-            return partner.viId.eq(privateId);
-        }
+    /**
+     * 검색 조건: user의 이름 또는 recordDegree에 텍스트가 포함되는지 확인.
+     */
+    private BooleanExpression searchCondition(String text) {
+        return user.name.contains(text)
+                .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()));
     }
 
-    private OrderSpecifier partnerSortCond(String sort){
-        if(sort.equals("RECENT")){ //최근순
-            return partner.updatedAt.desc();
-        }else if(sort.equals("COUNT")){ //많이 뛴 순
-            return partner.updatedAt.desc();
-        }
+    /**
+     * 정렬 조건: 현재는 RECENT와 COUNT 모두 partner.updatedAt의 내림차순 정렬.
+     */
+    private OrderSpecifier<?> partnerSortCond(String sort) {
         return partner.updatedAt.desc();
     }
 
-    private BooleanExpression getPartnerKind(String kind){
-        if(kind.equals("COMPETITON")){
+    /**
+     * 파트너의 종류 조건:
+     * - "COMPETITON": contestIds에 값이 있는 경우
+     * - "TRAINING": trainingIds에 값이 있는 경우
+     * - 그 외("all" 또는 null): 두 컬럼 중 하나라도 값이 있으면.
+     */
+    private BooleanExpression getPartnerKind(String kind) {
+        if ("COMPETITON".equals(kind)) {
             return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.contestIds);
-        } else if (kind.equals("TRAINING")) {
+        } else if ("TRAINING".equals(kind)) {
             return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.trainingIds);
         } else {
-            // kind가 null이거나 기타 값인 경우, 두 필드 중 하나라도 값이 존재하면 조회
             return Expressions.booleanTemplate(
                     "COALESCE(LENGTH({0}), 0) > 0 or COALESCE(LENGTH({1}), 0) > 0",
                     partner.trainingIds, partner.contestIds
@@ -259,4 +236,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         }
     }
 
+    /**
+     * getEndEventAttendanceAndPartner에서 partner와 조인할 때 사용하는 조건.
+     */
+    private BooleanExpression getUserType2(EnumPath<UserType> type, StringPath privateId) {
+        return type.equals(UserType.GUIDE)
+                ? partner.guideId.eq(privateId)
+                : partner.viId.eq(privateId);
+    }
 }
