@@ -32,7 +32,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public List<MyPagePartner> findMyPartner(String privateId, String sort, int limit, int start, UserType userType) {
         return queryFactory
-                .select(Projections.constructor(MyPagePartner.class,
+                .selectDistinct(Projections.constructor(MyPagePartner.class,
                         user.userId,
                         user.img,
                         user.role,
@@ -53,7 +53,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                         Expressions.constant(privateId)
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(userType))
+                .join(user)
                 .where(
                         partnerUserWhere(userType, privateId),
                         getPartnerKind("all")
@@ -67,7 +67,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public long countMyPartner(String privateId, UserType userType) {
         Long count = queryFactory
-                .select(partner.count())
+                .selectDistinct(partner.count())
                 .from(partner)
                 .where(
                         partnerUserWhere(userType, privateId),
@@ -80,7 +80,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public List<AdminPartnerResponse> getAdminPartner(String privateId, UserType type, String kind, int limit, int start) {
         return queryFactory
-                .select(Projections.constructor(AdminPartnerResponse.class,
+                .selectDistinct(Projections.constructor(AdminPartnerResponse.class,
                         user.userId,
                         user.img,
                         user.role,
@@ -93,7 +93,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         getPartnerKind(kind)
@@ -107,7 +107,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public long countAdminPartner(String privateId, UserType type, String kind) {
         Long count = queryFactory
-                .select(partner.count())
+                .selectDistinct(partner.count())
                 .from(partner)
                 .where(
                         partnerUserWhere(type, privateId),
@@ -120,7 +120,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public List<AdminPartnerResponse> searchAdminPartner(String privateId, UserType type, String text, int limit, int start) {
         return queryFactory
-                .select(Projections.constructor(AdminPartnerResponse.class,
+                .selectDistinct(Projections.constructor(AdminPartnerResponse.class,
                         user.userId,
                         user.img,
                         user.role,
@@ -133,7 +133,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         searchCondition(text)
@@ -147,9 +147,9 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public long searchAdminPartnerCount(String privateId, UserType type, String text) {
         Long count = queryFactory
-                .select(partner.count())
+                .selectDistinct(partner.count())
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         searchCondition(text)
@@ -161,7 +161,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public List<AttendAndPartnerDto> getEndEventAttendanceAndPartner(long eventId) {
         return queryFactory
-                .select(Projections.constructor(AttendAndPartnerDto.class,
+                .selectDistinct(Projections.constructor(AttendAndPartnerDto.class,
                         user.privateId,
                         user.type,
                         partner.viId,
