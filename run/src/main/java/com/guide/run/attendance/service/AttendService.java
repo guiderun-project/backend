@@ -28,8 +28,14 @@ public class AttendService {
 
     @Transactional
     public void countAttendUser(long eventId, boolean isAttend) {
+        if(eventId<=44){
+            return;
+        }
+
         int viCnt = 0;
         int guideCnt = 0;
+
+
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         List<Attendance> attendances = attendanceRepository.findAllByEventIdAndIsAttend(eventId, isAttend);
         for(Attendance attendance : attendances) {

@@ -139,7 +139,6 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         getPartnerId(type),
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                                //todo : 검색 조건 추가 필요
                                 )
                 )
                 .offset(start)
