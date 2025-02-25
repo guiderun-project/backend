@@ -68,7 +68,7 @@ public class SignController {
             for(Cookie cookie: httpServletRequest.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
                     //기존 쿠키 만료 처리 및 새 쿠키 생성
-                    cookieService.deleteOldCookieAndMakeNewCookie(httpServletResponse, cookie);
+                    cookieService.deleteOldCookieAndMakeNewCookie(privateId,httpServletResponse, cookie);
                     isExistCookie=true;
                 }
             }
@@ -97,7 +97,7 @@ public class SignController {
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){
                 if(cookie.getName().equals("refreshToken")){
-                    cookieService.deleteOldCookieAndMakeNewCookie(response, cookie);
+                    cookieService.deleteOldCookieAndMakeNewCookie(privateId,response, cookie);
                     isExistCookie=true;
                 }
             }
@@ -164,7 +164,7 @@ public class SignController {
                         boolean isExist = userService.getUserStatus(privateId);
 
                         //기존 쿠키 만료 처리 및 새 쿠키 생성
-                        cookieService.deleteOldCookieAndMakeNewCookie(response, cookie);
+                        cookieService.deleteOldCookieAndMakeNewCookie(privateId,response, cookie);
 
                         // 유효한 토큰인 경우 엑세스 토큰 재발급
                         return ReissuedAccessTokenDto.builder()
