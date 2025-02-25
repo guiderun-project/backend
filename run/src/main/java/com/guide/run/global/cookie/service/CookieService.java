@@ -1,6 +1,8 @@
 package com.guide.run.global.cookie.service;
 
 import com.guide.run.global.jwt.JwtProvider;
+import com.guide.run.global.redis.RefreshToken;
+import com.guide.run.global.redis.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,11 +11,14 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CookieService {
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
     int maxAge = 24 * 60 * 60 * 30;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))
@@ -37,20 +42,23 @@ public class CookieService {
         response.addCookie(deleteCookie);
     }
 
-    public void deleteOldCookieAndMakeNewCookie(HttpServletResponse response, Cookie cookie) {
+    public void deleteOldCookieAndMakeNewCookie(String privateId,HttpServletResponse response, Cookie cookie) {
         Cookie updatedCookie = new Cookie("refreshToken", cookie.getValue());
         updatedCookie.setPath("/"); // 새 경로 설정
         // 기존 쿠키의 설정을 그대로 반영 (만료시간, HttpOnly, Secure 등)
-        log.error("쿠키만료시간 " +cookie.getMaxAge());
         updatedCookie.setMaxAge(maxAge);
-        updatedCookie.setHttpOnly(cookie.isHttpOnly());
-        updatedCookie.setSecure(cookie.getSecure());
+        updatedCookie.setHttpOnly(true);
+        updatedCookie.setSecure(true);
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
+        if(!oldRefreshToken.isEmpty()){
+            jwtProvider.deleteRefreshToken(oldRefreshToken.get());
+        }
 
         //기존 쿠키 삭제
         Cookie deleteCookie = new Cookie("refreshToken", null);
         deleteCookie.setPath("/api/oauth/login");
-        deleteCookie.setHttpOnly(cookie.isHttpOnly());
-        deleteCookie.setSecure(cookie.getSecure());
+        deleteCookie.setHttpOnly(true);
+        deleteCookie.setSecure(true);
         deleteCookie.setMaxAge(0);
 
         response.addCookie(deleteCookie);
