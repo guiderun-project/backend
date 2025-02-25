@@ -58,7 +58,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         partnerSortCond(sort)
                 )
                 .where(
-                        getPartnerId(userType))
+                        getPartnerId(userType),
+                        getPartnerKind("all"))
                 .offset(start)
                 .limit(limit)
                 .fetch();
@@ -70,7 +71,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         long size = queryFactory
                 .select(partner.count())
                 .from(partner)
-                .where(getUserType(userType, privateId))
+                .where(getUserType(userType, privateId),
+                        getPartnerKind("all"))
                 .fetchOne();
         return size;
     }
