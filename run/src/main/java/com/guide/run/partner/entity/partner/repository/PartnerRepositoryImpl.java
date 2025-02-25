@@ -7,16 +7,19 @@ import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EnumPath;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
