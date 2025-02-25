@@ -7,16 +7,19 @@ import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EnumPath;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.partner.entity.partner.QPartner.partner;
 import static com.guide.run.partner.entity.partner.QPartnerLike.partnerLike;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
@@ -51,12 +54,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 Expressions.constant(privateId)
                         )
                 )
-                .from(partner)
-                .join(user).on(getUserType(userType, privateId).and(user.privateId.eq(privateId)))
+                .from(partner, user)
                 .orderBy(
                         partnerSortCond(sort)
                 )
                 .where(
+                        getUserType(userType, privateId),
                         getPartnerId(userType),
                         getPartnerKind("all"))
                 .offset(start)
@@ -93,9 +96,9 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner)
-                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
+                .from(partner, user)
                 .where(
+                        getUserType(type, privateId),
                         getPartnerId(type),
                         getPartnerKind(kind)
                 )
@@ -135,14 +138,13 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner)
-                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
+                .from(partner,user)
                 .where(
+                        getUserType(type, privateId),
                         getPartnerId(type),
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                        ),
-                        getUserType(type, privateId)
+                        )
                 )
                 .offset(start)
                 .limit(limit)
