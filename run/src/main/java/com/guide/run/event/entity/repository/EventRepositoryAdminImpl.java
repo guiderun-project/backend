@@ -111,8 +111,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 event.isApprove.as("approval"),
                                 event.maxNumV.as("minNumV"),
                                 event.maxNumG.as("minNumG"),
-                                formattedDate(event.updatedAt).as("update_date"),
-                                formattedTime(event.updatedAt).as("update_time")
+                                formattedDate(event.createdAt).as("update_date"),
+                                formattedTime(event.createdAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -209,8 +209,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 event.isApprove.as("approval"),
                                 event.maxNumV.as("minNumV"),
                                 event.maxNumG.as("minNumG"),
-                                formattedDate(event.updatedAt).as("update_date"),
-                                formattedTime(event.updatedAt).as("update_time")
+                                formattedDate(event.createdAt).as("update_date"),
+                                formattedTime(event.createdAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -321,7 +321,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
 
         if (cond.getTime()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
         }
 
         if (cond.getOrganizer()==0) {
@@ -345,7 +345,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if (cond.getTime()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.createdAt));
         }
 
         if (cond.getOrganizer()==1) {
@@ -353,7 +353,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if(cond.getOrganizer()==2 && cond.getTime()==2 && cond.getApproval()==2 && cond.getName()==2){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);

@@ -45,10 +45,10 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
     @Override
     public List<UserItem> sortAdminUser(int start, int limit, UserSortCond cond) {
         StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , user.updatedAt
+                , user.createdAt
                 , ConstantImpl.create("%Y-%m-%d"));
         StringExpression formattedTime = Expressions.stringTemplate("FUNCTION('TIME_FORMAT', {0}, {1})"
-                , user.updatedAt
+                , user.createdAt
                 , ConstantImpl.create("%H:%i:%s"));
 
         List<UserItem> userItems = queryFactory
@@ -93,10 +93,10 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
     @Override
     public List<UserItem> searchAdminUser(int start, int limit, UserSortCond cond, String text) {
         StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , user.updatedAt
+                , user.createdAt
                 , ConstantImpl.create("%Y-%m-%d"));
         StringExpression formattedTime = Expressions.stringTemplate("FUNCTION('TIME_FORMAT', {0}, {1})"
-                , user.updatedAt
+                , user.createdAt
                 , ConstantImpl.create("%H:%i:%s"));
 
         List<UserItem> userItems = queryFactory
@@ -206,7 +206,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
 
         if (cond.getTime()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.createdAt));
         }
 
         if (cond.getType()==0) {
@@ -230,7 +230,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
         }
 
         if (cond.getTime()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.createdAt));
         }
 
         if (cond.getGender()==1) {
@@ -246,7 +246,7 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
         if (cond.getTime()==2 && cond.getApproval()==2 && cond.getType()==2
                 && cond.getName_team()==2&& cond.getGender()==2) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.createdAt));
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
