@@ -53,7 +53,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                         Expressions.constant(privateId)
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(userType))
+                .join(user)
                 .where(
                         partnerUserWhere(userType, privateId),
                         getPartnerKind("all")
@@ -93,7 +93,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         getPartnerKind(kind)
@@ -133,7 +133,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         searchCondition(text)
@@ -149,7 +149,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
         Long count = queryFactory
                 .selectDistinct(partner.count())
                 .from(partner)
-                .join(user).on(partnerUserJoin(type))
+                .join(user)
                 .where(
                         partnerUserWhere(type, privateId),
                         searchCondition(text)
