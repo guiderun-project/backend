@@ -52,12 +52,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 Expressions.constant(privateId)
                         )
                 )
-                .from(partner)
-                .join(user).on(getUserType(userType, privateId).and(user.privateId.eq(privateId)))
+                .from(partner, user)
                 .orderBy(
                         partnerSortCond(sort)
                 )
                 .where(
+                        getUserType(userType, privateId),
                         getPartnerId(userType),
                         getPartnerKind("all"))
                 .offset(start)
@@ -94,9 +94,9 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner)
-                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
+                .from(partner, user)
                 .where(
+                        getUserType(type, privateId),
                         getPartnerId(type),
                         getPartnerKind(kind)
                 )
@@ -136,14 +136,13 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner)
-                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
+                .from(partner,user)
                 .where(
+                        getUserType(type, privateId),
                         getPartnerId(type),
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                        ),
-                        getUserType(type, privateId)
+                        )
                 )
                 .offset(start)
                 .limit(limit)
