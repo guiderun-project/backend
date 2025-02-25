@@ -54,13 +54,13 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 Expressions.constant(privateId)
                         )
                 )
-                .from(partner, user)
+                .from(partner)
+                .join(user).on(getPartnerId(userType))
                 .orderBy(
                         partnerSortCond(sort)
                 )
                 .where(
                         getUserType(userType, privateId),
-                        getPartnerId(userType),
                         getPartnerKind("all"))
                 .offset(start)
                 .limit(limit)
@@ -96,10 +96,10 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner, user)
+                .from(partner)
+                .join(user).on(getPartnerId(type))
                 .where(
                         getUserType(type, privateId),
-                        getPartnerId(type),
                         getPartnerKind(kind)
                 )
                 .offset(start)
@@ -138,10 +138,10 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(partner,user)
+                .from(partner)
+                .join(user).on(getPartnerId(type))
                 .where(
                         getUserType(type, privateId),
-                        getPartnerId(type),
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
                         )
