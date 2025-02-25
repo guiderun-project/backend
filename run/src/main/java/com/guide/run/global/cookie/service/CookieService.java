@@ -49,10 +49,10 @@ public class CookieService {
         updatedCookie.setMaxAge(maxAge);
         updatedCookie.setHttpOnly(true);
         updatedCookie.setSecure(true);
-        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
+        /*Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
         if(!oldRefreshToken.isEmpty()){
             jwtProvider.deleteRefreshToken(oldRefreshToken.get());
-        }
+        }*/
 
         //기존 쿠키 삭제
         Cookie deleteCookie = new Cookie("refreshToken", null);
