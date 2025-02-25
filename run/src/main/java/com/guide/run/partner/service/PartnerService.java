@@ -1,9 +1,11 @@
 package com.guide.run.partner.service;
 
+import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
@@ -55,15 +57,19 @@ public class PartnerService {
     @Transactional
     public void setAttendViPartnerList(long eventId, User vi){
         log.info("setAttendPartnerList - privateId : {}", vi.getPrivateId());
-        Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+        Event e = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         //매칭된 회원 조회
         List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, vi.getPrivateId());
         for (Matching matching : matchings) {
 
-            boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getGuideId()).isAttend();
+            Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getGuideId());
+
+            if(attendance==null){
+                continue;
+            }
 
             //출석한 파트너일 경우
-            if(isAttend){
+            if(attendance.isAttend()){
                 // 파트너 조회. 존재하지 않으면 신규 생성
                 Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
                         .orElseGet(() -> Partner.builder()
@@ -84,15 +90,19 @@ public class PartnerService {
     @Transactional
     public void setAttendGuidePartner(long eventId, User guide){
         log.info("setAttendGuidePartner - privateId : {}", guide.getPrivateId());
-        Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+        Event e = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         //매칭된 회원 조회
         Matching matching = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
 
         if(matching!=null){
-            boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getViId()).isAttend();
+            Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getGuideId());
+
+            if(attendance==null){
+                return;
+            }
 
             //vi가 출석했다면 파트너 추가
-            if(isAttend){
+            if(attendance.isAttend()){
                 // 파트너 조회. 존재하지 않으면 신규 생성
                 Partner partner = partnerRepository.findByViIdAndGuideId(matching.getViId(), matching.getGuideId())
                         .orElseGet(() -> Partner.builder()
@@ -112,7 +122,7 @@ public class PartnerService {
     @Transactional
     public void setNotAttendViPartnerList(long eventId, User vi){
         log.info("setNotAttendPartnerList - privateId : {}", vi.getPrivateId());
-        Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+        Event e = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         //매칭된 회원 조회
         List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, vi.getPrivateId());
@@ -131,7 +141,7 @@ public class PartnerService {
     @Transactional
     public void setNotAttendGuidePartner(long eventId, User guide){
         log.info("notAttendGuidePartner - privateId : {}", guide.getPrivateId());
-        Event e = eventRepository.findById(eventId).orElseThrow(NotExistUserException::new);
+        Event e = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         Matching matching = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
         if(matching!=null){

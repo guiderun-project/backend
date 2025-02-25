@@ -1,5 +1,6 @@
 package com.guide.run.event.service;
 
+import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.form.Form;
@@ -83,10 +84,12 @@ public class EventMatchingService {
         }
 
         //출석 되어 있으면 파트너 반영.
-        boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId()).isAttend();
-        if(isAttend) {
+        Attendance a = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+
+        if(a!=null && a.isAttend()){
             partnerService.setAttendGuidePartner(eventId, guide);
         }
+
 
     }
 
@@ -249,11 +252,13 @@ public class EventMatchingService {
                             .build()
             );
 
-            //파트너 반영 추가
-            boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId()).isAttend();
-            if(isAttend) {
+            //출석 되어 있으면 파트너 반영.
+            Attendance a = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+
+            if(a!=null && a.isAttend()){
                 partnerService.setAttendGuidePartner(eventId, guide);
             }
+
 
             Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
             if(!findVi.isEmpty()){
