@@ -28,7 +28,7 @@ public class AttendService {
 
     @Transactional
     public void countAttendUser(long eventId, boolean isAttend) {
-        if(eventId<=31){
+        if(eventId<=44){
             return;
         }
 
