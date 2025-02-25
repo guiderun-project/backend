@@ -1,5 +1,6 @@
 package com.guide.run.event.service;
 
+import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.form.Form;
 import com.guide.run.event.entity.dto.response.match.*;
@@ -11,6 +12,7 @@ import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
+import com.guide.run.partner.service.PartnerService;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -29,6 +31,9 @@ public class EventMatchingService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventFormRepository eventFormRepository;
+    private final PartnerService partnerService;
+    private final AttendanceRepository attendanceRepository;
+
     @Transactional
     public void matchUser(Long eventId, String viId, String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
@@ -48,8 +53,14 @@ public class EventMatchingService {
                                 .privateId(unMatchingVi.getPrivateId())
                                 .build()
                 );
+
+                //unMatching vi의 파트너 삭제 추가
+                partnerService.setNotAttendViPartnerList(eventId, unMatchingVi);
+
             }
         }
+
+
         matchingRepository.save(
                 Matching.builder()
                         .eventId(eventId)
@@ -66,8 +77,15 @@ public class EventMatchingService {
                         .build()
         );
         Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
+
         if(!findVi.isEmpty()){
             unMatchingRepository.delete(findVi.get());
+        }
+
+        //출석 되어 있으면 파트너 반영.
+        boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId()).isAttend();
+        if(isAttend) {
+            partnerService.setAttendGuidePartner(eventId, guide);
         }
 
     }
@@ -77,6 +95,7 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         String privateId = user.getPrivateId();
+
         if(user.getType()==UserType.VI){
             List<Matching> allMatching = matchingRepository.findAllByEventIdAndViId(eventId, privateId);
             for(Matching m : allMatching){
@@ -95,6 +114,10 @@ public class EventMatchingService {
                             .eventId(eventId)
                             .build()
             );
+
+            //vi 파트너 삭제 추가
+            partnerService.setNotAttendViPartnerList(eventId, user);
+
         }else{
             Matching m = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
             matchingRepository.delete(m);
@@ -105,6 +128,9 @@ public class EventMatchingService {
                             .build()
             );
             matchingRepository.flush();
+
+            //파트너 삭제 추가
+            partnerService.setNotAttendGuidePartner(eventId, user);
 
             if(matchingRepository.findAllByEventIdAndViId(eventId,m.getViId()).size()==0){
                 unMatchingRepository.save(
@@ -206,6 +232,7 @@ public class EventMatchingService {
             Form guideForm = guideList.get(0);
             User guide = userRepository.findUserByUserId(guideForm.getUserId()).orElseThrow(NotExistUserException::new);
             User vi = userRepository.findUserByUserId(viList.get(i).getUserId()).orElseThrow(NotExistUserException::new);
+
             matchingRepository.save(
                     Matching.builder()
                             .eventId(eventId)
@@ -221,6 +248,13 @@ public class EventMatchingService {
                             .privateId(guide.getPrivateId())
                             .build()
             );
+
+            //파트너 반영 추가
+            boolean isAttend = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId()).isAttend();
+            if(isAttend) {
+                partnerService.setAttendGuidePartner(eventId, guide);
+            }
+
             Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
             if(!findVi.isEmpty()){
                 unMatchingRepository.delete(findVi.get());
