@@ -167,7 +167,6 @@ public class PartnerService {
                 partner.addContest(eventId);
                 log.info("대회 파트너 저장 - eventId: {}", eventId);
             }
-            partnerRepository.save(partner);
         } else {
             log.info("파트너에 이미 해당 이벤트가 존재함 - eventId: {}", eventId);
         }
