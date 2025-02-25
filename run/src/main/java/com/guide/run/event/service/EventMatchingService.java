@@ -240,30 +240,33 @@ public class EventMatchingService {
             User guide = userRepository.findUserByUserId(guideForm.getUserId()).orElseThrow(NotExistUserException::new);
             User vi = userRepository.findUserByUserId(viList.get(i).getUserId()).orElseThrow(NotExistUserException::new);
 
-            matchingRepository.save(
-                    Matching.builder()
-                            .eventId(eventId)
-                            .guideId(guide.getPrivateId())
-                            .viId(vi.getPrivateId())
-                            .viRecord(viList.get(i).getApplyRecord())
-                            .guideRecord(guideForm.getApplyRecord())
-                            .build()
-            );
-            unMatchingRepository.delete(
-                    UnMatching.builder()
-                            .eventId(eventId)
-                            .privateId(guide.getPrivateId())
-                            .build()
-            );
+            Matching existMatching = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
+            if(existMatching==null) {
+                matchingRepository.save(
+                        Matching.builder()
+                                .eventId(eventId)
+                                .guideId(guide.getPrivateId())
+                                .viId(vi.getPrivateId())
+                                .viRecord(viList.get(i).getApplyRecord())
+                                .guideRecord(guideForm.getApplyRecord())
+                                .build()
+                );
+                unMatchingRepository.delete(
+                        UnMatching.builder()
+                                .eventId(eventId)
+                                .privateId(guide.getPrivateId())
+                                .build()
+                );
+
+                Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
+                if(!findVi.isEmpty()){
+                    unMatchingRepository.delete(findVi.get());
+                }
+            }
 
             //출석 되어 있으면 파트너 반영.
             updatePartnerOnAttendance(eventId, guide);
 
-
-            Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
-            if(!findVi.isEmpty()){
-                unMatchingRepository.delete(findVi.get());
-            }
             guideList.remove(0);
             startIdx++;
         }
