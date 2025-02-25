@@ -174,16 +174,6 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                 .fetch();
     }
 
-    // ── HELPER METHODS ──
-
-    /**
-     * 조인 조건: 사용자 타입에 따라 partner와 user의 연결 조건을 결정.
-     * - GUIDE: partner.viId = user.privateId
-     * - VI: partner.guideId = user.privateId
-     */
-    private BooleanExpression partnerUserJoin(UserType type) {
-        return user.privateId.eq(type.equals(UserType.GUIDE) ? partner.viId : partner.guideId);
-    }
 
     /**
      * where 조건: 현재 사용자의 partner 데이터 필터링.
