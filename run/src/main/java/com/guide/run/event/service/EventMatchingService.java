@@ -102,6 +102,9 @@ public class EventMatchingService {
 
         if(user.getType()==UserType.VI){
             List<Matching> allMatching = matchingRepository.findAllByEventIdAndViId(eventId, privateId);
+            //vi 파트너 삭제 추가
+            partnerService.setNotAttendViPartnerList(eventId, user);
+
             for(Matching m : allMatching){
                 matchingRepository.delete(m);
                 unMatchingRepository.save(
@@ -119,11 +122,14 @@ public class EventMatchingService {
                             .build()
             );
 
-            //vi 파트너 삭제 추가
-            partnerService.setNotAttendViPartnerList(eventId, user);
+
 
         }else{
             Matching m = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
+
+            //파트너 삭제 추가
+            partnerService.setNotAttendGuidePartner(eventId, user);
+
             matchingRepository.delete(m);
             unMatchingRepository.save(
                     UnMatching.builder()
@@ -132,9 +138,6 @@ public class EventMatchingService {
                             .build()
             );
             matchingRepository.flush();
-
-            //파트너 삭제 추가
-            partnerService.setNotAttendGuidePartner(eventId, user);
 
             if(matchingRepository.findAllByEventIdAndViId(eventId,m.getViId()).size()==0){
                 unMatchingRepository.save(
