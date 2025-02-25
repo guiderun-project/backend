@@ -176,10 +176,8 @@ public class PartnerService {
 
     @Transactional
     public void removeEventPartner(Partner partner, Long eventId, boolean isTraining) {
-        Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
-
         try {
-
+            Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
             if (eventIds.contains(eventId)) {
                 if (isTraining) {
                     partner.removeTraining(eventId);
