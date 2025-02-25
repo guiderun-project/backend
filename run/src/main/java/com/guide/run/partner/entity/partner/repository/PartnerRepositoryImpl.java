@@ -57,7 +57,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                 .orderBy(
                         partnerSortCond(sort)
                 )
-                .where(getPartnerId(userType))
+                .where(
+                        getPartnerId(userType))
                 .offset(start)
                 .limit(limit)
                 .fetch();
@@ -228,7 +229,11 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         } else if (kind.equals("TRAINING")) {
             return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.trainingIds);
         } else {
-            return null;
+            // kind가 null이거나 기타 값인 경우, 두 필드 중 하나라도 값이 존재하면 조회
+            return Expressions.booleanTemplate(
+                    "COALESCE(LENGTH({0}), 0) > 0 or COALESCE(LENGTH({1}), 0) > 0",
+                    partner.trainingIds, partner.contestIds
+            );
         }
     }
 
