@@ -182,8 +182,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
      */
     private BooleanExpression getPartnerId(UserType type) {
         return type.equals(UserType.GUIDE)
-                ? partner.guideId.eq(user.privateId)
-                : partner.viId.eq(user.privateId);
+                ? partner.viId.eq(user.privateId)
+                : partner.guideId.eq(user.privateId);
     }
 
     /**
