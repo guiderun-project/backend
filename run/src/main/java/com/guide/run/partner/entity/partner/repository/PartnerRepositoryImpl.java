@@ -52,13 +52,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                 Expressions.constant(privateId)
                         )
                 )
-                .from(user)
-                .join(partner).on(getUserType(userType, privateId))
+                .from(partner)
+                .join(user).on(getUserType(userType, privateId).and(user.privateId.eq(privateId)))
                 .orderBy(
                         partnerSortCond(sort)
                 )
                 .where(
-                        getUserType(userType, privateId),
                         getPartnerId(userType),
                         getPartnerKind("all"))
                 .offset(start)
@@ -95,12 +94,11 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(user)
-                .join(partner).on(getUserType(type,privateId))
+                .from(partner)
+                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
                 .where(
                         getPartnerId(type),
-                        getPartnerKind(kind),
-                        getUserType(type, privateId)
+                        getPartnerKind(kind)
                 )
                 .offset(start)
                 .limit(limit)
@@ -138,8 +136,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
-                .from(user)
-                .join(partner).on(getUserType(type,privateId))
+                .from(partner)
+                .join(user).on(getUserType(type, privateId).and(user.privateId.eq(privateId)))
                 .where(
                         getPartnerId(type),
                         (user.name.contains(text)
@@ -164,8 +162,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
                                 //todo : 검색 조건 추가 필요
-                        ),
-                        getUserType(type, privateId)
+                        )
                 )
                 .fetchOne();
         return count;
@@ -205,10 +202,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
     private BooleanExpression getUserType(UserType type, String privateId){
         if(type.equals(UserType.GUIDE)){
             return partner.guideId.eq(privateId);
-        } else if (type.equals(UserType.VI)) {
+        } else {
             return partner.viId.eq(privateId);
-        }else{
-            return null;
         }
     }
 
