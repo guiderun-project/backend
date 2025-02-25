@@ -44,6 +44,9 @@ public class EventMatchingService {
         EventForm guideForm = eventFormRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
         Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
         if(existGuide!=null){
+            //existGuide의 파트너 삭제 추가
+            partnerService.setNotAttendGuidePartner(eventId, guide);
+
             matchingRepository.delete(existGuide);
             long countMatchedGuideForVi = matchingRepository.countByEventIdAndViId(eventId, existGuide.getViId());
             if(countMatchedGuideForVi==0){
@@ -59,6 +62,8 @@ public class EventMatchingService {
                 partnerService.setNotAttendViPartnerList(eventId, unMatchingVi);
 
             }
+
+
         }
 
 
