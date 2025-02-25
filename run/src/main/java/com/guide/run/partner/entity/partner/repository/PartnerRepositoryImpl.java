@@ -58,6 +58,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         partnerSortCond(sort)
                 )
                 .where(
+                        getUserType(userType, privateId),
                         getPartnerId(userType),
                         getPartnerKind("all"))
                 .offset(start)
@@ -98,7 +99,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                 .join(partner).on(getUserType(type,privateId))
                 .where(
                         getPartnerId(type),
-                        getPartnerKind(kind)
+                        getPartnerKind(kind),
+                        getUserType(type, privateId)
                 )
                 .offset(start)
                 .limit(limit)
@@ -142,7 +144,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         getPartnerId(type),
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
-                                )
+                        ),
+                        getUserType(type, privateId)
                 )
                 .offset(start)
                 .limit(limit)
@@ -161,7 +164,8 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         (user.name.contains(text)
                                 .or(user.recordDegree.toUpperCase().contains(text.toUpperCase()))
                                 //todo : 검색 조건 추가 필요
-                        )
+                        ),
+                        getUserType(type, privateId)
                 )
                 .fetchOne();
         return count;
