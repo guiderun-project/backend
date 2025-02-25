@@ -55,13 +55,20 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                         )
                 )
                 .from(partner)
-                .join(user).on(getPartnerId(userType))
+                .join(user).on(
+                        user.privateId.eq(
+                                userType.equals(UserType.GUIDE) ? partner.viId : partner.guideId
+                        )
+                )
+                .where(
+                        userType.equals(UserType.GUIDE)
+                                ? partner.guideId.eq(privateId)
+                                : partner.viId.eq(privateId),
+                        getPartnerKind("all")
+                )
                 .orderBy(
                         partnerSortCond(sort)
                 )
-                .where(
-                        getUserType(userType, privateId),
-                        getPartnerKind("all"))
                 .offset(start)
                 .limit(limit)
                 .fetch();
@@ -97,10 +104,16 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
                                         .where(user.privateId.eq(partnerLike.recId)),"like" )
                 ))
                 .from(partner)
-                .join(user).on(getPartnerId(type))
+                .join(user).on(
+                        user.privateId.eq(
+                                type.equals(UserType.GUIDE) ? partner.viId : partner.guideId
+                        )
+                )
                 .where(
-                        getUserType(type, privateId),
-                        getPartnerKind(kind)
+                        type.equals(UserType.GUIDE)
+                                ? partner.guideId.eq(privateId)
+                                : partner.viId.eq(privateId),
+                        getPartnerKind("all")
                 )
                 .offset(start)
                 .limit(limit)
@@ -114,9 +127,16 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom{
         long response = queryFactory
                 .select(partner.count())
                 .from(partner)
+                .join(user).on(
+                        user.privateId.eq(
+                                type.equals(UserType.GUIDE) ? partner.viId : partner.guideId
+                        )
+                )
                 .where(
-                        getUserType(type, privateId),
-                        getPartnerKind(kind)
+                        type.equals(UserType.GUIDE)
+                                ? partner.guideId.eq(privateId)
+                                : partner.viId.eq(privateId),
+                        getPartnerKind("all")
                 )
                 .fetchOne();
         return response;
