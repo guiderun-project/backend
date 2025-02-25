@@ -27,6 +27,7 @@ import org.springframework.web.cors.CorsUtils;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 
 @Slf4j
@@ -64,6 +65,10 @@ public class JwtProvider {
                 .compact();
     }
     public String createRefreshToken(String privateId){
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
+        if(!oldRefreshToken.isEmpty()){
+            refreshTokenRepository.delete(oldRefreshToken.get());
+        }
         Date now = new Date();
        RefreshToken refreshToken= new RefreshToken(Jwts.builder()
                 .setIssuedAt(now)
