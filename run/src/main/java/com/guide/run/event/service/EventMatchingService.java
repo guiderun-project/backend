@@ -84,11 +84,7 @@ public class EventMatchingService {
         }
 
         //출석 되어 있으면 파트너 반영.
-        Attendance a = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
-
-        if(a!=null && a.isAttend()){
-            partnerService.setAttendGuidePartner(eventId, guide);
-        }
+        updatePartnerOnAttendance(eventId, guide);
 
 
     }
@@ -253,11 +249,7 @@ public class EventMatchingService {
             );
 
             //출석 되어 있으면 파트너 반영.
-            Attendance a = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
-
-            if(a!=null && a.isAttend()){
-                partnerService.setAttendGuidePartner(eventId, guide);
-            }
+            updatePartnerOnAttendance(eventId, guide);
 
 
             Optional<UnMatching> findVi = unMatchingRepository.findByPrivateIdAndEventId(vi.getPrivateId(),eventId);
@@ -270,10 +262,19 @@ public class EventMatchingService {
         return startIdx;
     }
 
+    private void updatePartnerOnAttendance(Long eventId, User guide) {
+        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+        if(attendance != null && attendance.isAttend()) {
+            partnerService.setAttendGuidePartner(eventId, guide);
+        }
+        }
+
     /*
     public int autoMatchBetweenTwoGroup(List<Form> vi,List<Form> guide){
 
         return vi.size();
     }
     */
+
+
 }
