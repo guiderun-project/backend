@@ -178,20 +178,26 @@ public class PartnerService {
     public void removeEventPartner(Partner partner, Long eventId, boolean isTraining) {
         Set<Long> eventIds = isTraining ? partner.getTrainingIds() : partner.getContestIds();
 
-        if (eventIds.contains(eventId)) {
-            if(isTraining){
-                partner.removeTraining(eventId);
-                log.info("트레이닝 파트너 삭제 - eventId: {}", eventId);
-            }else{
-                partner.removeContest(eventId);
-                log.info("대회 파트너 삭제 - eventId: {}", eventId);
+        try {
+
+            if (eventIds.contains(eventId)) {
+                if (isTraining) {
+                    partner.removeTraining(eventId);
+                    log.info("트레이닝 파트너 삭제 - eventId: {}", eventId);
+                } else {
+                    partner.removeContest(eventId);
+                    log.info("대회 파트너 삭제 - eventId: {}", eventId);
+                }
+            } else {
+                log.info("파트너에 해당 이벤트가 존재하지 않음 : {}", eventId);
             }
-        }else{
-            log.info("파트너에 해당 이벤트가 존재하지 않음 : {}", eventId);
+
+            partnerRepository.save(partner);
+
+        }catch (Exception e){
+            log.error("파트너 저장 중 오류 발생 - eventId: {}, error: {}", eventId, e.getMessage());
+            throw new RuntimeException("파트너 저장 실패", e);
         }
-
-        partnerRepository.save(partner);
-
     }
 
 }
