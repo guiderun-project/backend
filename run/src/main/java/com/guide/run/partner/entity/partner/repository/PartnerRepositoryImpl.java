@@ -52,12 +52,10 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                                 partnerLike.sendId.eq(privateId)), "sendId"),
                         Expressions.constant(privateId)
                 ))
-                .from(partner)
-                .join(user)
-                .where(
-                        partnerUserWhere(userType, privateId),
-                        getPartnerKind("all")
-                )
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(userType, privateId))
+                .where(getPartnerId(userType))
                 .orderBy(partnerSortCond(sort))
                 .offset(start)
                 .limit(limit)
@@ -67,12 +65,11 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     @Override
     public long countMyPartner(String privateId, UserType userType) {
         Long count = queryFactory
-                .selectDistinct(partner.count())
-                .from(partner)
-                .where(
-                        partnerUserWhere(userType, privateId),
-                        getPartnerKind("all")
-                )
+                .select(partner.countDistinct())
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(userType, privateId))
+                .where(getPartnerId(userType))
                 .fetchOne();
         return count != null ? count : 0;
     }
@@ -92,27 +89,24 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
-                .from(partner)
-                .join(user)
-                .where(
-                        partnerUserWhere(type, privateId),
-                        getPartnerKind(kind)
-                )
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(type, privateId))
+                .where(getPartnerId(type), getPartnerKind(kind))
+                .orderBy(partner.updatedAt.desc())
                 .offset(start)
                 .limit(limit)
-                .orderBy(partner.updatedAt.desc())
                 .fetch();
     }
 
     @Override
     public long countAdminPartner(String privateId, UserType type, String kind) {
         Long count = queryFactory
-                .selectDistinct(partner.count())
-                .from(partner)
-                .where(
-                        partnerUserWhere(type, privateId),
-                        getPartnerKind(kind)
-                )
+                .select(partner.countDistinct())
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(type, privateId))
+                .where(getPartnerId(type), getPartnerKind(kind))
                 .fetchOne();
         return count != null ? count : 0;
     }
@@ -132,26 +126,26 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                                         .from(partnerLike)
                                         .where(user.privateId.eq(partnerLike.recId)), "like")
                 ))
-                .from(partner)
-                .join(user)
-                .where(
-                        partnerUserWhere(type, privateId),
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(type, privateId))
+                .where(getPartnerId(type),
                         searchCondition(text)
                 )
+                .orderBy(partner.updatedAt.desc())
                 .offset(start)
                 .limit(limit)
-                .orderBy(partner.updatedAt.desc())
                 .fetch();
     }
 
     @Override
     public long searchAdminPartnerCount(String privateId, UserType type, String text) {
         Long count = queryFactory
-                .selectDistinct(partner.count())
-                .from(partner)
-                .join(user)
-                .where(
-                        partnerUserWhere(type, privateId),
+                .select(partner.countDistinct())
+                .from(user)
+                .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
+                .leftJoin(partner).on(getUserType(type, privateId))
+                .where(getPartnerId(type),
                         searchCondition(text)
                 )
                 .fetchOne();
@@ -180,23 +174,24 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                 .fetch();
     }
 
-    // ── HELPER METHODS ──
-
-    /**
-     * 조인 조건: 사용자 타입에 따라 partner와 user의 연결 조건을 결정.
-     * - GUIDE: partner.viId = user.privateId
-     * - VI: partner.guideId = user.privateId
-     */
-    private BooleanExpression partnerUserJoin(UserType type) {
-        return user.privateId.eq(type.equals(UserType.GUIDE) ? partner.viId : partner.guideId);
-    }
 
     /**
      * where 조건: 현재 사용자의 partner 데이터 필터링.
      * - GUIDE: partner.guideId = privateId
      * - VI: partner.viId = privateId
      */
-    private BooleanExpression partnerUserWhere(UserType type, String privateId) {
+    private BooleanExpression getPartnerId(UserType type) {
+        return type.equals(UserType.GUIDE)
+                ? partner.guideId.eq(user.privateId)
+                : partner.viId.eq(user.privateId);
+    }
+
+    /**
+     * getUserType: 기준으로 전달받은 privateId와 partner 테이블의 조건을 매칭
+     * - GUIDE인 경우: partner.guideId = 전달받은 privateId
+     * - VI인 경우: partner.viId = 전달받은 privateId
+     */
+    private BooleanExpression getUserType(UserType type, String privateId) {
         return type.equals(UserType.GUIDE)
                 ? partner.guideId.eq(privateId)
                 : partner.viId.eq(privateId);
