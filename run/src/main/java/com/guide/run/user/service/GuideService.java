@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
@@ -35,6 +36,7 @@ public class GuideService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
     private final CoolSmsService coolSmsService;
+    private final TimeFormatter timeFormatter;
 
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
@@ -62,6 +64,7 @@ public class GuideService {
                     .role(Role.ROLE_WAIT)
                     .type(UserType.GUIDE)
                     .id1365(guideSignupDto.getId1365())
+                    .birth(timeFormatter.getDate(guideSignupDto.getBirth()))
                     .build();
 
             Guide guideInfo = Guide.builder()

@@ -36,4 +36,10 @@ public class TimeFormatter {
         return LocalDateTime.of(localDate, localTime);
     }
 
+    public LocalDate getDate(String date) {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        return LocalDate.parse(date, dateFormatter);
+    }
+
 }

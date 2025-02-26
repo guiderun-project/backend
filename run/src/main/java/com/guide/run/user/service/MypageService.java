@@ -142,6 +142,7 @@ public class MypageService {
                 .like(like)
 
                 .id1365(user.getId1365())
+                .birth(user.getBirth())
                 .build();
         return response;
     }

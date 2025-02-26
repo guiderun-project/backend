@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
+
 
 @Entity
 @Getter
@@ -46,6 +48,8 @@ public class User extends BaseEntity {
     private String img;//프로필 이미지 링크
 
     private String id1365; //1365 아이디
+
+    private LocalDate birth;
     
     public void editUser(String name,
                          String gender,
@@ -54,7 +58,8 @@ public class User extends BaseEntity {
                          int age,
                          String snsId,
                          boolean openSns,
-                         String id1365) {
+                         String id1365,
+                         LocalDate birth) {
         this.name = name;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
@@ -63,6 +68,7 @@ public class User extends BaseEntity {
         this.snsId = snsId;
         this.isOpenSns = openSns;
         this.id1365 = id1365;
+        this.birth = birth;
     }
 
     public void editRunningInfo(String recordDegree, String detailRecord){

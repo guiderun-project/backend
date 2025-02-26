@@ -294,7 +294,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .select(Projections.constructor(Guide1365Response.class,
                         user.name.as("name"),
                         user.id1365.as("id1365"),
-                        user.phoneNumber.as("phone"))
+                        user.phoneNumber.as("phone"),
+                        user.birth.as("birth"))
                 )
                 .from(user, attendance)
                 .where(user.type.eq(UserType.GUIDE),
