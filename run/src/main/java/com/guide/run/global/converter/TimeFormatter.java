@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Component
 public class TimeFormatter {
@@ -38,8 +39,11 @@ public class TimeFormatter {
 
     public LocalDate getDate(String date) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        return LocalDate.parse(date, dateFormatter);
+        try {
+            return LocalDate.parse(date, dateFormatter);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("날짜 형식이 올바르지 않습니다. 'yyyy-MM-dd' 형식으로 입력해주세요.", e);
+        }
     }
 
 }
