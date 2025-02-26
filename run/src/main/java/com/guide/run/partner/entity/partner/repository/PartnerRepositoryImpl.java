@@ -220,12 +220,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
      */
     private BooleanExpression getPartnerKind(String kind) {
         if ("COMPETITON".equals(kind)) {
-            return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.contestIds);
+            return Expressions.booleanTemplate("(COALESCE(LENGTH({0}), 0) > 0)", partner.contestIds);
         } else if ("TRAINING".equals(kind)) {
-            return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.trainingIds);
+            return Expressions.booleanTemplate("(COALESCE(LENGTH({0}), 0) > 0)", partner.trainingIds);
         } else {
             return Expressions.booleanTemplate(
-                    "COALESCE(LENGTH({0}), 0) > 0 or COALESCE(LENGTH({1}), 0) > 0",
+                    "(COALESCE(LENGTH({0}), 0) > 0 or COALESCE(LENGTH({1}), 0) > 0)",
                     partner.trainingIds, partner.contestIds
             );
         }
