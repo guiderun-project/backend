@@ -95,7 +95,7 @@ public class PartnerService {
         Matching matching = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
 
         if(matching!=null){
-            Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getGuideId());
+            Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, matching.getViId());
 
             if(attendance==null){
                 return;
