@@ -55,7 +55,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                 .from(user)
                 .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
                 .leftJoin(partner).on(getUserType(userType, privateId))
-                .where(getPartnerId(userType))
+                .where(getPartnerId(userType), getPartnerKind("all"))
                 .orderBy(partnerSortCond(sort))
                 .offset(start)
                 .limit(limit)
@@ -69,7 +69,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                 .from(user)
                 .leftJoin(partnerLike).on(partnerLike.recId.eq(user.privateId))
                 .leftJoin(partner).on(getUserType(userType, privateId))
-                .where(getPartnerId(userType))
+                .where(getPartnerId(userType), getPartnerKind("all"))
                 .fetchOne();
         return count != null ? count : 0;
     }
@@ -220,12 +220,12 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
      */
     private BooleanExpression getPartnerKind(String kind) {
         if ("COMPETITON".equals(kind)) {
-            return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.contestIds);
+            return Expressions.booleanTemplate("LENGTH(IFNULL({0}, '')) > 0", partner.contestIds);
         } else if ("TRAINING".equals(kind)) {
-            return Expressions.booleanTemplate("COALESCE(LENGTH({0}), 0) > 0", partner.trainingIds);
+            return Expressions.booleanTemplate("LENGTH(IFNULL({0}, '')) > 0", partner.trainingIds);
         } else {
             return Expressions.booleanTemplate(
-                    "COALESCE(LENGTH({0}), 0) > 0 or COALESCE(LENGTH({1}), 0) > 0",
+                    "LENGTH(IFNULL({0}, '')) > 0 or LENGTH(IFNULL({1}, '')) > 0",
                     partner.trainingIds, partner.contestIds
             );
         }
