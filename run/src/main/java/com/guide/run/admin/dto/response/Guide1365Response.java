@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,4 +15,5 @@ public class Guide1365Response {
     private String name;
     private String id1365;
     private String phone;
+    private LocalDate birth;
 }

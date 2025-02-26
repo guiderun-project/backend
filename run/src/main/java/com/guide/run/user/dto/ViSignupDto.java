@@ -59,4 +59,5 @@ public class ViSignupDto {
     private boolean portraitRights;
 
     private String id1365;
+    private String birth;
 }

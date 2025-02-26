@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
@@ -33,6 +34,7 @@ public class ViService {
 
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final TimeFormatter timeFormatter;
 
 
 
@@ -63,6 +65,7 @@ public class ViService {
                     .snsId(viSignupDto.getSnsId())
                     .isOpenSns(viSignupDto.getIsOpenSns())
                     .id1365(viSignupDto.getId1365())
+                    .birth(viSignupDto.getBirth() != null ? timeFormatter.getDate(viSignupDto.getBirth()) : null)
                     .build();
 
             Vi viInfo = Vi.builder()

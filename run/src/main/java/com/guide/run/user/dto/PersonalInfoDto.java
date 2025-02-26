@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 @AllArgsConstructor
 @Builder
@@ -19,6 +21,7 @@ public class PersonalInfoDto {
     private String snsId;
     private Boolean isOpenSns;
     private String id1365;
+    private String birth;
 
     public static PersonalInfoDto userToInfoDto(User user){
         return PersonalInfoDto.builder()
@@ -32,6 +35,7 @@ public class PersonalInfoDto {
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
                 .id1365(user.getId1365())
+                .birth(user.getBirth() != null ? user.getBirth().toString() : null)
                 .build();
     }
 }

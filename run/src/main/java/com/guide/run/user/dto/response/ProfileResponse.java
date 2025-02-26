@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,5 +35,6 @@ public class ProfileResponse {
     private int like;
 
     private String id1365;
+    private LocalDate birth;
 
 }
