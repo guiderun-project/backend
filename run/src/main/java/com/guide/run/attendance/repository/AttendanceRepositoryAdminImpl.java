@@ -1,11 +1,12 @@
-package com.guide.run.temp.member.repository;
+package com.guide.run.attendance.repository;
 
 import com.guide.run.admin.dto.response.event.AbsentDto;
+import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class AttendanceRepositoryAdminImpl implements AttendanceRepositoryAdmin{

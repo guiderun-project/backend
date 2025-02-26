@@ -1,5 +1,6 @@
 package com.guide.run.user.service;
 
+import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.user.dto.GuideRunningInfoDto;
@@ -26,6 +27,7 @@ public class SignupInfoService {
     private final GuideRepository guideRepository;
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
+    private final TimeFormatter timeFormatter;
 
     //약관 동의 조회
     @Transactional
@@ -199,6 +201,7 @@ public class SignupInfoService {
             throw new UnauthorizedUserException();
         }
 
+
         user.editUser(
                 dto.getName(),
                 dto.getGender(),
@@ -207,7 +210,8 @@ public class SignupInfoService {
                 dto.getAge(),
                 dto.getSnsId(),
                 dto.getIsOpenSns(),
-                dto.getId1365()
+                dto.getId1365(),
+                dto.getBirth() != null ? timeFormatter.getDate(dto.getBirth()) : null
         );
 
         return PersonalInfoDto.userToInfoDto(user);

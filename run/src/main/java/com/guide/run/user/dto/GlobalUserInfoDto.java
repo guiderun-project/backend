@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +27,7 @@ public class GlobalUserInfoDto {
     private Boolean isOpenSns;
     private String img; //2차 이미지 링크 추가
     private String id1365; //1365 아이디
+    private LocalDate birth;
 
     public static GlobalUserInfoDto userToInfoDto(User user){
         return GlobalUserInfoDto.builder()
@@ -41,6 +44,7 @@ public class GlobalUserInfoDto {
                 .isOpenNumber(user.getIsOpenNumber())
                 .img(user.getImg())
                 .id1365(user.getId1365())
+                .birth(user.getBirth())
                 .build();
     }
 }

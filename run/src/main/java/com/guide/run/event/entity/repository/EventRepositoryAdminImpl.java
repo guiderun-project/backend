@@ -5,10 +5,10 @@ import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
+import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
-import com.guide.run.temp.member.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Order;
@@ -22,10 +22,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
-import static com.guide.run.temp.member.entity.QAttendance.attendance;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
@@ -111,8 +111,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 event.isApprove.as("approval"),
                                 event.maxNumV.as("minNumV"),
                                 event.maxNumG.as("minNumG"),
-                                formattedDate(event.updatedAt).as("update_date"),
-                                formattedTime(event.updatedAt).as("update_time")
+                                formattedDate(event.createdAt).as("update_date"),
+                                formattedTime(event.createdAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -209,8 +209,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                                 event.isApprove.as("approval"),
                                 event.maxNumV.as("minNumV"),
                                 event.maxNumG.as("minNumG"),
-                                formattedDate(event.updatedAt).as("update_date"),
-                                formattedTime(event.updatedAt).as("update_time")
+                                formattedDate(event.createdAt).as("update_date"),
+                                formattedTime(event.createdAt).as("update_time")
                         )
                 )
                 .from(event, user)
@@ -294,7 +294,8 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
                 .select(Projections.constructor(Guide1365Response.class,
                         user.name.as("name"),
                         user.id1365.as("id1365"),
-                        user.phoneNumber.as("phone"))
+                        user.phoneNumber.as("phone"),
+                        user.birth.as("birth"))
                 )
                 .from(user, attendance)
                 .where(user.type.eq(UserType.GUIDE),
@@ -321,7 +322,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
 
 
         if (cond.getTime()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
         }
 
         if (cond.getOrganizer()==0) {
@@ -345,7 +346,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if (cond.getTime()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.createdAt));
         }
 
         if (cond.getOrganizer()==1) {
@@ -353,7 +354,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if(cond.getOrganizer()==2 && cond.getTime()==2 && cond.getApproval()==2 && cond.getName()==2){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.updatedAt));
+            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
         }
 
         return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);

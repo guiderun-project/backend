@@ -16,6 +16,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,8 +27,10 @@ import org.springframework.web.cors.CorsUtils;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
@@ -62,6 +65,10 @@ public class JwtProvider {
                 .compact();
     }
     public String createRefreshToken(String privateId){
+        Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
+        if(!oldRefreshToken.isEmpty()){
+            refreshTokenRepository.delete(oldRefreshToken.get());
+        }
         Date now = new Date();
        RefreshToken refreshToken= new RefreshToken(Jwts.builder()
                 .setIssuedAt(now)
@@ -70,6 +77,10 @@ public class JwtProvider {
                 .compact(), privateId);
         refreshTokenRepository.save(refreshToken);
         return refreshToken.getToken();
+    }
+    public void deleteRefreshToken(RefreshToken refreshToken){
+        refreshTokenRepository.delete(refreshToken);
+        log.info("리프레시 토큰 제거 완료 refreshToken : "+refreshToken.getToken());
     }
     public Authentication getAuthentication(String token){
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(getSocialId(token));

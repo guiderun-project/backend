@@ -3,7 +3,6 @@ package com.guide.run.partner.entity.partner.repository;
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
 import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
-import com.guide.run.temp.member.entity.Attendance;
 import com.guide.run.user.entity.type.UserType;
 
 import java.util.List;

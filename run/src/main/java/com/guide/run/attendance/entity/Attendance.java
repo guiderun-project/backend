@@ -1,4 +1,4 @@
-package com.guide.run.temp.member.entity;
+package com.guide.run.attendance.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

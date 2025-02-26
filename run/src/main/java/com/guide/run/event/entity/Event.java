@@ -47,10 +47,7 @@ public class Event extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EventCategory eventCategory; // 이벤트 유형 ,팀 구분하는 방식 그룹별,팀별,디폴트 분류
 
-    public void setCnt(int viCnt, int guideCnt){
-        this.viCnt = viCnt;
-        this.guideCnt = guideCnt;
-    }
+
     public void closeEvent(){
         this.recruitEndDate = LocalDate.now();
         this.recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
@@ -68,15 +65,12 @@ public class Event extends BaseEntity {
         this.status = status;
     }
 
-    public void setViCnt(int viCnt) {
-        this.viCnt += viCnt;
-    }
-
-    public void setGuideCnt(int guideCnt) {
-        this.guideCnt += guideCnt;
-    }
-
     public void changeRecruit(EventRecruitStatus recruitStatus){
         this.recruitStatus = recruitStatus;
+    }
+
+    public void countAttendGAndV(int guideCnt, int viCnt) {
+        this.guideCnt = guideCnt;
+        this.viCnt = viCnt;
     }
 }

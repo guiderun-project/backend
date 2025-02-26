@@ -28,8 +28,12 @@ public class ImgService {
         // 이미지 형식 검사해서 에러 출력하는 코드
         if (imgformat.equals("png") || imgformat.equals("jpg") || imgformat.equals("jpeg")) {
             try{
+                String img = user.getImg();
                 imgUrl = s3Uploader.upload(file, "user");
                 user.editImg(imgUrl);
+                if(user.getImg()!=null) {
+                    s3Uploader.deleteFile(img);
+                }
                 return imgUrl;
             }catch (Exception e){
                 throw new RuntimeException("이미지 저장 실패");

@@ -11,6 +11,7 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.List;
 import static com.guide.run.event.entity.type.EventType.COMPETITION;
 import static com.guide.run.event.entity.type.EventType.TRAINING;
 
+@Slf4j
 @CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
         "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
         maxAge = 3600)
@@ -172,7 +174,7 @@ public class EventTestController {
 
     @GetMapping
     public void closeeventdup(HttpServletRequest request){
-
+        log.error("테스트");
 
     }
 }

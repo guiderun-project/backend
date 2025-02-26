@@ -61,4 +61,5 @@ public class GuideSignupDto {
     private boolean portraitRights;
 
     private String id1365;
+    private String birth;
 }
