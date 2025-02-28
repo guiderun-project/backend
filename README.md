@@ -1,2 +1,2 @@
 # ERD
-![가이드러너 db](https://github.com/user-attachments/assets/54a93b5c-f1e1-4c72-b38d-5a67891ba2b1)
+![db](https://github.com/user-attachments/assets/66442701-5565-4f47-9408-8b256b7d027e)
