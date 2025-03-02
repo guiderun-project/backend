@@ -27,7 +27,7 @@ public class GlobalUserInfoDto {
     private Boolean isOpenSns;
     private String img; //2차 이미지 링크 추가
     private String id1365; //1365 아이디
-    private LocalDate birth;
+    private String birth;
 
     public static GlobalUserInfoDto userToInfoDto(User user){
         return GlobalUserInfoDto.builder()
