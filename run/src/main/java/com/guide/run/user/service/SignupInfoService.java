@@ -211,7 +211,7 @@ public class SignupInfoService {
                 dto.getSnsId(),
                 dto.getIsOpenSns(),
                 dto.getId1365(),
-                dto.getBirth() != null ? timeFormatter.getDate(dto.getBirth()) : null
+                dto.getBirth()
         );
 
         return PersonalInfoDto.userToInfoDto(user);

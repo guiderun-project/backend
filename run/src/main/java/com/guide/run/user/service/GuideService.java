@@ -64,7 +64,7 @@ public class GuideService {
                     .role(Role.ROLE_WAIT)
                     .type(UserType.GUIDE)
                     .id1365(guideSignupDto.getId1365())
-                    .birth(guideSignupDto.getBirth() != null ? timeFormatter.getDate(guideSignupDto.getBirth()) : null)
+                    .birth(guideSignupDto.getBirth())
                     .build();
 
             Guide guideInfo = Guide.builder()

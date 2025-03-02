@@ -65,7 +65,7 @@ public class ViService {
                     .snsId(viSignupDto.getSnsId())
                     .isOpenSns(viSignupDto.getIsOpenSns())
                     .id1365(viSignupDto.getId1365())
-                    .birth(viSignupDto.getBirth() != null ? timeFormatter.getDate(viSignupDto.getBirth()) : null)
+                    .birth(viSignupDto.getBirth())
                     .build();
 
             Vi viInfo = Vi.builder()
