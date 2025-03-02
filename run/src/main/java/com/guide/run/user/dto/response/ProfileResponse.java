@@ -35,6 +35,6 @@ public class ProfileResponse {
     private int like;
 
     private String id1365;
-    private LocalDate birth;
+    private String birth;
 
 }

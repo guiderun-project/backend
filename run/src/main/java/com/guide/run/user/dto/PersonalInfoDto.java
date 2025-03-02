@@ -35,7 +35,7 @@ public class PersonalInfoDto {
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
                 .id1365(user.getId1365())
-                .birth(user.getBirth() != null ? user.getBirth().toString() : null)
+                .birth(user.getBirth())
                 .build();
     }
 }

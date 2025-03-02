@@ -15,5 +15,5 @@ public class Guide1365Response {
     private String name;
     private String id1365;
     private String phone;
-    private LocalDate birth;
+    private String birth;
 }

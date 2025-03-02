@@ -49,7 +49,7 @@ public class User extends BaseEntity {
 
     private String id1365; //1365 아이디
 
-    private LocalDate birth;
+    private String birth;
     
     public void editUser(String name,
                          String gender,
@@ -59,7 +59,7 @@ public class User extends BaseEntity {
                          String snsId,
                          boolean openSns,
                          String id1365,
-                         LocalDate birth) {
+                         String birth) {
         this.name = name;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
