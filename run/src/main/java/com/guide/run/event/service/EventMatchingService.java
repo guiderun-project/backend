@@ -201,13 +201,13 @@ public class EventMatchingService {
         List<Form> guideD = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.GUIDE, "D");
         List<Form> guideE = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.GUIDE, "E");
 
-        for(int i = 0; i<cnt; i++){
-            List<Form> viA = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "A");
-            List<Form> viB = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "B");
-            List<Form> viC = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "C");
-            List<Form> viD = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "D");
-            List<Form> viE = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "E");
+        List<Form> viA = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "A");
+        List<Form> viB = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "B");
+        List<Form> viC = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "C");
+        List<Form> viD = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "D");
+        List<Form> viE = eventFormRepository.findAllEventIdAndUserTypeAndHopeTeam(eventId, UserType.VI, "E");
 
+        for(int i = 0; i<cnt; i++){
             autoMatchBetweenTwoGroup(0,eventId,viA,guideA);
 
             autoMatchBetweenTwoGroup(

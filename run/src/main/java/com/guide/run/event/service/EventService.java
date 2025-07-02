@@ -103,16 +103,6 @@ public class EventService {
             recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
         }
 
-        //마감기간 지났으면 마감처리
-        if(request.getRecruitEndDate().isBefore(today)){
-            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
-        }
-
-        if(start.isEqual(now)||start.isBefore(now)){
-            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
-            status = EventStatus.EVENT_OPEN;
-        }
-
 
         Event createdEvent = eventRepository.save(Event.builder()
                 .organizer(privateId)
@@ -122,8 +112,8 @@ public class EventService {
                 .recruitStatus(recruitStatus)
                 .isApprove(true)
                 .type(request.getEventType())
-                .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
-                .endTime(timeFormatter.getDateTime(request.getDate(), request.getEndTime()))
+                .startTime(start)
+                .endTime(end)
                 .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
                 .maxNumG(request.getMinNumG())
                 .place(request.getPlace())
@@ -173,12 +163,6 @@ public class EventService {
             eventCategory = request.getEventCategory();
         }
 
-        EventRecruitStatus recruitStatus = EventRecruitStatus.RECRUIT_UPCOMING;
-        EventStatus status = EventStatus.EVENT_UPCOMING;
-
-        LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
-
         LocalDateTime start = timeFormatter.getDateTime(request.getDate(), request.getStartTime());
         LocalDateTime end = timeFormatter.getDateTime(request.getDate(), request.getEndTime());
 
@@ -194,21 +178,6 @@ public class EventService {
             throw new NotValidEventStartException();
         }
 
-        //오늘이면 오픈
-        if(request.getRecruitStartDate().isEqual(today)||request.getRecruitStartDate().isBefore(today)){
-            recruitStatus = EventRecruitStatus.RECRUIT_OPEN;
-        }
-
-        //마감기간 지났으면 마감처리
-        if(request.getRecruitEndDate().isBefore(today)){
-            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
-        }
-
-        if(start.isEqual(now)||start.isBefore(now)){
-            recruitStatus = EventRecruitStatus.RECRUIT_CLOSE;
-            status = EventStatus.EVENT_OPEN;
-        }
-
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if (event.getOrganizer().equals(privateId)) {
             Event updatedEvent = eventRepository.save(Event.builder()
@@ -217,7 +186,7 @@ public class EventService {
                     .recruitStartDate(request.getRecruitStartDate())
                     .recruitEndDate(request.getRecruitEndDate())
                     .name(request.getName())
-                    .recruitStatus(recruitStatus)
+                    .recruitStatus(event.getRecruitStatus())
                     .isApprove(event.isApprove())
                     .type(request.getEventType())
                     .startTime(timeFormatter.getDateTime(request.getDate(), request.getStartTime()))
@@ -225,7 +194,7 @@ public class EventService {
                     .maxNumV(request.getMinNumV()) //todo:event 필드에 있는 것도 min으로 바꿔야 함...나중에...
                     .maxNumG(request.getMinNumG())
                     .place(request.getPlace())
-                    .status(status)
+                    .status(event.getStatus())
                     .content(request.getContent())
                     .eventCategory(eventCategory).build());
 
