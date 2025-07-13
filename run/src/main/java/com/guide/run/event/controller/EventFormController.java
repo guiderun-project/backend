@@ -45,8 +45,8 @@ public class EventFormController {
     }
     @GetMapping("/{eventId}/forms/all")
     public ResponseEntity<GetAllForms> getAllForms(@PathVariable("eventId") Long eventId, HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventFormService.getAllForms(eventId));
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventFormService.getAllForms(eventId,privateId));
     }
     @DeleteMapping("/{eventId}/form")
     public ResponseEntity<String> deleteForm(@PathVariable("eventId") Long eventId,
