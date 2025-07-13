@@ -10,6 +10,6 @@ import java.util.List;
 @Getter
 @Builder
 public class GetAllForms {
-    private List<Form> vi;
-    private List<Form> guide;
+    private List<FormWithPhone> vi;
+    private List<FormWithPhone> guide;
 }

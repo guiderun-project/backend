@@ -18,6 +18,7 @@ import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -112,11 +113,19 @@ public class EventFormService {
                 .build();
     }
 
-    public GetAllForms getAllForms(Long eventId) {
-        return GetAllForms.builder()
-                .vi(eventFormRepository.findAllEventIdAndUserType(eventId, UserType.VI))
-                .guide(eventFormRepository.findAllEventIdAndUserType(eventId,UserType.GUIDE))
-                .build();
+    public GetAllForms getAllForms(Long eventId, String privateId) {
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        if(user.getRole().equals(Role.ROLE_ADMIN)){
+            return (GetAllForms.builder()
+                    .vi(eventFormRepository.findAllFormsWithPhone(eventId, UserType.VI))
+                    .guide(eventFormRepository.findAllFormsWithPhone(eventId,UserType.GUIDE))
+                    .build());
+        }else{
+            return (GetAllForms.builder()
+                    .vi(eventFormRepository.findAllFormsWithoutPhone(eventId, UserType.VI))
+                    .guide(eventFormRepository.findAllFormsWithoutPhone(eventId,UserType.GUIDE))
+                    .build());
+        }
     }
 
     @Transactional
