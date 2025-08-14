@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.request;
 
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventType;
 import lombok.AllArgsConstructor;
@@ -22,4 +23,5 @@ public class EventCreateRequest {
     private String place;//이벤트 장소
     private String content;//이벤트 내용
     private EventCategory eventCategory; //이벤트 유형
+    private CityName cityName; //이벤트 지역
 }

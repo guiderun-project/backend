@@ -1,9 +1,6 @@
 package com.guide.run.event.entity;
 
-import com.guide.run.event.entity.type.EventCategory;
-import com.guide.run.event.entity.type.EventRecruitStatus;
-import com.guide.run.event.entity.type.EventStatus;
-import com.guide.run.event.entity.type.EventType;
+import com.guide.run.event.entity.type.*;
 import com.guide.run.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,6 +43,9 @@ public class Event extends BaseEntity {
     private EventStatus status;
     @Enumerated(EnumType.STRING)
     private EventCategory eventCategory; // 이벤트 유형 ,팀 구분하는 방식 그룹별,팀별,디폴트 분류
+
+    @Enumerated(EnumType.STRING)
+    private CityName cityName; //이벤트 지역
 
 
     public void closeEvent(){
