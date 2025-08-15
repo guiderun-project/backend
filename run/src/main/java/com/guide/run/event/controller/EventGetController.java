@@ -4,6 +4,7 @@ package com.guide.run.event.controller;
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.event.service.EventGetService;
@@ -45,6 +46,7 @@ public class EventGetController {
     public ResponseEntity<Count> getAllEventListCount(@RequestParam("sort") String sort,
                                                       @RequestParam("type") EventType type,
                                                       @RequestParam("kind") EventRecruitStatus kind,
+                                                      @RequestParam("cityName") CityName cityName,
                                                       HttpServletRequest request){
         if(sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")){}
         else throw new NotValidSortException();
@@ -55,13 +57,14 @@ public class EventGetController {
         else throw new NotValidKindException();
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).
-                body(Count.builder().count(eventGetService.getAllEventListCount(sort,type,kind,userId)).build());
+                body(Count.builder().count(eventGetService.getAllEventListCount(sort,type,kind,userId,cityName)).build());
     }
 
     @GetMapping("/all")
     public ResponseEntity<AllEventResponse> getAllEventList(@RequestParam("sort") String sort,
                                                             @RequestParam("type") EventType type,
                                                             @RequestParam("kind") EventRecruitStatus kind,
+                                                            @RequestParam("cityName") CityName cityName,
                                                             @RequestParam("limit") int limit,
                                                             @RequestParam("start") int start,
                                                             HttpServletRequest request){
@@ -74,6 +77,6 @@ public class EventGetController {
         else throw new NotValidKindException();
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).
-                body(eventGetService.getAllEventList(limit,start,sort,type,kind,userId));
+                body(eventGetService.getAllEventList(limit,start,sort,type,kind,userId,cityName));
     }
 }

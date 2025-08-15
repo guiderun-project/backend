@@ -322,6 +322,7 @@ public class EventService {
                 .hasPartner(false) //파트너 존재 여부
                 .partner(partnerList)
                 .eventCategory(event.getEventCategory())
+                .cityName(event.getCityName())
                 .build();
 
         //매칭 여부로 파트너 정보 추가
@@ -429,7 +430,8 @@ public class EventService {
                     .details(event.getContent())
                     .checkOrganizer(isCheckOrganizer)
                     .status(event.getStatus())
-                    .eventCategory(event.getEventCategory()).build();
+                    .eventCategory(event.getEventCategory())
+                    .cityName(event.getCityName()).build();
         }
         //신청한 경우
         else{
@@ -463,7 +465,8 @@ public class EventService {
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
                             .status(event.getStatus())
-                            .eventCategory(event.getEventCategory()).build();
+                            .eventCategory(event.getEventCategory())
+                            .cityName(event.getCityName()).build();
                 }
                 else{
                     User vi = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
@@ -499,7 +502,8 @@ public class EventService {
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
                             .status(event.getStatus())
-                            .eventCategory(event.getEventCategory()).build();
+                            .eventCategory(event.getEventCategory())
+                            .cityName(event.getCityName()).build();
                 }
             }else{
                 List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
@@ -531,7 +535,8 @@ public class EventService {
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
                             .status(event.getStatus())
-                            .eventCategory(event.getEventCategory()).build();
+                            .eventCategory(event.getEventCategory())
+                            .cityName(event.getCityName()).build();
                 }
                 else{
                     for(Matching m : matchingList){
@@ -569,7 +574,8 @@ public class EventService {
                             .details(event.getContent())
                             .checkOrganizer(isCheckOrganizer)
                             .status(event.getStatus())
-                            .eventCategory(event.getEventCategory()).build();
+                            .eventCategory(event.getEventCategory())
+                            .cityName(event.getCityName()).build();
                 }
             }
         }

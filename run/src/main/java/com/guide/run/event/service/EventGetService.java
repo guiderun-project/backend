@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.repository.EventRepositoryImpl;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.logic.NotValidKindException;
@@ -44,43 +45,43 @@ public class EventGetService {
        return MyEventResponse.builder().items(myEvents).build();
     }
 
-    public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId){
+    public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName){
         if(sort.equals("UPCOMING")){
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.countByRecruitStatusNotAndIsApprove(RECRUIT_END,true);
+                    return eventRepository.countByRecruitStatusNotAndIsApproveAndCityName(RECRUIT_END,true,cityName);
                 }
                 else{
-                    return eventRepository.countByRecruitStatusAndIsApprove(kind,true);
+                    return eventRepository.countByRecruitStatusAndIsApproveAndCityName(kind,true,cityName);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.countByTypeAndRecruitStatusNotAndIsApprove(type, RECRUIT_END,true);
+                    return eventRepository.countByTypeAndRecruitStatusNotAndIsApproveAndCityName(type, RECRUIT_END,true,cityName);
                 }
                 else{
-                    return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type,kind,true);
+                    return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type,kind,true,cityName);
                 }
             }
         }else if(sort.equals("END")){
             if(type.equals(TOTAL)){
-                return eventRepository.countByRecruitStatusAndIsApprove(RECRUIT_END,true);
+                return eventRepository.countByRecruitStatusAndIsApproveAndCityName(RECRUIT_END,true,cityName);
             }else{
-                return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type, RECRUIT_END,true);
+                return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type, RECRUIT_END,true,cityName);
             }
         }else{
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventFormRepository.countByPrivateId(privateId);
+                    return eventRepository.countByPrivateIdAndCityName(privateId,cityName);
                 }
                 else{
-                    return eventRepository.getAllMyEventListCount(null,kind,privateId);
+                    return eventRepository.getAllMyEventListCount(null,kind,privateId,cityName);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.getAllMyEventListCount(type, null,privateId);
+                    return eventRepository.getAllMyEventListCount(type, null,privateId,cityName);
                 }
                 else{
-                    return eventRepository.getAllMyEventListCount(type,kind,privateId);
+                    return eventRepository.getAllMyEventListCount(type,kind,privateId,cityName);
                 }
             }
         }
@@ -91,46 +92,47 @@ public class EventGetService {
                                             String sort,
                                             EventType type,
                                             EventRecruitStatus kind,
-                                            String userId) {
+                                            String userId,
+                                            CityName cityName) {
         List<AllEvent> allEvents = new ArrayList<>();
         if(sort.equals("UPCOMING")){
             if(kind.equals(RECRUIT_END))
                 throw new NotValidKindException();
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,RECRUIT_ALL);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,RECRUIT_ALL,cityName);
                 }
                 else{
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,kind);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,kind,cityName);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,RECRUIT_ALL);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,RECRUIT_ALL,cityName);
                 }
                 else{
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,kind);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,kind,cityName);
                 }
             }
         }else if(sort.equals("END")){
             if(type.equals(TOTAL)){
-                allEvents = eventRepository.getAllEventList(limit,start,null, RECRUIT_END);
+                allEvents = eventRepository.getAllEventList(limit,start,null, RECRUIT_END,cityName);
             }else{
-                allEvents = eventRepository.getAllEventList(limit,start,type,RECRUIT_END);
+                allEvents = eventRepository.getAllEventList(limit,start,type,RECRUIT_END,cityName);
             }
         }else{
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.getAllMyEventList(limit,start,null,null,userId);
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,null,userId,cityName);
                 }
                 else{
-                    allEvents = eventRepository.getAllMyEventList(limit,start,null,kind,userId);
+                    allEvents = eventRepository.getAllMyEventList(limit,start,null,kind,userId,cityName);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.getAllMyEventList(limit,start,type,null,userId);
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,null,userId,cityName);
                 }
                 else{
-                    allEvents = eventRepository.getAllMyEventList(limit,start,type,kind,userId);
+                    allEvents = eventRepository.getAllMyEventList(limit,start,type,kind,userId,cityName);
                 }
             }
         }
