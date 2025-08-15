@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -124,18 +125,20 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+    public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName) {
         return queryFactory.select(event.count())
                 .from(event)
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
                         .and(eventForm.privateId.eq(privateId))
-                        .and(eventForm.eventId.eq(event.id)))
+                        .and(eventForm.eventId.eq(event.id))
+                        .and(event.cityName.eq(event.cityName))
+                )
                 .fetchOne();
     }
 
     @Override
-    public List<AllEvent> getAllMyEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId) {
+    public List<AllEvent> getAllMyEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                 event.id.as("eventId"),
                 event.type.as("eventType"),
@@ -146,7 +149,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
                         .and(eventForm.privateId.eq(privateId))
-                        .and(eventForm.eventId.eq(event.id)))
+                        .and(eventForm.eventId.eq(event.id))
+                        .and(event.cityName.eq(event.cityName))
+                )
                 .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
@@ -188,7 +193,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus) {
+    public List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus,CityName cityName) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -196,14 +201,18 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.startTime.as("date"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(event.cityName.eq(event.cityName))
+                )
                 .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
                 .fetch();
     }
     @Override
-    public List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus) {
+    public List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus,CityName cityName) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -211,13 +220,26 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.startTime.as("date"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
-                .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true)))
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(event.cityName.eq(event.cityName))
+                )
                 .orderBy(event.startTime.asc())
                 .offset(start)
                 .limit(limit)
                 .fetch();
     }
 
+    @Override
+    public long countByPrivateIdAndCityName(String privateId, CityName cityName) {
+        return queryFactory
+                .select(eventForm.count())
+                .from(eventForm)
+                .join(event).on(eventForm.eventId.eq(event.id))
+                .where(event.cityName.eq(cityName))
+                .fetchOne();
+    }
 
 
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
