@@ -46,7 +46,7 @@ public class EventGetController {
     public ResponseEntity<Count> getAllEventListCount(@RequestParam("sort") String sort,
                                                       @RequestParam("type") EventType type,
                                                       @RequestParam("kind") EventRecruitStatus kind,
-                                                      @RequestParam("cityName") CityName cityName,
+                                                      @RequestParam(value = "cityName", required = false) CityName cityName,
                                                       HttpServletRequest request){
         if(sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")){}
         else throw new NotValidSortException();

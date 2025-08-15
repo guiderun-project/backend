@@ -237,7 +237,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .select(eventForm.count())
                 .from(eventForm)
                 .join(event).on(eventForm.eventId.eq(event.id))
-                .where(checkByCityName(cityName))
+                .where(checkByCityName(cityName)
+                        .and(eventForm.privateId.eq(privateId)))
                 .fetchOne();
     }
 
