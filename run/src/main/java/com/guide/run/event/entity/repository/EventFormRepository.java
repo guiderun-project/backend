@@ -20,4 +20,5 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
     void deleteAllByPrivateId(String privateId);
     List<EventForm> findAllByEventId(Long eventId);
 
+    long countByPrivateId(String privateId);
 }

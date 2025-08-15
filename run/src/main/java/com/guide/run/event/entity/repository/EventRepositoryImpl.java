@@ -132,7 +132,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
                         .and(eventForm.privateId.eq(privateId))
                         .and(eventForm.eventId.eq(event.id))
-                        .and(event.cityName.eq(event.cityName))
+                        .and(checkByCityName(cityName))
                 )
                 .fetchOne();
     }
@@ -150,7 +150,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByKind(eventRecruitStatus).and(checkByType(eventType)).and(event.isApprove.eq(true))
                         .and(eventForm.privateId.eq(privateId))
                         .and(eventForm.eventId.eq(event.id))
-                        .and(event.cityName.eq(event.cityName))
+                        .and(checkByCityName(cityName))
                 )
                 .orderBy(event.startTime.desc())
                 .offset(start)
@@ -204,7 +204,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByKind(eventRecruitStatus)
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
-                        .and(event.cityName.eq(event.cityName))
+                        .and(checkByCityName(cityName))
                 )
                 .orderBy(event.startTime.desc())
                 .offset(start)
@@ -223,7 +223,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByKind(eventRecruitStatus)
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
-                        .and(event.cityName.eq(event.cityName))
+                        .and(checkByCityName(cityName))
                 )
                 .orderBy(event.startTime.asc())
                 .offset(start)
@@ -237,8 +237,18 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .select(eventForm.count())
                 .from(eventForm)
                 .join(event).on(eventForm.eventId.eq(event.id))
-                .where(event.cityName.eq(cityName))
+                .where(checkByCityName(cityName))
                 .fetchOne();
+    }
+
+    private BooleanBuilder checkByCityName(CityName cityName){
+        if(cityName==null){
+            return new BooleanBuilder();
+        } else if(cityName.equals(CityName.BUSAN)) {
+            return new BooleanBuilder(event.cityName.eq(CityName.BUSAN));
+        } else{
+            return new BooleanBuilder(event.cityName.eq(CityName.SEOUL));
+        }
     }
 
 
