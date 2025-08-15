@@ -45,43 +45,60 @@ public class EventGetService {
        return MyEventResponse.builder().items(myEvents).build();
     }
 
-    public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName){
-        if(sort.equals("UPCOMING")){
-            if(type.equals(TOTAL)){
-                if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.countByRecruitStatusNotAndIsApproveAndCityName(RECRUIT_END,true,cityName);
+    public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
+        if (sort.equals("UPCOMING")) {
+            if (type.equals(TOTAL)) {
+                if (kind.equals(RECRUIT_ALL)) {
+                    if (cityName == null) {
+                        return eventRepository.countByRecruitStatusNotAndIsApprove(RECRUIT_END, true);
+                    }
+                    return eventRepository.countByRecruitStatusNotAndIsApproveAndCityName(RECRUIT_END, true, cityName);
+                } else {
+                    if (cityName == null) {
+                        return eventRepository.countByRecruitStatusAndIsApprove(kind, true);
+                    }
+                    return eventRepository.countByRecruitStatusAndIsApproveAndCityName(kind, true, cityName);
                 }
-                else{
-                    return eventRepository.countByRecruitStatusAndIsApproveAndCityName(kind,true,cityName);
-                }
-            }else{
-                if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.countByTypeAndRecruitStatusNotAndIsApproveAndCityName(type, RECRUIT_END,true,cityName);
-                }
-                else{
-                    return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type,kind,true,cityName);
+            } else {
+                if (kind.equals(RECRUIT_ALL)) {
+                    if (cityName == null) {
+                        return eventRepository.countByTypeAndRecruitStatusNotAndIsApprove(type, RECRUIT_END, true);
+                    }
+                    return eventRepository.countByTypeAndRecruitStatusNotAndIsApproveAndCityName(type, RECRUIT_END, true, cityName);
+                } else {
+                    if (cityName == null) {
+                        return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type, kind, true);
+                    }
+                    return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type, kind, true, cityName);
                 }
             }
-        }else if(sort.equals("END")){
-            if(type.equals(TOTAL)){
-                return eventRepository.countByRecruitStatusAndIsApproveAndCityName(RECRUIT_END,true,cityName);
-            }else{
-                return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type, RECRUIT_END,true,cityName);
+        } else if (sort.equals("END")) {
+            if (type.equals(TOTAL)) {
+                if (cityName == null) {
+                    return eventRepository.countByRecruitStatusAndIsApprove(RECRUIT_END, true);
+                }
+                return eventRepository.countByRecruitStatusAndIsApproveAndCityName(RECRUIT_END, true, cityName);
+            } else {
+                if (cityName == null) {
+                    return eventRepository.countByTypeAndRecruitStatusAndIsApprove(type, RECRUIT_END, true);
+                }
+                return eventRepository.countByTypeAndRecruitStatusAndIsApproveAndCityName(type, RECRUIT_END, true, cityName);
             }
-        }else{
-            if(type.equals(TOTAL)){
-                if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.countByPrivateIdAndCityName(privateId,cityName);
+        } else {
+            if (type.equals(TOTAL)) {
+                if (kind.equals(RECRUIT_ALL)) {
+                    if (cityName == null) {
+                        return eventFormRepository.countByPrivateId(privateId);
+                    }
+                    return eventRepository.countByPrivateIdAndCityName(privateId, cityName);
+                } else {
+                    return eventRepository.getAllMyEventListCount(null, kind, privateId, cityName);
                 }
-                else{
-                    return eventRepository.getAllMyEventListCount(null,kind,privateId,cityName);
-                }
-            }else{
-                if(kind.equals(RECRUIT_ALL)){
-                    return eventRepository.getAllMyEventListCount(type, null,privateId,cityName);
-                }
-                else{
-                    return eventRepository.getAllMyEventListCount(type,kind,privateId,cityName);
+            } else {
+                if (kind.equals(RECRUIT_ALL)) {
+                    return eventRepository.getAllMyEventListCount(type, null, privateId, cityName);
+                } else {
+                    return eventRepository.getAllMyEventListCount(type, kind, privateId, cityName);
                 }
             }
         }
