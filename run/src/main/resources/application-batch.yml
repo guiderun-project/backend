@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MAIN_RDS}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+      resolve-lazily: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  social:
+    kakao:
+      client_id: ${KAKAO_CLIENT_ID}
+      redirect: https://guiderun.org/oauth
+      url:
+        login: https://kauth.kakao.com/oauth/authorize  # 로그인 진행 사이트
+        token: https://kauth.kakao.com/oauth/token  # access token을 발급 받는  url , 필요한 정보를 담아 보내야 함
+        profile: https://kapi.kakao.com/v2/user/me  # Access Token을 통해 정보를 받는 url
+
+    google:
+      client_id: aa
+      client_secret: aa
+      redirect: http://localhost:8080/login/oauth2/code/google
+      url:
+        login: https://accounts.google.com/o/oauth2/v2/auth
+        token: https://oauth2.googleapis.com/token
+        profile: https://www.googleapis.com/oauth2/v3/userinfo
+
+    naver:
+      client_id: aa
+      client_secret: aa
+      redirect: http://localhost:8080/social/login/naver
+      url:
+        login: https://nid.naver.com/oauth2.0/authorize
+        token: https://nid.naver.com/oauth2.0/token
+        profile: https://openapi.naver.com/v1/nid/me
+
+  coolsms:
+    apiKey: ${SMS_KEY}
+    apiSecret: ${SMS_SECRET}
+    senderNumber: ${SEND_NUMBER}
+    adminNumber: ${ADMIN_NUMBER}
+    kakaoChId: ${KAKAO_CH_ID}
+    signupCompletionMsgId: ${SIGNUP_COMPLETE_MSG}
+    signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
+cors:
+  origin: https://guiderun.org
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    credentials:
+      access-key: ${S3_ACCESS}
+      secret-key: ${S3_SECRET}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    url:
+      cloudFront: ${CLOUD_FRONT_URL}
