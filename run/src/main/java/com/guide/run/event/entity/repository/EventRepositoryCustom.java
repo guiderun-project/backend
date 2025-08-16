@@ -28,4 +28,6 @@ public interface EventRepositoryCustom {
     List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
 
     long countByPrivateIdAndCityName(String privateId, CityName cityName);
+
+    long updateRecruitEndForClosedEvents();
 }

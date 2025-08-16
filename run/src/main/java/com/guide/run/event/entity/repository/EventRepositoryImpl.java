@@ -242,6 +242,16 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetchOne();
     }
 
+    @Override
+    public long updateRecruitEndForClosedEvents() {
+        return queryFactory
+                .update(event)
+                .set(event.recruitStatus, EventRecruitStatus.RECRUIT_END)
+                .where(event.recruitStatus.eq(EventRecruitStatus.RECRUIT_CLOSE)
+                        .and(event.status.eq(EventStatus.EVENT_END)))
+                .execute();
+    }
+
     private BooleanBuilder checkByCityName(CityName cityName){
         if(cityName==null){
             return new BooleanBuilder();
