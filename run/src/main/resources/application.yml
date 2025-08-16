@@ -8,6 +8,8 @@ spring:
         - jwt
       prod:
         - jwt
+      batch:
+        - jwt
   messages:
     basename: i18n/exception
     encoding: UTF-8
