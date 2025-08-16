@@ -64,7 +64,7 @@ public class EventGetController {
     public ResponseEntity<AllEventResponse> getAllEventList(@RequestParam("sort") String sort,
                                                             @RequestParam("type") EventType type,
                                                             @RequestParam("kind") EventRecruitStatus kind,
-                                                            @RequestParam("cityName") CityName cityName,
+                                                            @RequestParam(value = "cityName", required = false) CityName cityName,
                                                             @RequestParam("limit") int limit,
                                                             @RequestParam("start") int start,
                                                             HttpServletRequest request){
