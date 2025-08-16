@@ -2,10 +2,7 @@ package com.guide.run.event.entity.dto.response.get;
 
 
 import com.guide.run.event.entity.dto.response.EventPopUpPartner;
-import com.guide.run.event.entity.type.EventCategory;
-import com.guide.run.event.entity.type.EventRecruitStatus;
-import com.guide.run.event.entity.type.EventStatus;
-import com.guide.run.event.entity.type.EventType;
+import com.guide.run.event.entity.type.*;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import lombok.AllArgsConstructor;
@@ -52,5 +49,8 @@ public class DetailEvent {
     private Boolean checkOrganizer;
     private EventStatus status;
     private EventCategory eventCategory;
+
+    //지역
+    private CityName cityName;
 
 }

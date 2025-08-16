@@ -1,6 +1,7 @@
 package com.guide.run.event.entity.repository;
 
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,4 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
     List<EventForm> findAllByEventId(Long eventId);
 
     long countByPrivateId(String privateId);
-
-
 }
