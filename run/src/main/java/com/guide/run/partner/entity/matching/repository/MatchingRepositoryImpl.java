@@ -39,6 +39,7 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 .join(user).on(user.privateId.eq(matching.guideId))
                 .join(eventForm).on(user.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
+                .orderBy(user.name.asc())
                 .fetch();
     }
 
@@ -56,6 +57,7 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 .join(eventForm).on(user.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
+                .orderBy(user.name.asc())
                 .distinct()
                 .fetch();
     }

@@ -45,6 +45,7 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
+                .orderBy(user.name.asc())
                 .fetch();
     }
 }
