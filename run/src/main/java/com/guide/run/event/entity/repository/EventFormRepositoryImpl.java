@@ -60,6 +60,7 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
                 .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
+                .orderBy(user.name.asc())
                 .fetch();
     }
 
@@ -74,6 +75,7 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
                 .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
+                .orderBy(user.name.asc())
                 .fetch();
     }
 }
