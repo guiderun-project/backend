@@ -14,6 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(indexes = {
+    @Index(name = "idx_event_form_event_id", columnList = "eventId"),
+    @Index(name = "idx_event_form_private_id", columnList = "privateId"),
+    @Index(name = "idx_event_form_event_private", columnList = "eventId, privateId")
+})
 public class EventForm extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -19,6 +19,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@Table(indexes = {
+    @Index(name = "idx_user_role", columnList = "role"),
+    @Index(name = "idx_user_type", columnList = "type"),
+    @Index(name = "idx_user_name", columnList = "name"),
+    @Index(name = "idx_user_role_type", columnList = "role, type")
+})
 public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String userId; //uuid

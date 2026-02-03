@@ -16,6 +16,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(indexes = {
+    @Index(name = "idx_event_recruit_status", columnList = "recruitStatus"),
+    @Index(name = "idx_event_is_approve", columnList = "isApprove"),
+    @Index(name = "idx_event_start_time", columnList = "startTime"),
+    @Index(name = "idx_event_status", columnList = "status"),
+    @Index(name = "idx_event_approve_status", columnList = "isApprove, recruitStatus")
+})
 public class Event extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //todo : 이 부분 기존 이벤트 추가로 적용하려면 db 수정 필요
