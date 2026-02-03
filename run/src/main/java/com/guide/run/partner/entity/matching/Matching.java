@@ -13,6 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @IdClass(MatchingId.class)
+@Table(indexes = {
+    @Index(name = "idx_matching_event_id", columnList = "eventId"),
+    @Index(name = "idx_matching_vi_id", columnList = "viId"),
+    @Index(name = "idx_matching_event_vi", columnList = "eventId, viId")
+})
 public class Matching {
     @Id
     private long eventId;

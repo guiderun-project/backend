@@ -1,8 +1,6 @@
 package com.guide.run.attendance.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +14,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @IdClass(AttendanceId.class)
+@Table(indexes = {
+    @Index(name = "idx_attendance_event_id", columnList = "eventId"),
+    @Index(name = "idx_attendance_is_attend", columnList = "isAttend")
+})
 public class Attendance {
     @Id
     private String privateId;
