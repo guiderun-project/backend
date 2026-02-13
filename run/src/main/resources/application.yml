@@ -13,3 +13,11 @@ spring:
   messages:
     basename: i18n/exception
     encoding: UTF-8
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tryItOutEnabled: true
+    operationsSorter: method

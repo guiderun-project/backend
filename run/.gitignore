@@ -38,3 +38,6 @@ out/
 
 ### Config file ###
 *.yml
+
+## Environment files
+.env

@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot - RunApplication (local)",
+      "request": "launch",
+      "mainClass": "com.guide.run.RunApplication",
+      "projectName": "run",
+      "cwd": "${workspaceFolder}/run",
+      "args": "--spring.profiles.active=local",
+      "envFile": "${workspaceFolder}/run/.env",
+      "console": "integratedTerminal"
+    }
+  ]
+}

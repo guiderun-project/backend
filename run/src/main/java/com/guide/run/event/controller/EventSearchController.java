@@ -1,6 +1,6 @@
 package com.guide.run.event.controller;
 
-import com.guide.run.admin.dto.SearchAllEventsCount;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
 import com.guide.run.event.service.EventSearchService;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
