@@ -49,7 +49,11 @@ public class SecurityConfig {
                     .requestMatchers("/api/accountId")
                     .requestMatchers("/api/new-password")
                     .requestMatchers("/tmp/**")
-                    .requestMatchers("/api/login");
+                    .requestMatchers("/api/login")
+                    .requestMatchers("/v3/api-docs/**")
+                    .requestMatchers("/v3/api-docs")
+                    .requestMatchers("/swagger-ui/**")
+                    .requestMatchers("/swagger-ui.html");
         };
     }
     @Bean
@@ -70,6 +74,7 @@ public class SecurityConfig {
                                 "/api/login/**",
                                 "/api/accountId/**",
                                 "/api/new-password/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(
                                 "/api/user/personal/**",
                                 "/api/user/permission/**",
