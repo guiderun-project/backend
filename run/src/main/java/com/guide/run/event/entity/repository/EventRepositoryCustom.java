@@ -7,8 +7,6 @@ import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
-import com.guide.run.user.entity.type.UserType;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

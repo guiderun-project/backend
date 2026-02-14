@@ -292,12 +292,4 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         return null;
     }
 
-    private BooleanBuilder checkByPrivateId(String privateId){
-        if(privateId==null){
-            return new BooleanBuilder();
-        } else {
-            return new BooleanBuilder(eventForm.privateId.eq(privateId));
-        }
-    }
-
 }

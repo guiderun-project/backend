@@ -5,15 +5,11 @@ import com.guide.run.event.entity.EventLike;
 import com.guide.run.event.entity.dto.response.LikeCountResponse;
 import com.guide.run.event.entity.dto.response.LikeResponse;
 import com.guide.run.event.entity.repository.CommentLikeRepository;
-import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventLikeRepository;
-import com.guide.run.global.exception.event.resource.NotExistCommentException;
-import com.guide.run.global.exception.event.resource.NotExistEventException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,7 +17,6 @@ import java.util.Optional;
 public class EventLikeService {
     private final CommentLikeRepository commentLikeRepository;
     private final EventLikeRepository eventLikeRepository;
-    private final EventCommentRepository eventCommentRepository;
 
     @Transactional
     public LikeResponse pressCommentLike(Long commentId, String privateId) {

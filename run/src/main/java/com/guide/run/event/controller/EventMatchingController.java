@@ -4,7 +4,6 @@ import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.service.EventMatchingService;
 import com.guide.run.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -40,7 +40,6 @@ public class EventFormController {
     public ResponseEntity<GetForm> getForm(@PathVariable("eventId") Long eventId,
                                            @PathVariable("userId") String userId,
                                            HttpServletRequest request){
-        String privateId = jwtProvider.extractUserId(request);
         return ResponseEntity.ok().body(eventFormService.getForm(eventId,userId));
     }
     @GetMapping("/{eventId}/forms/all")

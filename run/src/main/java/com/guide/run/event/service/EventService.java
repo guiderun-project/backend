@@ -82,7 +82,6 @@ public class EventService {
         EventStatus status = EventStatus.EVENT_UPCOMING;
 
         LocalDate today = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
 
         LocalDateTime start = timeFormatter.getDateTime(request.getDate(), request.getStartTime());
         LocalDateTime end = timeFormatter.getDateTime(request.getDate(), request.getEndTime());
@@ -124,7 +123,7 @@ public class EventService {
                 .content(request.getContent()).build());
 
         //자동 참가 처리
-        EventForm eventForm = eventFormRepository.save(
+        eventFormRepository.save(
                 EventForm.builder()
                         .privateId(privateId)
                         .eventId(createdEvent.getId())
@@ -155,7 +154,7 @@ public class EventService {
 
     @Transactional
     public EventUpdatedResponse eventUpdate(EventCreateRequest request, String privateId, Long eventId) {
-        User user = userRepository.findUserByPrivateId(privateId).
+        userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         EventCategory eventCategory;
@@ -212,7 +211,7 @@ public class EventService {
     //이벤트 모집 마감
     @Transactional
     public void eventClose(String privateId, Long eventId) {
-        User user = userRepository.findUserByPrivateId(privateId).
+       userRepository.findUserByPrivateId(privateId).
                 orElseThrow(NotExistUserException::new);
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);

@@ -2,10 +2,8 @@ package com.guide.run.event.entity.repository;
 
 import com.guide.run.admin.dto.EventDto;
 import com.guide.run.admin.dto.EventHistoryDto;
-import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.response.Guide1365Response;
-import com.guide.run.admin.dto.response.event.AdminEventApplyItem;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 

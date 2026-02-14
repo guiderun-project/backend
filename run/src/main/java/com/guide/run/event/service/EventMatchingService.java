@@ -17,7 +17,6 @@ import com.guide.run.partner.service.PartnerService;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
-import jakarta.persistence.criteria.From;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

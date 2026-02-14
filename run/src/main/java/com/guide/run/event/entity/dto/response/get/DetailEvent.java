@@ -1,17 +1,14 @@
 package com.guide.run.event.entity.dto.response.get;
 
 
-import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.type.*;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
