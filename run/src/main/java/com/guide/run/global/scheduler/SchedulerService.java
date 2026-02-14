@@ -7,10 +7,6 @@ import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.global.scheduler.entity.Schedule;
 import com.guide.run.global.scheduler.entity.ScheduleRepository;
 import com.guide.run.global.scheduler.entity.ScheduleStatus;
-import com.guide.run.partner.entity.matching.repository.MatchingRepository;
-import com.guide.run.partner.entity.partner.repository.PartnerRepository;
-import com.guide.run.attendance.repository.AttendanceRepository;
-import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,13 +32,8 @@ public class SchedulerService {
     @Qualifier("taskScheduler")
     private final ThreadPoolTaskScheduler taskScheduler;
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
-    private final PartnerRepository partnerRepository;
-    private final MatchingRepository matchingRepository;
 
     private final ScheduleRepository scheduleRepository;
-
-    private final AttendanceRepository attendanceRepository;
 
     private final LockService lockService;
 
@@ -177,11 +168,12 @@ public class SchedulerService {
                 try {
                     Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                     LocalDateTime now = LocalDateTime.now();
-                    log.info("lockName="+lockName+", "+e.getStartTime());
                     if(e==null){
                         scheduleRepository.delete(schedule);
+                        return;
                     }
-                    else if (e.getStartTime().isBefore(now) || e.getStartTime().isEqual(now)) {
+                    log.info("lockName="+lockName+", "+e.getStartTime());
+                    if (e.getStartTime().isBefore(now) || e.getStartTime().isEqual(now)) {
                         //시작시간과 현재 시간 비교해서 시간 같거나 지났으면 진행중/ 이벤트 모집 종료로 변경.
                         e.changeRecruit(EventRecruitStatus.RECRUIT_CLOSE);
                         e.changeStatus(EventStatus.EVENT_OPEN);
@@ -209,11 +201,12 @@ public class SchedulerService {
             try{
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDateTime now = LocalDateTime.now();
-                log.info("lockName="+lockName+", "+e.getEndTime());
                 if(e==null){
                     scheduleRepository.delete(schedule);
+                    return;
                 }
-                else if ( (e.getEndTime().isBefore(now)  || e.getEndTime().isEqual(now) )) {
+                log.info("lockName="+lockName+", "+e.getEndTime());
+                if ( (e.getEndTime().isBefore(now)  || e.getEndTime().isEqual(now) )) {
                     //종료시간과 현재 시간 비교해서 시간 같거나 지났으면 종료로 변경. + 종료 시 이벤트 모집 상태도 종료로 바꿔줌.
                     e.changeStatus(EventStatus.EVENT_END);
                     e.changeRecruit(EventRecruitStatus.RECRUIT_END);
@@ -244,11 +237,12 @@ public class SchedulerService {
             try{
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDateTime now = LocalDateTime.now();
-                log.info("lockName="+lockName+", "+e.getEndTime());
                 if(e==null){
                     scheduleRepository.delete(schedule);
+                    return;
                 }
-                else if ( (e.getEndTime().isBefore(now)  || e.getEndTime().isEqual(now) )) {
+                log.info("lockName="+lockName+", "+e.getEndTime());
+                if ( (e.getEndTime().isBefore(now)  || e.getEndTime().isEqual(now) )) {
                     //종료시간과 현재 시간 비교해서 시간 같거나 지났으면 종료로 변경. + 종료 시 이벤트 모집 상태도 종료로 바꿔줌.
                     e.changeStatus(EventStatus.EVENT_END);
                     e.changeRecruit(EventRecruitStatus.RECRUIT_END);
@@ -280,11 +274,12 @@ public class SchedulerService {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDate today = LocalDate.now();
-                log.info("lockName="+lockName+", "+e.getRecruitStartDate());
                 if(e==null){
                     scheduleRepository.delete(schedule);
+                    return;
                 }
-                else if ( e.getRecruitStartDate().isBefore(today) || e.getRecruitStartDate().isEqual(today)) {
+                log.info("lockName="+lockName+", "+e.getRecruitStartDate());
+                if ( e.getRecruitStartDate().isBefore(today) || e.getRecruitStartDate().isEqual(today)) {
                     //모집 시작일과 현재 일자 비교해서 시간 같거나 지났으면 진행중으로 변경.
                     e.changeRecruit(EventRecruitStatus.RECRUIT_OPEN);
                     schedule.changeRecruitStatus(ScheduleStatus.OPEN);
@@ -310,11 +305,12 @@ public class SchedulerService {
             try {
                 Event e = eventRepository.findById(schedule.getEventId()).orElse(null);
                 LocalDate today = LocalDate.now();
-                log.info("lockName="+lockName+", "+e.getRecruitEndDate());
                 if(e==null){
                     scheduleRepository.delete(schedule);
+                    return;
                 }
-                else if (e.getRecruitEndDate().isBefore(today)) {
+                log.info("lockName="+lockName+", "+e.getRecruitEndDate());
+                if (e.getRecruitEndDate().isBefore(today)) {
                     //모집 종료일과 현재 일자 비교해서 시간이 지났으면 종료로 변경.
                     e.changeRecruit(EventRecruitStatus.RECRUIT_CLOSE);
                     schedule.changeRecruitStatus(ScheduleStatus.END);
