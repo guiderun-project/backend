@@ -7,17 +7,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class EventSearchServiceTest {
-    @MockBean
+    @Autowired
     EventSearchService eventSearchService;
 
+    @Autowired
     EventRepository eventRepository;
 
     @BeforeEach
@@ -44,25 +44,13 @@ class EventSearchServiceTest {
     @DisplayName("전체 이벤트 검색 개수")
     void getSearchAllEventsCount() {
         List<Event> events = eventRepository.findAll();
-        eventRepository.save(Event.builder()
-                .id(1L)
-                .name("테스트")
-                .content("중입니다.")
-                .build());
-        eventRepository.save(Event.builder()
-                .id(2L)
-                .name("토스트")
-                .content("아닙니다.")
-                .build());
-        eventRepository.save(Event.builder()
-                .id(3L)
-                .name("ㅇㅇ")
-                .content("스트라이크")
-                .build());
         int count = 0;
-        for (Event e : events)
-            count++;
-        Assertions.assertThat(3).isEqualTo(count);
+        for (Event e : events) {
+            if (e.getName().contains("스트") || e.getContent().contains("스트")) {
+                count++;
+            }
+        }
+        Assertions.assertThat(count).isEqualTo(3);
        // Assertions.assertThat(3).isEqualTo(eventSearchService.getSearchAllEventsCount("스트").getCount());
     }
 
