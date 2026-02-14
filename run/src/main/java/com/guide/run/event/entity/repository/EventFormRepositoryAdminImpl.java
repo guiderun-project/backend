@@ -2,10 +2,7 @@ package com.guide.run.event.entity.repository;
 
 import com.guide.run.admin.dto.condition.EventApplyCond;
 import com.guide.run.admin.dto.response.event.AdminEventApplyItem;
-import com.guide.run.user.entity.QWithdrawal;
-import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -58,8 +55,8 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
         return size;
     }
 
-    private OrderSpecifier[] createOrderSpec(EventApplyCond cond){
-        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+    private OrderSpecifier<?>[] createOrderSpec(EventApplyCond cond){
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
 
         NumberExpression<Integer> typeOrder = new CaseBuilder()
@@ -72,11 +69,11 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
         }
 
         if(cond.getTeam()==0){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.recordDegree));
         }
 
         if(cond.getType_name()==0){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, typeOrder));
         }
 
         if(cond.getTime()==1){
@@ -84,11 +81,11 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
         }
 
         if(cond.getTeam()==1){
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.recordDegree));
         }
 
         if(cond.getType_name()==1){
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, typeOrder));
         }
 
         if(cond.getTeam()==2 && cond.getType_name()==2 && cond.getTime()==2){

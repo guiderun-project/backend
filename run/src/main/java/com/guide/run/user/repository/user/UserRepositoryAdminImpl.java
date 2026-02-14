@@ -11,7 +11,6 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,9 +190,9 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
 
 
-    private OrderSpecifier[] createOrderSpec(UserSortCond cond) {
+    private OrderSpecifier<?>[] createOrderSpec(UserSortCond cond) {
         //정렬 순서 때문에 일부러 if 문을 여러 개 사용
-        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
         NumberExpression<Integer> roleOrder = new CaseBuilder()
                 .when(user.role.eq(Role.ROLE_WAIT)).then(0)
@@ -206,19 +205,19 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
 
         if (cond.getTime()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.createdAt));
         }
 
         if (cond.getType()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, typeOrder));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, typeOrder));
         }
 
         if (cond.getGender()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.gender));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.gender));
         }
 
         if (cond.getName_team()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.recordDegree));
         }
 
         if(cond.getApproval()==0){
@@ -226,19 +225,19 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
         }
 
         if (cond.getType()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, typeOrder));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, typeOrder));
         }
 
         if (cond.getTime()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.createdAt));
         }
 
         if (cond.getGender()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.gender));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.gender));
         }
 
         if (cond.getName_team()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, user.recordDegree));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.recordDegree));
         }
         if(cond.getApproval()==1){
             orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, roleOrder));
@@ -246,29 +245,9 @@ public class UserRepositoryAdminImpl implements UserRepositoryAdmin{
 
         if (cond.getTime()==2 && cond.getApproval()==2 && cond.getType()==2
                 && cond.getName_team()==2&& cond.getGender()==2) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.createdAt));
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
-    }
-
-    private StringExpression formattedDate(DateTimePath<LocalDateTime> localDateTime){
-        return Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, {1})"
-                , localDateTime
-                , ConstantImpl.create("%Y-%m-%d"));
-    }
-
-    private StringExpression formattedDateTime(DateTimePath<LocalDateTime> localDateTime){
-        return Expressions.stringTemplate(
-                "FUNCTION('DATE_FORMAT', {0}, {1})",
-                localDateTime,
-                ConstantImpl.create("%Y-%m-%d %H:%i:%s")
-        );
-    }
-
-    private StringExpression formattedTime(DateTimePath<LocalDateTime> localDateTime){
-        return Expressions.stringTemplate("FUNCTION('TIME_FORMAT', {0}, {1})"
-                , localDateTime
-                , ConstantImpl.create("%H:%i:%s"));
+        return orderSpecifiers.toArray(new OrderSpecifier<?>[0]);
     }
 }
