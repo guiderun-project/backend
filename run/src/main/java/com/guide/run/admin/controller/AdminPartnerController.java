@@ -1,15 +1,12 @@
 package com.guide.run.admin.controller;
 
 import com.guide.run.admin.dto.response.partner.AdminPartnerList;
-import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
 import com.guide.run.admin.dto.response.partner.PartnerTypeResponse;
 import com.guide.run.admin.service.AdminPartnerService;
 import com.guide.run.event.entity.dto.response.get.Count;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

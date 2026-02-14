@@ -1,6 +1,5 @@
 package com.guide.run.temp.member.dto;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,7 +1,6 @@
 package com.guide.run.global.exception.event;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.*;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;

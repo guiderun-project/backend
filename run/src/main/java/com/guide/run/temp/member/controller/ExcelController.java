@@ -14,6 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ExcelController {
     @GetMapping("/healty")
-    public ResponseEntity healthCheck(){
+    public ResponseEntity<String> healthCheck(){
         return ResponseEntity.ok().body("");}
 }

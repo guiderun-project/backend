@@ -1,24 +1,18 @@
 package com.guide.run.global.cookie.service;
 
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.redis.RefreshToken;
-import com.guide.run.global.redis.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CookieService {
     private final JwtProvider jwtProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     int maxAge = 24 * 60 * 60 * 30;
     public void createCookie(String cookieName, HttpServletResponse response, String privateId) {
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwtProvider.createRefreshToken(privateId))

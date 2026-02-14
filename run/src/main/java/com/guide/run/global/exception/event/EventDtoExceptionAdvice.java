@@ -3,8 +3,6 @@ package com.guide.run.global.exception.event;
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.event.dto.NotValidEventRecruitException;
 import com.guide.run.global.exception.event.dto.NotValidEventStartException;
-import com.guide.run.global.exception.event.resource.NotExistCommentException;
-import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
