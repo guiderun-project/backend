@@ -4,8 +4,6 @@ import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 @Getter

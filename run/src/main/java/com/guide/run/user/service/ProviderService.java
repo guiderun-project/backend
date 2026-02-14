@@ -8,7 +8,6 @@ import com.guide.run.user.info.GetGoogleInfo;
 import com.guide.run.user.info.GetKakaoInfo;
 import com.guide.run.user.info.GetNaverInfo;
 import com.guide.run.user.profile.*;
-import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -27,7 +26,6 @@ public class ProviderService {
     private final RestTemplate restTemplate;
     private final Gson gson;
     private final OAuthRequestFactory oAuthRequestFactory;
-    private final UserRepository userRepository;
 
 
     public OAuthProfile getProfile(String accessToken, String provider) throws CommunicationException {

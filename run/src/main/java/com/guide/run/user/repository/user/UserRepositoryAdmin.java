@@ -1,11 +1,8 @@
 package com.guide.run.user.repository.user;
 
 import com.guide.run.admin.dto.condition.UserSortCond;
-import com.guide.run.admin.dto.condition.WithdrawalSortCond;
 import com.guide.run.admin.dto.response.user.NewUserResponse;
 import com.guide.run.admin.dto.response.user.UserItem;
-import com.guide.run.admin.dto.response.user.WithdrawalItem;
-
 import java.util.List;
 
 public interface UserRepositoryAdmin {

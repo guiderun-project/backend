@@ -1,10 +1,8 @@
 package com.guide.run.user.service;
 
-import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.authorize.ExistUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.ArchiveData;
@@ -19,7 +17,6 @@ import com.guide.run.user.repository.SignUpInfoRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +32,6 @@ public class GuideService {
     private final UserService userService;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final SignUpInfoRepository signUpInfoRepository;
-    private final CoolSmsService coolSmsService;
-    private final TimeFormatter timeFormatter;
 
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){

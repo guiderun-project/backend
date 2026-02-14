@@ -4,15 +4,12 @@ import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
 import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.GuideSignupDto;
 import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
-import com.guide.run.user.dto.request.RefreshTokenDto;
 import com.guide.run.user.dto.request.WithdrawalRequest;
-import com.guide.run.user.dto.response.ATAInfo;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.LoginResponse;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -28,14 +25,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
-import javax.security.auth.RefreshFailedException;
 
 @CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
 maxAge = 3600,

@@ -1,6 +1,5 @@
 package com.guide.run.partner.entity.partner.repository;
 
-import com.guide.run.partner.entity.partner.QPartnerLike;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
