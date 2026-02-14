@@ -31,6 +31,7 @@ public class GuideApplyResponse {
 
     //가이드 경험 없을 시
     @Convert(converter = StringListConverter.class)
+    @Builder.Default
     private List<String> howToKnow = new ArrayList<>();
     private String motive;
 

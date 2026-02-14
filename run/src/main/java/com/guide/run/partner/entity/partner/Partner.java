@@ -28,8 +28,10 @@ public class Partner extends BaseEntity {
     private String guideId;
 
     @Convert(converter = SetStringConverter.class)
+    @Builder.Default
     private Set<Long> contestIds = new HashSet<>();
     @Convert(converter = SetStringConverter.class)
+    @Builder.Default
     private Set<Long> trainingIds = new HashSet<>();
 
     public void addContest(Long eventId){

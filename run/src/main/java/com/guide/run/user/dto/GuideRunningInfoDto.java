@@ -24,6 +24,7 @@ public class GuideRunningInfoDto {
     private String viCount; //상세한 가이드 경험
     private String guidingPace; //가이드 가능한 페이스 그룹
     private String runningPlace;
+    @Builder.Default
     private List<String> howToKnow = new ArrayList<>();
     private String motive;
     private String hopePrefs;

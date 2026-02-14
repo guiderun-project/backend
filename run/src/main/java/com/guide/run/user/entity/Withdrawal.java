@@ -32,5 +32,6 @@ public class Withdrawal extends BaseEntity {
     private Role role;
 
     @Convert(converter = StringListConverter.class)
+    @Builder.Default
     private List<String> deleteReasons = new ArrayList<>(); //탈퇴 사유
 }
