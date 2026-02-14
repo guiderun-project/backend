@@ -349,14 +349,14 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if (cond.getOrganizer()==1) {
-            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.name));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.name));
         }
 
         if(cond.getOrganizer()==2 && cond.getTime()==2 && cond.getApproval()==2 && cond.getName()==2){
             orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.createdAt));
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier<?>[orderSpecifiers.size()]);
+        return orderSpecifiers.toArray(new OrderSpecifier<?>[0]);
     }
 
     private BooleanExpression searchByKind(String kind){

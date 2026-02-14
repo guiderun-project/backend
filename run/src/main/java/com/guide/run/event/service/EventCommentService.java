@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.comments.GetComment;
 import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.event.authorize.NotEventCommentWriterException;
+import com.guide.run.global.exception.event.resource.NotExistCommentException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class EventCommentService {
     @Transactional
     public Long deleteComment(Long eventId, Long commentId,String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        Comment comment = eventCommentRepository.findById(commentId).orElseThrow(NotExistEventException::new);
+        Comment comment = eventCommentRepository.findById(commentId).orElseThrow(NotExistCommentException::new);
         if(!comment.getPrivateId().equals(userId))
             throw new NotEventCommentWriterException();
         eventCommentRepository.delete(comment);
@@ -42,7 +43,7 @@ public class EventCommentService {
     @Transactional
     public Long patchComment(Long eventId, Long commentId, EventCommentCreateRequest eventCommentCreateRequest, String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        Comment comment = eventCommentRepository.findById(commentId).orElseThrow(NotExistEventException::new);
+        Comment comment = eventCommentRepository.findById(commentId).orElseThrow(NotExistCommentException::new);
         if(!comment.getPrivateId().equals(userId))
             throw new NotEventCommentWriterException();
         return eventCommentRepository.save(

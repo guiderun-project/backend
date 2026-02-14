@@ -334,7 +334,7 @@ public class EventService {
                     matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
                     if(matching!=null){
                         //매칭이 있을 때
-                        User partner = userRepository.findUserByPrivateId(matching.getViId()).orElse(null);
+                        User partner = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
                         hasPartner = true;
 
                         EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
@@ -362,7 +362,7 @@ public class EventService {
                             hasPartner = true;
 
                             for(Matching m : matchings){
-                                User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(null);
+                                User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
                                 EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
                                         .partnerType(partner.getType())
                                         .partnerName(partner.getName())

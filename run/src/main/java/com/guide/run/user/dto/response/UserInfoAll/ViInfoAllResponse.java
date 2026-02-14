@@ -28,7 +28,7 @@ public class ViInfoAllResponse {
     private String detailRecord;
     private Boolean isRunningExp;
     @Builder.Default
-    private List<String> howToKnow = new ArrayList<>(); //러닝 경험 없을 시 null
+    private List<String> howToKnow = new ArrayList<>(); //러닝 경험이 없으면 빈 리스트
     private String motive; //러닝 경험 없을 시 null
     private String runningPlace;
     private String guideName;

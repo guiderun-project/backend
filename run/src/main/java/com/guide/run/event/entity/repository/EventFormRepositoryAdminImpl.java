@@ -92,7 +92,7 @@ public class EventFormRepositoryAdminImpl implements EventFormRepositoryAdmin{
             orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, eventForm.createdAt));
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+        return orderSpecifiers.toArray(new OrderSpecifier<?>[0]);
 
     }
 }

@@ -51,6 +51,10 @@ public class SchedulerService {
         log.info("create Schedule");
         Schedule schedule = scheduleRepository.findByEventId(eventId);
         Event event = eventRepository.findById(eventId).orElse(null);
+        if (event == null) {
+            log.warn("createSchedule: event not found for eventId={}", eventId);
+            return;
+        }
 
         ScheduleStatus recruitStatus = ScheduleStatus.PENDING;
         ScheduleStatus eventStatus = ScheduleStatus.PENDING;
@@ -298,7 +302,7 @@ public class SchedulerService {
     @Async
     public void setRecruitEnd(Schedule schedule){
         log.info("setRecruitEnd");
-        String lockName = "recruitStartLock-" + schedule.getEventId();
+        String lockName = "recruitEndLock-" + schedule.getEventId();
         schedule = scheduleRepository.findById(schedule.getId()).orElse(null);
         if (schedule!=null && !lockService.isLockActive(lockName)
                 && lockService.acquireLock(lockName, LocalDateTime.now().plusSeconds(59))) {
