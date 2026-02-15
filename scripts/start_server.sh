@@ -11,7 +11,7 @@ fi
 echo ">>> Starting application: $JAR_FILE"
 
 # 환경변수 로드 (MAIN_RDS, REDIS_DOMAIN 등)
-source /home/ubuntu/.bashrc
+source /home/ubuntu/.env
 
 # 각 EC2에 미리 만들어둔 .deploy_profile에서 프로필 읽기
 # main-1: prod / main-2: batch
