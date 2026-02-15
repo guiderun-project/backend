@@ -9,6 +9,7 @@ import com.guide.run.user.dto.response.MyPageEventList;
 import com.guide.run.user.dto.response.MyPagePartnerList;
 import com.guide.run.user.dto.response.ProfileResponse;
 import com.guide.run.user.service.MypageService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class MypageController {
     private final JwtProvider jwtProvider;
     private final MypageService mypageService;
 
+    @Operation(summary = "사용자 인적사항 조회")
     @GetMapping("/personal")
     public ResponseEntity<GlobalUserInfoDto> getGlobalUserInfo(HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
