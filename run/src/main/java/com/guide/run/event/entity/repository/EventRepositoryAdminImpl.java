@@ -5,7 +5,6 @@ import com.guide.run.admin.dto.EventHistoryDto;
 import com.guide.run.admin.dto.condition.EventSortCond;
 import com.guide.run.admin.dto.response.Guide1365Response;
 import com.guide.run.admin.dto.response.event.CurrentEventResponse;
-import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -317,20 +316,20 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
     }
 
-    private OrderSpecifier[] createOrderSpec(EventSortCond cond) {
-        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+    private OrderSpecifier<?>[] createOrderSpec(EventSortCond cond) {
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
 
         if (cond.getTime()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.createdAt));
         }
 
         if (cond.getOrganizer()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, user.name));
         }
 
         if (cond.getApproval()==0) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.isApprove));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.isApprove));
         }
 
         if(cond.getName()==0){
@@ -338,7 +337,7 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if (cond.getApproval()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.isApprove));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, event.isApprove));
         }
 
         if(cond.getName()==1){
@@ -346,18 +345,18 @@ public class EventRepositoryAdminImpl implements EventRepositoryAdmin{
         }
 
         if (cond.getTime()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.ASC, event.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, event.createdAt));
         }
 
         if (cond.getOrganizer()==1) {
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, user.name));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.ASC, user.name));
         }
 
         if(cond.getOrganizer()==2 && cond.getTime()==2 && cond.getApproval()==2 && cond.getName()==2){
-            orderSpecifiers.add(new OrderSpecifier(Order.DESC, event.createdAt));
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, event.createdAt));
         }
 
-        return orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]);
+        return orderSpecifiers.toArray(new OrderSpecifier<?>[0]);
     }
 
     private BooleanExpression searchByKind(String kind){

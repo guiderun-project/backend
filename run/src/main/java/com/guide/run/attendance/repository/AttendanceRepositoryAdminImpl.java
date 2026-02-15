@@ -1,7 +1,6 @@
 package com.guide.run.attendance.repository;
 
 import com.guide.run.admin.dto.response.event.AbsentDto;
-import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

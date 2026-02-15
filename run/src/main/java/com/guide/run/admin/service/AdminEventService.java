@@ -15,7 +15,6 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
-import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.attendance.repository.AttendanceRepository;
@@ -35,7 +34,6 @@ public class AdminEventService {
     private final EventRepository eventRepository;
     private final AttendanceRepository attendanceRepository;
     private final EventFormRepository eventFormRepository;
-    private final TimeFormatter timeFormatter;
 
     public List<EventHistoryDto> getEventHistory(String userId, int start, int limit, String kind){
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);

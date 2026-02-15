@@ -3,7 +3,6 @@ package com.guide.run.global.security.config;
 import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.entity.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +38,7 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
             web.ignoring()
-                    .requestMatchers("/healty")
+                    .requestMatchers("/health")
                     .requestMatchers("/favicon.ico")
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")

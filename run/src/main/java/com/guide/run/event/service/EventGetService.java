@@ -1,25 +1,16 @@
 package com.guide.run.event.service;
 
-import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
-import com.guide.run.event.entity.repository.EventRepositoryImpl;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.logic.NotValidSortException;
-import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 

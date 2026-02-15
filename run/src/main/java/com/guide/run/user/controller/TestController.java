@@ -1,10 +1,7 @@
 package com.guide.run.user.controller;
 
 
-import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.global.scheduler.SchedulerService;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -16,9 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TestController {
     private final UserRepository userRepository;
-    private final SchedulerService schedulerService;
 
-    private final EventRepository eventRepository;
 
     //USER 권한 테스트
     @GetMapping("/api/test")

@@ -1,7 +1,5 @@
 package com.guide.run.partner.entity.matching.repository;
 
-import com.guide.run.attendance.entity.QAttendance;
-import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;

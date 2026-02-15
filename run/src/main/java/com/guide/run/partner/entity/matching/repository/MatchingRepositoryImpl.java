@@ -1,7 +1,5 @@
 package com.guide.run.partner.entity.matching.repository;
 
-import com.guide.run.attendance.entity.QAttendance;
-import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
 import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
 import com.guide.run.user.entity.type.UserType;
@@ -14,7 +12,6 @@ import java.util.List;
 import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.partner.entity.matching.QMatching.matching;
-import static com.guide.run.partner.entity.matching.QUnMatching.unMatching;
 import static com.guide.run.user.entity.user.QUser.user;
 
 public class MatchingRepositoryImpl implements MatchingRepositoryCustom {

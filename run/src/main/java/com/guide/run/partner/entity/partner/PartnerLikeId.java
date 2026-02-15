@@ -1,6 +1,5 @@
 package com.guide.run.partner.entity.partner;
 
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

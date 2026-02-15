@@ -21,6 +21,7 @@ public class ArchiveData {
     private String runningPlace;
 
     @Convert(converter = StringListConverter.class)
+    @Builder.Default
     private List<String> howToKnow = new ArrayList<>();
 
     private String motive;

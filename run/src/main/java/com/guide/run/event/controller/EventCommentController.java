@@ -55,7 +55,6 @@ public class EventCommentController {
     @GetMapping("/{eventId}/comments/count")
     public ResponseEntity<Count> getCommentsCount(@PathVariable Long eventId,
                                                   HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(Count.builder()
                 .count(eventCommentService.getCommentsCount(eventId)).build());
     }

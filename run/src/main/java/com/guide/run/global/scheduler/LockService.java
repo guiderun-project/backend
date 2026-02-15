@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -34,7 +33,7 @@ public class LockService {
     //lock 확인
     public boolean isLockActive(String lockName) {
         String sql = "SELECT lock_until FROM scheduler_lock WHERE lock_name = ?";
-        List<LocalDateTime> results = jdbcTemplate.query(sql, new Object[]{lockName}, (rs, rowNum) -> rs.getTimestamp("lock_until").toLocalDateTime());
+        List<LocalDateTime> results = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getTimestamp("lock_until").toLocalDateTime(), lockName);
 
         if (results.isEmpty()) {
             return false;

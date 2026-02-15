@@ -4,9 +4,6 @@ import com.guide.run.event.entity.*;
 import com.guide.run.event.entity.repository.*;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
-import com.guide.run.event.entity.type.EventType;
-import com.guide.run.global.exception.event.resource.NotExistCommentException;
-import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.guide.run.event.entity.type.EventType.COMPETITION;
 import static com.guide.run.event.entity.type.EventType.TRAINING;
@@ -31,10 +25,7 @@ import static com.guide.run.event.entity.type.EventType.TRAINING;
 @RequestMapping("/api/event/test")
 public class EventTestController {
     private final EventRepository eventRepository;
-    private final JwtProvider jwtProvider;
     private final EventFormRepository eventFormRepository;
-    private final EventLikeRepository eventLikeRepository;
-    private final CommentLikeRepository commentLikeRepository;
     private final EventCommentRepository eventCommentRepository;
     private final UserRepository userRepository;
     //kakao3232984128

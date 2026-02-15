@@ -235,8 +235,7 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
      * getEndEventAttendanceAndPartner에서 partner와 조인할 때 사용하는 조건.
      */
     private BooleanExpression getUserType2(EnumPath<UserType> type, StringPath privateId) {
-        return type.equals(UserType.GUIDE)
-                ? partner.guideId.eq(privateId)
-                : partner.viId.eq(privateId);
+        return type.eq(UserType.GUIDE).and(partner.guideId.eq(privateId))
+                .or(type.eq(UserType.VI).and(partner.viId.eq(privateId)));
     }
 }

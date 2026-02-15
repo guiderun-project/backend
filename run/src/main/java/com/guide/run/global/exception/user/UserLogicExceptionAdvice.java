@@ -2,7 +2,6 @@ package com.guide.run.global.exception.user;
 
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.user.dto.NotExistPhoneNumException;
 import com.guide.run.global.exception.user.logic.InvalidAccountIdAndPhoneException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;

@@ -90,8 +90,11 @@ public class EventFormService {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
             throw new NotValidDurationException();
-        User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
+        userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, userId);
+        if (form == null) {
+            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
         form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail(),event.getEventCategory());
         return eventFormRepository.save(
                 form
@@ -99,9 +102,12 @@ public class EventFormService {
     }
 
     public GetForm getForm(Long eventId, String userId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
+        if (form == null) {
+            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
         return GetForm.builder()
                 .type(user.getType().getValue())
                 .name(user.getName())
@@ -133,6 +139,9 @@ public class EventFormService {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        if (form == null) {
+            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
         eventFormRepository.delete(form);
         //if(user.getType().equals(UserType.GUIDE)){
         //    event.setGuideCnt(event.getGuideCnt()-1);

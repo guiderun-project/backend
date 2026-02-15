@@ -1,6 +1,5 @@
 package com.guide.run.partner.entity.matching;
 
-import com.guide.run.partner.entity.partner.PartnerId;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

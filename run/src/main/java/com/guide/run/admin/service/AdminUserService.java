@@ -8,9 +8,7 @@ import com.guide.run.admin.dto.response.ViApplyResponse;
 import com.guide.run.admin.dto.response.user.NewUserResponse;
 import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.event.entity.dto.response.get.Count;
-import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
@@ -37,8 +35,6 @@ public class AdminUserService {
     private final ViRepository viRepository;
     private final GuideRepository guideRepository;
     private final ArchiveDataRepository archiveDataRepository;
-    private final TimeFormatter timeFormatter;
-    private final JwtProvider jwtProvider;
     private final CoolSmsService coolSmsService;
 
     public List<UserItem> getUserList(int start, int limit, UserSortCond cond){

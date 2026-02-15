@@ -1,15 +1,10 @@
 package com.guide.run.event.entity.dto.response.comments;
 
-import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.entity.type.UserType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 public class GetComment {

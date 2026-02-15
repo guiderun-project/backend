@@ -70,7 +70,6 @@ public class LoginInfoController {
     }
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response){
-        String privateId = jwtProvider.extractUserId(request);
 
         if(request.getCookies() !=null){
             for(Cookie cookie: request.getCookies()){

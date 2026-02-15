@@ -52,7 +52,7 @@ public class LoginInfoService {
     @Transactional
     public void getNumberForAccountId(String phoneNum) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         String phone = userService.extractNumber(phoneNum);
-        User user = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
+        userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
         //인증번호 생성
         String authNum = createSmsKey();
@@ -121,7 +121,7 @@ public class LoginInfoService {
     public void createNewPassword(String token, String password){
         TmpToken tmpToken = tmpTokenRepository.findById(token).orElseThrow(NotValidTmpTokenException::new);
         if(tmpToken.getType().equals("password")){
-            User user = userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
+            userRepository.findUserByPrivateId(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
             //비밀번호 재설정 해줌.
             SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
 

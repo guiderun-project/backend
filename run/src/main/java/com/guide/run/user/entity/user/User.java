@@ -2,7 +2,6 @@ package com.guide.run.user.entity.user;
 
 
 import com.guide.run.global.entity.BaseEntity;
-import com.guide.run.temp.member.dto.CntDTO;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import jakarta.persistence.*;
@@ -10,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 
 @Entity

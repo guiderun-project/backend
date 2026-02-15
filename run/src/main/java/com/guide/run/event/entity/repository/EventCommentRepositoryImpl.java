@@ -1,9 +1,6 @@
 package com.guide.run.event.entity.repository;
 
-import com.guide.run.event.entity.QComment;
-import com.guide.run.event.entity.QCommentLike;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
-import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;

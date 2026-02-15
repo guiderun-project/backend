@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class ExcelController {
-    @GetMapping("/healty")
-    public ResponseEntity healthCheck(){
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck(){
         return ResponseEntity.ok().body("");}
 }

@@ -1,7 +1,6 @@
 package com.guide.run.event.entity.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

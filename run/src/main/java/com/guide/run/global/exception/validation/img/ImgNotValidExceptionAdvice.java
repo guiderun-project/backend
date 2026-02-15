@@ -1,7 +1,6 @@
 package com.guide.run.global.exception.validation.img;
 
 import com.guide.run.global.dto.response.FailResult;
-import com.guide.run.global.exception.user.authorize.NotApprovedUserException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

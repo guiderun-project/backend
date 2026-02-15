@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class PartnerService {
 
     @Transactional
     public void partnerLike(String userId, String privateId){
-        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         User partner = userRepository.findUserByUserId(userId).orElseThrow(RuntimeException::new); //todo : 존재하지 않는 파트너 에러 추가 필요
         PartnerLike partnerLike = partnerLikeRepository.findByRecIdAndSendId(partner.getPrivateId(),privateId).orElse(null);
 

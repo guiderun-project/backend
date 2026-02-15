@@ -2,9 +2,7 @@ package com.guide.run.user.controller;
 
 import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.event.entity.dto.response.get.Count;
-import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.dto.GlobalUserInfoDto;
 import com.guide.run.user.dto.request.Add1365Dto;
 import com.guide.run.user.dto.response.MyPageEventList;
@@ -16,9 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 @RestController

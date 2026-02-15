@@ -5,8 +5,6 @@ import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.*;
 import com.guide.run.admin.dto.response.user.AdminUserList;
 import com.guide.run.admin.dto.response.user.NewUserList;
-import com.guide.run.admin.dto.response.user.NewUserResponse;
-import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.admin.service.AdminUserService;
 
 import com.guide.run.event.entity.dto.response.get.Count;
@@ -15,8 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
