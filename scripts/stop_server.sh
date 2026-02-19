@@ -2,7 +2,7 @@
 
 echo ">>> Stopping existing application..."
 
-CURRENT_PID=$(pgrep -f "java -jar.*run-.*\.jar")
+CURRENT_PID=$(pgrep -f "java.*run-0\.0\.1-SNAPSHOT\.jar")
 
 if [ -z "$CURRENT_PID" ]; then
   echo ">>> No running application found."
