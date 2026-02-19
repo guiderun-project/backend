@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -82,6 +83,29 @@ public class MypageService {
                 NotExistUserException::new
         );
 
+        if ("COUNT".equalsIgnoreCase(sort)) {
+            long totalCount = partnerRepository.countMyPartner(user.getPrivateId(), user.getType());
+            int total = totalCount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) totalCount;
+            if (total == 0 || start >= total) {
+                return List.of();
+            }
+
+            List<MyPagePartner> allPartners = partnerRepository.findMyPartner(
+                    user.getPrivateId(),
+                    "RECENT",
+                    total,
+                    0,
+                    user.getType()
+            );
+            allPartners.sort(Comparator.comparingInt(
+                    (MyPagePartner p) -> p.getTrainingCnt() + p.getContestCnt()
+            ).reversed());
+
+            int from = Math.max(start, 0);
+            int safeLimit = Math.max(limit, 0);
+            int to = Math.min(from + safeLimit, allPartners.size());
+            return allPartners.subList(from, to);
+        }
 
         return partnerRepository.findMyPartner(user.getPrivateId(),sort , limit, start, user.getType());
     }
