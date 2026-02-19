@@ -4,12 +4,14 @@ import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
 import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
 import com.guide.run.user.entity.type.UserType;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.EnumPath;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -206,10 +208,27 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
     }
 
     /**
-     * 정렬 조건: 현재는 RECENT와 COUNT 모두 partner.updatedAt의 내림차순 정렬.
+     * 정렬 조건:
+     * - RECENT: partner.updatedAt 내림차순
+     * - COUNT: (trainingIds 개수 + contestIds 개수) 내림차순
      */
     private OrderSpecifier<?> partnerSortCond(String sort) {
+        if ("COUNT".equalsIgnoreCase(sort)) {
+            return partnerEventCount().desc();
+        }
         return partner.updatedAt.desc();
+    }
+
+    private NumberExpression<Integer> partnerEventCount() {
+        return setSize(partner.trainingIds).add(setSize(partner.contestIds));
+    }
+
+    private NumberExpression<Integer> setSize(Expression<?> field) {
+        return Expressions.numberTemplate(
+                Integer.class,
+                "CASE WHEN {0} IS NULL OR {0} = '' THEN 0 ELSE LENGTH({0}) - LENGTH(REPLACE({0}, ',', '')) + 1 END",
+                field
+        );
     }
 
     /**
