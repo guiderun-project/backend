@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,14 @@ public class EventSearchService {
                 .build();
     }
     public List<SearchAllEvent> getSearchAllEvents(int start, int limit, String title){
-        Pageable pageable = PageRequest.of(start/limit,limit);
+        Pageable pageable = PageRequest.of(
+                start / limit,
+                limit,
+                Sort.by(
+                        Sort.Order.desc("createdAt"),
+                        Sort.Order.desc("id")
+                )
+        );
         Page<Event> findEventPage = eventRepository.findAllByNameContainingOrContentContaining(title, title, pageable);
         List<SearchAllEvent> findEventList = new ArrayList<>();
         for(Event e : findEventPage){
