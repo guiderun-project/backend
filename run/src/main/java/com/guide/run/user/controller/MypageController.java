@@ -33,6 +33,7 @@ public class MypageController {
 
         return ResponseEntity.ok().body(response);
     }
+    @Operation(summary = "나의 이벤트 참여 횟수 조회")
     @GetMapping("/event-history/count/{userId}")
     public ResponseEntity<Count> getMyEventCount(@PathVariable String userId,
                                                  @RequestParam(defaultValue = "RECRUIT_ALL") String kind,
