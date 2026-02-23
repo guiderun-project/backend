@@ -43,6 +43,7 @@ public class MypageController {
                 .build();
         return ResponseEntity.ok().body(response);
     }
+    @Operation(summary = "나의 이벤트 참여 목록 조회")
     @GetMapping("/event-history/{userId}")
     public ResponseEntity<MyPageEventList> getMyEventList(@PathVariable String userId,
                                                           @RequestParam(defaultValue = "0") int start,
