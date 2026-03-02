@@ -66,6 +66,7 @@ public class SecurityConfig {
                                 "/api/accountId/**",
                                 "/api/new-password/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/health").permitAll()
                         .requestMatchers(
                                 "/api/user/personal/**",
                                 "/api/user/permission/**",
