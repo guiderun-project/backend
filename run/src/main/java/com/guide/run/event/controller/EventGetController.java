@@ -21,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
 import static com.guide.run.event.entity.type.EventType.*;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
