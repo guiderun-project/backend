@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
 public class EventSearchController {

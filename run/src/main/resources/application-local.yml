@@ -52,7 +52,8 @@ spring:
     signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
 
 cors:
-  origin: http://localhost:3000
+  allowed-origins:
+    - http://localhost:3000
 
 cloud:
   aws:

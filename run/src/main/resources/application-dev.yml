@@ -51,7 +51,10 @@ spring:
     signupCompletionMsgId: ${SIGNUP_COMPLETE_MSG}
     signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
 cors:
-  origin: https://dev.guiderun.org
+  allowed-origins:
+    - https://dev.guiderun.org
+    - http://localhost:3000
+    - http://localhost:5173
 
 cloud:
   aws:
