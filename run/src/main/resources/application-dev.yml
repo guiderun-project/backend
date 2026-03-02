@@ -13,17 +13,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
-
+      ddl-auto: update
 
   social:
     kakao:
       client_id: ${KAKAO_CLIENT_ID}
       redirect: https://dev.guiderun.org/oauth
       url:
-        login: https://kauth.kakao.com/oauth/authorize  # 로그인 진행 사이트
-        token: https://kauth.kakao.com/oauth/token  # access token을 발급 받는  url , 필요한 정보를 담아 보내야 함
-        profile: https://kapi.kakao.com/v2/user/me  # Access Token을 통해 정보를 받는 url
+        login: https://kauth.kakao.com/oauth/authorize # 로그인 진행 사이트
+        token: https://kauth.kakao.com/oauth/token # access token을 발급 받는  url , 필요한 정보를 담아 보내야 함
+        profile: https://kapi.kakao.com/v2/user/me # Access Token을 통해 정보를 받는 url
 
     google:
       client_id: aa
@@ -67,4 +66,3 @@ cloud:
       auto: false
     url:
       cloudFront: ${CLOUD_FRONT_URL}
-
