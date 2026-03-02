@@ -100,18 +100,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
-
-        CorsConfiguration apiConfig = new CorsConfiguration();
-        apiConfig.setAllowedOrigins(allowedOrigins);
-        apiConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        apiConfig.setAllowedHeaders(List.of("*"));
-        apiConfig.setMaxAge(3600L);
-        apiConfig.setAllowCredentials(true);
+        config.addAllowedOrigin(origin);
+        config.addAllowedMethod("*"); // 모든 메소드 허용.
+        config.addAllowedHeader("*");
+        config.setMaxAge(3600L);
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/health", healthConfig);
-        source.registerCorsConfiguration("/health/**", healthConfig);
-        source.registerCorsConfiguration("/**", apiConfig);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
