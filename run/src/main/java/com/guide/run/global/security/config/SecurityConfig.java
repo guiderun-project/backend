@@ -18,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -26,8 +25,8 @@ import java.util.List;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
-    @Value("${cors.allowed-origins}")
-    private List<String> allowedOrigins;
+     @Value("${cors.origin}")
+    private String origin;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -99,12 +98,8 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration healthConfig = new CorsConfiguration();
-        healthConfig.setAllowedOriginPatterns(List.of("*"));
-        healthConfig.setAllowedMethods(List.of("GET", "OPTIONS"));
-        healthConfig.setAllowedHeaders(List.of("*"));
-        healthConfig.setMaxAge(3600L);
-        healthConfig.setAllowCredentials(false);
+
+        CorsConfiguration config = new CorsConfiguration();
 
         CorsConfiguration apiConfig = new CorsConfiguration();
         apiConfig.setAllowedOrigins(allowedOrigins);

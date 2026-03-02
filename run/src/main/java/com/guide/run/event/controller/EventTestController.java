@@ -17,6 +17,9 @@ import static com.guide.run.event.entity.type.EventType.COMPETITION;
 import static com.guide.run.event.entity.type.EventType.TRAINING;
 
 @Slf4j
+@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
+        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event/test")

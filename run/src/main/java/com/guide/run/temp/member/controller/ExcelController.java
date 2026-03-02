@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
+        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
+        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 public class ExcelController {
