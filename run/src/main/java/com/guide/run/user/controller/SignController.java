@@ -32,10 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.naming.CommunicationException;
 
-@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
-maxAge = 3600,
-allowCredentials = "true")
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor

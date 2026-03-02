@@ -18,14 +18,16 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
-    @Value("${cors.origin}")
-    private String origin;
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -97,16 +99,24 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+        CorsConfiguration healthConfig = new CorsConfiguration();
+        healthConfig.setAllowedOriginPatterns(List.of("*"));
+        healthConfig.setAllowedMethods(List.of("GET", "OPTIONS"));
+        healthConfig.setAllowedHeaders(List.of("*"));
+        healthConfig.setMaxAge(3600L);
+        healthConfig.setAllowCredentials(false);
 
-        config.addAllowedOrigin(origin);
-        config.addAllowedMethod("*"); // 모든 메소드 허용.
-        config.addAllowedHeader("*");
-        config.setMaxAge(3600L);
-        config.setAllowCredentials(true);
+        CorsConfiguration apiConfig = new CorsConfiguration();
+        apiConfig.setAllowedOrigins(allowedOrigins);
+        apiConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        apiConfig.setAllowedHeaders(List.of("*"));
+        apiConfig.setMaxAge(3600L);
+        apiConfig.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/health", healthConfig);
+        source.registerCorsConfiguration("/health/**", healthConfig);
+        source.registerCorsConfiguration("/**", apiConfig);
         return source;
     }
 }
