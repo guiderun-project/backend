@@ -4,7 +4,7 @@ import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,10 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
+@EnableConfigurationProperties(CorsProperties.class)
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
-    @Value("${cors.allowed-origins}")
-    private List<String> allowedOrigins;
+    private final CorsProperties corsProperties;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -107,7 +107,7 @@ public class SecurityConfig {
         healthConfig.setAllowCredentials(false);
 
         CorsConfiguration apiConfig = new CorsConfiguration();
-        apiConfig.setAllowedOrigins(allowedOrigins);
+        apiConfig.setAllowedOrigins(corsProperties.getAllowedOrigins());
         apiConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         apiConfig.setAllowedHeaders(List.of("*"));
         apiConfig.setMaxAge(3600L);
