@@ -57,6 +57,7 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "사용자 프로필 상세 조회")
     @GetMapping("/profile/{userId}")
     public ResponseEntity<ProfileResponse> getUserProfile(@PathVariable String userId,
                                                           HttpServletRequest request){
