@@ -39,12 +39,22 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
-             web.ignoring()
-                .requestMatchers("/favicon.ico")
-                .requestMatchers("/v3/api-docs/**")
-                .requestMatchers("/v3/api-docs")
-                .requestMatchers("/swagger-ui/**")
-                .requestMatchers("/swagger-ui.html");
+            web.ignoring()
+                    .requestMatchers("/health")
+                    .requestMatchers("/favicon.ico")
+                    .requestMatchers("/member-upload")
+                    .requestMatchers("/event-upload")
+                    .requestMatchers("/attendance-upload")
+                    .requestMatchers("/api/oauth/**")
+                    .requestMatchers("/api/sms/**")
+                    .requestMatchers("/api/accountId")
+                    .requestMatchers("/api/new-password")
+                    .requestMatchers("/tmp/**")
+                    .requestMatchers("/api/login")
+                    .requestMatchers("/v3/api-docs/**")
+                    .requestMatchers("/v3/api-docs")
+                    .requestMatchers("/swagger-ui/**")
+                    .requestMatchers("/swagger-ui.html");
         };
     }
     @Bean
