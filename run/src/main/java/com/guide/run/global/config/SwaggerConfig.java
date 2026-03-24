@@ -1,12 +1,11 @@
 package com.guide.run.global.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
@@ -26,12 +25,11 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("GuideRun API")
-                        .description("GuideRun 백엔드 API 문서")
+                        .description("GuideRun 백엔드 API 문서. 실제 서버 계약을 기준으로 정리되어 있으며, 프론트 사용 흐름에 맞춘 설명과 예시를 제공합니다.")
                         .version("v1")
                         .license(new License().name("GuideRun"))
                         .termsOfService("https://guidesrun.kr"))
-                .components(new Components())
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+                .components(new Components());
     }
 
     @Bean
@@ -39,7 +37,15 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("public")
                 .pathsToMatch("/api/**")
-                .pathsToExclude("/api/admin/**")
+                .pathsToExclude("/api/admin/**", "/api/test/**", "/api/test2", "/api/test3", "/api/event/test/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi adminApi() {
+        return GroupedOpenApi.builder()
+                .group("admin")
+                .pathsToMatch("/api/admin/**")
                 .build();
     }
 
