@@ -3,6 +3,7 @@ package com.guide.run.user.dto;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,9 +16,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "Guide 사용자 러닝 스펙")
 public class GuideRunningInfoDto {
+    @Schema(description = "현재 러닝 등급", example = "A")
     private String recordDegree;
+    @Schema(description = "세부 기록", example = "10km 48분")
     private String detailRecord;
+    @Schema(description = "가이드 경험 여부", example = "true")
     private Boolean isGuideExp;
     private String viName;
     private String viRecord;

@@ -1,6 +1,7 @@
 package com.guide.run.admin.dto;
 
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,8 +9,11 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 @Getter
+@Schema(description = "관리자 이벤트 목록 항목")
 public class EventDto {
+    @Schema(description = "이벤트 ID", example = "1023")
     private Long eventId;
+    @Schema(description = "이벤트 이름", example = "상계천 천천히 달리기")
     private String name;
     private String smallDate;
     private String startTime;
