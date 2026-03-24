@@ -2,6 +2,7 @@ package com.guide.run.event.entity.dto.response;
 
 import com.guide.run.event.entity.type.*;
 import com.guide.run.user.entity.type.UserType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,8 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "이벤트 팝업/모달 상세 응답")
 public class EventPopUpResponse {
+        @Schema(description = "이벤트 ID", example = "1023")
         private Long eventId;
+        @Schema(description = "이벤트 유형", example = "TRAINING")
         private EventType type;//이벤트 분류
 
         private String organizerId; //주최자 아이디
@@ -36,7 +40,9 @@ public class EventPopUpResponse {
         private String content;//이벤트 내용
         private LocalDate updatedAt; //수정일
 
+        @Schema(description = "현재 로그인 사용자의 신청 여부", example = "true")
         private Boolean isApply; //신청 여부
+        @Schema(description = "파트너 정보 존재 여부", example = "false")
         private Boolean hasPartner; //파트너 존재 여부
 
         private List<EventPopUpPartner> partner;
