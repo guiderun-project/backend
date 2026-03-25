@@ -7,7 +7,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,13 @@ public class SwaggerConfig {
                         .version("v1")
                         .license(new License().name("GuideRun"))
                         .termsOfService("https://guidesrun.kr"))
-                .components(new Components());
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
+                                .in(SecurityScheme.In.HEADER)
+                                .name("Authorization")));
     }
 
     @Bean
@@ -61,19 +66,6 @@ public class SwaggerConfig {
             }
             addDefaultResponses(operation);
             return operation;
-        };
-    }
-
-    @Bean
-    public OpenApiCustomizer openApiSecurityCustomizer() {
-        return openApi -> {
-            openApi.getComponents().addSecuritySchemes("bearerAuth",
-                    new SecurityScheme()
-                            .type(SecurityScheme.Type.HTTP)
-                            .scheme("bearer")
-                            .bearerFormat("JWT")
-                            .in(SecurityScheme.In.HEADER)
-                            .name("Authorization"));
         };
     }
 
