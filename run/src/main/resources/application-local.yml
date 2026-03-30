@@ -58,7 +58,7 @@ spring:
     secret-key: ${TOSSPAYMENTS_SECRET_KEY}
 
 cors:
-  allowed-origins:
+  origin: http://localhost:3000
 
 cloud:
   aws:
