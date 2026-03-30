@@ -40,6 +40,7 @@ public class SecurityConfig {
         return web -> {
             web.ignoring()
                     .requestMatchers("/health")
+                    .requestMatchers("/webhook/tosspayments")
                     .requestMatchers("/favicon.ico")
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
