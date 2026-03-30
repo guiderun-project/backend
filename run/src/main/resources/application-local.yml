@@ -54,6 +54,8 @@ spring:
       api-key: ${COOLSMS_WEBHOOK_API_KEY}
       api-secret: ${COOLSMS_WEBHOOK_API_SECRET}
       from-number: ${SEND_NUMBER}
+  tosspayments:
+    secret-key: ${TOSSPAYMENTS_SECRET_KEY}
 
 cors:
   allowed-origins:
