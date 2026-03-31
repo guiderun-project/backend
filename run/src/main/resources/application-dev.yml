@@ -50,6 +50,12 @@ spring:
     kakaoChId: ${KAKAO_CH_ID}
     signupCompletionMsgId: ${SIGNUP_COMPLETE_MSG}
     signupApprovalMsgId: ${SIGNUP_APPROVAL_MSG}
+    webhook-sms:
+      api-key: ${COOLSMS_WEBHOOK_API_KEY}
+      api-secret: ${COOLSMS_WEBHOOK_API_SECRET}
+      from-number: ${SEND_NUMBER}
+  tosspayments:
+    secret-key: ${TOSSPAYMENTS_SECRET_KEY}
 cors:
   origin: https://dev.guiderun.org
 

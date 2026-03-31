@@ -18,6 +18,9 @@ import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
@@ -36,6 +39,7 @@ import javax.naming.CommunicationException;
 @CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
 maxAge = 3600,
 allowCredentials = "true")
+@Tag(name = "Auth", description = "로그인, 회원가입, 토큰 재발급, 중복 확인과 회원 탈퇴를 다루는 인증 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -48,6 +52,7 @@ public class SignController {
     private final GuideService guideService;
 
 
+    @Operation(summary = "일반 로그인", description = "로그인 화면에서 계정 ID와 비밀번호로 로그인합니다. 응답 본문에는 액세스 토큰을, 브라우저 쿠키에는 refreshToken을 내려줍니다.", security = {})
     @PostMapping("/login")
     public LoginResponse generalLogin(@RequestBody GeneralLoginRequest request,HttpServletRequest httpServletRequest,
                                       HttpServletResponse httpServletResponse){
@@ -78,8 +83,9 @@ public class SignController {
                 .build();
     }
 
+    @Operation(summary = "카카오 OAuth 로그인", description = "프론트 OAuth 콜백 화면에서 받은 카카오 인가 코드를 전달받아 로그인합니다. 신규 사용자는 `isExist=false`로 내려와 추가 회원가입 흐름으로 이동합니다.", security = {})
     @PostMapping("/oauth/login/kakao")
-    public LoginResponse kakaoLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
+    public LoginResponse kakaoLogin(@RequestParam("code") String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
@@ -108,6 +114,7 @@ public class SignController {
                 .build();
     }
 
+    @Operation(summary = "VI 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 VI 회원가입 폼을 제출할 때 호출됩니다. 프론트의 회원가입 화면에서 입력한 기본 정보, 러닝 정보, 약관 동의 정보를 함께 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/signup/vi")
     public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
@@ -121,6 +128,7 @@ public class SignController {
     }
 
 
+    @Operation(summary = "Guide 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 Guide 회원가입 폼을 제출할 때 호출됩니다. 프론트의 회원가입 화면에서 입력한 기본 정보와 가이드 경험 정보를 함께 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/signup/guide")
     public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
@@ -134,8 +142,9 @@ public class SignController {
     }
 
 
+    @Operation(summary = "구글 OAuth 토큰 교환", description = "구글 인가 코드를 액세스 토큰으로 교환합니다. 현재 프론트 실사용 흐름보다는 보조 인증 경로에 가깝습니다.", security = {})
     @PostMapping("/oauth/token/google")
-    public LoginResponse googleSignup(String code,HttpServletResponse response) throws CommunicationException {
+    public LoginResponse googleSignup(@RequestParam("code") String code,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "google").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"google");
         String userId = oAuthProfile.getSocialId();
@@ -144,6 +153,7 @@ public class SignController {
                 .accessToken(jwtProvider.createAccessToken(userId))
                 .build();
     }
+    @Operation(summary = "액세스 토큰 재발급", description = "브라우저 쿠키의 refreshToken으로 액세스 토큰을 재발급합니다. 프론트 앱 초기 진입과 401 재시도 처리에서 사용됩니다.", security = {})
     @GetMapping("/oauth/login/reissue")
     public ReissuedAccessTokenDto accessTokenReissue(HttpServletRequest request, HttpServletResponse response){
         Cookie[] cookies = request.getCookies();
@@ -185,6 +195,7 @@ public class SignController {
     }
 
     //아이디 중복확인
+    @Operation(summary = "회원가입용 계정 ID 중복 확인", description = "회원가입 화면에서 입력한 accountId가 사용 가능한지 확인합니다. 소셜 로그인 이후 NEW 권한 상태에서 호출됩니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/signup/duplicated")
     public ResponseEntity<IsDuplicatedResponse> isIdDuplicated(@RequestBody AccountIdDto aa){
         IsDuplicatedResponse response =
@@ -194,6 +205,7 @@ public class SignController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 화면에서 선택한 탈퇴 사유 목록을 저장하고 계정을 탈퇴 처리합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/withdrawal")
     public ResponseEntity<String> withDrawal(@RequestBody WithdrawalRequest request, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
@@ -201,8 +213,9 @@ public class SignController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
     }
 
+    @Operation(summary = "네이버 OAuth 로그인", description = "네이버 인가 코드를 전달받아 로그인합니다. 현재 프론트의 주 인증 경로는 아니지만 운영 가능한 공개 인증 API입니다.", security = {})
     @PostMapping("/oauth/login/naver")
-    public LoginResponse naverLogin(String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
+    public LoginResponse naverLogin(@RequestParam("code") String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
         String accessToken = providerService.getAccessToken(code, "naver").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"naver");
         String privateId = oAuthProfile.getSocialId();
