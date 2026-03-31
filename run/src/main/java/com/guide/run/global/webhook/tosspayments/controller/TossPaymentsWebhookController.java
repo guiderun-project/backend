@@ -22,8 +22,6 @@ public class TossPaymentsWebhookController {
 
     @PostMapping("/webhook/tosspayments")
     public ResponseEntity<Void> receiveWebhook(@RequestBody(required = false) TossPaymentsWebhookRequest request) {
-        log.info("Received tosspayments webhook payload: {}", request);
-
         if (shouldProcess(request)) {
             try {
                 tossPaymentsWebhookAsyncService.processPaymentCompleted(

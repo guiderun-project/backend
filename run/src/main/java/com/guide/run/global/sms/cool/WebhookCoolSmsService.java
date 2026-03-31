@@ -14,6 +14,8 @@ import org.springframework.util.StringUtils;
 @Service
 public class WebhookCoolSmsService {
 
+    private static final String WEBHOOK_SMS_SUBJECT = "[가이드런프로젝트] 오픈채팅방 입장 안내";
+
     @Value("${spring.coolsms.webhook-sms.from-number}")
     private String fromNumber;
 
@@ -42,6 +44,7 @@ public class WebhookCoolSmsService {
             message.setFrom(fromNumber);
             message.setTo(normalizedTo);
             message.setAutoTypeDetect(true);
+            message.setSubject(WEBHOOK_SMS_SUBJECT);
             message.setText(buildMessageText(customerName));
 
             messageService.sendOne(new SingleMessageSendingRequest(message));

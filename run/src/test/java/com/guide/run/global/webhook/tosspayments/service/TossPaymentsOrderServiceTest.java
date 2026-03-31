@@ -1,6 +1,5 @@
 package com.guide.run.global.webhook.tosspayments.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guide.run.global.webhook.tosspayments.dto.TossPaymentCustomerInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,14 +25,12 @@ class TossPaymentsOrderServiceTest {
     private RestTemplate restTemplate;
     private MockRestServiceServer mockRestServiceServer;
     private TossPaymentsOrderService tossPaymentsOrderService;
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         restTemplate = new RestTemplate();
         mockRestServiceServer = MockRestServiceServer.createServer(restTemplate);
-        objectMapper = new ObjectMapper();
-        tossPaymentsOrderService = new TossPaymentsOrderService(restTemplate, objectMapper);
+        tossPaymentsOrderService = new TossPaymentsOrderService(restTemplate);
         ReflectionTestUtils.setField(tossPaymentsOrderService, "secretKey", "test_secret_key");
     }
 
@@ -43,18 +40,26 @@ class TossPaymentsOrderServiceTest {
         String encoded = Base64.getEncoder()
                 .encodeToString("test_secret_key:".getBytes(StandardCharsets.UTF_8));
 
-        mockRestServiceServer.expect(requestTo("https://api.tosspayments.com/v1/payments/orders/order-123"))
+        mockRestServiceServer.expect(requestTo("https://linkpay-openapi.tosspayments.com/api/v1/orders/order-123"))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header(HttpHeaders.AUTHORIZATION, "Basic " + encoded))
                 .andRespond(withSuccess("""
                         {
-                          "paymentKey": "payment-key",
-                          "orderId": "order-123",
-                          "orderName": "정회원 회비",
-                          "totalAmount": 30000,
-                          "customerName": "홍길동",
-                          "mobilePhone": {
-                            "customerMobilePhone": "010-1234-5678"
+                          "code": "SUCCESS",
+                          "message": "",
+                          "result": {
+                            "paymentKey": "payment-key",
+                            "orderId": "order-123",
+                            "amount": 30000,
+                            "customerName": "홍길동",
+                            "customerPhoneNumber": "010-1234-5678",
+                            "orderItems": [
+                              {
+                                "product": {
+                                  "name": "2026 상반기 정회원 회비 납부"
+                                }
+                              }
+                            ]
                           }
                         }
                         """, MediaType.APPLICATION_JSON));
@@ -63,7 +68,7 @@ class TossPaymentsOrderServiceTest {
 
         assertThat(payment.paymentKey()).isEqualTo("payment-key");
         assertThat(payment.orderId()).isEqualTo("order-123");
-        assertThat(payment.orderName()).isEqualTo("정회원 회비");
+        assertThat(payment.orderName()).isEqualTo("2026 상반기 정회원 회비 납부");
         assertThat(payment.totalAmount()).isEqualTo(30000L);
         assertThat(payment.customerName()).isEqualTo("홍길동");
         assertThat(payment.customerPhone()).isEqualTo("010-1234-5678");
@@ -72,20 +77,55 @@ class TossPaymentsOrderServiceTest {
     @Test
     @DisplayName("고객 전화번호가 없으면 null로 반환한다")
     void getPaymentByOrderIdReturnsNullPhoneWhenMissing() {
-        mockRestServiceServer.expect(requestTo("https://api.tosspayments.com/v1/payments/orders/order-456"))
+        mockRestServiceServer.expect(requestTo("https://linkpay-openapi.tosspayments.com/api/v1/orders/order-456"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("""
                         {
-                          "paymentKey": "payment-key",
-                          "orderId": "order-456",
-                          "orderName": "정회원 회비",
-                          "totalAmount": 30000,
-                          "customerName": "홍길동"
+                          "code": "SUCCESS",
+                          "message": "",
+                          "result": {
+                            "paymentKey": "payment-key",
+                            "orderId": "order-456",
+                            "amount": 30000,
+                            "customerName": "홍길동",
+                            "orderItems": [
+                              {
+                                "product": {
+                                  "name": "2026 상반기 정회원 회비 납부"
+                                }
+                              }
+                            ]
+                          }
                         }
                         """, MediaType.APPLICATION_JSON));
 
         TossPaymentCustomerInfo payment = tossPaymentsOrderService.getPaymentByOrderId("order-456");
 
         assertThat(payment.customerPhone()).isNull();
+    }
+
+    @Test
+    @DisplayName("orderItems 상품명이 없으면 orderName fallback을 사용한다")
+    void getPaymentByOrderIdFallsBackToOrderName() {
+        mockRestServiceServer.expect(requestTo("https://linkpay-openapi.tosspayments.com/api/v1/orders/order-789"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("""
+                        {
+                          "code": "SUCCESS",
+                          "message": "",
+                          "result": {
+                            "paymentKey": "payment-key",
+                            "orderId": "order-789",
+                            "orderName": "테스트",
+                            "amount": 100,
+                            "customerName": "홍길동",
+                            "customerPhoneNumber": "01012345678"
+                          }
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        TossPaymentCustomerInfo payment = tossPaymentsOrderService.getPaymentByOrderId("order-789");
+
+        assertThat(payment.orderName()).isEqualTo("테스트");
     }
 }

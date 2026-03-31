@@ -46,24 +46,6 @@ class TossPaymentsWebhookAsyncServiceTest {
     }
 
     @Test
-    @DisplayName("테스트 상품명도 문자 발송을 허용한다")
-    void processPaymentCompletedSendsSmsForTestOrder() {
-        when(tossPaymentsOrderService.getPaymentByOrderId("order-123"))
-                .thenReturn(new TossPaymentCustomerInfo(
-                        "payment-key",
-                        "order-123",
-                        "테스트",
-                        30000L,
-                        "홍길동",
-                        "010-1234-5678"
-                ));
-
-        tossPaymentsWebhookAsyncService.processPaymentCompleted("payment-key", "order-123");
-
-        verify(webhookCoolSmsService).sendPaymentCompletedMessage("010-1234-5678", "홍길동");
-    }
-
-    @Test
     @DisplayName("고객 전화번호가 없으면 문자 발송을 건너뛴다")
     void processPaymentCompletedSkipsWhenPhoneMissing() {
         when(tossPaymentsOrderService.getPaymentByOrderId("order-123"))

@@ -8,17 +8,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TossPaymentsWebhookAsyncService {
 
-    private static final List<String> SMS_ALLOWED_ORDER_NAME_KEYWORDS = List.of(
-            "정회원 회비 납부",
-            "테스트"
-    );
+    private static final String MEMBERSHIP_FEE_ORDER_NAME_KEYWORD = "정회원 회비 납부";
 
     private final TossPaymentsOrderService tossPaymentsOrderService;
     private final WebhookCoolSmsService webhookCoolSmsService;
@@ -52,6 +47,6 @@ public class TossPaymentsWebhookAsyncService {
 
     private boolean isMembershipFeePayment(String orderName) {
         return StringUtils.hasText(orderName)
-                && SMS_ALLOWED_ORDER_NAME_KEYWORDS.stream().anyMatch(orderName::contains);
+                && orderName.contains(MEMBERSHIP_FEE_ORDER_NAME_KEYWORD);
     }
 }

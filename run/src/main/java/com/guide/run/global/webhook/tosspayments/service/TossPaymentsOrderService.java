@@ -1,11 +1,8 @@
 package com.guide.run.global.webhook.tosspayments.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.guide.run.global.webhook.tosspayments.dto.TossPaymentCustomerInfo;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,15 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TossPaymentsOrderService {
 
-    private static final String ORDER_LOOKUP_URL = "https://api.tosspayments.com/v1/payments/orders/{orderId}";
+    private static final String ORDER_LOOKUP_URL = "https://linkpay-openapi.tosspayments.com/api/v1/orders/{orderId}";
 
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
 
     @Value("${spring.tosspayments.secret-key}")
     private String secretKey;
@@ -49,24 +44,27 @@ public class TossPaymentsOrderService {
             throw new IllegalStateException("TossPayments payment response body is empty.");
         }
 
-        log.info("TossPayments order lookup response. orderId={}, statusCode={}, body={}",
-                orderId,
-                response.getStatusCode(),
-                maskSensitiveFields(body));
+        JsonNode resultNode = body.path("result");
+        if (resultNode.isMissingNode() || resultNode.isNull() || resultNode.isEmpty()) {
+            throw new IllegalStateException("LinkPay order lookup result is empty.");
+        }
 
         return new TossPaymentCustomerInfo(
-                readText(body, "/paymentKey"),
-                readText(body, "/orderId"),
-                readText(body, "/orderName"),
-                readLong(body, "/totalAmount"),
-                firstText(body, List.of("/customerName", "/customer/name")),
+                readText(resultNode, "/paymentKey"),
+                readText(resultNode, "/orderId"),
+                firstText(resultNode, List.of(
+                        "/orderItems/0/product/name",
+                        "/product/name",
+                        "/orderName"
+                )),
+                firstLong(resultNode, List.of("/amount", "/totalAmount")),
+                firstText(resultNode, List.of("/customerName", "/customer/name")),
                 firstText(body, List.of(
-                        "/mobilePhone/customerMobilePhone",
-                        "/customerMobilePhone",
-                        "/mobilePhone",
-                        "/customer/mobilePhone",
-                        "/customerPhone",
-                        "/phone"
+                        "/result/customerPhoneNumber",
+                        "/result/phoneNumber",
+                        "/result/customerPhone",
+                        "/result/mobilePhone",
+                        "/result/shipping/phoneNumber"
                 ))
         );
     }
@@ -106,11 +104,13 @@ public class TossPaymentsOrderService {
         return node.asLong();
     }
 
-    private JsonNode maskSensitiveFields(JsonNode body) {
-        JsonNode copied = body.deepCopy();
-        if (copied instanceof ObjectNode objectNode && objectNode.has("secret")) {
-            objectNode.put("secret", "***");
+    private Long firstLong(JsonNode body, List<String> jsonPointers) {
+        for (String jsonPointer : jsonPointers) {
+            Long value = readLong(body, jsonPointer);
+            if (value != null) {
+                return value;
+            }
         }
-        return copied;
+        return null;
     }
 }
