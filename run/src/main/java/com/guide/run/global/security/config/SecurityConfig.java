@@ -41,6 +41,7 @@ public class SecurityConfig {
             web.ignoring()
                     .requestMatchers("/health")
                     .requestMatchers("/webhook/tosspayments")
+                    .requestMatchers("/webhook/appsmith/user-approval")
                     .requestMatchers("/favicon.ico")
                     .requestMatchers("/member-upload")
                     .requestMatchers("/event-upload")
