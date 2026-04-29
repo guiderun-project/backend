@@ -54,14 +54,26 @@ jobs:
           aws s3 cp ${{ github.event.release.tag_name }}.zip \
             s3://${{ env.S3_BUCKET }}/${{ github.event.release.tag_name }}.zip
 
-      - name: Deploy
+      - name: Create CodeDeploy deployment
+        id: codedeploy
         run: |
-          aws deploy create-deployment \
+          deployment_id=$(aws deploy create-deployment \
             --application-name ${{ env.CODEDEPLOY_APP }} \
             --deployment-group-name ${{ env.DEPLOY_GROUP }} \
             --s3-location bucket=${{ env.S3_BUCKET }},key=${{ github.event.release.tag_name }}.zip,bundleType=zip \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --description "Release ${{ github.event.release.tag_name }}"
+            --description "Release ${{ github.event.release.tag_name }}" \
+            --query deploymentId \
+            --output text)
+
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+          echo "Created CodeDeploy deployment: $deployment_id"
+
+      - name: Wait for CodeDeploy deployment
+        env:
+          CODEDEPLOY_MAX_ATTEMPTS: 120
+          CODEDEPLOY_POLL_INTERVAL_SECONDS: 15
+        run: bash .github/scripts/wait-codedeploy.sh "${{ steps.codedeploy.outputs.deployment_id }}"
 
   sync-develop-pr:
     needs: build-and-deploy
