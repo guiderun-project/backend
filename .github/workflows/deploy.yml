@@ -54,11 +54,71 @@ jobs:
           aws s3 cp ${{ github.event.release.tag_name }}.zip \
             s3://${{ env.S3_BUCKET }}/${{ github.event.release.tag_name }}.zip
 
-      - name: Deploy
+      - name: Create CodeDeploy deployment
+        id: codedeploy
         run: |
-          aws deploy create-deployment \
+          deployment_id=$(aws deploy create-deployment \
             --application-name ${{ env.CODEDEPLOY_APP }} \
             --deployment-group-name ${{ env.DEPLOY_GROUP }} \
             --s3-location bucket=${{ env.S3_BUCKET }},key=${{ github.event.release.tag_name }}.zip,bundleType=zip \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --description "Release ${{ github.event.release.tag_name }}"
+            --description "Release ${{ github.event.release.tag_name }}" \
+            --query deploymentId \
+            --output text)
+
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+          echo "Created CodeDeploy deployment: $deployment_id"
+
+      - name: Wait for CodeDeploy deployment
+        env:
+          CODEDEPLOY_MAX_ATTEMPTS: 120
+          CODEDEPLOY_POLL_INTERVAL_SECONDS: 15
+        run: bash .github/scripts/wait-codedeploy.sh "${{ steps.codedeploy.outputs.deployment_id }}"
+
+  sync-develop-pr:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event.release.target_commitish == 'main' }}
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check whether main has file changes not in develop
+        id: diff
+        run: |
+          git fetch origin main develop
+
+          if git diff --quiet origin/develop...origin/main; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create sync PR
+        if: steps.diff.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          open_pr_count=$(gh pr list \
+            --base develop \
+            --head main \
+            --state open \
+            --json number \
+            --jq 'length')
+
+          if [ "$open_pr_count" -gt 0 ]; then
+            echo "Sync PR from main to develop already exists."
+            exit 0
+          fi
+
+          gh pr create \
+            --base develop \
+            --head main \
+            --title "chore: sync main into develop after release" \
+            --body "Production release ${{ github.event.release.tag_name }} was published. This PR syncs main back into develop."
