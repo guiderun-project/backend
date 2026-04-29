@@ -34,13 +34,32 @@ deployment_details() {
     --output json
 }
 
+get_status() {
+  local retry status
+
+  for retry in 1 2 3; do
+    if status="$(aws deploy get-deployment \
+      --deployment-id "$deployment_id" \
+      --query 'deploymentInfo.status' \
+      --output text)"; then
+      echo "$status"
+      return 0
+    fi
+
+    echo "Failed to fetch CodeDeploy status (retry $retry/3)." >&2
+
+    if [[ "$retry" != "3" ]]; then
+      sleep 3
+    fi
+  done
+
+  return 1
+}
+
 echo "Waiting for CodeDeploy deployment $deployment_id..."
 
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
-  status="$(aws deploy get-deployment \
-    --deployment-id "$deployment_id" \
-    --query 'deploymentInfo.status' \
-    --output text)"
+  status="$(get_status)"
 
   echo "[$attempt/$max_attempts] CodeDeploy status: $status"
 
