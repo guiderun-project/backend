@@ -43,7 +43,7 @@ public class AppsmithUserApprovalWebhookController {
             @RequestHeader(value = SECRET_HEADER, required = false) String headerSecret,
             @RequestBody(required = false) AppsmithUserApprovalRequest request
     ) {
-        if (!isValidSecret(headerSecret, request)) {
+        if (!isValidSecret(headerSecret)) {
             return fail(HttpStatus.FORBIDDEN, "FORBIDDEN", "Invalid AppSmith webhook secret.");
         }
 
@@ -70,19 +70,21 @@ public class AppsmithUserApprovalWebhookController {
         return ResponseEntity.ok(response);
     }
 
-    private boolean isValidSecret(String headerSecret, AppsmithUserApprovalRequest request) {
-        String receivedSecret = StringUtils.hasText(headerSecret)
-                ? headerSecret
-                : request == null ? null : request.getSecret();
-
-        if (!StringUtils.hasText(webhookSecret) || !StringUtils.hasText(receivedSecret)) {
+    private boolean isValidSecret(String headerSecret) {
+        if (!StringUtils.hasText(webhookSecret) || !StringUtils.hasText(headerSecret)) {
+            log.warn("AppSmith webhook secret missing or not configured.");
             return false;
         }
 
-        return MessageDigest.isEqual(
+        boolean matches = MessageDigest.isEqual(
                 webhookSecret.getBytes(StandardCharsets.UTF_8),
-                receivedSecret.getBytes(StandardCharsets.UTF_8)
+                headerSecret.getBytes(StandardCharsets.UTF_8)
         );
+
+        if (!matches) {
+            log.warn("AppSmith webhook secret mismatch.");
+        }
+        return matches;
     }
 
     private ResponseEntity<FailResult> fail(HttpStatus status, String code, String message) {

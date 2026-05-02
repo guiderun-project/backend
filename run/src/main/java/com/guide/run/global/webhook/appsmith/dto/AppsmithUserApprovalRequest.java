@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class AppsmithUserApprovalRequest {
-    private String secret;
     private String userId;
     private String role;
     private String recordDegree;

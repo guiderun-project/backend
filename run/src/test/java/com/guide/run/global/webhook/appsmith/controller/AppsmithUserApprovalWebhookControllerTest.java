@@ -76,8 +76,8 @@ class AppsmithUserApprovalWebhookControllerTest {
     }
 
     @Test
-    @DisplayName("body secret fallback으로 ROLE_REJECT 요청을 처리한다")
-    void rejectUserWithBodySecretFallback() throws Exception {
+    @DisplayName("헤더 secret으로 ROLE_REJECT 요청을 처리한다")
+    void rejectUserWithHeaderSecret() throws Exception {
         when(userApprovalService.processUserApproval(
                 "user-123",
                 Role.ROLE_REJECT,
@@ -91,10 +91,10 @@ class AppsmithUserApprovalWebhookControllerTest {
         ));
 
         mockMvc.perform(post("/webhook/appsmith/user-approval")
+                        .header("X-Appsmith-Webhook-Secret", "test-secret")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "secret": "test-secret",
                                   "userId": "user-123",
                                   "role": "거절",
                                   "runningGroup": "C그룹",
@@ -114,7 +114,6 @@ class AppsmithUserApprovalWebhookControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "secret": "wrong-secret",
                                   "userId": "user-123",
                                   "role": "ROLE_USER",
                                   "recordDegree": "C그룹"
