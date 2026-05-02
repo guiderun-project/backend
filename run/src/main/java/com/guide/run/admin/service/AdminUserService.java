@@ -3,16 +3,15 @@ package com.guide.run.admin.service;
 import com.guide.run.admin.dto.condition.UserSortCond;
 import com.guide.run.admin.dto.request.ApproveRequest;
 import com.guide.run.admin.dto.response.GuideApplyResponse;
+import com.guide.run.admin.dto.response.UserApprovalResult;
 import com.guide.run.admin.dto.response.UserApprovalResponse;
 import com.guide.run.admin.dto.response.ViApplyResponse;
 import com.guide.run.admin.dto.response.user.NewUserResponse;
 import com.guide.run.admin.dto.response.user.UserItem;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.Guide;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
@@ -22,8 +21,10 @@ import com.guide.run.user.repository.ViRepository;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class AdminUserService {
     private final ViRepository viRepository;
     private final GuideRepository guideRepository;
     private final ArchiveDataRepository archiveDataRepository;
-    private final CoolSmsService coolSmsService;
+    private final UserApprovalService userApprovalService;
 
     public List<UserItem> getUserList(int start, int limit, UserSortCond cond){
        List<UserItem> response =  userRepository.sortAdminUser(start, limit, cond);
@@ -106,29 +107,24 @@ public class AdminUserService {
     //todo : 승인 후 회원에게 알림톡 전송
     @Transactional
     public UserApprovalResponse approveUser(String userId, ApproveRequest request){
-        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        Boolean isApprove = false;
-        if(request.getIsApprove()){
-            user.approveUser(Role.ROLE_USER, request.getRecordDegree());
-            userRepository.save(user);
-            isApprove = true;
-        }else{
-            user.approveUser(Role.ROLE_REJECT, user.getRecordDegree());
-            userRepository.save(user);
+        if (request == null || request.getIsApprove() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "isApprove is required.");
         }
 
-        if(isApprove){
-            if(user.getType().equals(UserType.GUIDE)){
-                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"가이드러너", user.getRecordDegree());
-            } else if (user.getType().equals(UserType.VI)) {
-                coolSmsService.sendToNewUser(user.getPhoneNumber(), user.getName(),"시각장애러너", user.getRecordDegree());
-            }
-        }
+        Role targetRole = request.getIsApprove()
+                ? Role.ROLE_USER
+                : Role.ROLE_REJECT;
+        UserApprovalResult result = userApprovalService.processUserApproval(
+                userId,
+                targetRole,
+                request.getRecordDegree(),
+                "admin"
+        );
 
         UserApprovalResponse response = UserApprovalResponse.builder()
-                .userId(user.getUserId())
-                .isApprove(isApprove)
-                .recordDegree(user.getRecordDegree())
+                .userId(result.userId())
+                .isApprove(targetRole == Role.ROLE_USER)
+                .recordDegree(result.recordDegree())
                 .build();
         return response;
     }
