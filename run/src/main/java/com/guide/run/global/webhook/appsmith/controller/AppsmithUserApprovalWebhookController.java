@@ -22,7 +22,7 @@ import java.util.Locale;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "https://grp.appsmith.com")
 public class AppsmithUserApprovalWebhookController {
 
     private static final String SECRET_HEADER = "X-Appsmith-Webhook-Secret";
