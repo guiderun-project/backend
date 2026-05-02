@@ -12,7 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -33,6 +35,15 @@ class AppsmithUserApprovalWebhookControllerTest {
         AppsmithUserApprovalWebhookController controller =
                 new AppsmithUserApprovalWebhookController(userApprovalService, "test-secret");
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    }
+
+    @Test
+    @DisplayName("AppSmith origin만 CORS 허용 origin으로 설정한다")
+    void allowOnlyAppsmithOrigin() {
+        CrossOrigin crossOrigin = AppsmithUserApprovalWebhookController.class.getAnnotation(CrossOrigin.class);
+
+        assertThat(crossOrigin).isNotNull();
+        assertThat(crossOrigin.origins()).containsExactly("https://grp.appsmith.com");
     }
 
     @Test
