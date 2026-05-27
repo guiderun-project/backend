@@ -32,7 +32,7 @@ class UserServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
         userRepository.save(user);
-        boolean userStatus = userService.getUserStatus("kakao_1");
+        String userStatus = userService.getUserStatus("kakao_1");
         Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_USER.getValue());
     }
 
@@ -45,7 +45,7 @@ class UserServiceTest {
                 .role(Role.ROLE_WAIT)
                 .build();
         userRepository.save(user);
-        boolean userStatus = userService.getUserStatus("kakao_1");
+        String userStatus = userService.getUserStatus("kakao_1");
         Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_WAIT.getValue());
     }
 }

@@ -91,15 +91,15 @@ public class UserService {
     }
 
     @Transactional
-    public boolean getUserStatus(String privateId){
+    public String getUserStatus(String privateId){
         User user = userRepository.findById(privateId).orElse(null);
 
         if(user != null){
             if(user.getPhoneNumber()==null) {
-                return false;
+                return "0";
             }
             else{
-                return true;
+                return "1";
             }
         }else{
                 //신규 가입자의 경우 인증을 위해 임시 유저 생성
@@ -109,7 +109,7 @@ public class UserService {
                         .role(Role.ROLE_NEW)
                         .userId(getUUID())
                         .build());
-                return false;
+                return "0";
         }
     }
 

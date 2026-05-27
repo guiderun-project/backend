@@ -14,6 +14,6 @@ public class LoginResponse {
     private String accessToken;
     @Schema(description = "리프레시 토큰", example = "dG9rZW4tcmVmcmVzaA...")
     private String refreshToken;
-    @Schema(description = "회원 가입 여부", example = "true")
-    private Boolean isExist;
+    @Schema(description = "회원 상태", example = "true")
+    private String status;
 }

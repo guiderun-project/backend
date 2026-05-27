@@ -58,9 +58,9 @@ public class SignController {
                                       HttpServletResponse httpServletResponse){
 
         String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
-        boolean isExist = userService.getUserStatus(privateId);
+        String status = userService.getUserStatus(privateId);
 
-        boolean isExistCookie =false;
+        Boolean isExistCookie =false;
 
 
         if(httpServletRequest.getCookies() !=null){
@@ -79,7 +79,7 @@ public class SignController {
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
-                .isExist(isExist)
+                .status(status)
                 .build();
     }
 
@@ -89,7 +89,7 @@ public class SignController {
         String accessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"kakao");
         String privateId = oAuthProfile.getSocialId();
-        boolean isExist = userService.getUserStatus(privateId);
+        String status = userService.getUserStatus(privateId);
 
         boolean isExistCookie =false;
 
@@ -110,7 +110,7 @@ public class SignController {
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
-                .isExist(isExist)
+                .status(status)
                 .build();
     }
 
@@ -165,7 +165,7 @@ public class SignController {
 
                         // refresh 토큰의 유효성 및 만료 여부 체크 (만료된 경우 예외 발생)
                         String privateId = jwtProvider.getPrivateIdForRefreshToken(refreshToken);
-                        boolean isExist = userService.getUserStatus(privateId);
+                        String status = userService.getUserStatus(privateId);
 
                         //기존 쿠키 만료 처리 및 새 쿠키 생성
                         cookieService.deleteOldCookieAndMakeNewCookie(privateId,response, cookie);
@@ -173,7 +173,7 @@ public class SignController {
                         // 유효한 토큰인 경우 엑세스 토큰 재발급
                         return ReissuedAccessTokenDto.builder()
                                 .accessToken(jwtProvider.createAccessToken(privateId))
-                                .isExist(isExist)
+                                .status(status)
                                 .build();
 
                     } catch (ExpiredJwtException e) {
@@ -219,13 +219,13 @@ public class SignController {
         String accessToken = providerService.getAccessToken(code, "naver").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"naver");
         String privateId = oAuthProfile.getSocialId();
-        boolean isExist = userService.getUserStatus(privateId);
+        String status = userService.getUserStatus(privateId);
 
 
         return LoginResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
                 .refreshToken(jwtProvider.createRefreshToken(privateId))
-                .isExist(isExist)
+                .status(status)
                 .build();
     }
 
