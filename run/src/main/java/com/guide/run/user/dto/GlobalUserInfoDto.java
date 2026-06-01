@@ -28,11 +28,11 @@ public class GlobalUserInfoDto {
     private String phoneNumber;
     @Schema(description = "러닝 등급", example = "A")
     private String recordDegree;
-    private int age;
+    private int birthDate ;
     private String snsId;
     private Boolean isOpenNumber;
     private Boolean isOpenSns;
-    private String img; //2차 이미지 링크 추가
+    //private String img; //2차 이미지 링크 추가
     private String id1365; //1365 아이디
     private String birth;
 
@@ -45,11 +45,11 @@ public class GlobalUserInfoDto {
                 .name(user.getName())
                 .gender(user.getGender())
                 .phoneNumber(user.getPhoneNumber())
-                .age(user.getAge())
+                .birthDate(user.getAge())
                 .snsId(user.getSnsId())
                 .isOpenSns(user.getIsOpenSns())
                 .isOpenNumber(user.getIsOpenNumber())
-                .img(user.getImg())
+                //.img(user.getImg())
                 .id1365(user.getId1365())
                 .birth(user.getBirth())
                 .build();
