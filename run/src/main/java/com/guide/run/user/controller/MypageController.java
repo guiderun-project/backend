@@ -68,16 +68,7 @@ public class MypageController {
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "사용자 프로필 상세 조회", description = "프로필 모달과 관리자 사용자 상세 화면에서 공개 프로필과 통계 정보를 조회합니다.")
-    @GetMapping("/profile/{userId}")
-    public ResponseEntity<ProfileResponse> getUserProfile(@PathVariable String userId,
-                                                          HttpServletRequest request){
-        String privateId = jwtProvider.extractUserId(request);
-        ProfileResponse response = mypageService.getUserProfile(userId,privateId);
-        return ResponseEntity.ok().body(response);
-    }
-
-    @Operation(summary = "함께 뛴 파트너 목록 조회", description = "메인 화면과 파트너 목록 화면에서 특정 사용자의 파트너 목록을 조회합니다.")
+        @Operation(summary = "함께 뛴 파트너 목록 조회", description = "메인 화면과 파트너 목록 화면에서 특정 사용자의 파트너 목록을 조회합니다.")
     @GetMapping("/partner-list/{userId}")
     public ResponseEntity<MyPagePartnerList> getMyPartnerList(@PathVariable String userId,
                                                               @Parameter(description = "페이지 시작 offset", example = "0")
