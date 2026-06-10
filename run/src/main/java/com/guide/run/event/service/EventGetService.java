@@ -144,6 +144,12 @@ public class EventGetService {
                 }
             }
         }
-        return AllEventResponse.builder().items(allEvents).build();
+
+        long totalCount = getAllEventListCount(sort, type, kind, userId, cityName);
+
+        return AllEventResponse.builder()
+                .items(allEvents)
+                .pagination(AllEventResponse.Pagination.builder().totalCount(totalCount).build())
+                .build();
     }
 }
