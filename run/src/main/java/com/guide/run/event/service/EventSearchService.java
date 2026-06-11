@@ -1,8 +1,9 @@
 package com.guide.run.event.service;
 
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,14 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class EventSearchService {
     private final EventRepository eventRepository;
-    public SearchAllEventsCount getSearchAllEventsCount(String title){
+
+    public SearchAllEventsCount getSearchAllEventsCount(String title) {
         return SearchAllEventsCount.builder()
-                        .count(eventRepository.findAllByNameContainingOrContentContaining(title,title).size())
+                .count(eventRepository.findAllByNameContainingOrContentContaining(title, title).size())
                 .build();
     }
-    public List<SearchAllEvent> getSearchAllEvents(int start, int limit, String title){
+
+    public SearchAllEventList getSearchAllEvents(int start, int limit, String title) {
         Pageable pageable = PageRequest.of(
                 start / limit,
                 limit,
@@ -36,19 +39,26 @@ public class EventSearchService {
                 )
         );
         Page<Event> findEventPage = eventRepository.findAllByNameContainingOrContentContaining(title, title, pageable);
+        long totalCount = eventRepository.findAllByNameContainingOrContentContaining(title, title).size();
+
         List<SearchAllEvent> findEventList = new ArrayList<>();
-        for(Event e : findEventPage){
+        for (Event e : findEventPage) {
             findEventList.add(SearchAllEvent.builder()
                     .eventId(e.getId())
                     .eventType(e.getType())
                     .name(e.getName())
-                    .endDate(translateEndDate(e.getEndTime()))
+                    .startDate(translateStartDate(e.getStartTime()))
                     .recruitStatus(e.getRecruitStatus())
                     .build());
         }
-        return findEventList;
+
+        return SearchAllEventList.builder()
+                .items(findEventList)
+                .pagination(SearchAllEventList.Pagination.builder().totalCount(totalCount).build())
+                .build();
     }
-    public String translateEndDate(LocalDateTime time){
+
+    public String translateStartDate(LocalDateTime time) {
         StringBuilder sb = new StringBuilder();
         sb.append(time.getYear());
         sb.append(".");

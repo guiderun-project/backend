@@ -26,32 +26,32 @@ public class EventSearchController {
     private final JwtProvider jwtProvider;
     private final EventSearchService eventSearchService;
     private final UserRepository userRepository;
+
     @Operation(summary = "이벤트 검색 목록 조회", description = "이벤트 검색 화면에서 제목 기준으로 이벤트 목록을 페이지네이션 조회합니다.")
     @GetMapping("/search")
-    public SearchAllEventList searchAllEventList(@Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
-                                                 @Parameter(description = "페이지 크기", example = "10") @RequestParam("limit") int limit,
-                                                 @Parameter(description = "페이지 시작 offset", example = "0") @RequestParam("start") int start,
-                                                 HttpServletRequest request){
+    public SearchAllEventList searchAllEventList(
+            @Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
+            @Parameter(description = "페이지 크기", example = "10") @RequestParam("limit") int limit,
+            @Parameter(description = "페이지 시작 offset", example = "0") @RequestParam("start") int start,
+            HttpServletRequest request) {
         extracted(request);
         System.out.println("title = " + title);
-        return SearchAllEventList.builder().
-                items(eventSearchService.getSearchAllEvents(start,limit,title))
-                .build();
+        return eventSearchService.getSearchAllEvents(start, limit, title);
     }
 
     @Operation(summary = "이벤트 검색 개수 조회", description = "이벤트 검색 화면에서 제목 기준 검색 결과 개수를 조회합니다.")
     @GetMapping("/search/count")
-    public SearchAllEventsCount searchAllEventCount(@Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
-                                                    HttpServletRequest request){
+    public SearchAllEventsCount searchAllEventCount(
+            @Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
+            HttpServletRequest request) {
         extracted(request);
         return eventSearchService.getSearchAllEventsCount(title);
     }
 
     private String extracted(HttpServletRequest request) {
         String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
+        userRepository.findUserByPrivateId(privateId)
+                .orElseThrow(() -> new NotExistUserException());
         return privateId;
     }
-
 }
