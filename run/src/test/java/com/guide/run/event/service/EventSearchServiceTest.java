@@ -53,4 +53,6 @@ class EventSearchServiceTest {
         SearchAllEventList result = eventSearchService.getSearchAllEvents(0, 10, "스트");
 
         Assertions.assertThat(result.getItems()).extracting(SearchAllEvent::getEventId)
-                .containsE
+                .containsExactly(thirdEventId, secondEventId, firstEventId);
+    }
+}
