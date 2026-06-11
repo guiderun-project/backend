@@ -3,6 +3,7 @@ package com.guide.run.event.entity.dto.response.search;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,5 +12,4 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class SearchAllEventList {
-    private List<SearchAllEvent> items;
-}
+    privat
