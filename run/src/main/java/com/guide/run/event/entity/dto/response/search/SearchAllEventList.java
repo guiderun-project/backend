@@ -12,4 +12,14 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class SearchAllEventList {
-    privat
+    private List<SearchAllEvent> items;
+    private Pagination pagination;
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Pagination {
+        private long totalCount;
+    }
+}
