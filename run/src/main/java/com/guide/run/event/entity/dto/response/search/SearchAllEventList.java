@@ -12,4 +12,4 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class SearchAllEventList {
-    privat
+    privat

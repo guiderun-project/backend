@@ -15,4 +15,4 @@ public class SearchAllEvent {
     private String name;
     private String startDate;
     private EventRecruitStatus recruitStatus;
-}
+}

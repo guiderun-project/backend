@@ -2,6 +2,7 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
 import com.guide.run.event.entity.repository.EventRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,8 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 
 @SpringBootTest
@@ -51,9 +50,7 @@ class EventSearchServiceTest {
     @Test
     @DisplayName("전체 이벤트 검색은 최신순으로 조회된다")
     void getSearchAllEventsByLatest() {
-        List<SearchAllEvent> events = eventSearchService.getSearchAllEvents(0, 10, "스트");
+        SearchAllEventList result = eventSearchService.getSearchAllEvents(0, 10, "스트");
 
-        Assertions.assertThat(events).extracting(SearchAllEvent::getEventId)
-                .containsExactly(thirdEventId, secondEventId, firstEventId);
-    }
-}
+        Assertions.assertThat(result.getItems()).extracting(SearchAllEvent::getEventId)
+                .containsE
