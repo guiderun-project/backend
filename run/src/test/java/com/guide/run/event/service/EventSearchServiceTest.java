@@ -4,6 +4,9 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
 import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.CityName;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,13 +47,13 @@ class EventSearchServiceTest {
     @Test
     @DisplayName("전체 이벤트 검색 개수")
     void getSearchAllEventsCount() {
-        Assertions.assertThat(eventSearchService.getSearchAllEventsCount("스트").getCount()).isEqualTo(3);
+        Assertions.assertThat(eventSearchService.getSearchAllEventsCount("스트", "UPCOMING", EventType.TOTAL, EventRecruitStatus.RECRUIT_ALL, null, null).getCount()).isEqualTo(3);
     }
 
     @Test
     @DisplayName("전체 이벤트 검색은 최신순으로 조회된다")
     void getSearchAllEventsByLatest() {
-        SearchAllEventList result = eventSearchService.getSearchAllEvents(0, 10, "스트");
+        SearchAllEventList result = eventSearchService.getSearchAllEvents(0, 10, "스트", "UPCOMING", EventType.TOTAL, EventRecruitStatus.RECRUIT_ALL, null, null);
 
         Assertions.assertThat(result.getItems()).extracting(SearchAllEvent::getEventId)
                 .containsExactly(thirdEventId, secondEventId, firstEventId);
