@@ -46,4 +46,37 @@ public class EventSearchController {
             @RequestParam(value = "cityName", required = false) CityName cityName,
             @Parameter(description = "페이지 크기", example = "10") @RequestParam("limit") int limit,
             @Parameter(description = "페이지 시작 offset", example = "0") @RequestParam("start") int start,
-          
+            HttpServletRequest request) {
+        validateParams(sort, type, kind);
+        String privateId = extracted(request);
+        return eventSearchService.getSearchAllEvents(start, limit, title, sort, type, kind, privateId, cityName);
+    }
+
+    @Operation(summary = "이벤트 검색 개수 조회", description = "이벤트 검색 화면에서 제목 및 필터 조건 기준 검색 결과 개수를 조회합니다.")
+    @GetMapping("/search/count")
+    public SearchAllEventsCount searchAllEventCount(
+            @Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
+            @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam("sort") String sort,
+            @Parameter(description = "이벤트 유형 필터", example = "TRAINING") @RequestParam("type") EventType type,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_OPEN") @RequestParam("kind") EventRecruitStatus kind,
+            @RequestParam(value = "cityName", required = false) CityName cityName,
+            HttpServletRequest request) {
+        validateParams(sort, type, kind);
+        String privateId = extracted(request);
+        return eventSearchService.getSearchAllEventsCount(title, sort, type, kind, privateId, cityName);
+    }
+
+    private void validateParams(String sort, EventType type, EventRecruitStatus kind) {
+        if (sort.equals("UPCOMING") || sort.equals("END") || sort.equals("MY")) {} else throw new NotValidSortException();
+        if (type.equals(TRAINING) || type.equals(COMPETITION) || type.equals(TOTAL)) {} else throw new NotValidTypeException();
+        if (kind.equals(RECRUIT_UPCOMING) || kind.equals(RECRUIT_OPEN) || kind.equals(RECRUIT_CLOSE) ||
+                kind.equals(RECRUIT_END) || kind.equals(RECRUIT_ALL)) {} else throw new NotValidKindException();
+    }
+
+    private String extracted(HttpServletRequest request) {
+        String privateId = jwtProvider.extractUserId(request);
+        userRepository.findUserByPrivateId(privateId)
+                .orElseThrow(() -> new NotExistUserException());
+        return privateId;
+    }
+}

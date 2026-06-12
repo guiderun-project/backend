@@ -29,4 +29,9 @@ public interface EventRepositoryCustom {
 
     long updateRecruitEndForClosedEvents();
 
- 
+    List<AllEvent> getSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> getMySearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
+    long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    long getMySearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
+}
