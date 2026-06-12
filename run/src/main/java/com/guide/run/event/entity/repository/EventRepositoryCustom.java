@@ -28,4 +28,5 @@ public interface EventRepositoryCustom {
     long countByPrivateIdAndCityName(String privateId, CityName cityName);
 
     long updateRecruitEndForClosedEvents();
-}
+
+ 

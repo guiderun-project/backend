@@ -252,44 +252,35 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .execute();
     }
 
-    private BooleanBuilder checkByCityName(CityName cityName){
-        if(cityName==null){
-            return new BooleanBuilder();
-        } else if(cityName.equals(CityName.BUSAN)) {
-            return new BooleanBuilder(event.cityName.eq(CityName.BUSAN));
-        } else{
-            return new BooleanBuilder(event.cityName.eq(CityName.SEOUL));
-        }
+    @Override
+    public List<AllEvent> getSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .orderBy(event.startTime.desc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
     }
 
-
-    private BooleanBuilder checkByKind(EventRecruitStatus kind){
-        if(kind==null){
-            return new BooleanBuilder();
-        } else if(kind.equals(RECRUIT_UPCOMING)){
-            return new BooleanBuilder(event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING));
-        } else if(kind.equals(RECRUIT_OPEN)){
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_OPEN));
-        } else if(kind.equals(RECRUIT_CLOSE)){
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE));
-        } else if (kind.equals(RECRUIT_END)) {
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_END));
-        } else if(kind.equals(RECRUIT_ALL)){
-            return new BooleanBuilder(event.recruitStatus.ne(RECRUIT_END));
-        }
-        return null;
-    }
-
-
-    private BooleanBuilder checkByType(EventType type){
-        if(type==null){
-            return new BooleanBuilder();
-        } else if(type.equals(EventType.COMPETITION)){
-            return new BooleanBuilder(event.type.eq(EventType.COMPETITION));
-        } else if(type.equals(EventType.TRAINING)){
-            return new BooleanBuilder(event.type.eq(EventType.TRAINING));
-        }
-        return null;
-    }
-
-}
+    @Override
+    public List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+              
