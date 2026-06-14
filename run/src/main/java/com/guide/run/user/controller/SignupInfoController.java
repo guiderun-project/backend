@@ -5,11 +5,13 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.SetAccountRequest;
 import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
+import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.SetAccountResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
 import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
@@ -35,6 +37,18 @@ public class SignupInfoController {
     private final SignupInfoService signupInfoService;
     private final UserService userService;
     private final JwtProvider jwtProvider;
+
+    //아이디 중복 확인 (마이페이지)
+    @Operation(summary = "아이디 중복 확인", description = "마이페이지 계정 최초 설정 화면에서 accountId 사용 가능 여부를 확인합니다.")
+    @PostMapping("/user/account/duplicated")
+    public ResponseEntity<IsDuplicatedResponse> checkAccountDuplicated(@RequestBody AccountIdDto request,
+                                                                        HttpServletRequest httpServletRequest) {
+        jwtProvider.extractUserId(httpServletRequest); // 회원 인증 확인
+        IsDuplicatedResponse response = IsDuplicatedResponse.builder()
+                .isUnique(!userService.isAccountIdExist(request.getAccountId()))
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
     //아이디/비밀번호 최초 설정
     @Operation(summary = "아이디/비밀번호 최초 설정", description = "소셜 로그인 이후 아이디/비밀번호가 없는 회원이 계정을 최초 설정합니다. 이미 설정된 경우 또는 중복 accountId는 409를 반환합니다.")
