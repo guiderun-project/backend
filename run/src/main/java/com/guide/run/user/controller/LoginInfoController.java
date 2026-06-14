@@ -7,6 +7,7 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.request.*;
 import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.SmsVerificationIssueResponse;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,18 +43,16 @@ public class LoginInfoController {
     //인증번호 요청(아이디 찾기)
     @Operation(summary = "아이디 찾기용 인증번호 요청", description = "전화번호만으로 아이디 찾기 인증번호를 발송합니다.", security = {})
     @PostMapping("/sms/accountId")
-    public ResponseEntity<String> getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        loginInfoService.getNumberForAccountId(request.getPhoneNum());
-        return ResponseEntity.ok("");
+    public ResponseEntity<SmsVerificationIssueResponse> getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+        return ResponseEntity.ok(loginInfoService.getNumberForAccountId(request.getPhoneNum()));
     }
 
     //인증번호 요청(비밀번호 재설정)
     @Operation(summary = "비밀번호 재설정용 인증번호 요청", description = "accountId와 전화번호를 함께 받아 비밀번호 재설정용 인증번호를 발송합니다.", security = {})
     @PostMapping("/sms/password")
-    public ResponseEntity<String> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
+    public ResponseEntity<SmsVerificationIssueResponse> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
             throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        loginInfoService.getNumberForPassword(request);
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok(loginInfoService.getNumberForPassword(request));
     }
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)

@@ -15,6 +15,7 @@ import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.SmsVerificationIssueResponse;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.entity.SignUpInfo;
 import com.guide.run.user.entity.user.User;
@@ -30,8 +31,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -49,44 +53,62 @@ public class LoginInfoService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private static final int AUTH_EXPIRES_IN_SECONDS = 600;
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+
     @Transactional
-    public void getNumberForAccountId(String phoneNum) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+    public SmsVerificationIssueResponse getNumberForAccountId(String phoneNum) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         String phone = userService.extractNumber(phoneNum);
         userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
-        //인증번호 생성
         String authNum = createSmsKey();
-        //인증번호 전송 api 실행
         smsService.sendSMS(phone, authNum);
 
-        //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId");
         authNumberRepository.save(authNumber);
 
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime expiresAt = now.plusSeconds(AUTH_EXPIRES_IN_SECONDS);
+
+        return SmsVerificationIssueResponse.builder()
+                .verificationId(UUID.randomUUID().toString())
+                .purpose("ACCOUNT_ID")
+                .expiresInSeconds(AUTH_EXPIRES_IN_SECONDS)
+                .expiresAt(expiresAt.format(ISO_FORMATTER))
+                .serverTime(now.format(ISO_FORMATTER))
+                .canExtend(false)
+                .build();
     }
 
     @Transactional
-    public void getNumberForPassword(AccountIdPhoneRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+    public SmsVerificationIssueResponse getNumberForPassword(AccountIdPhoneRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         String phone = userService.extractNumber(request.getPhoneNum());
 
         User user1 = userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
         SignUpInfo user2 = signUpInfoRepository.findByAccountId(request.getAccountId()).orElseThrow(NotExistAccountIdException::new);
 
-        //번호와 아이디 정보가 일치하는지 확인해야 함.
-        if(!user1.getPrivateId().equals(user2.getPrivateId())){
+        if (!user1.getPrivateId().equals(user2.getPrivateId())) {
             throw new InvalidAccountIdAndPhoneException();
         }
 
-        //인증번호 생성
         String authNum = createSmsKey();
-        //인증번호 전송 api 실행
         smsService.sendSMS(phone, authNum);
 
-        //인증번호 저장
         AuthNumber authNumber = new AuthNumber(phone, authNum, "password");
         authNumberRepository.save(authNumber);
 
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime expiresAt = now.plusSeconds(AUTH_EXPIRES_IN_SECONDS);
+
+        return SmsVerificationIssueResponse.builder()
+                .verificationId(UUID.randomUUID().toString())
+                .purpose("PASSWORD")
+                .expiresInSeconds(AUTH_EXPIRES_IN_SECONDS)
+                .expiresAt(expiresAt.format(ISO_FORMATTER))
+                .serverTime(now.format(ISO_FORMATTER))
+                .canExtend(false)
+                .build();
     }
 
     @Transactional
