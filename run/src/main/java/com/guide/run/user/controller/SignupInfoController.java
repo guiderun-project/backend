@@ -6,9 +6,11 @@ import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
+import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
+import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.service.SignupInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,24 +112,13 @@ public class SignupInfoController {
         return ResponseEntity.ok().body(response);
     }
 
-    //vi 러닝스펙 수정
-    @Operation(summary = "VI 러닝 스펙 수정", description = "정보 수정 화면에서 VI 사용자의 러닝 스펙을 저장합니다.")
-    @PatchMapping("/user/running/vi")
-    public ResponseEntity<ViRunningInfoDto> editViRunningInfo(HttpServletRequest httpServletRequest,
-                                                              @RequestBody ViRunningInfoDto request){
+    //러닝 정보 수정 (통합)
+    @Operation(summary = "러닝 정보 수정", description = "마이페이지 러닝 정보 수정 화면에서 VI/Guide 공통 필드(등급·세부기록·희망지역)를 수정합니다.")
+    @PatchMapping("/user/running")
+    public ResponseEntity<UpdateRunningInfoResponse> updateRunningInfo(HttpServletRequest httpServletRequest,
+                                                                       @RequestBody UpdateRunningInfoRequest request) {
         String privateId = jwtProvider.extractUserId(httpServletRequest);
-        ViRunningInfoDto response = signupInfoService.editViRunningInfo(privateId, request);
-        return ResponseEntity.ok().body(response);
-    }
-
-    //guide 러닝 스펙 수정
-    @Operation(summary = "Guide 러닝 스펙 수정", description = "정보 수정 화면에서 Guide 사용자의 러닝 스펙을 저장합니다.")
-    @PatchMapping("/user/running/guide")
-    public ResponseEntity<GuideRunningInfoDto> editGuideRunningInfo(HttpServletRequest httpServletRequest,
-                                                              @RequestBody GuideRunningInfoDto request){
-        String privateId = jwtProvider.extractUserId(httpServletRequest);
-        GuideRunningInfoDto response = signupInfoService.editGuideRunningInfo(privateId, request);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(signupInfoService.updateRunningInfo(privateId, request));
     }
 
 

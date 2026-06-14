@@ -7,8 +7,10 @@ import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
+import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
+import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
@@ -230,6 +232,27 @@ public class SignupInfoService {
         user.editBirthDate(birthDate);
         return UserBirthDatePatchResponse.builder()
                 .birthDate(user.getBirth())
+                .build();
+    }
+
+    @Transactional
+    public UpdateRunningInfoResponse updateRunningInfo(String privateId, UpdateRunningInfoRequest request) {
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
+        archiveData.editRunningInfo(
+                archiveData.getHowToKnow(),
+                archiveData.getMotive(),
+                request.getHopePrefs(),
+                archiveData.getRunningPlace()
+        );
+
+        return UpdateRunningInfoResponse.builder()
+                .type(user.getType() != null ? user.getType().name() : null)
+                .recordDegree(user.getRecordDegree())
+                .detailRecord(user.getDetailRecord())
+                .hopePrefs(archiveData.getHopePrefs())
                 .build();
     }
 
