@@ -5,14 +5,18 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.request.SetAccountRequest;
 import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
+import com.guide.run.user.dto.response.SetAccountResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
 import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.service.SignupInfoService;
+import com.guide.run.user.service.UserService;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +33,17 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class SignupInfoController {
     private final SignupInfoService signupInfoService;
+    private final UserService userService;
     private final JwtProvider jwtProvider;
+
+    //아이디/비밀번호 최초 설정
+    @Operation(summary = "아이디/비밀번호 최초 설정", description = "소셜 로그인 이후 아이디/비밀번호가 없는 회원이 계정을 최초 설정합니다. 이미 설정된 경우 또는 중복 accountId는 409를 반환합니다.")
+    @PostMapping("/user/account")
+    public ResponseEntity<SetAccountResponse> setAccount(@RequestBody @Valid SetAccountRequest request,
+                                                         HttpServletRequest httpServletRequest) {
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        return ResponseEntity.status(201).body(userService.setAccount(privateId, request.getAccountId(), request.getPassword()));
+    }
 
     //마이페이지 통합 조회
     @Operation(summary = "마이페이지 조회", description = "마이페이지 첫 화면 표시용 프로필·참여이력·개인정보·러닝정보 통합 조회 API입니다.")

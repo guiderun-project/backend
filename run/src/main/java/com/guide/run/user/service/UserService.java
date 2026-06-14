@@ -5,7 +5,9 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.global.exception.auth.authorize.NotValidAccountIdException;
 import com.guide.run.global.exception.auth.authorize.NotValidPasswordException;
+import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.user.dto.response.SetAccountResponse;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
@@ -156,6 +158,33 @@ public class UserService {
     public boolean isAccountIdExist(String accountId) {
         Optional<SignUpInfo> byAccountId = signUpInfoRepository.findByAccountId(accountId);
         return !byAccountId.isEmpty();
+    }
+
+    @Transactional
+    public SetAccountResponse setAccount(String privateId, String accountId, String password) {
+        SignUpInfo existing = signUpInfoRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        // 이미 accountId가 설정된 경우
+        if (existing.getAccountId() != null) {
+            throw new DuplicatedUserIdException();
+        }
+
+        // 중복 accountId 확인
+        if (isAccountIdExist(accountId)) {
+            throw new DuplicatedUserIdException();
+        }
+
+        SignUpInfo updated = SignUpInfo.builder()
+                .privateId(privateId)
+                .accountId(accountId)
+                .password(password)
+                .build();
+        updated.hashPassword(bCryptPasswordEncoder);
+        signUpInfoRepository.save(updated);
+
+        return SetAccountResponse.builder()
+                .accountId(accountId)
+                .build();
     }
 
     //todo : 탈퇴 후 정보 전체 탈퇴한 회원으로 변경
