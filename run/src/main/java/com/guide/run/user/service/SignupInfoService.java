@@ -6,8 +6,12 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
+import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
+import com.guide.run.user.entity.type.UserType;
+import com.guide.run.global.exception.user.dto.InvalidItemErrorException;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.Guide;
@@ -226,6 +230,29 @@ public class SignupInfoService {
         user.editBirthDate(birthDate);
         return UserBirthDatePatchResponse.builder()
                 .birthDate(user.getBirth())
+                .build();
+    }
+
+    @Transactional
+    public UpdatePersonalInfoResponse updatePersonalInfo(String privateId, UpdatePersonalInfoRequest request) {
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        if (UserType.VI.equals(user.getType()) && request.getId1365() != null) {
+            throw new InvalidItemErrorException();
+        }
+
+        user.editPersonalFields(
+                request.getPhoneNumber(),
+                request.getSnsId(),
+                request.getId1365(),
+                request.getBirthDate()
+        );
+
+        return UpdatePersonalInfoResponse.builder()
+                .birthDate(user.getBirth())
+                .phoneNumber(user.getPhoneNumber())
+                .snsId(user.getSnsId())
+                .id1365(user.getId1365())
                 .build();
     }
 

@@ -5,8 +5,10 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
+import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.service.SignupInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,14 +72,12 @@ public class SignupInfoController {
     }
 
     //인적사항 수정
-    @Operation(summary = "기본 인적사항 수정", description = "정보 수정 화면에서 이름, 연락처 공개 여부, SNS 공개 여부 등 기본 인적사항을 저장합니다.")
+    @Operation(summary = "내 정보 수정", description = "마이페이지 내 정보 수정 화면에서 생년월일·전화번호·SNS·1365 아이디를 수정합니다. VI 사용자가 id1365를 전송하면 400을 반환합니다.")
     @PatchMapping("/user/personal")
-    public ResponseEntity<PersonalInfoDto> editPersonalInfo(@RequestBody PersonalInfoDto personalInfoDto,
-                                                            HttpServletRequest httpServletRequest){
+    public ResponseEntity<UpdatePersonalInfoResponse> editPersonalInfo(@RequestBody UpdatePersonalInfoRequest request,
+                                                                       HttpServletRequest httpServletRequest) {
         String privateId = jwtProvider.extractUserId(httpServletRequest);
-        PersonalInfoDto response = signupInfoService.editPersonalInfo(privateId, personalInfoDto);
-
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(signupInfoService.updatePersonalInfo(privateId, request));
     }
 
     //생년월일 등록
