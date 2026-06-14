@@ -15,6 +15,7 @@ import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.SmsVerificationExtendResponse;
 import com.guide.run.user.dto.response.SmsVerificationIssueResponse;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.entity.SignUpInfo;
@@ -62,21 +63,22 @@ public class LoginInfoService {
         userRepository.findUserByPhoneNumber(phone).orElseThrow(NotExistPhoneNumException::new);
 
         String authNum = createSmsKey();
+        String verificationId = UUID.randomUUID().toString();
         smsService.sendSMS(phone, authNum);
 
-        AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId");
+        AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId", verificationId);
         authNumberRepository.save(authNumber);
 
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         ZonedDateTime expiresAt = now.plusSeconds(AUTH_EXPIRES_IN_SECONDS);
 
         return SmsVerificationIssueResponse.builder()
-                .verificationId(UUID.randomUUID().toString())
+                .verificationId(verificationId)
                 .purpose("ACCOUNT_ID")
                 .expiresInSeconds(AUTH_EXPIRES_IN_SECONDS)
                 .expiresAt(expiresAt.format(ISO_FORMATTER))
                 .serverTime(now.format(ISO_FORMATTER))
-                .canExtend(false)
+                .canExtend(true)
                 .build();
     }
 
@@ -93,17 +95,38 @@ public class LoginInfoService {
         }
 
         String authNum = createSmsKey();
+        String verificationId = UUID.randomUUID().toString();
         smsService.sendSMS(phone, authNum);
 
-        AuthNumber authNumber = new AuthNumber(phone, authNum, "password");
+        AuthNumber authNumber = new AuthNumber(phone, authNum, "password", verificationId);
         authNumberRepository.save(authNumber);
 
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         ZonedDateTime expiresAt = now.plusSeconds(AUTH_EXPIRES_IN_SECONDS);
 
         return SmsVerificationIssueResponse.builder()
-                .verificationId(UUID.randomUUID().toString())
+                .verificationId(verificationId)
                 .purpose("PASSWORD")
+                .expiresInSeconds(AUTH_EXPIRES_IN_SECONDS)
+                .expiresAt(expiresAt.format(ISO_FORMATTER))
+                .serverTime(now.format(ISO_FORMATTER))
+                .canExtend(true)
+                .build();
+    }
+
+    @Transactional
+    public SmsVerificationExtendResponse extendVerification(String verificationId) {
+        AuthNumber authNumber = authNumberRepository.findByVerificationId(verificationId)
+                .orElseThrow(InvalidAuthNumException::new);
+
+        AuthNumber extended = authNumber.withCanExtendFalse();
+        authNumberRepository.save(extended);
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        ZonedDateTime expiresAt = now.plusSeconds(AUTH_EXPIRES_IN_SECONDS);
+
+        return SmsVerificationExtendResponse.builder()
+                .verificationId(verificationId)
                 .expiresInSeconds(AUTH_EXPIRES_IN_SECONDS)
                 .expiresAt(expiresAt.format(ISO_FORMATTER))
                 .serverTime(now.format(ISO_FORMATTER))

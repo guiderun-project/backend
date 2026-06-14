@@ -6,7 +6,9 @@ import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenExcepti
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.request.*;
+import com.guide.run.user.dto.request.SmsVerificationExtendRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.SmsVerificationExtendResponse;
 import com.guide.run.user.dto.response.SmsVerificationIssueResponse;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
@@ -53,6 +55,13 @@ public class LoginInfoController {
     public ResponseEntity<SmsVerificationIssueResponse> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
             throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         return ResponseEntity.ok(loginInfoService.getNumberForPassword(request));
+    }
+
+    //인증번호 제한시간 연장
+    @Operation(summary = "인증번호 제한시간 연장", description = "기존 인증번호를 재발송하지 않고 만료시간을 연장합니다. 연장 후 canExtend는 false가 됩니다.", security = {})
+    @PostMapping("/sms/verification/extend")
+    public ResponseEntity<SmsVerificationExtendResponse> extendVerification(@RequestBody SmsVerificationExtendRequest request) {
+        return ResponseEntity.ok(loginInfoService.extendVerification(request.getVerificationId()));
     }
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)
