@@ -6,6 +6,7 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.user.Guide;
@@ -213,5 +214,14 @@ public class SignupInfoService {
         );
 
         return PersonalInfoDto.userToInfoDto(user);
+    }
+
+    @Transactional
+    public UserBirthDatePatchResponse updateBirthDate(String privateId, String birthDate) {
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        user.editBirthDate(birthDate);
+        return UserBirthDatePatchResponse.builder()
+                .birthDate(user.getBirth())
+                .build();
     }
 }

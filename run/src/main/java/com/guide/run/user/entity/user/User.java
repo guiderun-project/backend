@@ -103,5 +103,9 @@ public class User extends BaseEntity {
     public void editId1365(String id1365){
         this.id1365 = id1365;
     }
+
+    public void editBirthDate(String birth) {
+        this.birth = birth;
+    }
 }
 

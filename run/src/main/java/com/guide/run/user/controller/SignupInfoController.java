@@ -5,6 +5,8 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
+import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.service.SignupInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -67,6 +69,15 @@ public class SignupInfoController {
         PersonalInfoDto response = signupInfoService.editPersonalInfo(privateId, personalInfoDto);
 
         return ResponseEntity.ok().body(response);
+    }
+
+    //생년월일 등록
+    @Operation(summary = "생년월일 등록", description = "생년월일 정보가 없는 기존 회원에게 생년월일을 등록합니다.")
+    @PatchMapping("/user/personal/birth-date")
+    public ResponseEntity<UserBirthDatePatchResponse> updateBirthDate(@RequestBody UserBirthDatePatchRequest request,
+                                                                      HttpServletRequest httpServletRequest) {
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        return ResponseEntity.ok(signupInfoService.updateBirthDate(privateId, request.getBirthDate()));
     }
 
     //러닝 스펙 조회 vi
