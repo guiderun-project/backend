@@ -113,12 +113,13 @@ public class LoginInfoService {
 
     @Transactional
     public TokenResponse getToken(String authNum) {
-        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(InvalidAuthNumException::new);//인증번호가 일치하지 않음 에러
+        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(InvalidAuthNumException::new);
         User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(InvalidAuthNumException::new);
-        TokenResponse response = TokenResponse.builder()
+        String purpose = authNumber.getType().equals("accountId") ? "ACCOUNT_ID" : "PASSWORD";
+        return TokenResponse.builder()
                 .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
+                .purpose(purpose)
                 .build();
-        return response;
     }
 
 
