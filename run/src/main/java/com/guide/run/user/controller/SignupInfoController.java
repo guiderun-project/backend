@@ -6,6 +6,7 @@ import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
+import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.service.SignupInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +26,14 @@ import org.springframework.web.bind.annotation.*;
 public class SignupInfoController {
     private final SignupInfoService signupInfoService;
     private final JwtProvider jwtProvider;
+
+    //마이페이지 통합 조회
+    @Operation(summary = "마이페이지 조회", description = "마이페이지 첫 화면 표시용 프로필·참여이력·개인정보·러닝정보 통합 조회 API입니다.")
+    @GetMapping("/user/mypage")
+    public ResponseEntity<MyPageResponse> getMyPage(HttpServletRequest httpServletRequest) {
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        return ResponseEntity.ok(signupInfoService.getMyPage(privateId));
+    }
 
     //약관 동의 조회
     @Operation(summary = "약관 동의 조회", description = "정보 페이지와 관리자 사용자 상세 화면에서 개인정보/초상권 동의 상태를 조회합니다.")

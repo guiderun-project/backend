@@ -6,6 +6,7 @@ import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
+import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UserBirthDatePatchResponse;
 import com.guide.run.user.entity.*;
 import com.guide.run.user.entity.type.Role;
@@ -14,6 +15,8 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
 import com.guide.run.user.repository.user.UserRepository;
+
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class SignupInfoService {
     private final GuideRepository guideRepository;
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
+    private final SignUpInfoRepository signUpInfoRepository;
 
     //약관 동의 조회
     @Transactional
@@ -222,6 +226,48 @@ public class SignupInfoService {
         user.editBirthDate(birthDate);
         return UserBirthDatePatchResponse.builder()
                 .birthDate(user.getBirth())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageResponse getMyPage(String privateId) {
+        User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        String accountId = signUpInfoRepository.findById(privateId).map(s -> s.getAccountId()).orElse(null);
+
+        MyPageResponse.Profile profile = MyPageResponse.Profile.builder()
+                .name(user.getName())
+                .gender(user.getGender())
+                .type(user.getType() != null ? user.getType().name() : null)
+                .recordDegree(user.getRecordDegree())
+                .build();
+
+        MyPageResponse.Participation participation = MyPageResponse.Participation.builder()
+                .trainingCount(user.getTrainingCnt())
+                .competitionCount(user.getCompetitionCnt())
+                .totalCount(user.getTrainingCnt() + user.getCompetitionCnt())
+                .build();
+
+        MyPageResponse.PersonalInfo personalInfo = MyPageResponse.PersonalInfo.builder()
+                .birthDate(user.getBirth())
+                .phoneNumber(user.getPhoneNumber())
+                .snsId(user.getSnsId())
+                .id1365(user.getId1365())
+                .accountId(accountId)
+                .build();
+
+        MyPageResponse.RunningInfo runningInfo = MyPageResponse.RunningInfo.builder()
+                .type(user.getType() != null ? user.getType().name() : null)
+                .recordDegree(user.getRecordDegree())
+                .detailRecord(user.getDetailRecord())
+                .hopePrefs(archiveData.getHopePrefs())
+                .build();
+
+        return MyPageResponse.builder()
+                .profile(profile)
+                .participation(participation)
+                .personalInfo(personalInfo)
+                .runningInfo(runningInfo)
                 .build();
     }
 }
