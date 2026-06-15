@@ -5,6 +5,8 @@ import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GlobalUserInfoDto;
 import com.guide.run.user.dto.request.Add1365Dto;
+import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import com.guide.run.user.dto.response.MyPageEventList;
 import com.guide.run.user.dto.response.MyPagePartnerList;
 import com.guide.run.user.dto.response.ProfileResponse;
@@ -97,6 +99,20 @@ public class MypageController {
     @GetMapping("/event-type/count/{userId}")
     public ResponseEntity<EventTypeCountDto> getEventTypeCount(@PathVariable String userId){
         return ResponseEntity.ok(mypageService.getMyPageEventTypeCount(userId));
+    }
+
+    @Operation(summary = "나의 활동 이벤트 목록 조회", description = "내가 참여했거나 주최한 이벤트 목록을 조회합니다.")
+    @GetMapping("/activity/events")
+    public ResponseEntity<MyActivityEventsResponse> getActivityEvents(
+            @Parameter(description = "이벤트 유형 필터", example = "TOTAL")
+            @RequestParam(defaultValue = "TOTAL") EventType type,
+            @Parameter(description = "관계 필터 (TOTAL/PARTICIPATED/HOSTED)", example = "TOTAL")
+            @RequestParam(defaultValue = "TOTAL") String relation,
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            HttpServletRequest request) {
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(mypageService.getActivityEvents(privateId, type, relation, page));
     }
 
     @Operation(summary = "1365 아이디 저장", description = "정보 수정 화면에서 1365 아이디를 저장합니다.")

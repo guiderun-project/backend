@@ -4,6 +4,8 @@ import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -171,6 +173,23 @@ public class MypageService {
                 .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
                 .contestCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
+                .build();
+    }
+
+    public MyActivityEventsResponse getActivityEvents(String privateId, EventType type, String relation, int page) {
+        final int SIZE = 10;
+        List<MyActivityEventsResponse.Item> items = eventRepository.findActivityEvents(privateId, type, relation, page, SIZE);
+        long totalCount = eventRepository.countActivityEvents(privateId, type, relation);
+        int totalPages = (int) Math.ceil((double) totalCount / SIZE);
+        return MyActivityEventsResponse.builder()
+                .items(items)
+                .pagination(MyActivityEventsResponse.Pagination.builder()
+                        .page(page)
+                        .size(SIZE)
+                        .totalCount(totalCount)
+                        .totalPages(totalPages)
+                        .hasNext(page < totalPages - 1)
+                        .build())
                 .build();
     }
 

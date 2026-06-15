@@ -7,6 +7,7 @@ import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,4 +40,7 @@ public interface EventRepositoryCustom {
     double sumDistanceByYear(int year);
     long countMyParticipation(String privateId);
     double sumMyParticipationDistance(String privateId);
+
+    List<MyActivityEventsResponse.Item> findActivityEvents(String privateId, EventType type, String relation, int page, int size);
+    long countActivityEvents(String privateId, EventType type, String relation);
 }

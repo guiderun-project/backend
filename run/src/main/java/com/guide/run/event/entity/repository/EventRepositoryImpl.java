@@ -6,6 +6,8 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
+import com.querydsl.jpa.JPAExpressions;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
@@ -343,6 +345,57 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByTitle(title))
                 )
                 .fetchOne();
+    }
+
+    @Override
+    public List<MyActivityEventsResponse.Item> findActivityEvents(String privateId, EventType type, String relation, int page, int size) {
+        return queryFactory.select(
+                        Projections.constructor(MyActivityEventsResponse.Item.class,
+                                event.id,
+                                event.name,
+                                event.type,
+                                event.startTime))
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(activityTypeCond(type))
+                        .and(activityRelationCond(privateId, relation)))
+                .orderBy(event.startTime.desc())
+                .offset((long) page * size)
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public long countActivityEvents(String privateId, EventType type, String relation) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(activityTypeCond(type))
+                        .and(activityRelationCond(privateId, relation)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    private BooleanBuilder activityTypeCond(EventType type) {
+        if (type == null || type == EventType.TOTAL) return new BooleanBuilder();
+        return new BooleanBuilder(event.type.eq(type));
+    }
+
+    private BooleanBuilder activityRelationCond(String privateId, String relation) {
+        if ("PARTICIPATED".equals(relation)) {
+            return new BooleanBuilder(
+                    JPAExpressions.selectFrom(eventForm)
+                            .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
+                            .exists());
+        } else if ("HOSTED".equals(relation)) {
+            return new BooleanBuilder(event.organizer.eq(privateId));
+        } else {
+            return new BooleanBuilder(
+                    event.organizer.eq(privateId)
+                            .or(JPAExpressions.selectFrom(eventForm)
+                                    .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
+                                    .exists()));
+        }
     }
 
     @Override
