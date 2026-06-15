@@ -4,8 +4,11 @@ import com.guide.run.admin.dto.EventTypeCountDto;
 import com.guide.run.event.entity.dto.response.get.MyPageEvent;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.user.dto.response.MyActivityEventsResponse;
+import com.guide.run.user.dto.response.MyActivityPartnersResponse;
 import com.guide.run.global.exception.event.logic.NotValidKindException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -23,9 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -173,6 +175,67 @@ public class MypageService {
                 .totalCnt(user.getCompetitionCnt()+user.getTrainingCnt())
                 .contestCnt(user.getCompetitionCnt())
                 .trainingCnt(user.getTrainingCnt())
+                .build();
+    }
+
+    public MyActivityPartnersResponse getActivityPartners(String privateId, String sort, int page) {
+        final int SIZE = 5;
+        User currentUser = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+
+        List<Partner> partners = partnerRepository.findActivityPartners(privateId, currentUser.getType(), sort, page, SIZE);
+        long totalCount = partnerRepository.countActivityPartners(privateId, currentUser.getType());
+        int totalPages = (int) Math.ceil((double) totalCount / SIZE);
+
+        Set<String> partnerPrivateIds = new HashSet<>();
+        Set<Long> allEventIds = new HashSet<>();
+        for (Partner p : partners) {
+            String partnerId = currentUser.getType().equals(com.guide.run.user.entity.type.UserType.GUIDE)
+                    ? p.getViId() : p.getGuideId();
+            partnerPrivateIds.add(partnerId);
+            allEventIds.addAll(p.getContestIds());
+            allEventIds.addAll(p.getTrainingIds());
+        }
+
+        Map<String, User> userMap = userRepository.findAllById(partnerPrivateIds).stream()
+                .collect(Collectors.toMap(User::getPrivateId, u -> u));
+        Map<Long, Event> eventMap = eventRepository.findAllById(allEventIds).stream()
+                .collect(Collectors.toMap(Event::getId, e -> e));
+
+        List<MyActivityPartnersResponse.Item> items = partners.stream().map(p -> {
+            String partnerPrivateId = currentUser.getType().equals(com.guide.run.user.entity.type.UserType.GUIDE)
+                    ? p.getViId() : p.getGuideId();
+            User partnerUser = userMap.get(partnerPrivateId);
+            if (partnerUser == null) return null;
+
+            Set<Long> eventIds = new HashSet<>();
+            eventIds.addAll(p.getContestIds());
+            eventIds.addAll(p.getTrainingIds());
+
+            List<MyActivityPartnersResponse.EventItem> events = eventIds.stream()
+                    .map(eventMap::get)
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.comparing(Event::getStartTime).reversed())
+                    .map(MyActivityPartnersResponse.EventItem::new)
+                    .collect(Collectors.toList());
+
+            return MyActivityPartnersResponse.Item.builder()
+                    .partnerId(partnerUser.getUserId())
+                    .name(partnerUser.getName())
+                    .type(partnerUser.getType())
+                    .eventCount(eventIds.size())
+                    .events(events)
+                    .build();
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return MyActivityPartnersResponse.builder()
+                .items(items)
+                .pagination(MyActivityPartnersResponse.Pagination.builder()
+                        .page(page)
+                        .size(SIZE)
+                        .totalCount(totalCount)
+                        .totalPages(totalPages)
+                        .hasNext(page < totalPages - 1)
+                        .build())
                 .build();
     }
 

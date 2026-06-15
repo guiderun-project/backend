@@ -3,6 +3,7 @@ package com.guide.run.partner.entity.partner.repository;
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
 import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
+import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
@@ -174,6 +175,31 @@ public class PartnerRepositoryImpl implements PartnerRepositoryCustom {
                 .fetch();
     }
 
+
+    @Override
+    public List<Partner> findActivityPartners(String privateId, UserType userType, String sort, int page, int size) {
+        return queryFactory.selectFrom(partner)
+                .where(getUserTypeForActivity(userType, privateId), getPartnerKind("all"))
+                .orderBy("OLD".equals(sort) ? partner.updatedAt.asc() : partner.updatedAt.desc())
+                .offset((long) page * size)
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public long countActivityPartners(String privateId, UserType userType) {
+        Long result = queryFactory.select(partner.count())
+                .from(partner)
+                .where(getUserTypeForActivity(userType, privateId), getPartnerKind("all"))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    private BooleanExpression getUserTypeForActivity(UserType type, String privateId) {
+        return type.equals(UserType.GUIDE)
+                ? partner.guideId.eq(privateId)
+                : partner.viId.eq(privateId);
+    }
 
     /**
      * where 조건: 현재 사용자의 partner 데이터 필터링.
