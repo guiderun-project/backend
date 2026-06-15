@@ -54,6 +54,8 @@ public class Event extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CityName cityName; //이벤트 지역
 
+    private Double distance; //러닝 거리 (km)
+
 
     public void closeEvent(){
         this.recruitEndDate = LocalDate.now();

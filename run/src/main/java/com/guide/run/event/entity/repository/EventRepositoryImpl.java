@@ -345,6 +345,48 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetchOne();
     }
 
+    @Override
+    public long countApprovedEventsByYear(int year) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(event.startTime.year().eq(year)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
+    public double sumDistanceByYear(int year) {
+        Double result = queryFactory.select(event.distance.sum())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(event.startTime.year().eq(year)))
+                .fetchOne();
+        return result != null ? result : 0.0;
+    }
+
+    @Override
+    public long countMyParticipation(String privateId) {
+        Long result = queryFactory.select(eventForm.count())
+                .from(eventForm)
+                .join(event).on(eventForm.eventId.eq(event.id))
+                .where(eventForm.privateId.eq(privateId)
+                        .and(event.isApprove.eq(true)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
+    public double sumMyParticipationDistance(String privateId) {
+        Double result = queryFactory.select(event.distance.sum())
+                .from(eventForm)
+                .join(event).on(eventForm.eventId.eq(event.id))
+                .where(eventForm.privateId.eq(privateId)
+                        .and(event.isApprove.eq(true)))
+                .fetchOne();
+        return result != null ? result : 0.0;
+    }
+
     private BooleanBuilder checkByTitle(String title) {
         if (title == null || title.isEmpty()) {
             return new BooleanBuilder();

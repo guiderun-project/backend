@@ -3,6 +3,7 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
 import com.guide.run.event.entity.dto.response.get.Count;
+import com.guide.run.event.entity.dto.response.get.EventsSummaryGetResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -36,6 +37,13 @@ import static com.guide.run.event.entity.type.EventType.*;
 public class EventGetController {
     private final JwtProvider jwtProvider;
     private final EventGetService eventGetService;
+
+    @Operation(summary = "이벤트 요약 조회", description = "메인페이지 상단 요약. 비회원은 올해 전체 이벤트 수와 거리, 회원은 개인 누적 참여 수와 거리도 조회합니다.")
+    @GetMapping("/summary")
+    public ResponseEntity<EventsSummaryGetResponse> getEventsSummary(HttpServletRequest request) {
+        String userId = jwtProvider.tryExtractUserId(request);
+        return ResponseEntity.status(200).body(eventGetService.getEventsSummary(userId));
+    }
 
     @Operation(summary = "나의 이벤트 목록 조회", description = "나의 이벤트 화면에서 예정/종료 이벤트를 연도별로 조회합니다.")
     @GetMapping("/my")

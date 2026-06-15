@@ -50,6 +50,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/sms/**")
                     .requestMatchers("/api/accountId")
                     .requestMatchers("/api/new-password")
+                    .requestMatchers("/api/event/summary")
                     .requestMatchers("/tmp/**")
                     .requestMatchers("/api/login")
                     .requestMatchers("/v3/api-docs/**")

@@ -34,4 +34,9 @@ public interface EventRepositoryCustom {
     List<AllEvent> getMySearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
     long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
     long getMySearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
+
+    long countApprovedEventsByYear(int year);
+    double sumDistanceByYear(int year);
+    long countMyParticipation(String privateId);
+    double sumMyParticipationDistance(String privateId);
 }

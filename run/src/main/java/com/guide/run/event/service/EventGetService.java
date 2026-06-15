@@ -1,6 +1,7 @@
 package com.guide.run.event.service;
 
 import com.guide.run.event.entity.dto.response.get.*;
+import java.time.LocalDate;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.CityName;
@@ -150,6 +151,34 @@ public class EventGetService {
         return AllEventResponse.builder()
                 .items(allEvents)
                 .pagination(AllEventResponse.Pagination.builder().totalCount(totalCount).build())
+                .build();
+    }
+
+    public EventsSummaryGetResponse getEventsSummary(String userId) {
+        int year = LocalDate.now().getYear();
+
+        long totalEventCount = eventRepository.countApprovedEventsByYear(year);
+        double totalRunningDistanceKm = eventRepository.sumDistanceByYear(year);
+
+        EventsSummaryGetResponse.PublicSummary publicSummary = EventsSummaryGetResponse.PublicSummary.builder()
+                .year(year)
+                .totalEventCount(totalEventCount)
+                .totalRunningDistanceKm(totalRunningDistanceKm)
+                .build();
+
+        EventsSummaryGetResponse.MySummary mySummary = null;
+        if (userId != null) {
+            long totalParticipationCount = eventRepository.countMyParticipation(userId);
+            double myTotalDistanceKm = eventRepository.sumMyParticipationDistance(userId);
+            mySummary = EventsSummaryGetResponse.MySummary.builder()
+                    .totalParticipationCount(totalParticipationCount)
+                    .totalRunningDistanceKm(myTotalDistanceKm)
+                    .build();
+        }
+
+        return EventsSummaryGetResponse.builder()
+                .publicSummary(publicSummary)
+                .mySummary(mySummary)
                 .build();
     }
 }

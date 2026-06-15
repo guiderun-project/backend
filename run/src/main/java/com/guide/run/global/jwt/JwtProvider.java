@@ -101,6 +101,14 @@ public class JwtProvider {
         return getSocialId(accessToken);
     }
 
+    public String tryExtractUserId(HttpServletRequest request) {
+        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (bearer == null || !bearer.startsWith("Bearer ")) {
+            return null;
+        }
+        return getSocialId(bearer.substring("Bearer ".length()));
+    }
+
     public String resolveToken(HttpServletRequest request) {
         if (CorsUtils.isPreFlightRequest(request)) {
             return null;
