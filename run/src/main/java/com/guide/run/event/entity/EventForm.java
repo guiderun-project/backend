@@ -1,6 +1,7 @@
 package com.guide.run.event.entity;
 
 import com.guide.run.event.entity.type.EventCategory;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.global.entity.BaseEntity;
 import com.guide.run.user.entity.type.UserType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,6 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -47,12 +52,29 @@ public class EventForm extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Schema(description = "이벤트 카테고리", example = "GROUP")
     private EventCategory eventCategory; // 이벤트 유형, 팀 구분하는 방식 그룹별,팀별,디폴트 분류
+    private BigDecimal runningDistanceKm;
+    private LocalDate birthDate;
+    private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private EventFormStatus status = EventFormStatus.APPLIED;
+    private LocalDateTime canceledAt;
 
     public void setform(String hopeTeam,String hopePartner,String referContent,EventCategory eventCategory) {
         this.hopeTeam = hopeTeam;
         this.hopePartner = hopePartner;
         this.referContent = referContent;
         this.eventCategory = eventCategory;
+    }
+
+    public void updateCompetitionInfo(LocalDate birthDate, String phoneNumber) {
+        this.birthDate = birthDate;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void cancel(LocalDateTime canceledAt) {
+        this.status = EventFormStatus.CANCELED;
+        this.canceledAt = canceledAt;
     }
 
 }
