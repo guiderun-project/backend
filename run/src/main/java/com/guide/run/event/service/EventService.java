@@ -260,6 +260,8 @@ public class EventService {
         if (event.getOrganizer().equals(userId) || user.getRole().equals(Role.ROLE_ADMIN)) {
 
             //todo : 매칭, 출석, 신청서, 이벤트 좋아요, 댓글, 댓글 좋아요 전부 삭제해야 함. 파트너는 종료됐을 때 추가되기 때문에 삭제 안해도 됨.
+            eventAdditionalInfoService.deleteAllForEvent(eventId);
+            log.info("additional info deleted");
             eventFormRepository.deleteAllByEventId(eventId);
             log.info("form deleted");
             matchingRepository.deleteAllByEventId(eventId);

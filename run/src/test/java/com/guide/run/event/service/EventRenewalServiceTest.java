@@ -31,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,6 +45,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -198,6 +200,23 @@ class EventRenewalServiceTest {
                 .hasMessage("신청자가 있는 이벤트는 추가정보를 수정할 수 없습니다.");
         verify(eventRepository, never()).save(any(Event.class));
         verify(eventAdditionalInfoService, never()).replaceQuestions(any(), any());
+    }
+
+    @Test
+    @DisplayName("이벤트 삭제는 이벤트 삭제 전에 추가 질문과 답변을 정리한다")
+    void eventDeleteRemovesAdditionalInfoBeforeDeletingEvent() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(eventCommentRepository.findAllByEventId(1L)).thenReturn(List.of());
+
+        eventService.eventDelete("organizer-private", 1L);
+
+        InOrder inOrder = inOrder(eventAdditionalInfoService, eventRepository);
+        inOrder.verify(eventAdditionalInfoService).deleteAllForEvent(1L);
+        inOrder.verify(eventRepository).deleteById(1L);
     }
 
     @Test
