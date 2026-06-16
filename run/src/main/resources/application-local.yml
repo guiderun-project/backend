@@ -57,7 +57,7 @@ spring:
   tosspayments:
     secret-key: ${TOSSPAYMENTS_SECRET_KEY}
   appsmith:
-    webhook-secret: ${APPSMITH_WEBHOOK_SECRET}
+    webhook-secret: ${APPSMITH_WEBHOOK_SECRET:local-dev-secret}
 
 cors:
   origin: http://localhost:3000

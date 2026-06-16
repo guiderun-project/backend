@@ -32,7 +32,7 @@ public class AppsmithUserApprovalWebhookController {
 
     public AppsmithUserApprovalWebhookController(
             UserApprovalService userApprovalService,
-            @Value("${spring.appsmith.webhook-secret}") String webhookSecret
+            @Value("${spring.appsmith.webhook-secret:}") String webhookSecret
     ) {
         this.userApprovalService = userApprovalService;
         this.webhookSecret = webhookSecret;
