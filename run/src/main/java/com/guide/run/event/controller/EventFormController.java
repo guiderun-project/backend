@@ -1,6 +1,6 @@
 package com.guide.run.event.controller;
 
-import com.guide.run.event.entity.dto.request.form.CreateEventForm;
+import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.CreatedForm;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
@@ -24,7 +24,7 @@ public class EventFormController {
     private final JwtProvider jwtProvider;
     @Operation(summary = "이벤트 신청서 생성", description = "이벤트 신청 화면에서 현재 로그인 사용자의 신청서를 생성합니다.")
     @PostMapping("/{eventId}/form")
-    public ResponseEntity<CreatedForm> createForm(@RequestBody CreateEventForm createForm,
+    public ResponseEntity<CreatedForm> createForm(@RequestBody EventApplyRequest createForm,
                                                   @PathVariable("eventId") Long eventId,
                                                   HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
@@ -35,7 +35,7 @@ public class EventFormController {
 
     @Operation(summary = "이벤트 신청서 수정", description = "이벤트 신청 수정 화면에서 기존 신청서를 수정합니다.")
     @PatchMapping("/{eventId}/form")
-    public ResponseEntity<CreatedForm> patchForm(@RequestBody CreateEventForm createForm,
+    public ResponseEntity<CreatedForm> patchForm(@RequestBody EventApplyRequest createForm,
                                                   @PathVariable("eventId") Long eventId,
                                                   HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
