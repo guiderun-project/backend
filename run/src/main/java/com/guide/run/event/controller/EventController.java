@@ -2,9 +2,9 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
+import com.guide.run.event.entity.dto.response.EventDetailResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
-import com.guide.run.event.entity.dto.response.get.DetailEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.service.EventService;
 import com.guide.run.global.jwt.JwtProvider;
@@ -83,9 +83,9 @@ public class EventController {
     }
     @Operation(summary = "이벤트 상세 조회", description = "이벤트 상세 화면과 관리자 이벤트 다이얼로그에서 사용하는 전체 이벤트 상세 정보를 조회합니다.")
     @GetMapping("/{eventId}")
-    public ResponseEntity<DetailEvent> getDetailEvent(@PathVariable("eventId")Long eventId,
-                                                      HttpServletRequest request){
-        String privateId = jwtProvider.extractUserId(request);
+    public ResponseEntity<EventDetailResponse> getDetailEvent(@PathVariable("eventId")Long eventId,
+                                                              HttpServletRequest request){
+        String privateId = jwtProvider.tryExtractUserId(request);
         return ResponseEntity.ok().
                 body(eventService.getDetailEvent(eventId,privateId));
 

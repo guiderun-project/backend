@@ -9,14 +9,14 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
+import com.guide.run.event.entity.dto.response.EventDetailResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
-import com.guide.run.event.entity.dto.response.get.DetailEvent;
-import com.guide.run.event.entity.dto.response.get.EventDetailPartner;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventCategory;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.global.converter.TimeFormatter;
@@ -42,8 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +66,7 @@ public class EventService {
     private final EventLikeRepository eventLikeRepository;
 
     private final AttendService attendService;
+    private final EventAdditionalInfoService eventAdditionalInfoService;
 
 
     @Transactional
@@ -383,202 +386,53 @@ public class EventService {
         return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(privateId)).build();
     }
 
-    public DetailEvent getDetailEvent(Long eventId, String privateId) {
-        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+    public EventDetailResponse getDetailEvent(Long eventId, String privateId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
 
-        //출석 인원 반영
-        attendService.countAttendUser(eventId,true);
+        return EventDetailResponse.builder()
+                .eventId(event.getId())
+                .name(event.getName())
+                .eventType(event.getType())
+                .eventCategory(event.getEventCategory())
+                .recruitStatus(event.getRecruitStatus())
+                .isPrivate(event.isPrivate())
+                .recruitStartDate(event.getRecruitStartDate())
+                .recruitEndDate(event.getRecruitEndDate())
+                .organizer(EventDetailResponse.Organizer.builder()
+                        .name(organizer.getName())
+                        .type(organizer.getType())
+                        .build())
+                .schedule(EventDetailResponse.Schedule.builder()
+                        .date(event.getStartTime().toLocalDate().toString())
+                        .startTime(event.getStartTime().toLocalTime().toString().substring(0, 5))
+                        .endTime(event.getEndTime().toLocalTime().toString().substring(0, 5))
+                        .dateText(toDateText(event.getStartTime()))
+                        .build())
+                .place(event.getPlace())
+                .expectedRunningDistanceKm(event.getExpectedRunningDistanceKm())
+                .content(event.getContent())
+                .additionalQuestions(eventAdditionalInfoService.getQuestions(eventId))
+                .viewer(createViewer(event, eventId, privateId))
+                .build();
+    }
 
-        DetailEvent detailEvent;
-
-
-        List<EventDetailPartner> eventDetailPartnerList =new ArrayList<>();
-        boolean isCheckOrganizer = false;
-        if(organizer.getPrivateId().equals(privateId))
-            isCheckOrganizer = true;
-        Matching matching;
-        //미신청한 경우
-        if(form == null) {
-            detailEvent = DetailEvent.builder()
-                    .eventId(eventId)
-                    .type(event.getType())
-                    .name(event.getName())
-                    .recruitStatus(event.getRecruitStatus())
-                    .recruitStartDate(event.getRecruitStartDate())
-                    .recruitEndDate(event.getRecruitEndDate())
-                    .organizerId(organizer.getUserId())
-                    .organizer(organizer.getName())
-                    .organizerType(organizer.getType())
-                    .organizerPace(organizer.getRecordDegree())
-                    .date(event.getStartTime().toLocalDate().toString())
-                    .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
-                    .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
-                    .created_at(LocalDate.from(event.getCreatedAt()))
-                    .updated_at(LocalDate.from(event.getUpdatedAt()))
-                    .place(event.getPlace())
-                    .minNumV(event.getMaxNumV())
-                    .minNumG(event.getMaxNumG())
-                    .numG(event.getGuideCnt())
-                    .numV(event.getViCnt())
-                    .isApply(false)
-                    .hasPartner(false)
-                    .partner(eventDetailPartnerList)
-                    .details(event.getContent())
-                    .checkOrganizer(isCheckOrganizer)
-                    .status(event.getStatus())
-                    .eventCategory(event.getEventCategory())
-                    .cityName(event.getCityName()).build();
+    private EventDetailResponse.Viewer createViewer(Event event, Long eventId, String privateId) {
+        if (privateId == null) {
+            return null;
         }
-        //신청한 경우
-        else{
-            if(user.getType().equals(UserType.GUIDE)){
-                matching = matchingRepository.findByEventIdAndGuideId(eventId, privateId);
-                if(matching == null){
-                    detailEvent = DetailEvent.builder()
-                            .eventId(eventId)
-                            .type(event.getType())
-                            .name(event.getName())
-                            .recruitStatus(event.getRecruitStatus())
-                            .recruitStartDate(event.getRecruitStartDate())
-                            .recruitEndDate(event.getRecruitEndDate())
-                            .organizerId(organizer.getUserId())
-                            .organizer(organizer.getName())
-                            .organizerType(organizer.getType())
-                            .organizerPace(organizer.getRecordDegree())
-                            .date(event.getStartTime().toLocalDate().toString())
-                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
-                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
-                            .created_at(LocalDate.from(event.getCreatedAt()))
-                            .updated_at(LocalDate.from(event.getUpdatedAt()))
-                            .place(event.getPlace())
-                            .minNumV(event.getMaxNumV())
-                            .minNumG(event.getMaxNumG())
-                            .numG(event.getGuideCnt())
-                            .numV(event.getViCnt())
-                            .isApply(true)
-                            .hasPartner(false)
-                            .partner(eventDetailPartnerList)
-                            .details(event.getContent())
-                            .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus())
-                            .eventCategory(event.getEventCategory())
-                            .cityName(event.getCityName()).build();
-                }
-                else{
-                    User vi = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
-                    eventDetailPartnerList.add(EventDetailPartner.builder()
-                            .partnerType(vi.getType())
-                            .partnerRecord(vi.getRecordDegree())
-                            .partnerName(vi.getName())
-                            .build());
-                    detailEvent = DetailEvent.builder()
-                            .eventId(eventId)
-                            .type(event.getType())
-                            .name(event.getName())
-                            .recruitStatus(event.getRecruitStatus())
-                            .recruitStartDate(event.getRecruitStartDate())
-                            .recruitEndDate(event.getRecruitEndDate())
-                            .organizerId(organizer.getUserId())
-                            .organizer(organizer.getName())
-                            .organizerType(organizer.getType())
-                            .organizerPace(organizer.getRecordDegree())
-                            .date(event.getStartTime().toLocalDate().toString())
-                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
-                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
-                            .created_at(LocalDate.from(event.getCreatedAt()))
-                            .updated_at(LocalDate.from(event.getUpdatedAt()))
-                            .place(event.getPlace())
-                            .minNumV(event.getMaxNumV())
-                            .minNumG(event.getMaxNumG())
-                            .numG(event.getGuideCnt())
-                            .numV(event.getViCnt())
-                            .isApply(true)
-                            .hasPartner(true)
-                            .partner(eventDetailPartnerList)
-                            .details(event.getContent())
-                            .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus())
-                            .eventCategory(event.getEventCategory())
-                            .cityName(event.getCityName()).build();
-                }
-            }else{
-                List<Matching> matchingList = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
-                if(matchingList.size()==0){
-                    detailEvent = DetailEvent.builder()
-                            .eventId(eventId)
-                            .type(event.getType())
-                            .name(event.getName())
-                            .recruitStatus(event.getRecruitStatus())
-                            .recruitStartDate(event.getRecruitStartDate())
-                            .recruitEndDate(event.getRecruitEndDate())
-                            .organizerId(organizer.getUserId())
-                            .organizer(organizer.getName())
-                            .organizerType(organizer.getType())
-                            .organizerPace(organizer.getRecordDegree())
-                            .date(event.getStartTime().toLocalDate().toString())
-                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
-                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
-                            .created_at(LocalDate.from(event.getCreatedAt()))
-                            .updated_at(LocalDate.from(event.getUpdatedAt()))
-                            .place(event.getPlace())
-                            .minNumV(event.getMaxNumV())
-                            .minNumG(event.getMaxNumG())
-                            .numG(event.getGuideCnt())
-                            .numV(event.getViCnt())
-                            .isApply(true)
-                            .hasPartner(false)
-                            .partner(eventDetailPartnerList)
-                            .details(event.getContent())
-                            .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus())
-                            .eventCategory(event.getEventCategory())
-                            .cityName(event.getCityName()).build();
-                }
-                else{
-                    for(Matching m : matchingList){
-                        User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
-                        eventDetailPartnerList.add(EventDetailPartner.builder()
-                                .partnerType(guide.getType())
-                                .partnerRecord(guide.getRecordDegree())
-                                .partnerName(guide.getName())
-                                .build());
-                    }
-                    detailEvent = DetailEvent.builder()
-                            .eventId(eventId)
-                            .type(event.getType())
-                            .name(event.getName())
-                            .recruitStatus(event.getRecruitStatus())
-                            .recruitStartDate(event.getRecruitStartDate())
-                            .recruitEndDate(event.getRecruitEndDate())
-                            .organizerId(organizer.getUserId())
-                            .organizer(organizer.getName())
-                            .organizerType(organizer.getType())
-                            .organizerPace(organizer.getRecordDegree())
-                            .date(event.getStartTime().toLocalDate().toString())
-                            .startTime(event.getStartTime().toLocalTime().toString().substring(0,5))
-                            .endTime(event.getEndTime().toLocalTime().toString().substring(0,5))
-                            .created_at(LocalDate.from(event.getCreatedAt()))
-                            .updated_at(LocalDate.from(event.getUpdatedAt()))
-                            .place(event.getPlace())
-                            .minNumV(event.getMaxNumV())
-                            .minNumG(event.getMaxNumG())
-                            .numG(event.getGuideCnt())
-                            .numV(event.getViCnt())
-                            .isApply(true)
-                            .hasPartner(true)
-                            .partner(eventDetailPartnerList)
-                            .details(event.getContent())
-                            .checkOrganizer(isCheckOrganizer)
-                            .status(event.getStatus())
-                            .eventCategory(event.getEventCategory())
-                            .cityName(event.getCityName()).build();
-                }
-            }
-        }
-        return detailEvent;
+
+        EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(eventId, privateId, EventFormStatus.APPLIED);
+        return EventDetailResponse.Viewer.builder()
+                .isApplied(form != null)
+                .isOrganizer(event.getOrganizer().equals(privateId))
+                .build();
+    }
+
+    private String toDateText(LocalDateTime startTime) {
+        return startTime.getMonthValue() + "월 "
+                + startTime.getDayOfMonth() + "일 ("
+                + startTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN) + ")";
     }
 
 }
