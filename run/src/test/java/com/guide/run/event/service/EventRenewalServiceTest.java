@@ -4,7 +4,11 @@ import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.dto.request.EventCreateRequest;
+import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
+import com.guide.run.event.entity.type.AdditionalQuestionType;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.repository.CommentLikeRepository;
 import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventFormRepository;
@@ -24,6 +28,7 @@ import com.guide.run.user.repository.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +40,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +74,82 @@ class EventRenewalServiceTest {
 
     @InjectMocks
     private EventService eventService;
+
+    @Test
+    @DisplayName("이벤트 생성은 비공개 여부, 예상 거리, 추가 질문을 함께 반영한다")
+    void eventCreateReflectsRenewalFieldsAndAdditionalQuestions() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions = List.of(
+                new EventCreateRequest.AdditionalQuestionRequest(
+                        AdditionalQuestionType.TEXT,
+                        "하고 싶은 말",
+                        List.of()
+                ),
+                new EventCreateRequest.AdditionalQuestionRequest(
+                        AdditionalQuestionType.SELECT,
+                        "티셔츠 사이즈",
+                        List.of("S", "M", "L")
+                )
+        );
+        EventCreateRequest request = new EventCreateRequest(
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 10),
+                "상계천천히달리기",
+                EventType.TRAINING,
+                "2026-06-20",
+                "09:00",
+                "11:00",
+                4,
+                2,
+                "서울",
+                "내용",
+                EventCategory.GENERAL,
+                CityName.SEOUL,
+                true,
+                new BigDecimal("7.50"),
+                additionalQuestions
+        );
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event event = invocation.getArgument(0);
+            return Event.builder()
+                    .id(99L)
+                    .organizer(event.getOrganizer())
+                    .recruitStartDate(event.getRecruitStartDate())
+                    .recruitEndDate(event.getRecruitEndDate())
+                    .name(event.getName())
+                    .recruitStatus(event.getRecruitStatus())
+                    .isApprove(event.isApprove())
+                    .type(event.getType())
+                    .startTime(event.getStartTime())
+                    .endTime(event.getEndTime())
+                    .maxNumV(event.getMaxNumV())
+                    .maxNumG(event.getMaxNumG())
+                    .place(event.getPlace())
+                    .content(event.getContent())
+                    .status(event.getStatus())
+                    .cityName(event.getCityName())
+                    .eventCategory(event.getEventCategory())
+                    .isPrivate(event.isPrivate())
+                    .expectedRunningDistanceKm(event.getExpectedRunningDistanceKm())
+                    .build();
+        });
+
+        EventCreatedResponse response = eventService.eventCreate(request, "organizer-private");
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+        Event savedEvent = eventCaptor.getValue();
+        assertThat(savedEvent.isPrivate()).isTrue();
+        assertThat(savedEvent.getExpectedRunningDistanceKm()).isEqualByComparingTo("7.50");
+        assertThat(response.getEventId()).isEqualTo(99L);
+        verify(eventAdditionalInfoService).replaceQuestions(99L, additionalQuestions);
+    }
 
     @Test
     @DisplayName("비회원 이벤트 상세 조회는 viewer 없이 리뉴얼 상세 정보를 반환한다")

@@ -123,7 +123,12 @@ public class EventService {
                 .status(status)
                 .cityName(request.getCityName())
                 .eventCategory(eventCategory)
-                .content(request.getContent()).build());
+                .content(request.getContent())
+                .isPrivate(Boolean.TRUE.equals(request.getIsPrivate()))
+                .expectedRunningDistanceKm(request.getExpectedRunningDistanceKm())
+                .build());
+
+        eventAdditionalInfoService.replaceQuestions(createdEvent.getId(), request.getAdditionalQuestions());
 
         //자동 참가 처리
         eventFormRepository.save(
