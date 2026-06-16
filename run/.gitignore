@@ -38,6 +38,7 @@ out/
 
 ### Config file ###
 *.yml
+!src/test/resources/application-test.yml
 
 ## Environment files
 .env
