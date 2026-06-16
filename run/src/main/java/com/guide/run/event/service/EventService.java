@@ -23,6 +23,7 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.dto.NotValidEventRecruitException;
 import com.guide.run.global.exception.event.dto.NotValidEventStartException;
+import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -189,6 +190,13 @@ public class EventService {
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if (event.getOrganizer().equals(privateId)) {
+            if (request.getAdditionalQuestions() != null) {
+                long appliedCount = eventFormRepository.countByEventIdAndStatus(eventId, EventFormStatus.APPLIED);
+                if (appliedCount > 0) {
+                    throw new CannotModifyAdditionalQuestionsException();
+                }
+            }
+
             Event updatedEvent = eventRepository.save(Event.builder()
                     .id(eventId)
                     .organizer(privateId)
@@ -206,7 +214,14 @@ public class EventService {
                     .status(event.getStatus())
                     .content(request.getContent())
                     .cityName(request.getCityName())
-                    .eventCategory(eventCategory).build());
+                    .eventCategory(eventCategory)
+                    .isPrivate(Boolean.TRUE.equals(request.getIsPrivate()))
+                    .expectedRunningDistanceKm(request.getExpectedRunningDistanceKm())
+                    .build());
+
+            if (request.getAdditionalQuestions() != null) {
+                eventAdditionalInfoService.replaceQuestions(eventId, request.getAdditionalQuestions());
+            }
 
             return EventUpdatedResponse.builder()
                     .eventId(updatedEvent.getId())

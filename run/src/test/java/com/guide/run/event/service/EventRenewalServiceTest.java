@@ -7,6 +7,7 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
+import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.repository.CommentLikeRepository;
@@ -20,6 +21,7 @@ import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
+import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -40,7 +42,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,36 +83,8 @@ class EventRenewalServiceTest {
     @DisplayName("이벤트 생성은 비공개 여부, 예상 거리, 추가 질문을 함께 반영한다")
     void eventCreateReflectsRenewalFieldsAndAdditionalQuestions() {
         User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
-        List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions = List.of(
-                new EventCreateRequest.AdditionalQuestionRequest(
-                        AdditionalQuestionType.TEXT,
-                        "하고 싶은 말",
-                        List.of()
-                ),
-                new EventCreateRequest.AdditionalQuestionRequest(
-                        AdditionalQuestionType.SELECT,
-                        "티셔츠 사이즈",
-                        List.of("S", "M", "L")
-                )
-        );
-        EventCreateRequest request = new EventCreateRequest(
-                LocalDate.of(2026, 6, 1),
-                LocalDate.of(2026, 6, 10),
-                "상계천천히달리기",
-                EventType.TRAINING,
-                "2026-06-20",
-                "09:00",
-                "11:00",
-                4,
-                2,
-                "서울",
-                "내용",
-                EventCategory.GENERAL,
-                CityName.SEOUL,
-                true,
-                new BigDecimal("7.50"),
-                additionalQuestions
-        );
+        List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions = createAdditionalQuestions();
+        EventCreateRequest request = createEventRequest(true, new BigDecimal("7.50"), additionalQuestions);
 
         when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
         when(timeFormatter.getDateTime("2026-06-20", "09:00"))
@@ -149,6 +125,79 @@ class EventRenewalServiceTest {
         assertThat(savedEvent.getExpectedRunningDistanceKm()).isEqualByComparingTo("7.50");
         assertThat(response.getEventId()).isEqualTo(99L);
         verify(eventAdditionalInfoService).replaceQuestions(99L, additionalQuestions);
+    }
+
+    @Test
+    @DisplayName("이벤트 수정은 신청자가 없으면 비공개 여부, 예상 거리, 추가 질문을 함께 반영한다")
+    void eventUpdateReflectsRenewalFieldsAndAdditionalQuestionsWhenNoAppliedForm() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+        List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions = createAdditionalQuestions();
+        EventCreateRequest request = createEventRequest(false, new BigDecimal("9.20"), additionalQuestions);
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.findById(99L)).thenReturn(Optional.of(event));
+        when(eventFormRepository.countByEventIdAndStatus(99L, EventFormStatus.APPLIED)).thenReturn(0L);
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event saved = invocation.getArgument(0);
+            return Event.builder()
+                    .id(saved.getId())
+                    .organizer(saved.getOrganizer())
+                    .recruitStartDate(saved.getRecruitStartDate())
+                    .recruitEndDate(saved.getRecruitEndDate())
+                    .name(saved.getName())
+                    .recruitStatus(saved.getRecruitStatus())
+                    .isApprove(saved.isApprove())
+                    .type(saved.getType())
+                    .startTime(saved.getStartTime())
+                    .endTime(saved.getEndTime())
+                    .maxNumV(saved.getMaxNumV())
+                    .maxNumG(saved.getMaxNumG())
+                    .place(saved.getPlace())
+                    .content(saved.getContent())
+                    .status(saved.getStatus())
+                    .cityName(saved.getCityName())
+                    .eventCategory(saved.getEventCategory())
+                    .isPrivate(saved.isPrivate())
+                    .expectedRunningDistanceKm(saved.getExpectedRunningDistanceKm())
+                    .build();
+        });
+
+        EventUpdatedResponse response = eventService.eventUpdate(request, "organizer-private", 99L);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+        Event savedEvent = eventCaptor.getValue();
+        assertThat(savedEvent.isPrivate()).isFalse();
+        assertThat(savedEvent.getExpectedRunningDistanceKm()).isEqualByComparingTo("9.20");
+        assertThat(response.getEventId()).isEqualTo(99L);
+        verify(eventAdditionalInfoService).replaceQuestions(99L, additionalQuestions);
+    }
+
+    @Test
+    @DisplayName("이벤트 수정은 신청자가 있으면 추가 질문 변경을 거부한다")
+    void eventUpdateRejectsAdditionalQuestionsWhenAppliedFormExists() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+        EventCreateRequest request = createEventRequest(false, new BigDecimal("9.20"), createAdditionalQuestions());
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.findById(99L)).thenReturn(Optional.of(event));
+        when(eventFormRepository.countByEventIdAndStatus(99L, EventFormStatus.APPLIED)).thenReturn(1L);
+
+        assertThatThrownBy(() -> eventService.eventUpdate(request, "organizer-private", 99L))
+                .isInstanceOf(CannotModifyAdditionalQuestionsException.class)
+                .hasMessage("신청자가 있는 이벤트는 추가정보를 수정할 수 없습니다.");
+        verify(eventRepository, never()).save(any(Event.class));
+        verify(eventAdditionalInfoService, never()).replaceQuestions(any(), any());
     }
 
     @Test
@@ -224,6 +273,46 @@ class EventRenewalServiceTest {
                 .eventCategory(EventCategory.GENERAL)
                 .expectedRunningDistanceKm(new BigDecimal("7.50"))
                 .build();
+    }
+
+    private EventCreateRequest createEventRequest(
+            Boolean isPrivate,
+            BigDecimal expectedRunningDistanceKm,
+            List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions
+    ) {
+        return new EventCreateRequest(
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 10),
+                "상계천천히달리기",
+                EventType.TRAINING,
+                "2026-06-20",
+                "09:00",
+                "11:00",
+                4,
+                2,
+                "서울",
+                "내용",
+                EventCategory.GENERAL,
+                CityName.SEOUL,
+                isPrivate,
+                expectedRunningDistanceKm,
+                additionalQuestions
+        );
+    }
+
+    private List<EventCreateRequest.AdditionalQuestionRequest> createAdditionalQuestions() {
+        return List.of(
+                new EventCreateRequest.AdditionalQuestionRequest(
+                        AdditionalQuestionType.TEXT,
+                        "하고 싶은 말",
+                        List.of()
+                ),
+                new EventCreateRequest.AdditionalQuestionRequest(
+                        AdditionalQuestionType.SELECT,
+                        "티셔츠 사이즈",
+                        List.of("S", "M", "L")
+                )
+        );
     }
 
     private User createUser(String privateId, String userId, String name, UserType type) {
