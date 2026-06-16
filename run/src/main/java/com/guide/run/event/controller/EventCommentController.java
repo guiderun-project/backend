@@ -33,7 +33,7 @@ public class EventCommentController {
                 .commentId(eventCommentService.createComment(eventId,userId,eventCommentCreateRequest)).build());
     }
     @Operation(summary = "이벤트 댓글 삭제", description = "이벤트 상세 화면의 댓글 항목에서 댓글을 삭제합니다.")
-    @DeleteMapping("/{eventId}/{commentId}")
+    @DeleteMapping("/{eventId}/comments/{commentId}")
     public ResponseEntity<CommentsDeletedResponse> deleteComment(@PathVariable Long eventId,
                                                                  @PathVariable Long commentId,
                                                                  HttpServletRequest request){
@@ -42,7 +42,7 @@ public class EventCommentController {
                 .commentId(eventCommentService.deleteComment(eventId,commentId,userId)).build());
     }
     @Operation(summary = "이벤트 댓글 수정", description = "이벤트 상세 화면의 댓글 항목에서 댓글 내용을 수정합니다.")
-    @PatchMapping("/{eventId}/{commentId}")
+    @PatchMapping("/{eventId}/comments/{commentId}")
     public ResponseEntity<CommentsCreatedResponse> patchComment(@PathVariable Long eventId,
                                                                  @PathVariable Long commentId,
                                                                 @RequestBody EventCommentCreateRequest eventCommentCreateRequest,
