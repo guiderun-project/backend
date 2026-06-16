@@ -12,7 +12,9 @@ import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
 import com.guide.run.event.entity.dto.response.EventPopUpPartner;
 import com.guide.run.event.entity.dto.response.EventPopUpResponse;
+import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
+import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventCategory;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.TextStyle;
@@ -406,6 +409,38 @@ public class EventService {
 
     public MyEventDdayResponse getMyEventDday(String privateId) {
         return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(privateId)).build();
+    }
+
+    public MissingRunningDistanceGetResponse getMissingRunningDistance(String privateId) {
+        List<MissingRunningDistanceGetResponse.Item> items = eventRepository
+                .findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNull(privateId, LocalDateTime.now())
+                .stream()
+                .map(event -> MissingRunningDistanceGetResponse.Item.builder()
+                        .eventId(event.getId())
+                        .name(event.getName())
+                        .dateText(toDateText(event.getStartTime()))
+                        .build())
+                .toList();
+
+        return MissingRunningDistanceGetResponse.builder()
+                .items(items)
+                .build();
+    }
+
+    @Transactional
+    public EventRunningDistancePatchResponse patchRunningDistance(Long eventId, String privateId, BigDecimal distance) {
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        if (!event.getOrganizer().equals(privateId)) {
+            throw new NotEventOrganizerException();
+        }
+
+        event.updateExpectedRunningDistanceKm(distance);
+        eventRepository.save(event);
+
+        return EventRunningDistancePatchResponse.builder()
+                .eventId(event.getId())
+                .expectedRunningDistanceKm(event.getExpectedRunningDistanceKm())
+                .build();
     }
 
     public EventDetailResponse getDetailEvent(Long eventId, String privateId) {

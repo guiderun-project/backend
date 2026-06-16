@@ -7,7 +7,9 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
+import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
+import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.repository.CommentLikeRepository;
@@ -21,6 +23,7 @@ import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
+import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
@@ -45,6 +48,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -220,6 +224,59 @@ class EventRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("러닝 거리 미입력 이벤트 조회는 내가 주최한 종료 이벤트만 반환한다")
+    void getMissingRunningDistanceReturnsOrganizerEndedEvents() {
+        Event missingDistanceEvent = createEndedEventWithoutExpectedDistance(10L, "상계천천히달리기");
+        when(eventRepository.findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNull(
+                eq("organizer-private"),
+                any(LocalDateTime.class)
+        )).thenReturn(List.of(missingDistanceEvent));
+
+        MissingRunningDistanceGetResponse response = eventService.getMissingRunningDistance("organizer-private");
+
+        assertThat(response.getItems()).hasSize(1);
+        MissingRunningDistanceGetResponse.Item item = response.getItems().get(0);
+        assertThat(item.getEventId()).isEqualTo(10L);
+        assertThat(item.getName()).isEqualTo("상계천천히달리기");
+        assertThat(item.getDateText()).isEqualTo("6월 1일 (월)");
+    }
+
+    @Test
+    @DisplayName("러닝 거리 등록은 주최자만 예상 거리를 갱신한다")
+    void patchRunningDistanceUpdatesExpectedDistanceByOrganizer() {
+        Event event = createEvent("organizer-private");
+        BigDecimal distance = new BigDecimal("8.25");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        EventRunningDistancePatchResponse response = eventService.patchRunningDistance(
+                1L,
+                "organizer-private",
+                distance
+        );
+
+        assertThat(event.getExpectedRunningDistanceKm()).isEqualByComparingTo("8.25");
+        assertThat(response.getEventId()).isEqualTo(1L);
+        assertThat(response.getExpectedRunningDistanceKm()).isEqualByComparingTo("8.25");
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    @DisplayName("러닝 거리 등록은 주최자가 아니면 거부한다")
+    void patchRunningDistanceRejectsNonOrganizer() {
+        Event event = createEvent("organizer-private");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.patchRunningDistance(
+                1L,
+                "other-private",
+                new BigDecimal("8.25")
+        )).isInstanceOf(NotEventOrganizerException.class);
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
     @DisplayName("비회원 이벤트 상세 조회는 viewer 없이 리뉴얼 상세 정보를 반환한다")
     void getDetailEventReturnsPublicRenewalDetailForGuest() {
         Event event = createEvent("organizer-private");
@@ -291,6 +348,17 @@ class EventRenewalServiceTest {
                 .status(EventStatus.EVENT_UPCOMING)
                 .eventCategory(EventCategory.GENERAL)
                 .expectedRunningDistanceKm(new BigDecimal("7.50"))
+                .build();
+    }
+
+    private Event createEndedEventWithoutExpectedDistance(Long eventId, String name) {
+        return Event.builder()
+                .id(eventId)
+                .organizer("organizer-private")
+                .name(name)
+                .startTime(LocalDateTime.of(2026, 6, 1, 9, 0))
+                .endTime(LocalDateTime.of(2026, 6, 1, 11, 0))
+                .expectedRunningDistanceKm(null)
                 .build();
     }
 
