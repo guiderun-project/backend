@@ -92,6 +92,14 @@ public class EventLogicExceptionAdvice {
                 getMessage("CannotModifyAdditionalQuestions.msg")));
     }
 
+    //2210
+    @ExceptionHandler(EventValidationException.class)
+    protected ResponseEntity<FailResult> EventValidationException(EventValidationException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("EventValidation.code"),
+                e.getMessage()));
+    }
+
     private String getMessage(String code){
         return getMessage(code,null);
     }

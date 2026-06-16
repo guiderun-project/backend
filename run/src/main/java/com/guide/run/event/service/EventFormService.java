@@ -7,13 +7,13 @@ import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
 import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
-import com.guide.run.event.entity.dto.response.form.GetForm;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
@@ -61,8 +61,12 @@ public class EventFormService {
         if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
             throw new NotValidDurationException();
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
-        List<EventForm> forms = eventFormRepository.findAllByEventIdAndPrivateId(eventId, userId);
-        if(forms.size()>0)
+        EventForm appliedForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                userId,
+                EventFormStatus.APPLIED
+        );
+        if(appliedForm != null)
             throw new ExistFormException();
         validateCompetitionInfo(event, createForm);
         attendanceRepository.save(
@@ -99,7 +103,7 @@ public class EventFormService {
                         .status(EventFormStatus.APPLIED)
                         .build()
         );
-        eventAdditionalInfoService.replaceAnswers(savedForm.getId(), createForm.getAdditionalAnswers());
+        eventAdditionalInfoService.replaceAnswers(eventId, savedForm.getId(), createForm.getAdditionalAnswers());
         return savedForm.getId();
     }
 
@@ -121,26 +125,8 @@ public class EventFormService {
         form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail(),event.getEventCategory());
         form.updateCompetitionInfo(getBirthDate(createForm), getPhoneNumber(createForm));
         EventForm savedForm = eventFormRepository.save(form);
-        eventAdditionalInfoService.replaceAnswers(savedForm.getId(), createForm.getAdditionalAnswers());
+        eventAdditionalInfoService.replaceAnswers(eventId, savedForm.getId(), createForm.getAdditionalAnswers());
         return savedForm.getId();
-    }
-
-    public GetForm getForm(Long eventId, String userId) {
-        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
-        if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
-        }
-        return GetForm.builder()
-                .type(user.getType().getValue())
-                .name(user.getName())
-                .pace(user.getRecordDegree())
-                .group(form.getHopeTeam())
-                .partner(form.getHopePartner())
-                .detail(form.getReferContent())
-                .eventCategory(form.getEventCategory())
-                .build();
     }
 
     public MyEventApplyGetResponse getMyForm(Long eventId, String privateId) {
@@ -245,13 +231,13 @@ public class EventFormService {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         if(user.getRole().equals(Role.ROLE_ADMIN)){
             return (GetAllForms.builder()
-                    .vi(eventFormRepository.findAllFormsWithPhone(eventId, UserType.VI))
-                    .guide(eventFormRepository.findAllFormsWithPhone(eventId,UserType.GUIDE))
+                    .vi(eventFormRepository.findAllFormsWithPhone(eventId, UserType.VI, EventFormStatus.APPLIED))
+                    .guide(eventFormRepository.findAllFormsWithPhone(eventId,UserType.GUIDE, EventFormStatus.APPLIED))
                     .build());
         }else{
             return (GetAllForms.builder()
-                    .vi(eventFormRepository.findAllFormsWithoutPhone(eventId, UserType.VI))
-                    .guide(eventFormRepository.findAllFormsWithoutPhone(eventId,UserType.GUIDE))
+                    .vi(eventFormRepository.findAllFormsWithoutPhone(eventId, UserType.VI, EventFormStatus.APPLIED))
+                    .guide(eventFormRepository.findAllFormsWithoutPhone(eventId,UserType.GUIDE, EventFormStatus.APPLIED))
                     .build());
         }
     }
@@ -327,7 +313,7 @@ public class EventFormService {
                 || competitionInfo.getBirthDate() == null
                 || competitionInfo.getPhoneNumber() == null
                 || competitionInfo.getPhoneNumber().isBlank()) {
-            throw new IllegalArgumentException("대회 신청 정보는 필수입니다.");
+            throw new EventValidationException("대회 신청 정보는 필수입니다.");
         }
     }
 

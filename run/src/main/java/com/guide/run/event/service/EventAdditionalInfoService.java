@@ -11,6 +11,7 @@ import com.guide.run.event.entity.repository.EventAdditionalAnswerRepository;
 import com.guide.run.event.entity.repository.EventAdditionalOptionRepository;
 import com.guide.run.event.entity.repository.EventAdditionalQuestionRepository;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -87,7 +88,7 @@ public class EventAdditionalInfoService {
     }
 
     @Transactional
-    public void replaceAnswers(Long eventFormId, List<EventApplyRequest.AdditionalAnswerRequest> requests) {
+    public void replaceAnswers(Long eventId, Long eventFormId, List<EventApplyRequest.AdditionalAnswerRequest> requests) {
         answerRepository.deleteAllByEventFormId(eventFormId);
         if (requests == null || requests.isEmpty()) {
             return;
@@ -96,6 +97,7 @@ public class EventAdditionalInfoService {
         for (EventApplyRequest.AdditionalAnswerRequest request : requests) {
             EventAdditionalQuestion question = questionRepository.findById(request.getQuestionId())
                     .orElseThrow(NotExistEventException::new);
+            validateQuestionBelongsToEvent(eventId, question);
             validateAnswer(question, request);
 
             answerRepository.save(EventAdditionalAnswer.builder()
@@ -155,30 +157,36 @@ public class EventAdditionalInfoService {
                 .filter(request -> request.getType() == AdditionalQuestionType.TEXT)
                 .count();
         if (textCount > 1) {
-            throw new IllegalArgumentException("TEXT 추가질문은 최대 1개까지 가능합니다.");
+            throw new EventValidationException("TEXT 추가질문은 최대 1개까지 가능합니다.");
         }
 
         long selectCount = requests.stream()
                 .filter(request -> request.getType() == AdditionalQuestionType.SELECT)
                 .count();
         if (selectCount > 1) {
-            throw new IllegalArgumentException("SELECT 추가질문은 최대 1개까지 가능합니다.");
+            throw new EventValidationException("SELECT 추가질문은 최대 1개까지 가능합니다.");
         }
 
         for (EventCreateRequest.AdditionalQuestionRequest request : requests) {
             if (request.getType() == null) {
-                throw new IllegalArgumentException("추가질문 타입은 필수입니다.");
+                throw new EventValidationException("추가질문 타입은 필수입니다.");
             }
             if (request.getType() == AdditionalQuestionType.SELECT
                     && (request.getOptions() == null || request.getOptions().isEmpty())) {
-                throw new IllegalArgumentException("SELECT 추가질문은 옵션이 1개 이상이어야 합니다.");
+                throw new EventValidationException("SELECT 추가질문은 옵션이 1개 이상이어야 합니다.");
             }
+        }
+    }
+
+    private void validateQuestionBelongsToEvent(Long eventId, EventAdditionalQuestion question) {
+        if (!eventId.equals(question.getEventId())) {
+            throw new EventValidationException("해당 이벤트의 추가질문이 아닙니다.");
         }
     }
 
     private void validateAnswer(EventAdditionalQuestion question, EventApplyRequest.AdditionalAnswerRequest request) {
         if (question.getType() != request.getType()) {
-            throw new IllegalArgumentException("추가답변 타입이 질문 타입과 일치하지 않습니다.");
+            throw new EventValidationException("추가답변 타입이 질문 타입과 일치하지 않습니다.");
         }
 
         if (question.getType() == AdditionalQuestionType.SELECT) {
@@ -186,7 +194,7 @@ public class EventAdditionalInfoService {
             boolean optionBelongsToQuestion = options.stream()
                     .anyMatch(option -> option.getId().equals(request.getSelectedOptionId()));
             if (!optionBelongsToQuestion) {
-                throw new IllegalArgumentException("선택한 옵션이 질문에 속하지 않습니다.");
+                throw new EventValidationException("선택한 옵션이 질문에 속하지 않습니다.");
             }
         }
     }

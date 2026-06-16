@@ -25,6 +25,7 @@ import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -244,7 +245,7 @@ class EventRenewalServiceTest {
     @Test
     @DisplayName("러닝 거리 등록은 주최자만 예상 거리를 갱신한다")
     void patchRunningDistanceUpdatesExpectedDistanceByOrganizer() {
-        Event event = createEvent("organizer-private");
+        Event event = createEndedEventWithoutExpectedDistance(1L, "상계천천히달리기");
         BigDecimal distance = new BigDecimal("8.25");
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
@@ -259,6 +260,38 @@ class EventRenewalServiceTest {
         assertThat(response.getEventId()).isEqualTo(1L);
         assertThat(response.getExpectedRunningDistanceKm()).isEqualByComparingTo("8.25");
         verify(eventRepository).save(event);
+    }
+
+    @Test
+    @DisplayName("러닝 거리 등록은 종료되지 않은 이벤트면 거부한다")
+    void patchRunningDistanceRejectsNotEndedEvent() {
+        Event event = createEvent("organizer-private");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.patchRunningDistance(
+                1L,
+                "organizer-private",
+                new BigDecimal("8.25")
+        )).isInstanceOf(EventValidationException.class)
+                .hasMessage("종료된 이벤트만 러닝 거리를 등록할 수 있습니다.");
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    @DisplayName("러닝 거리 등록은 0보다 큰 값만 허용한다")
+    void patchRunningDistanceRejectsNonPositiveDistance() {
+        Event event = createEndedEventWithoutExpectedDistance(1L, "상계천천히달리기");
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.patchRunningDistance(
+                1L,
+                "organizer-private",
+                BigDecimal.ZERO
+        )).isInstanceOf(EventValidationException.class)
+                .hasMessage("러닝 거리는 0보다 커야 합니다.");
+        verify(eventRepository, never()).save(any(Event.class));
     }
 
     @Test

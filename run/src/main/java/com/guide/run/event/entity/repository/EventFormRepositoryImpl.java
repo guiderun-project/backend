@@ -2,6 +2,7 @@ package com.guide.run.event.entity.repository;
 
 import com.guide.run.event.entity.dto.response.form.Form;
 import com.guide.run.event.entity.dto.response.form.FormWithPhone;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -29,7 +30,9 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                 user.recordDegree.as("recordDegree")))
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
-                .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
+                .where(eventForm.eventId.eq(eventId)
+                        .and(user.type.eq(userType))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .fetch();
     }
     @Override
@@ -42,12 +45,15 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                         user.recordDegree.as("recordDegree")))
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
-                .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)).and(eventForm.hopeTeam.eq(hopeTeam)))
+                .where(eventForm.eventId.eq(eventId)
+                        .and(user.type.eq(userType))
+                        .and(eventForm.hopeTeam.eq(hopeTeam))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .fetch();
     }
 
     @Override
-    public List<FormWithPhone> findAllFormsWithPhone(Long eventId, UserType userType) {
+    public List<FormWithPhone> findAllFormsWithPhone(Long eventId, UserType userType, EventFormStatus status) {
         return queryFactory.select(Projections.constructor(FormWithPhone.class,
                         user.userId.as("userId"),
                         user.type.as("type"),
@@ -57,13 +63,15 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                         user.phoneNumber.as("phone")))
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
-                .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
+                .where(eventForm.eventId.eq(eventId)
+                        .and(user.type.eq(userType))
+                        .and(eventForm.status.eq(status)))
                 .orderBy(user.name.asc())
                 .fetch();
     }
 
     @Override
-    public List<FormWithPhone> findAllFormsWithoutPhone(Long eventId, UserType userType) {
+    public List<FormWithPhone> findAllFormsWithoutPhone(Long eventId, UserType userType, EventFormStatus status) {
         return queryFactory.select(Projections.constructor(FormWithPhone.class,
                         user.userId.as("userId"),
                         user.type.as("type"),
@@ -72,7 +80,9 @@ public class EventFormRepositoryImpl implements EventFormRepositoryCustom{
                         user.recordDegree.as("recordDegree")))
                 .from(eventForm)
                 .join(user).on(eventForm.privateId.eq(user.privateId).and(eventForm.eventId.eq(eventId)))
-                .where(eventForm.eventId.eq(eventId).and(user.type.eq(userType)))
+                .where(eventForm.eventId.eq(eventId)
+                        .and(user.type.eq(userType))
+                        .and(eventForm.status.eq(status)))
                 .orderBy(user.name.asc())
                 .fetch();
     }

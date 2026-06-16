@@ -2,11 +2,13 @@ package com.guide.run.event.service;
 
 import com.guide.run.event.entity.EventAdditionalOption;
 import com.guide.run.event.entity.EventAdditionalQuestion;
+import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.repository.EventAdditionalAnswerRepository;
 import com.guide.run.event.entity.repository.EventAdditionalOptionRepository;
 import com.guide.run.event.entity.repository.EventAdditionalQuestionRepository;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,11 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,7 +98,7 @@ class EventAdditionalInfoServiceTest {
         assertThatThrownBy(() -> eventAdditionalInfoService.replaceQuestions(1L, List.of(
                 new EventCreateRequest.AdditionalQuestionRequest(AdditionalQuestionType.TEXT, "질문1", null),
                 new EventCreateRequest.AdditionalQuestionRequest(AdditionalQuestionType.TEXT, "질문2", null)
-        ))).isInstanceOf(IllegalArgumentException.class)
+        ))).isInstanceOf(EventValidationException.class)
                 .hasMessageContaining("TEXT");
     }
 
@@ -103,7 +107,33 @@ class EventAdditionalInfoServiceTest {
     void replaceQuestionsRejectsSelectQuestionWithoutOptions() {
         assertThatThrownBy(() -> eventAdditionalInfoService.replaceQuestions(1L, List.of(
                 new EventCreateRequest.AdditionalQuestionRequest(AdditionalQuestionType.SELECT, "사이즈", List.of())
-        ))).isInstanceOf(IllegalArgumentException.class)
+        ))).isInstanceOf(EventValidationException.class)
                 .hasMessageContaining("SELECT");
+    }
+
+    @Test
+    @DisplayName("추가답변은 같은 이벤트의 추가질문에만 저장할 수 있다")
+    void replaceAnswersRejectsQuestionFromAnotherEvent() {
+        EventAdditionalQuestion otherEventQuestion = EventAdditionalQuestion.builder()
+                .id(10L)
+                .eventId(2L)
+                .type(AdditionalQuestionType.TEXT)
+                .title("다른 이벤트 질문")
+                .build();
+        when(questionRepository.findById(10L)).thenReturn(Optional.of(otherEventQuestion));
+
+        assertThatThrownBy(() -> eventAdditionalInfoService.replaceAnswers(
+                1L,
+                55L,
+                List.of(new EventApplyRequest.AdditionalAnswerRequest(
+                        10L,
+                        AdditionalQuestionType.TEXT,
+                        "답변",
+                        null
+                ))
+        )).isInstanceOf(EventValidationException.class)
+                .hasMessage("해당 이벤트의 추가질문이 아닙니다.");
+        verify(answerRepository).deleteAllByEventFormId(55L);
+        verify(answerRepository, never()).save(any());
     }
 }

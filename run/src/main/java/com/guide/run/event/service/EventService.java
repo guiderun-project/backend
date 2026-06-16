@@ -26,6 +26,7 @@ import com.guide.run.global.exception.event.authorize.NotEventOrganizerException
 import com.guide.run.global.exception.event.dto.NotValidEventRecruitException;
 import com.guide.run.global.exception.event.dto.NotValidEventStartException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -432,6 +433,12 @@ public class EventService {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if (!event.getOrganizer().equals(privateId)) {
             throw new NotEventOrganizerException();
+        }
+        if (event.getEndTime().isAfter(LocalDateTime.now()) || event.getEndTime().isEqual(LocalDateTime.now())) {
+            throw new EventValidationException("종료된 이벤트만 러닝 거리를 등록할 수 있습니다.");
+        }
+        if (distance == null || distance.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new EventValidationException("러닝 거리는 0보다 커야 합니다.");
         }
 
         event.updateExpectedRunningDistanceKm(distance);

@@ -118,6 +118,9 @@ NotDeleteEvent:
 CannotModifyAdditionalQuestions:
   code: "2209"
   msg: "신청자가 있는 이벤트는 추가정보를 수정할 수 없습니다."
+EventValidation:
+  code: "2210"
+  msg: "이벤트 요청 값이 유효하지 않습니다."
 
 notExistEvent:
   code: "2300"

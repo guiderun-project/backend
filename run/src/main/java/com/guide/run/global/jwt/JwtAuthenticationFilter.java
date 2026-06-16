@@ -20,9 +20,12 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String bearer = ((HttpServletRequest) request).getHeader(HttpHeaders.AUTHORIZATION);
-        if (bearer == null || !bearer.startsWith("Bearer ")) {
+        if (bearer == null) {
             chain.doFilter(request, response);
             return;
+        }
+        if (!bearer.startsWith("Bearer ")) {
+            throw new NotValidAccessTokenException();
         }
 
         String token = bearer.substring("Bearer ".length());

@@ -16,6 +16,7 @@ import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
@@ -38,6 +39,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,7 +73,9 @@ class EventFormRenewalServiceTest {
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
-        when(eventFormRepository.findAllByEventIdAndPrivateId(1L, "user-private")).thenReturn(List.of());
+        lenient().when(eventFormRepository.findAllByEventIdAndPrivateId(1L, "user-private")).thenReturn(List.of());
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(null);
         when(eventFormRepository.save(any(EventForm.class))).thenAnswer(invocation -> {
             EventForm form = invocation.getArgument(0);
             return EventForm.builder()
@@ -104,7 +108,39 @@ class EventFormRenewalServiceTest {
         assertThat(savedForm.getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
         assertThat(savedForm.getPhoneNumber()).isEqualTo("010-1234-5678");
         assertThat(formId).isEqualTo(55L);
-        verify(eventAdditionalInfoService).replaceAnswers(55L, request.getAdditionalAnswers());
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
+    }
+
+    @Test
+    @DisplayName("신청서 생성은 CANCELED 이력이 있어도 APPLIED 신청서가 없으면 허용한다")
+    void createFormAllowsCanceledHistoryWhenNoAppliedFormExists() {
+        Event event = createEvent(EventType.TRAINING);
+        User user = createUser("user-private", UserType.VI);
+        EventApplyRequest request = new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of());
+        EventForm canceledForm = EventForm.builder()
+                .id(44L)
+                .eventId(1L)
+                .privateId("user-private")
+                .status(EventFormStatus.CANCELED)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        lenient().when(eventFormRepository.findAllByEventIdAndPrivateId(1L, "user-private"))
+                .thenReturn(List.of(canceledForm));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(null);
+        when(eventFormRepository.save(any(EventForm.class))).thenReturn(EventForm.builder()
+                .id(55L)
+                .eventId(1L)
+                .privateId("user-private")
+                .status(EventFormStatus.APPLIED)
+                .build());
+
+        Long formId = eventFormService.createForm(request, 1L, "user-private");
+
+        assertThat(formId).isEqualTo(55L);
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
     }
 
     @Test
@@ -122,13 +158,15 @@ class EventFormRenewalServiceTest {
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
         when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
-        when(eventFormRepository.findAllByEventIdAndPrivateId(1L, "user-private")).thenReturn(List.of());
+        lenient().when(eventFormRepository.findAllByEventIdAndPrivateId(1L, "user-private")).thenReturn(List.of());
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(null);
 
         assertThatThrownBy(() -> eventFormService.createForm(request, 1L, "user-private"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(EventValidationException.class)
                 .hasMessage("대회 신청 정보는 필수입니다.");
         verify(eventFormRepository, never()).save(any(EventForm.class));
-        verify(eventAdditionalInfoService, never()).replaceAnswers(any(), any());
+        verify(eventAdditionalInfoService, never()).replaceAnswers(any(), any(), any());
     }
 
     @Test
@@ -158,7 +196,7 @@ class EventFormRenewalServiceTest {
         assertThat(form.getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
         assertThat(form.getPhoneNumber()).isEqualTo("010-1234-5678");
         assertThat(formId).isEqualTo(55L);
-        verify(eventAdditionalInfoService).replaceAnswers(55L, request.getAdditionalAnswers());
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
     }
 
     @Test
@@ -382,6 +420,26 @@ class EventFormRenewalServiceTest {
                 "applicant-user",
                 "viewer-private"
         )).isInstanceOf(NotEventOrganizerException.class);
+    }
+
+    @Test
+    @DisplayName("기존 전체 신청자 상세 조회는 APPLIED 신청서만 조회한다")
+    void getAllFormsUsesAppliedStatusFilters() {
+        User admin = User.builder()
+                .privateId("admin-private")
+                .role(Role.ROLE_ADMIN)
+                .build();
+
+        when(userRepository.findUserByPrivateId("admin-private")).thenReturn(Optional.of(admin));
+        when(eventFormRepository.findAllFormsWithPhone(1L, UserType.VI, EventFormStatus.APPLIED))
+                .thenReturn(List.of());
+        when(eventFormRepository.findAllFormsWithPhone(1L, UserType.GUIDE, EventFormStatus.APPLIED))
+                .thenReturn(List.of());
+
+        eventFormService.getAllForms(1L, "admin-private");
+
+        verify(eventFormRepository).findAllFormsWithPhone(1L, UserType.VI, EventFormStatus.APPLIED);
+        verify(eventFormRepository).findAllFormsWithPhone(1L, UserType.GUIDE, EventFormStatus.APPLIED);
     }
 
     private Event createEvent(EventType eventType) {
