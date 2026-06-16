@@ -5,6 +5,8 @@ import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
+import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
+import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -13,9 +15,11 @@ import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -242,6 +246,142 @@ class EventFormRenewalServiceTest {
         verify(eventFormRepository, never()).delete(any(EventForm.class));
         verify(attendanceRepository).delete(attendance);
         verify(unMatchingRepository).delete(unMatching);
+    }
+
+    @Test
+    @DisplayName("신청자 명단은 APPLIED 신청서만 그룹화해서 반환한다")
+    void getApplicantFormsReturnsAppliedFormsGroupedByRunningGroup() {
+        EventForm viForm = EventForm.builder()
+                .id(55L)
+                .privateId("vi-private")
+                .eventId(1L)
+                .type(UserType.VI)
+                .hopeTeam("A")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        EventForm guideForm = EventForm.builder()
+                .id(56L)
+                .privateId("guide-private")
+                .eventId(1L)
+                .type(UserType.GUIDE)
+                .hopeTeam("A")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        User vi = User.builder()
+                .privateId("vi-private")
+                .userId("vi-user")
+                .name("VI 사용자")
+                .type(UserType.VI)
+                .trainingCnt(0)
+                .competitionCnt(0)
+                .build();
+        User guide = User.builder()
+                .privateId("guide-private")
+                .userId("guide-user")
+                .name("가이드 사용자")
+                .type(UserType.GUIDE)
+                .trainingCnt(1)
+                .competitionCnt(0)
+                .build();
+
+        when(eventFormRepository.findAllByEventIdAndStatus(1L, EventFormStatus.APPLIED))
+                .thenReturn(List.of(viForm, guideForm));
+        when(userRepository.findUserByPrivateId("vi-private")).thenReturn(Optional.of(vi));
+        when(userRepository.findUserByPrivateId("guide-private")).thenReturn(Optional.of(guide));
+
+        EventApplicantListResponse response = eventFormService.getApplicantForms(1L);
+
+        assertThat(response.getSummary().getTotalCount()).isEqualTo(2);
+        assertThat(response.getSummary().getViCount()).isEqualTo(1);
+        assertThat(response.getSummary().getGuideCount()).isEqualTo(1);
+        assertThat(response.getGroups()).hasSize(1);
+        EventApplicantListResponse.EventApplicantGroup group = response.getGroups().get(0);
+        assertThat(group.getRunningGroup()).isEqualTo("A");
+        assertThat(group.getTotalCount()).isEqualTo(2);
+        assertThat(group.getApplicants()).extracting(EventApplicantListResponse.EventApplicant::getUserId)
+                .containsExactly("vi-user", "guide-user");
+        assertThat(group.getApplicants().get(0).isFirstParticipation()).isTrue();
+        assertThat(group.getApplicants().get(1).isFirstParticipation()).isFalse();
+    }
+
+    @Test
+    @DisplayName("신청자 신청서 상세는 이벤트 주최자가 조회할 수 있다")
+    void getApplicantFormAllowsOrganizer() {
+        Event event = Event.builder()
+                .id(1L)
+                .organizer("organizer-private")
+                .build();
+        User requester = User.builder()
+                .privateId("organizer-private")
+                .role(Role.ROLE_USER)
+                .build();
+        User applicant = User.builder()
+                .privateId("applicant-private")
+                .userId("applicant-user")
+                .name("신청자")
+                .type(UserType.VI)
+                .build();
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .privateId("applicant-private")
+                .eventId(1L)
+                .hopeTeam("A")
+                .hopePartner("김가이드")
+                .referContent("대회 참가")
+                .birthDate(LocalDate.of(1990, 1, 2))
+                .phoneNumber("010-1234-5678")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        List<MyEventApplyGetResponse.AdditionalAnswerDetail> answers = List.of(
+                MyEventApplyGetResponse.AdditionalAnswerDetail.builder()
+                        .questionId(10L)
+                        .type(AdditionalQuestionType.TEXT)
+                        .question("하고 싶은 말")
+                        .answerText("답변")
+                        .build()
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(requester));
+        when(userRepository.findUserByUserId("applicant-user")).thenReturn(Optional.of(applicant));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "applicant-private", EventFormStatus.APPLIED))
+                .thenReturn(form);
+        when(eventAdditionalInfoService.getAnswerDetails(55L)).thenReturn(answers);
+
+        EventApplicantFormResponse response = eventFormService.getApplicantForm(
+                1L,
+                "applicant-user",
+                "organizer-private"
+        );
+
+        assertThat(response.getApplicant().getUserId()).isEqualTo("applicant-user");
+        assertThat(response.getApplicant().getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
+        assertThat(response.getApplicant().getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(response.getForm().getApplyGroup()).isEqualTo("A");
+        assertThat(response.getAdditionalAnswers()).hasSize(1);
+        assertThat(response.getAdditionalAnswers().get(0).getAnswer()).isEqualTo("답변");
+    }
+
+    @Test
+    @DisplayName("신청자 신청서 상세는 주최자나 관리자가 아니면 거부한다")
+    void getApplicantFormRejectsNonOrganizer() {
+        Event event = Event.builder()
+                .id(1L)
+                .organizer("organizer-private")
+                .build();
+        User requester = User.builder()
+                .privateId("viewer-private")
+                .role(Role.ROLE_USER)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("viewer-private")).thenReturn(Optional.of(requester));
+
+        assertThatThrownBy(() -> eventFormService.getApplicantForm(
+                1L,
+                "applicant-user",
+                "viewer-private"
+        )).isInstanceOf(NotEventOrganizerException.class);
     }
 
     private Event createEvent(EventType eventType) {

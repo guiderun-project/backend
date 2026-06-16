@@ -4,6 +4,8 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
+import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
+import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
@@ -11,6 +13,7 @@ import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
@@ -32,7 +35,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_OPEN;
@@ -167,6 +173,74 @@ public class EventFormService {
                 .build();
     }
 
+    public EventApplicantListResponse getApplicantForms(Long eventId) {
+        List<EventForm> forms = eventFormRepository.findAllByEventIdAndStatus(eventId, EventFormStatus.APPLIED);
+        long viCount = forms.stream()
+                .filter(form -> form.getType() == UserType.VI)
+                .count();
+        long guideCount = forms.stream()
+                .filter(form -> form.getType() == UserType.GUIDE)
+                .count();
+
+        Map<String, List<EventForm>> groupedForms = new LinkedHashMap<>();
+        for (EventForm form : forms) {
+            groupedForms.computeIfAbsent(form.getHopeTeam(), key -> new ArrayList<>()).add(form);
+        }
+
+        List<EventApplicantListResponse.EventApplicantGroup> groups = groupedForms.entrySet().stream()
+                .map(entry -> EventApplicantListResponse.EventApplicantGroup.builder()
+                        .runningGroup(entry.getKey())
+                        .totalCount(entry.getValue().size())
+                        .applicants(entry.getValue().stream()
+                                .map(this::toApplicant)
+                                .toList())
+                        .build())
+                .toList();
+
+        return EventApplicantListResponse.builder()
+                .summary(EventApplicantListResponse.Summary.builder()
+                        .totalCount(forms.size())
+                        .viCount(viCount)
+                        .guideCount(guideCount)
+                        .build())
+                .groups(groups)
+                .build();
+    }
+
+    public EventApplicantFormResponse getApplicantForm(Long eventId, String userId, String requesterPrivateId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User requester = userRepository.findUserByPrivateId(requesterPrivateId).orElseThrow(NotExistUserException::new);
+        if (!event.getOrganizer().equals(requesterPrivateId) && !Role.ROLE_ADMIN.equals(requester.getRole())) {
+            throw new NotEventOrganizerException();
+        }
+
+        User applicant = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                applicant.getPrivateId(),
+                EventFormStatus.APPLIED
+        );
+        if (form == null) {
+            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
+
+        return EventApplicantFormResponse.builder()
+                .applicant(EventApplicantFormResponse.Applicant.builder()
+                        .userId(applicant.getUserId())
+                        .name(applicant.getName())
+                        .type(applicant.getType())
+                        .birthDate(form.getBirthDate())
+                        .phoneNumber(form.getPhoneNumber())
+                        .build())
+                .form(EventApplicantFormResponse.Form.builder()
+                        .applyGroup(form.getHopeTeam())
+                        .hopePartner(form.getHopePartner())
+                        .additionalComment(form.getReferContent())
+                        .build())
+                .additionalAnswers(toApplicantAdditionalAnswers(form.getId()))
+                .build();
+    }
+
     public GetAllForms getAllForms(Long eventId, String privateId) {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         if(user.getRole().equals(Role.ROLE_ADMIN)){
@@ -280,5 +354,26 @@ public class EventFormService {
                 form.getBirthDate(),
                 form.getPhoneNumber()
         );
+    }
+
+    private EventApplicantListResponse.EventApplicant toApplicant(EventForm form) {
+        User user = userRepository.findUserByPrivateId(form.getPrivateId()).orElseThrow(NotExistUserException::new);
+        return EventApplicantListResponse.EventApplicant.builder()
+                .userId(user.getUserId())
+                .name(user.getName())
+                .type(user.getType())
+                .isFirstParticipation(user.getTrainingCnt() + user.getCompetitionCnt() == 0)
+                .build();
+    }
+
+    private List<EventApplicantFormResponse.AdditionalAnswer> toApplicantAdditionalAnswers(Long formId) {
+        return eventAdditionalInfoService.getAnswerDetails(formId).stream()
+                .map(answer -> EventApplicantFormResponse.AdditionalAnswer.builder()
+                        .questionId(answer.getQuestionId())
+                        .questionTitle(answer.getQuestion())
+                        .questionType(answer.getType())
+                        .answer(answer.getAnswerText() != null ? answer.getAnswerText() : answer.getSelectedOptionValue())
+                        .build())
+                .toList();
     }
 }

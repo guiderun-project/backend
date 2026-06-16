@@ -2,6 +2,8 @@ package com.guide.run.event.controller;
 
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.CreatedForm;
+import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
+import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
@@ -60,6 +62,23 @@ public class EventFormController {
                                            HttpServletRequest request){
         return ResponseEntity.ok().body(eventFormService.getForm(eventId,userId));
     }
+
+    @Operation(summary = "이벤트 신청자 명단 조회", description = "이벤트 상세 화면에서 APPLIED 상태의 신청자 명단을 그룹별로 조회합니다.")
+    @GetMapping("/{eventId}/forms")
+    public ResponseEntity<EventApplicantListResponse> getApplicantForms(@PathVariable("eventId") Long eventId,
+                                                                        HttpServletRequest request) {
+        return ResponseEntity.ok(eventFormService.getApplicantForms(eventId));
+    }
+
+    @Operation(summary = "신청자 신청서 상세 조회", description = "이벤트 주최자 또는 관리자가 특정 신청자의 신청서 상세를 조회합니다.")
+    @GetMapping("/{eventId}/forms/{userId}")
+    public ResponseEntity<EventApplicantFormResponse> getApplicantForm(@PathVariable("eventId") Long eventId,
+                                                                       @PathVariable("userId") String userId,
+                                                                       HttpServletRequest request) {
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(eventFormService.getApplicantForm(eventId, userId, privateId));
+    }
+
     @Operation(summary = "이벤트 전체 신청자 상세 조회", description = "이벤트 상세 화면의 신청자 패널에서 VI/Guide 신청자 목록을 함께 조회합니다.")
     @GetMapping("/{eventId}/forms/all")
     public ResponseEntity<GetAllForms> getAllForms(@PathVariable("eventId") Long eventId, HttpServletRequest request){
