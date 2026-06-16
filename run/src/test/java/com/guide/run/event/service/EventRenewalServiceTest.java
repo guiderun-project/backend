@@ -26,6 +26,7 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.global.exception.event.logic.EventValidationException;
+import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -310,9 +311,9 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("비회원 이벤트 상세 조회는 viewer 없이 리뉴얼 상세 정보를 반환한다")
+    @DisplayName("비회원 공개 이벤트 상세 조회는 viewer 없이 리뉴얼 상세 정보를 반환한다")
     void getDetailEventReturnsPublicRenewalDetailForGuest() {
-        Event event = createEvent("organizer-private");
+        Event event = createEvent("organizer-private", false);
         User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
         List<EventDetailResponse.AdditionalQuestion> questions = List.of(
                 EventDetailResponse.AdditionalQuestion.builder()
@@ -329,12 +330,23 @@ class EventRenewalServiceTest {
 
         assertThat(response.getEventId()).isEqualTo(1L);
         assertThat(response.getEventType()).isEqualTo(EventType.TRAINING);
-        assertThat(response.isPrivate()).isTrue();
+        assertThat(response.isPrivate()).isFalse();
         assertThat(response.getRecruitStartDate()).isEqualTo(LocalDate.of(2026, 6, 1));
         assertThat(response.getRecruitEndDate()).isEqualTo(LocalDate.of(2026, 6, 10));
         assertThat(response.getExpectedRunningDistanceKm()).isEqualByComparingTo("7.50");
         assertThat(response.getAdditionalQuestions()).hasSize(1);
         assertThat(response.getViewer()).isNull();
+    }
+
+    @Test
+    @DisplayName("비회원 비공개 이벤트 상세 조회는 거부한다")
+    void getDetailEventRejectsPrivateEventForGuest() {
+        Event event = createEvent("organizer-private", true);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.getDetailEvent(1L, null))
+                .isInstanceOf(NotAuthorizationException.class);
     }
 
     @Test
@@ -362,6 +374,10 @@ class EventRenewalServiceTest {
     }
 
     private Event createEvent(String organizer) {
+        return createEvent(organizer, true);
+    }
+
+    private Event createEvent(String organizer, boolean isPrivate) {
         return Event.builder()
                 .id(1L)
                 .organizer(organizer)
@@ -369,7 +385,7 @@ class EventRenewalServiceTest {
                 .recruitEndDate(LocalDate.of(2026, 6, 10))
                 .name("상계천천히달리기")
                 .recruitStatus(EventRecruitStatus.RECRUIT_OPEN)
-                .isPrivate(true)
+                .isPrivate(isPrivate)
                 .isApprove(true)
                 .type(EventType.TRAINING)
                 .startTime(LocalDateTime.of(2026, 6, 20, 9, 0))
