@@ -4,6 +4,7 @@ import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.CreatedForm;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
+import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.service.EventFormService;
 import com.guide.run.global.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,6 +44,15 @@ public class EventFormController {
                 .requestId(eventFormService.patchForm(createForm,eventId,userId))
                 .build());
     }
+
+    @Operation(summary = "내 이벤트 신청서 조회", description = "신청 수정 화면에서 현재 로그인 사용자의 신청서를 조회합니다.")
+    @GetMapping("/{eventId}/form")
+    public ResponseEntity<MyEventApplyGetResponse> getMyForm(@PathVariable("eventId") Long eventId,
+                                                             HttpServletRequest request) {
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(eventFormService.getMyForm(eventId, privateId));
+    }
+
     @Operation(summary = "특정 사용자 이벤트 신청서 조회", description = "신청 상세 툴팁과 신청 수정 화면에서 특정 사용자의 이벤트 신청서를 조회합니다.")
     @GetMapping("/{eventId}/form/{userId}")
     public ResponseEntity<GetForm> getForm(@PathVariable("eventId") Long eventId,

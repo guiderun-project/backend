@@ -6,6 +6,7 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.GetForm;
+import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -135,6 +137,36 @@ public class EventFormService {
                 .build();
     }
 
+    public MyEventApplyGetResponse getMyForm(Long eventId, String privateId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                privateId,
+                EventFormStatus.APPLIED
+        );
+        if (form == null) {
+            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
+
+        return MyEventApplyGetResponse.builder()
+                .eventId(event.getId())
+                .eventName(event.getName())
+                .eventType(event.getType())
+                .eventCategory(event.getEventCategory())
+                .userType(user.getType())
+                .name(user.getName())
+                .recordDegree(user.getRecordDegree())
+                .applicationInfo(MyEventApplyGetResponse.ApplicationInfo.builder()
+                        .group(form.getHopeTeam())
+                        .partner(form.getHopePartner())
+                        .detail(form.getReferContent())
+                        .build())
+                .competitionInfo(toCompetitionInfo(form))
+                .additionalAnswers(eventAdditionalInfoService.getAnswerDetails(form.getId()))
+                .build();
+    }
+
     public GetAllForms getAllForms(Long eventId, String privateId) {
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
         if(user.getRole().equals(Role.ROLE_ADMIN)){
@@ -154,11 +186,16 @@ public class EventFormService {
     public void deleteForm(Long eventId, String privateId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
-        EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                privateId,
+                EventFormStatus.APPLIED
+        );
         if (form == null) {
             throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
         }
-        eventFormRepository.delete(form);
+        form.cancel(LocalDateTime.now());
+        eventFormRepository.save(form);
         //if(user.getType().equals(UserType.GUIDE)){
         //    event.setGuideCnt(event.getGuideCnt()-1);
         //}
@@ -232,5 +269,16 @@ public class EventFormService {
             return null;
         }
         return request.getCompetitionInfo().getPhoneNumber();
+    }
+
+    private EventApplyRequest.CompetitionApplicationInfo toCompetitionInfo(EventForm form) {
+        if (form.getBirthDate() == null && form.getPhoneNumber() == null) {
+            return null;
+        }
+
+        return new EventApplyRequest.CompetitionApplicationInfo(
+                form.getBirthDate(),
+                form.getPhoneNumber()
+        );
     }
 }

@@ -1,9 +1,11 @@
 package com.guide.run.event.service;
 
 import com.guide.run.attendance.repository.AttendanceRepository;
+import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
+import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
@@ -11,6 +13,7 @@ import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -154,9 +157,97 @@ class EventFormRenewalServiceTest {
         verify(eventAdditionalInfoService).replaceAnswers(55L, request.getAdditionalAnswers());
     }
 
+    @Test
+    @DisplayName("내 신청서 조회는 이벤트, 사용자, 신청 정보와 추가답변을 반환한다")
+    void getMyFormReturnsApplicationDetail() {
+        Event event = createEvent(EventType.COMPETITION);
+        User user = User.builder()
+                .privateId("user-private")
+                .userId("user-id")
+                .name("홍길동")
+                .type(UserType.VI)
+                .recordDegree("6:00")
+                .build();
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .privateId("user-private")
+                .eventId(1L)
+                .hopeTeam("A")
+                .hopePartner("김가이드")
+                .referContent("대회 참가")
+                .birthDate(LocalDate.of(1990, 1, 2))
+                .phoneNumber("010-1234-5678")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        List<MyEventApplyGetResponse.AdditionalAnswerDetail> answers = List.of(
+                MyEventApplyGetResponse.AdditionalAnswerDetail.builder()
+                        .questionId(10L)
+                        .type(AdditionalQuestionType.TEXT)
+                        .question("하고 싶은 말")
+                        .answerText("답변")
+                        .build()
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(form);
+        when(eventAdditionalInfoService.getAnswerDetails(55L)).thenReturn(answers);
+
+        MyEventApplyGetResponse response = eventFormService.getMyForm(1L, "user-private");
+
+        assertThat(response.getEventId()).isEqualTo(1L);
+        assertThat(response.getEventType()).isEqualTo(EventType.COMPETITION);
+        assertThat(response.getUserType()).isEqualTo(UserType.VI);
+        assertThat(response.getName()).isEqualTo("홍길동");
+        assertThat(response.getApplicationInfo().getGroup()).isEqualTo("A");
+        assertThat(response.getCompetitionInfo().getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
+        assertThat(response.getCompetitionInfo().getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(response.getAdditionalAnswers()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("신청 취소는 신청서를 삭제하지 않고 CANCELED 상태로 변경한다")
+    void deleteFormCancelsAppliedFormWithoutDeletingIt() {
+        Event event = createEvent(EventType.TRAINING);
+        User user = createUser("user-private", UserType.VI);
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .privateId("user-private")
+                .eventId(1L)
+                .status(EventFormStatus.APPLIED)
+                .build();
+        Attendance attendance = Attendance.builder()
+                .eventId(1L)
+                .privateId("user-private")
+                .isAttend(false)
+                .build();
+        UnMatching unMatching = UnMatching.builder()
+                .eventId(1L)
+                .privateId("user-private")
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(form);
+        when(attendanceRepository.findByEventIdAndPrivateId(1L, "user-private")).thenReturn(attendance);
+        when(unMatchingRepository.findByPrivateIdAndEventId("user-private", 1L)).thenReturn(Optional.of(unMatching));
+
+        eventFormService.deleteForm(1L, "user-private");
+
+        assertThat(form.getStatus()).isEqualTo(EventFormStatus.CANCELED);
+        assertThat(form.getCanceledAt()).isNotNull();
+        verify(eventFormRepository).save(form);
+        verify(eventFormRepository, never()).delete(any(EventForm.class));
+        verify(attendanceRepository).delete(attendance);
+        verify(unMatchingRepository).delete(unMatching);
+    }
+
     private Event createEvent(EventType eventType) {
         return Event.builder()
                 .id(1L)
+                .name("상계천천히달리기")
                 .type(eventType)
                 .recruitStatus(EventRecruitStatus.RECRUIT_OPEN)
                 .eventCategory(EventCategory.GENERAL)
