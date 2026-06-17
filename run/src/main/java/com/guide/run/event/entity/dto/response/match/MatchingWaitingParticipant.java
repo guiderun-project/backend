@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.response.match;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,8 @@ public class MatchingWaitingParticipant {
     private String name;
     private UserType type;
     private String originalRunningGroup;
-    private boolean isFirstParticipation;
+    @JsonProperty("isFirstParticipation")
+    private Boolean isFirstParticipation;
     private String hopePartner;
     private String additionalComment;
     private List<AdditionalAnswer> additionalAnswers;
