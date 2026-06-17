@@ -1,8 +1,12 @@
 package com.guide.run.partner.entity.matching.repository;
 
+import com.guide.run.attendance.entity.QAttendance;
+import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
 import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
+import com.guide.run.event.entity.dto.response.match.MatchingCompletedFlatDto;
 import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -56,6 +60,41 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
                 .orderBy(user.name.asc())
                 .distinct()
+                .fetch();
+    }
+
+    @Override
+    public List<MatchingCompletedFlatDto> findMatchingCompletedByEventId(Long eventId) {
+        QUser viUser = new QUser("viUser");
+        QUser guideUser = new QUser("guideUser");
+        QEventForm viForm = new QEventForm("viForm");
+        QEventForm guideForm = new QEventForm("guideForm");
+        QAttendance viAttendance = new QAttendance("viAttendance");
+        QAttendance guideAttendance = new QAttendance("guideAttendance");
+
+        return queryFactory.select(Projections.constructor(MatchingCompletedFlatDto.class,
+                        viUser.userId.as("viUserId"),
+                        viUser.type.as("viType"),
+                        viUser.name.as("viName"),
+                        viForm.hopeTeam.as("viApplyRecord"),
+                        viAttendance.isAttend.as("viIsAttended"),
+                        viUser.recordDegree.as("viRecordDegree"),
+                        viForm.hopeTeam.as("viRunningGroup"),
+                        guideUser.userId.as("guideUserId"),
+                        guideUser.type.as("guideType"),
+                        guideUser.name.as("guideName"),
+                        guideForm.hopeTeam.as("guideApplyRecord"),
+                        guideAttendance.isAttend.as("guideIsAttended"),
+                        guideUser.recordDegree.as("guideRecordDegree")))
+                .from(matching)
+                .join(viUser).on(viUser.privateId.eq(matching.viId))
+                .join(viForm).on(viForm.privateId.eq(matching.viId).and(viForm.eventId.eq(eventId)))
+                .join(viAttendance).on(viAttendance.privateId.eq(matching.viId).and(viAttendance.eventId.eq(eventId)))
+                .join(guideUser).on(guideUser.privateId.eq(matching.guideId))
+                .join(guideForm).on(guideForm.privateId.eq(matching.guideId).and(guideForm.eventId.eq(eventId)))
+                .join(guideAttendance).on(guideAttendance.privateId.eq(matching.guideId).and(guideAttendance.eventId.eq(eventId)))
+                .where(matching.eventId.eq(eventId))
+                .orderBy(viForm.hopeTeam.asc(), viUser.name.asc(), guideUser.name.asc())
                 .fetch();
     }
 }

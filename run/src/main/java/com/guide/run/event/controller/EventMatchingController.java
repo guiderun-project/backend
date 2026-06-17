@@ -1,5 +1,6 @@
 package com.guide.run.event.controller;
 
+import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
 import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.service.EventMatchingService;
 import com.guide.run.global.jwt.JwtProvider;
@@ -22,6 +23,15 @@ import org.springframework.web.bind.annotation.*;
 public class EventMatchingController {
     private final JwtProvider jwtProvider;
     private final EventMatchingService eventMatchingService;
+
+    @Operation(summary = "매칭 생성 (VI 1명 + Guide 여러 명)", description = "매칭하기 페이지에서 VI 1명과 Guide 여러 명을 한 번의 요청으로 매칭합니다.")
+    @PostMapping("{eventId}/matching")
+    public ResponseEntity<MatchingCreateResponse> createMatching(@PathVariable("eventId") Long eventId,
+                                                                 @RequestBody MatchingCreateRequest request,
+                                                                 HttpServletRequest httpRequest) {
+        jwtProvider.extractUserId(httpRequest);
+        return ResponseEntity.ok().body(eventMatchingService.createMatching(eventId, request));
+    }
 
     @Operation(summary = "수동 매칭 생성", description = "이벤트 상세의 매칭 패널에서 VI와 Guide를 수동으로 매칭합니다.")
     @PostMapping("{eventId}/match/{viId}/{userId}")
@@ -94,6 +104,14 @@ public class EventMatchingController {
         jwtProvider.extractUserId(request);
         eventMatchingService.autoMatchUsers(eventId);
         return ResponseEntity.ok().body("200 ok");
+    }
+
+    @Operation(summary = "매칭 완료 참가자 조회", description = "매칭하기 페이지의 매칭 완료 탭. VI와 매칭된 Guide 배열을 RunningGroup별로 반환합니다.")
+    @GetMapping("{eventId}/matching/completed")
+    public ResponseEntity<MatchingCompletedResponse> getMatchingCompleted(@PathVariable("eventId") Long eventId,
+                                                                          HttpServletRequest request) {
+        jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingCompleted(eventId));
     }
 
 }
