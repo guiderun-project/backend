@@ -356,7 +356,11 @@ public class EventService {
 
         //매칭 여부로 파트너 정보 추가
         //신청 여부
-        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateId(eventId, privateId);
+        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                privateId,
+                EventFormStatus.APPLIED
+        );
         if (eventForm != null) {
             //이벤트 신청서가 있을 때.
             apply = true;

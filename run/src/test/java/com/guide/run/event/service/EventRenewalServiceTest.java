@@ -1,5 +1,7 @@
 package com.guide.run.event.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Event;
@@ -7,6 +9,7 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
+import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
@@ -40,6 +43,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -86,6 +90,8 @@ class EventRenewalServiceTest {
 
     @InjectMocks
     private EventService eventService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     @DisplayName("이벤트 생성은 비공개 여부, 예상 거리, 추가 질문을 함께 반영한다")
@@ -373,11 +379,61 @@ class EventRenewalServiceTest {
         assertThat(response.getViewer().isOrganizer()).isFalse();
     }
 
+    @Test
+    @DisplayName("이벤트 팝업 신청 여부는 APPLIED 상태 신청서만 기준으로 판단한다")
+    void eventPopUpUsesAppliedFormForApplyStatus() {
+        User viewer = createUser("viewer-private", "viewer-user", "김철수", UserType.GUIDE);
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+        EventForm appliedForm = EventForm.builder()
+                .eventId(1L)
+                .privateId("viewer-private")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        ReflectionTestUtils.setField(event, "updatedAt", LocalDateTime.now());
+
+        when(userRepository.findUserByPrivateId("viewer-private")).thenReturn(Optional.of(viewer));
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getHHMM(event.getStartTime())).thenReturn("09:00");
+        when(timeFormatter.getHHMM(event.getEndTime())).thenReturn("11:00");
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED))
+                .thenReturn(appliedForm);
+
+        EventPopUpResponse response = eventService.eventPopUp(1L, "viewer-private");
+
+        assertThat(response.getIsApply()).isTrue();
+        verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED);
+        verify(eventFormRepository, never()).findByEventIdAndPrivateId(1L, "viewer-private");
+    }
+
+    @Test
+    @DisplayName("이벤트 상세 응답 boolean 필드는 is 접두사 JSON 키를 유지한다")
+    void eventDetailResponseSerializesBooleanKeysWithIsPrefix() throws Exception {
+        EventDetailResponse response = EventDetailResponse.builder()
+                .isPrivate(true)
+                .viewer(EventDetailResponse.Viewer.builder()
+                        .isApplied(true)
+                        .isOrganizer(false)
+                        .build())
+                .build();
+
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(response));
+
+        assertThat(json.has("isPrivate")).isTrue();
+        assertThat(json.has("private")).isFalse();
+        assertThat(json.get("viewer").has("isApplied")).isTrue();
+        assertThat(json.get("viewer").has("applied")).isFalse();
+        assertThat(json.get("viewer").has("isOrganizer")).isTrue();
+        assertThat(json.get("viewer").has("organizer")).isFalse();
+    }
+
     private Event createEvent(String organizer) {
         return createEvent(organizer, true);
     }
 
     private Event createEvent(String organizer, boolean isPrivate) {
+        LocalDateTime eventDate = LocalDateTime.now().plusDays(3).withHour(9).withMinute(0).withSecond(0).withNano(0);
         return Event.builder()
                 .id(1L)
                 .organizer(organizer)
@@ -388,8 +444,8 @@ class EventRenewalServiceTest {
                 .isPrivate(isPrivate)
                 .isApprove(true)
                 .type(EventType.TRAINING)
-                .startTime(LocalDateTime.of(2026, 6, 20, 9, 0))
-                .endTime(LocalDateTime.of(2026, 6, 20, 11, 0))
+                .startTime(eventDate)
+                .endTime(eventDate.withHour(11))
                 .maxNumV(4)
                 .maxNumG(4)
                 .place("서울")

@@ -1,10 +1,12 @@
 package com.guide.run.event.entity.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.entity.type.UserType;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +26,8 @@ public class EventDetailResponse {
     private EventType eventType;
     private EventCategory eventCategory;
     private EventRecruitStatus recruitStatus;
+    @Getter(AccessLevel.NONE)
+    @JsonProperty("isPrivate")
     private boolean isPrivate;
     private LocalDate recruitStartDate;
     private LocalDate recruitEndDate;
@@ -34,6 +38,11 @@ public class EventDetailResponse {
     private String content;
     private List<AdditionalQuestion> additionalQuestions;
     private Viewer viewer;
+
+    @JsonProperty("isPrivate")
+    public boolean isPrivate() {
+        return isPrivate;
+    }
 
     @Getter
     @NoArgsConstructor
@@ -60,8 +69,22 @@ public class EventDetailResponse {
     @AllArgsConstructor
     @Builder
     public static class Viewer {
+        @Getter(AccessLevel.NONE)
+        @JsonProperty("isApplied")
         private boolean isApplied;
+        @Getter(AccessLevel.NONE)
+        @JsonProperty("isOrganizer")
         private boolean isOrganizer;
+
+        @JsonProperty("isApplied")
+        public boolean isApplied() {
+            return isApplied;
+        }
+
+        @JsonProperty("isOrganizer")
+        public boolean isOrganizer() {
+            return isOrganizer;
+        }
     }
 
     @Getter

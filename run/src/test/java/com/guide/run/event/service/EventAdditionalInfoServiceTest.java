@@ -136,4 +136,50 @@ class EventAdditionalInfoServiceTest {
         verify(answerRepository).deleteAllByEventFormId(55L);
         verify(answerRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("추가답변은 같은 질문에 대해 1개만 저장할 수 있다")
+    void replaceAnswersRejectsDuplicateQuestionId() {
+        assertThatThrownBy(() -> eventAdditionalInfoService.replaceAnswers(
+                1L,
+                55L,
+                List.of(
+                        new EventApplyRequest.AdditionalAnswerRequest(
+                                10L,
+                                AdditionalQuestionType.TEXT,
+                                "첫 번째 답변",
+                                null
+                        ),
+                        new EventApplyRequest.AdditionalAnswerRequest(
+                                10L,
+                                AdditionalQuestionType.TEXT,
+                                "두 번째 답변",
+                                null
+                        )
+                )
+        )).isInstanceOf(EventValidationException.class)
+                .hasMessage("동일한 추가질문에 대한 답변은 1개만 가능합니다.");
+        verify(answerRepository).deleteAllByEventFormId(55L);
+        verify(answerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 추가질문 답변은 검증 예외로 거부한다")
+    void replaceAnswersRejectsMissingQuestionAsValidationError() {
+        when(questionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventAdditionalInfoService.replaceAnswers(
+                1L,
+                55L,
+                List.of(new EventApplyRequest.AdditionalAnswerRequest(
+                        999L,
+                        AdditionalQuestionType.TEXT,
+                        "답변",
+                        null
+                ))
+        )).isInstanceOf(EventValidationException.class)
+                .hasMessage("존재하지 않는 추가질문입니다.");
+        verify(answerRepository).deleteAllByEventFormId(55L);
+        verify(answerRepository, never()).save(any());
+    }
 }

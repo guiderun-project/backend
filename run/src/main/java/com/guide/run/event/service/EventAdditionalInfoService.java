@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -94,9 +96,10 @@ public class EventAdditionalInfoService {
             return;
         }
 
+        validateAnswerQuestionIds(requests);
         for (EventApplyRequest.AdditionalAnswerRequest request : requests) {
             EventAdditionalQuestion question = questionRepository.findById(request.getQuestionId())
-                    .orElseThrow(NotExistEventException::new);
+                    .orElseThrow(() -> new EventValidationException("존재하지 않는 추가질문입니다."));
             validateQuestionBelongsToEvent(eventId, question);
             validateAnswer(question, request);
 
@@ -106,6 +109,15 @@ public class EventAdditionalInfoService {
                     .textAnswer(request.getAnswerText())
                     .optionId(request.getSelectedOptionId())
                     .build());
+        }
+    }
+
+    private void validateAnswerQuestionIds(List<EventApplyRequest.AdditionalAnswerRequest> requests) {
+        Set<Long> seenQuestionIds = new HashSet<>();
+        for (EventApplyRequest.AdditionalAnswerRequest request : requests) {
+            if (!seenQuestionIds.add(request.getQuestionId())) {
+                throw new EventValidationException("동일한 추가질문에 대한 답변은 1개만 가능합니다.");
+            }
         }
     }
 
