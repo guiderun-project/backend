@@ -115,6 +115,14 @@ public class EventMatchingController {
         return ResponseEntity.ok().body("200 ok");
     }
 
+    @Operation(summary = "매칭 대기 참가자 조회", description = "매칭하기 페이지의 매칭 대기 탭. 아직 매칭되지 않은 참가자를 RunningGroup별로 반환합니다.")
+    @GetMapping("{eventId}/matching/waiting")
+    public ResponseEntity<MatchingWaitingResponse> getMatchingWaiting(@PathVariable("eventId") Long eventId,
+                                                                       HttpServletRequest request) {
+        jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingWaiting(eventId));
+    }
+
     @Operation(summary = "매칭 완료 참가자 조회", description = "매칭하기 페이지의 매칭 완료 탭. VI와 매칭된 Guide 배열을 RunningGroup별로 반환합니다.")
     @GetMapping("{eventId}/matching/completed")
     public ResponseEntity<MatchingCompletedResponse> getMatchingCompleted(@PathVariable("eventId") Long eventId,

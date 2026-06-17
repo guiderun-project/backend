@@ -258,6 +258,48 @@ public class EventMatchingService {
                 .build();
     }
 
+    public MatchingWaitingResponse getMatchingWaiting(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+
+        List<MatchingWaitingFlatDto> flatList = unMatchingRepository.findWaitingParticipants(eventId);
+
+        int viCount = (int) flatList.stream().filter(f -> f.getType() == UserType.VI).count();
+        int guideCount = (int) flatList.stream().filter(f -> f.getType() == UserType.GUIDE).count();
+
+        LinkedHashMap<String, List<MatchingWaitingParticipant>> groupMap = new LinkedHashMap<>();
+        for (MatchingWaitingFlatDto flat : flatList) {
+            String runningGroup = flat.getHopeTeam() != null ? flat.getHopeTeam() : "";
+            MatchingWaitingParticipant participant = MatchingWaitingParticipant.builder()
+                    .userId(flat.getUserId())
+                    .name(flat.getName())
+                    .type(flat.getType())
+                    .originalRunningGroup(flat.getHopeTeam())
+                    .isFirstParticipation(flat.getTrainingCnt() == 0 && flat.getCompetitionCnt() == 0)
+                    .hopePartner(flat.getHopePartner())
+                    .additionalComment(flat.getReferContent())
+                    .additionalAnswers(Collections.emptyList())
+                    .build();
+            groupMap.computeIfAbsent(runningGroup, k -> new ArrayList<>()).add(participant);
+        }
+
+        List<MatchingWaitingGroup> groups = groupMap.entrySet().stream()
+                .map(e -> MatchingWaitingGroup.builder()
+                        .runningGroup(e.getKey())
+                        .totalCount(e.getValue().size())
+                        .participants(e.getValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MatchingWaitingResponse.builder()
+                .summary(MatchingWaitingResponse.Summary.builder()
+                        .waitingCount(flatList.size())
+                        .viCount(viCount)
+                        .guideCount(guideCount)
+                        .build())
+                .groups(groups)
+                .build();
+    }
+
     public MatchingCompletedResponse getMatchingCompleted(Long eventId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
