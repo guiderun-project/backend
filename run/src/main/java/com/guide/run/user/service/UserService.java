@@ -115,6 +115,10 @@ public class UserService {
         }
     }
 
+    public User findByPrivateId(String privateId) {
+        return userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+    }
+
     //일반 로그인
     public String generalLogin(String accountId, String password){
         SignUpInfo info = signUpInfoRepository.findByAccountId(accountId).orElseThrow(NotValidAccountIdException::new);
