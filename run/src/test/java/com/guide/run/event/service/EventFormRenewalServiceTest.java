@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +68,7 @@ class EventFormRenewalServiceTest {
     @Test
     @DisplayName("대회 신청서 생성은 대회 정보와 추가답변을 함께 저장한다")
     void createCompetitionFormStoresCompetitionInfoAndAdditionalAnswers() {
-        Event event = createEvent(EventType.COMPETITION);
+        Event event = createEvent(EventType.COMPETITION, new BigDecimal("7.50"));
         User user = createUser("user-private", UserType.VI);
         EventApplyRequest request = createApplyRequest();
 
@@ -90,6 +91,7 @@ class EventFormRenewalServiceTest {
                     .referContent(form.getReferContent())
                     .isMatching(form.isMatching())
                     .eventCategory(form.getEventCategory())
+                    .runningDistanceKm(form.getRunningDistanceKm())
                     .birthDate(form.getBirthDate())
                     .phoneNumber(form.getPhoneNumber())
                     .status(form.getStatus())
@@ -105,6 +107,7 @@ class EventFormRenewalServiceTest {
         assertThat(savedForm.getHopeTeam()).isEqualTo("A");
         assertThat(savedForm.getHopePartner()).isEqualTo("김가이드");
         assertThat(savedForm.getReferContent()).isEqualTo("대회 참가");
+        assertThat(savedForm.getRunningDistanceKm()).isEqualByComparingTo("7.50");
         assertThat(savedForm.getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
         assertThat(savedForm.getPhoneNumber()).isEqualTo("010-1234-5678");
         assertThat(formId).isEqualTo(55L);
@@ -139,6 +142,9 @@ class EventFormRenewalServiceTest {
 
         Long formId = eventFormService.createForm(request, 1L, "user-private");
 
+        ArgumentCaptor<EventForm> formCaptor = ArgumentCaptor.forClass(EventForm.class);
+        verify(eventFormRepository).save(formCaptor.capture());
+        assertThat(formCaptor.getValue().getRunningDistanceKm()).isNull();
         assertThat(formId).isEqualTo(55L);
         verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
     }
@@ -443,12 +449,17 @@ class EventFormRenewalServiceTest {
     }
 
     private Event createEvent(EventType eventType) {
+        return createEvent(eventType, null);
+    }
+
+    private Event createEvent(EventType eventType, BigDecimal expectedRunningDistanceKm) {
         return Event.builder()
                 .id(1L)
                 .name("상계천천히달리기")
                 .type(eventType)
                 .recruitStatus(EventRecruitStatus.RECRUIT_OPEN)
                 .eventCategory(EventCategory.GENERAL)
+                .expectedRunningDistanceKm(expectedRunningDistanceKm)
                 .build();
     }
 

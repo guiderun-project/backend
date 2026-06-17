@@ -72,6 +72,10 @@ public class EventForm extends BaseEntity {
         this.phoneNumber = phoneNumber;
     }
 
+    public void updateRunningDistanceKm(BigDecimal runningDistanceKm) {
+        this.runningDistanceKm = runningDistanceKm;
+    }
+
     public void cancel(LocalDateTime canceledAt) {
         this.status = EventFormStatus.CANCELED;
         this.canceledAt = canceledAt;

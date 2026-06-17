@@ -98,6 +98,7 @@ public class EventFormService {
                         .referContent(createForm.getDetail())
                         .isMatching(false)
                         .eventCategory(event.getEventCategory())
+                        .runningDistanceKm(event.getExpectedRunningDistanceKm())
                         .birthDate(getBirthDate(createForm))
                         .phoneNumber(getPhoneNumber(createForm))
                         .status(EventFormStatus.APPLIED)

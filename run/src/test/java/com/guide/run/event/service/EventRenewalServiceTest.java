@@ -29,6 +29,7 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.global.exception.event.logic.EventValidationException;
+import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
@@ -43,6 +44,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -138,6 +140,9 @@ class EventRenewalServiceTest {
         assertThat(savedEvent.isPrivate()).isTrue();
         assertThat(savedEvent.getExpectedRunningDistanceKm()).isEqualByComparingTo("7.50");
         assertThat(response.getEventId()).isEqualTo(99L);
+        ArgumentCaptor<EventForm> formCaptor = ArgumentCaptor.forClass(EventForm.class);
+        verify(eventFormRepository).save(formCaptor.capture());
+        assertThat(formCaptor.getValue().getRunningDistanceKm()).isEqualByComparingTo("7.50");
         verify(eventAdditionalInfoService).replaceQuestions(99L, additionalQuestions);
     }
 
@@ -193,6 +198,47 @@ class EventRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("이벤트 수정은 예상 거리가 변경되면 미입력 신청서만 새 예상 거리로 동기화한다")
+    void eventUpdateSyncsOnlyMissingFormRunningDistancesWhenExpectedDistanceChanges() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+        EventForm nullDistanceForm = EventForm.builder()
+                .id(1L)
+                .eventId(99L)
+                .privateId("vi-private")
+                .status(EventFormStatus.APPLIED)
+                .runningDistanceKm(null)
+                .build();
+        EventForm zeroDistanceForm = EventForm.builder()
+                .id(2L)
+                .eventId(99L)
+                .privateId("guide-private")
+                .status(EventFormStatus.APPLIED)
+                .runningDistanceKm(BigDecimal.ZERO)
+                .build();
+        EventCreateRequest request = createEventRequest(false, new BigDecimal("9.20"), null);
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.findById(99L)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(eventFormRepository.findAllMissingRunningDistanceForms(
+                99L,
+                EventFormStatus.APPLIED,
+                BigDecimal.ZERO
+        )).thenReturn(List.of(nullDistanceForm, zeroDistanceForm));
+
+        eventService.eventUpdate(request, "organizer-private", 99L);
+
+        assertThat(nullDistanceForm.getRunningDistanceKm()).isEqualByComparingTo("9.20");
+        assertThat(zeroDistanceForm.getRunningDistanceKm()).isEqualByComparingTo("9.20");
+        verify(eventFormRepository).saveAll(List.of(nullDistanceForm, zeroDistanceForm));
+    }
+
+    @Test
     @DisplayName("이벤트 수정은 신청자가 있으면 추가 질문 변경을 거부한다")
     void eventUpdateRejectsAdditionalQuestionsWhenAppliedFormExists() {
         User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
@@ -232,15 +278,18 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("러닝 거리 미입력 이벤트 조회는 내가 주최한 종료 이벤트만 반환한다")
-    void getMissingRunningDistanceReturnsOrganizerEndedEvents() {
+    @DisplayName("러닝 거리 미입력 이벤트 조회는 내가 참여한 종료 이벤트 중 최신 1개를 반환한다")
+    void getMissingRunningDistanceReturnsLatestParticipatedEndedEvent() {
         Event missingDistanceEvent = createEndedEventWithoutExpectedDistance(10L, "상계천천히달리기");
-        when(eventRepository.findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNull(
-                eq("organizer-private"),
-                any(LocalDateTime.class)
+        when(eventFormRepository.findLatestMissingRunningDistanceEvents(
+                eq("participant-private"),
+                eq(EventFormStatus.APPLIED),
+                any(LocalDateTime.class),
+                eq(BigDecimal.ZERO),
+                any(Pageable.class)
         )).thenReturn(List.of(missingDistanceEvent));
 
-        MissingRunningDistanceGetResponse response = eventService.getMissingRunningDistance("organizer-private");
+        MissingRunningDistanceGetResponse response = eventService.getMissingRunningDistance("participant-private");
 
         assertThat(response.getItems()).hasSize(1);
         MissingRunningDistanceGetResponse.Item item = response.getItems().get(0);
@@ -250,23 +299,37 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("러닝 거리 등록은 주최자만 예상 거리를 갱신한다")
-    void patchRunningDistanceUpdatesExpectedDistanceByOrganizer() {
+    @DisplayName("러닝 거리 등록은 현재 사용자의 신청서 거리만 갱신한다")
+    void patchRunningDistanceUpdatesAppliedFormDistance() {
         Event event = createEndedEventWithoutExpectedDistance(1L, "상계천천히달리기");
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .eventId(1L)
+                .privateId("participant-private")
+                .status(EventFormStatus.APPLIED)
+                .runningDistanceKm(null)
+                .build();
         BigDecimal distance = new BigDecimal("8.25");
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                1L,
+                "participant-private",
+                EventFormStatus.APPLIED
+        )).thenReturn(form);
 
         EventRunningDistancePatchResponse response = eventService.patchRunningDistance(
                 1L,
-                "organizer-private",
+                "participant-private",
                 distance
         );
 
-        assertThat(event.getExpectedRunningDistanceKm()).isEqualByComparingTo("8.25");
+        assertThat(event.getExpectedRunningDistanceKm()).isNull();
+        assertThat(form.getRunningDistanceKm()).isEqualByComparingTo("8.25");
         assertThat(response.getEventId()).isEqualTo(1L);
         assertThat(response.getExpectedRunningDistanceKm()).isEqualByComparingTo("8.25");
-        verify(eventRepository).save(event);
+        verify(eventFormRepository).save(form);
+        verify(eventRepository, never()).save(event);
     }
 
     @Test
@@ -302,18 +365,23 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("러닝 거리 등록은 주최자가 아니면 거부한다")
-    void patchRunningDistanceRejectsNonOrganizer() {
-        Event event = createEvent("organizer-private");
+    @DisplayName("러닝 거리 등록은 현재 사용자의 APPLIED 신청서가 없으면 거부한다")
+    void patchRunningDistanceRejectsMissingAppliedForm() {
+        Event event = createEndedEventWithoutExpectedDistance(1L, "상계천천히달리기");
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                1L,
+                "participant-private",
+                EventFormStatus.APPLIED
+        )).thenReturn(null);
 
         assertThatThrownBy(() -> eventService.patchRunningDistance(
                 1L,
-                "other-private",
+                "participant-private",
                 new BigDecimal("8.25")
-        )).isInstanceOf(NotEventOrganizerException.class);
-        verify(eventRepository, never()).save(any(Event.class));
+        )).isInstanceOf(NotExistEventException.class);
+        verify(eventFormRepository, never()).save(any(EventForm.class));
     }
 
     @Test
