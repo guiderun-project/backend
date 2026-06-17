@@ -43,6 +43,15 @@ public class EventMatchingController {
         eventMatchingService.matchUser(eventId,viId,userId);
         return ResponseEntity.ok().body("200 ok");
     }
+    @Operation(summary = "VI 매칭 전체 취소", description = "매칭하기 페이지에서 특정 VI에 연결된 모든 Guide 매칭을 한 번에 취소합니다.")
+    @DeleteMapping("{eventId}/matching/{viId}")
+    public ResponseEntity<MatchingCancelResponse> cancelMatching(@PathVariable("eventId") Long eventId,
+                                                                 @PathVariable("viId") String viId,
+                                                                 HttpServletRequest request) {
+        jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.cancelMatching(eventId, viId));
+    }
+
     @Operation(summary = "매칭 취소", description = "이벤트 상세의 매칭 패널에서 특정 사용자 매칭을 해제합니다.")
     @DeleteMapping("{eventId}/match/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable("eventId") Long eventId,

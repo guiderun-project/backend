@@ -120,6 +120,47 @@ public class EventMatchingService {
     }
 
     @Transactional
+    public MatchingCancelResponse cancelMatching(Long eventId, String viId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
+        String viPrivateId = vi.getPrivateId();
+
+        List<Matching> allMatching = matchingRepository.findAllByEventIdAndViId(eventId, viPrivateId);
+        partnerService.setNotAttendViPartnerList(eventId, vi);
+
+        List<String> canceledGuideIds = new ArrayList<>();
+        for (Matching m : allMatching) {
+            User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
+            canceledGuideIds.add(guide.getUserId());
+            matchingRepository.delete(m);
+            unMatchingRepository.save(UnMatching.builder()
+                    .privateId(m.getGuideId())
+                    .eventId(eventId)
+                    .build());
+        }
+
+        unMatchingRepository.save(UnMatching.builder()
+                .privateId(viPrivateId)
+                .eventId(eventId)
+                .build());
+
+        int waitingCount = (int) (unMatchingRepository.getUserTypeCount(eventId, UserType.VI)
+                + unMatchingRepository.getUserTypeCount(eventId, UserType.GUIDE));
+        int completedViCount = matchingRepository.findAllMatchedViByEventIdAndUserType(eventId, UserType.VI).size();
+        int matchedGuideCount = matchingRepository.findAllByEventId(eventId).size();
+
+        return MatchingCancelResponse.builder()
+                .viId(viId)
+                .canceledGuideIds(canceledGuideIds)
+                .summary(MatchingCancelResponse.Summary.builder()
+                        .waitingCount(waitingCount)
+                        .completedViCount(completedViCount)
+                        .matchedGuideCount(matchedGuideCount)
+                        .build())
+                .build();
+    }
+
+    @Transactional
     public void deleteMatchUser(Long eventId, String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
