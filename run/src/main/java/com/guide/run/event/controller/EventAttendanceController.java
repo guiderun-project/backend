@@ -4,7 +4,6 @@ package com.guide.run.event.controller;
 import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
-import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
 import com.guide.run.event.service.EventAttendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -48,11 +47,5 @@ public class EventAttendanceController {
     public ResponseEntity<ParticipationCount> getParticipationCount(@PathVariable("eventId") Long eventId,
                                                                     HttpServletRequest request){
         return ResponseEntity.ok().body(eventAttendService.getParticipationCount(eventId));
-    }
-    @Operation(summary = "이벤트 신청 현황 목록 조회", description = "이벤트 상세의 출석 패널에서 출석 완료/미완료 신청자 목록을 조회합니다.")
-    @GetMapping("/{eventId}/forms")
-    public ResponseEntity<ParticipationInfos> getParticipationInfos(@PathVariable("eventId") Long eventId,
-                                                                    HttpServletRequest request){
-        return ResponseEntity.ok().body(eventAttendService.getParticipationInfos(eventId));
     }
 }

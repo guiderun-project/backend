@@ -10,8 +10,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class UserServiceTest {
     @Autowired
     UserService userService;
@@ -28,24 +30,25 @@ class UserServiceTest {
     void existUserLoginResponse() {
         User user = User.builder()
                 .userId(userService.getUUID())
-                .userId("kakao_1")
+                .privateId("kakao_1")
+                .phoneNumber("01000000000")
                 .role(Role.ROLE_USER)
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_USER.getValue());
+        Assertions.assertThat(userStatus).isEqualTo("1");
     }
 
-    @DisplayName("로그인 시 가입 대기중 회원 응답")
+    @DisplayName("로그인 시 가입 미완료 회원 응답")
     @Test
     void waitUserLoginResponse() {
         User user = User.builder()
                 .userId(userService.getUUID())
-                .userId("kakao_1")
+                .privateId("kakao_1")
                 .role(Role.ROLE_WAIT)
                 .build();
         userRepository.save(user);
         String userStatus = userService.getUserStatus("kakao_1");
-        Assertions.assertThat(userStatus).isEqualTo(Role.ROLE_WAIT.getValue());
+        Assertions.assertThat(userStatus).isEqualTo("0");
     }
 }

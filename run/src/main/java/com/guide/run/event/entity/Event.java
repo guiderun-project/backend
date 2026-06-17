@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -55,6 +56,8 @@ public class Event extends BaseEntity {
     private CityName cityName; //이벤트 지역
 
     private Double distance; //러닝 거리 (km)
+    private boolean isPrivate;
+    private BigDecimal expectedRunningDistanceKm;
 
 
     public void closeEvent(){
@@ -81,5 +84,9 @@ public class Event extends BaseEntity {
     public void countAttendGAndV(int guideCnt, int viCnt) {
         this.guideCnt = guideCnt;
         this.viCnt = viCnt;
+    }
+
+    public void updateExpectedRunningDistanceKm(BigDecimal expectedRunningDistanceKm) {
+        this.expectedRunningDistanceKm = expectedRunningDistanceKm;
     }
 }
