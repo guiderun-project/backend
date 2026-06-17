@@ -1,6 +1,7 @@
 package com.guide.run.event.service;
 
 import com.guide.run.attendance.service.AttendService;
+import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
@@ -63,6 +64,37 @@ public class EventAttendService {
         //출석 개수 반영
         attendService.countAttendEvent(user.getPrivateId());
 
+    }
+
+    public AttendanceCancelResponse cancelAttend(Long eventId, String userId) {
+        User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
+        Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
+
+        if (attendance != null && attendance.isAttend()) {
+            if (user.getType().equals(UserType.VI)) {
+                partnerService.setNotAttendViPartnerList(eventId, user);
+            } else if (user.getType().equals(UserType.GUIDE)) {
+                partnerService.setNotAttendGuidePartner(eventId, user);
+            }
+            attendanceRepository.save(
+                    Attendance.builder()
+                            .eventId(eventId)
+                            .privateId(user.getPrivateId())
+                            .isAttend(false)
+                            .date(LocalDateTime.now())
+                            .build()
+            );
+            attendService.countAttendEvent(user.getPrivateId());
+        }
+
+        return AttendanceCancelResponse.builder()
+                .userId(userId)
+                .isAttended(false)
+                .summary(AttendanceCancelResponse.Summary.builder()
+                        .waitingCount(attendanceRepository.countByIsAttendAndEventId(false, eventId))
+                        .attendedCount(attendanceRepository.countByIsAttendAndEventId(true, eventId))
+                        .build())
+                .build();
     }
 
     public AttendCount getAttendCount(Long eventId) {
