@@ -46,3 +46,6 @@ out/
 ## DB info (sensitive)
 db_info.txt
 db_schema_issues.txt
+
+## Internal work documents
+미구현_API_목록.md
