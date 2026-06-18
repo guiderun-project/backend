@@ -10,11 +10,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Entity
 @Getter
 @NoArgsConstructor
@@ -56,9 +58,15 @@ public class EventForm extends BaseEntity {
     private LocalDate birthDate;
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private EventFormStatus status = EventFormStatus.APPLIED;
+    private EventFormStatus status;
     private LocalDateTime canceledAt;
+
+    @PrePersist
+    protected void prePersist() {
+        if (this.status == null) {
+            this.status = EventFormStatus.APPLIED;
+        }
+    }
 
     public void setform(String hopeTeam,String hopePartner,String referContent,EventCategory eventCategory) {
         this.hopeTeam = hopeTeam;
