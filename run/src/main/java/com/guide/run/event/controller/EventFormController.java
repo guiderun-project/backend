@@ -4,6 +4,7 @@ import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.CreatedForm;
 import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
 import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
+import com.guide.run.event.entity.dto.response.form.EventCanceledApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.service.EventFormService;
@@ -68,6 +69,15 @@ public class EventFormController {
                                                                        HttpServletRequest request) {
         String privateId = jwtProvider.extractUserId(request);
         return ResponseEntity.ok(eventFormService.getApplicantForm(eventId, userId, privateId));
+    }
+
+    @Operation(summary = "이벤트 신청 취소자 명단 조회", description = "이벤트 신청을 취소한 참가자 명단을 조회합니다.")
+    @GetMapping("/{eventId}/forms/canceled")
+    public ResponseEntity<EventCanceledApplicantListResponse> getCanceledApplicantForms(
+            @PathVariable("eventId") Long eventId,
+            HttpServletRequest request) {
+        jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(eventFormService.getCanceledApplicantForms(eventId));
     }
 
     @Operation(summary = "이벤트 전체 신청자 상세 조회", description = "이벤트 상세 화면의 신청자 패널에서 VI/Guide 신청자 목록을 함께 조회합니다.")

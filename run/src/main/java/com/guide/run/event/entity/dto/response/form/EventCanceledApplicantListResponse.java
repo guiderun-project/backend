@@ -1,21 +1,21 @@
 package com.guide.run.event.entity.dto.response.form;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EventApplicantListResponse {
+public class EventCanceledApplicantListResponse {
     private Summary summary;
-    private List<EventApplicantGroup> groups;
+    private List<CanceledApplicant> canceledApplicants;
 
     @Getter
     @NoArgsConstructor
@@ -31,21 +31,10 @@ public class EventApplicantListResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class EventApplicantGroup {
-        private String runningGroup;
-        private long totalCount;
-        private List<EventApplicant> applicants;
-    }
-
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class EventApplicant {
+    public static class CanceledApplicant {
         private String userId;
         private String name;
         private UserType type;
-        @JsonProperty("isFirstParticipation")
-        private Boolean isFirstParticipation;
+        private LocalDateTime canceledAt;
     }
 }

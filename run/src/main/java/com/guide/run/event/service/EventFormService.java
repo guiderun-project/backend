@@ -6,6 +6,7 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
 import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
+import com.guide.run.event.entity.dto.response.form.EventCanceledApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
@@ -225,6 +226,37 @@ public class EventFormService {
                         .additionalComment(form.getReferContent())
                         .build())
                 .additionalAnswers(toApplicantAdditionalAnswers(form.getId()))
+                .build();
+    }
+
+    public EventCanceledApplicantListResponse getCanceledApplicantForms(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        List<EventForm> canceledForms = eventFormRepository.findAllByEventIdAndStatus(eventId, EventFormStatus.CANCELED);
+
+        List<EventCanceledApplicantListResponse.CanceledApplicant> applicants = canceledForms.stream()
+                .map(form -> {
+                    User user = userRepository.findUserByPrivateId(form.getPrivateId()).orElse(null);
+                    if (user == null) return null;
+                    return EventCanceledApplicantListResponse.CanceledApplicant.builder()
+                            .userId(user.getUserId())
+                            .name(user.getName())
+                            .type(user.getType())
+                            .canceledAt(form.getCanceledAt())
+                            .build();
+                })
+                .filter(a -> a != null)
+                .toList();
+
+        long viCount = applicants.stream().filter(a -> a.getType() == UserType.VI).count();
+        long guideCount = applicants.stream().filter(a -> a.getType() == UserType.GUIDE).count();
+
+        return EventCanceledApplicantListResponse.builder()
+                .summary(EventCanceledApplicantListResponse.Summary.builder()
+                        .totalCount(applicants.size())
+                        .viCount(viCount)
+                        .guideCount(guideCount)
+                        .build())
+                .canceledApplicants(applicants)
                 .build();
     }
 
