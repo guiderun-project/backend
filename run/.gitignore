@@ -49,3 +49,6 @@ db_schema_issues.txt
 
 ## Internal work documents
 미구현_API_목록.md
+
+## API test files (local only, contains tokens)
+http-tests/
