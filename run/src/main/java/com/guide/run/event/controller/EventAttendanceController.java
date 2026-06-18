@@ -2,6 +2,7 @@ package com.guide.run.event.controller;
 
 
 import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
+import com.guide.run.event.entity.dto.response.attend.AttendanceUpdateResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.service.EventAttendService;
@@ -20,6 +21,14 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class EventAttendanceController {
     private final EventAttendService eventAttendService;
+    @Operation(summary = "출석 처리", description = "참가자를 출석 완료 상태로 설정합니다. 이미 출석 상태이면 현재 summary만 반환합니다.")
+    @PostMapping("/{eventId}/attendance/{userId}")
+    public ResponseEntity<AttendanceUpdateResponse> confirmAttend(@PathVariable("eventId") Long eventId,
+                                                                  @PathVariable("userId") String userId,
+                                                                  HttpServletRequest request) {
+        return ResponseEntity.ok().body(eventAttendService.confirmAttend(eventId, userId));
+    }
+
     @Operation(summary = "출석 취소", description = "출석 완료 참가자를 출석 대기 상태로 되돌립니다. 이미 미출석 상태이면 현재 summary만 반환합니다.")
     @DeleteMapping("/{eventId}/attendance/{userId}")
     public ResponseEntity<AttendanceCancelResponse> cancelAttend(@PathVariable("eventId") Long eventId,
