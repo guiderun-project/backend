@@ -2,8 +2,10 @@ package com.guide.run.event.service;
 
 import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
+import com.guide.run.event.entity.dto.response.attend.AttendanceParticipant;
 import com.guide.run.event.entity.dto.response.attend.AttendanceUpdateResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
+import com.guide.run.event.entity.dto.response.attend.EventAttendanceResponse;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -143,6 +146,19 @@ public class EventAttendService {
                 .count(guideNum+ViNum)
                 .vi(ViNum)
                 .guide(guideNum)
+                .build();
+    }
+
+    public EventAttendanceResponse getEventAttendance(Long eventId) {
+        List<AttendanceParticipant> waiting = attendanceRepository.findAttendanceParticipants(eventId, false);
+        List<AttendanceParticipant> attended = attendanceRepository.findAttendanceParticipants(eventId, true);
+        return EventAttendanceResponse.builder()
+                .summary(EventAttendanceResponse.Summary.builder()
+                        .waitingCount(waiting.size())
+                        .attendedCount(attended.size())
+                        .build())
+                .waiting(waiting)
+                .attended(attended)
                 .build();
     }
 
