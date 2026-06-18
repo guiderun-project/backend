@@ -5,6 +5,7 @@ import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendanceParticipant;
 import com.guide.run.event.entity.dto.response.attend.AttendanceUpdateResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendCount;
+import com.guide.run.event.entity.dto.response.attend.AttendedGuideListResponse;
 import com.guide.run.event.entity.dto.response.attend.EventAttendanceResponse;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
@@ -167,6 +168,21 @@ public class EventAttendService {
                 .attend(attendanceRepository.getParticipationInfo(eventId,true))
                 .notAttend(attendanceRepository.getParticipationInfo(eventId,false))
                 .build();
+    }
+
+    public AttendedGuideListResponse getAttendedGuides(Long eventId) {
+        List<AttendedGuideListResponse.AttendedGuide> guides = attendanceRepository
+                .findAllByEventIdAndIsAttend(eventId, true)
+                .stream()
+                .map(attendance -> userRepository.findUserByPrivateId(attendance.getPrivateId()).orElse(null))
+                .filter(user -> user != null && UserType.GUIDE.equals(user.getType()))
+                .map(user -> AttendedGuideListResponse.AttendedGuide.builder()
+                        .name(user.getName())
+                        .birthDate(user.getBirth())
+                        .id1365(user.getId1365())
+                        .build())
+                .toList();
+        return AttendedGuideListResponse.builder().items(guides).build();
     }
 
 }
