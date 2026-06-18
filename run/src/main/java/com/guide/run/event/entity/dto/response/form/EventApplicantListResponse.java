@@ -45,7 +45,6 @@ public class EventApplicantListResponse {
         private String userId;
         private String name;
         private UserType type;
-        @JsonProperty("isFirstParticipation")
-        private Boolean isFirstParticipation;
+        private boolean isFirstParticipation;
     }
 }
