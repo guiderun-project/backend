@@ -42,3 +42,7 @@ out/
 
 ## Environment files
 .env
+
+## DB info (sensitive)
+db_info.txt
+db_schema_issues.txt
