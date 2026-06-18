@@ -52,3 +52,6 @@ db_schema_issues.txt
 
 ## API test files (local only, contains tokens)
 http-tests/
+
+## 에러 확인 안내 문서 (로컬 전용)
+에러_확인_방법.txt
