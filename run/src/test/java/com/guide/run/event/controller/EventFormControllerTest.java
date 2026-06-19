@@ -22,4 +22,17 @@ class EventFormControllerTest {
 
         assertThat(hasLegacyMapping).isFalse();
     }
+
+    @Test
+    @DisplayName("러닝 거리 스킵 API는 이벤트 컨트롤러에 PATCH로 노출한다")
+    void runningDistanceSkipEndpointIsExposed() {
+        boolean hasSkipMapping = Arrays.stream(EventController.class.getDeclaredMethods())
+                .map(method -> method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class))
+                .filter(mapping -> mapping != null)
+                .map(org.springframework.web.bind.annotation.PatchMapping::value)
+                .flatMap(Arrays::stream)
+                .anyMatch("/{eventId}/running-distance/skip"::equals);
+
+        assertThat(hasSkipMapping).isTrue();
+    }
 }
