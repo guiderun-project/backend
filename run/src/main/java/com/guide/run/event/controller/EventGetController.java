@@ -5,6 +5,7 @@ import com.guide.run.event.entity.dto.response.get.AllEventResponse;
 import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.entity.dto.response.get.EventsSummaryGetResponse;
 import com.guide.run.event.entity.dto.response.get.MyEventResponse;
+import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -37,6 +38,16 @@ import static com.guide.run.event.entity.type.EventType.*;
 public class EventGetController {
     private final JwtProvider jwtProvider;
     private final EventGetService eventGetService;
+
+    @Operation(summary = "다가오는 이벤트 목록 조회", description = "메인/홈 화면에서 모집 중이거나 모집 예정인 가까운 이벤트 목록을 최대 10건 조회합니다. isApply는 로그인 사용자의 신청 여부를 나타냅니다.")
+    @GetMapping("/upcoming")
+    public ResponseEntity<UpcomingEventResponse> getUpcomingEvents(
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            HttpServletRequest request) {
+        String userId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(eventGetService.getUpcomingEvents(page, userId));
+    }
 
     @Operation(summary = "이벤트 요약 조회", description = "메인페이지 상단 요약. 비회원은 올해 전체 이벤트 수와 거리, 회원은 개인 누적 참여 수와 거리도 조회합니다.")
     @GetMapping("/summary")

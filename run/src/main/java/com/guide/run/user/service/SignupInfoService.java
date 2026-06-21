@@ -282,7 +282,8 @@ public class SignupInfoService {
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(String privateId) {
         User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
-        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        // ArchiveData가 없는 사용자(소셜 로그인 초기 상태)도 마이페이지 조회 가능하도록 null 허용
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElse(null);
         String accountId = signUpInfoRepository.findById(privateId).map(s -> s.getAccountId()).orElse(null);
 
         MyPageResponse.Profile profile = MyPageResponse.Profile.builder()
@@ -310,7 +311,7 @@ public class SignupInfoService {
                 .type(user.getType() != null ? user.getType().name() : null)
                 .recordDegree(user.getRecordDegree())
                 .detailRecord(user.getDetailRecord())
-                .hopePrefs(archiveData.getHopePrefs())
+                .hopePrefs(archiveData != null ? archiveData.getHopePrefs() : null)
                 .build();
 
         return MyPageResponse.builder()

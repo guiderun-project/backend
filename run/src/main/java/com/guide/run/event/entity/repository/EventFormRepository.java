@@ -27,6 +27,8 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
 
     long countByPrivateId(String privateId);
 
+    List<EventForm> findAllByPrivateIdAndEventIdIn(String privateId, List<Long> eventIds);
+
     @Query("""
             select event
             from EventForm form, Event event
