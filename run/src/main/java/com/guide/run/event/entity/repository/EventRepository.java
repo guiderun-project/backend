@@ -38,4 +38,10 @@ public interface EventRepository extends JpaRepository<Event,Long>, EventReposit
             LocalDateTime now
     );
 
+    List<Event> findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
+            String organizer,
+            LocalDateTime now,
+            Pageable pageable
+    );
+
 }

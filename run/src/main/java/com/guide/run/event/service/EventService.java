@@ -197,10 +197,6 @@ public class EventService {
 
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         if (event.getOrganizer().equals(privateId)) {
-            boolean expectedRunningDistanceChanged = isExpectedRunningDistanceChanged(
-                    event.getExpectedRunningDistanceKm(),
-                    request.getExpectedRunningDistanceKm()
-            );
             if (request.getAdditionalQuestions() != null) {
                 long appliedCount = eventFormRepository.countByEventIdAndStatus(eventId, EventFormStatus.APPLIED);
                 if (appliedCount > 0) {
@@ -232,9 +228,6 @@ public class EventService {
 
             if (request.getAdditionalQuestions() != null) {
                 eventAdditionalInfoService.replaceQuestions(eventId, request.getAdditionalQuestions());
-            }
-            if (expectedRunningDistanceChanged && request.getExpectedRunningDistanceKm() != null) {
-                syncMissingFormRunningDistances(eventId, request.getExpectedRunningDistanceKm());
             }
 
             return EventUpdatedResponse.builder()
@@ -427,12 +420,10 @@ public class EventService {
     }
 
     public MissingRunningDistanceGetResponse getMissingRunningDistance(String privateId) {
-        List<MissingRunningDistanceGetResponse.Item> items = eventFormRepository
-                .findLatestMissingRunningDistanceEvents(
+        List<MissingRunningDistanceGetResponse.Item> items = eventRepository
+                .findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
                         privateId,
-                        EventFormStatus.APPLIED,
                         LocalDateTime.now(),
-                        BigDecimal.ZERO,
                         PageRequest.of(0, 1)
                 )
                 .stream()
@@ -451,27 +442,33 @@ public class EventService {
     @Transactional
     public EventRunningDistancePatchResponse patchRunningDistance(Long eventId, String privateId, BigDecimal distance) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if (event.getEndTime().isAfter(LocalDateTime.now()) || event.getEndTime().isEqual(LocalDateTime.now())) {
-            throw new EventValidationException("종료된 이벤트만 러닝 거리를 등록할 수 있습니다.");
-        }
         if (distance == null || distance.compareTo(BigDecimal.ZERO) <= 0) {
             throw new EventValidationException("러닝 거리는 0보다 커야 합니다.");
         }
-        EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
-                eventId,
-                privateId,
-                EventFormStatus.APPLIED
-        );
-        if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        return updateRunningDistance(event, privateId, distance);
+    }
+
+    @Transactional
+    public EventRunningDistancePatchResponse skipRunningDistance(Long eventId, String privateId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        return updateRunningDistance(event, privateId, BigDecimal.ZERO);
+    }
+
+    private EventRunningDistancePatchResponse updateRunningDistance(Event event, String privateId, BigDecimal distance) {
+        if (!event.getOrganizer().equals(privateId)) {
+            throw new NotEventOrganizerException();
+        }
+        if (event.getEndTime().isAfter(LocalDateTime.now()) || event.getEndTime().isEqual(LocalDateTime.now())) {
+            throw new EventValidationException("종료된 이벤트만 러닝 거리를 등록할 수 있습니다.");
         }
 
-        form.updateRunningDistanceKm(distance);
-        eventFormRepository.save(form);
+        event.updateExpectedRunningDistanceKm(distance);
+        eventRepository.save(event);
+        syncAppliedFormRunningDistances(event.getId(), distance);
 
         return EventRunningDistancePatchResponse.builder()
                 .eventId(event.getId())
-                .expectedRunningDistanceKm(form.getRunningDistanceKm())
+                .expectedRunningDistanceKm(event.getExpectedRunningDistanceKm())
                 .build();
     }
 
@@ -528,24 +525,10 @@ public class EventService {
                 + startTime.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN) + ")";
     }
 
-    private boolean isExpectedRunningDistanceChanged(BigDecimal before, BigDecimal after) {
-        if (before == null && after == null) {
-            return false;
-        }
-        if (before == null || after == null) {
-            return true;
-        }
-        return before.compareTo(after) != 0;
-    }
-
-    private void syncMissingFormRunningDistances(Long eventId, BigDecimal expectedRunningDistanceKm) {
-        List<EventForm> forms = eventFormRepository.findAllMissingRunningDistanceForms(
-                eventId,
-                EventFormStatus.APPLIED,
-                BigDecimal.ZERO
-        );
+    private void syncAppliedFormRunningDistances(Long eventId, BigDecimal runningDistanceKm) {
+        List<EventForm> forms = eventFormRepository.findAllByEventIdAndStatus(eventId, EventFormStatus.APPLIED);
         for (EventForm form : forms) {
-            form.updateRunningDistanceKm(expectedRunningDistanceKm);
+            form.updateRunningDistanceKm(runningDistanceKm);
         }
         eventFormRepository.saveAll(forms);
     }

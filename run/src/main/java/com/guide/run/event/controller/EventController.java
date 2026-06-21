@@ -64,6 +64,16 @@ public class EventController {
         ));
     }
 
+    @Operation(summary = "이벤트 러닝 거리 입력 스킵", description = "이벤트 주최자가 종료 이벤트의 러닝 거리 입력을 스킵합니다. 스킵 값은 0km로 저장됩니다.")
+    @PatchMapping("/{eventId}/running-distance/skip")
+    public ResponseEntity<EventRunningDistancePatchResponse> skipRunningDistance(
+            @PathVariable Long eventId,
+            HttpServletRequest request
+    ) {
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok(eventService.skipRunningDistance(eventId, privateId));
+    }
+
     @Operation(summary = "이벤트 수정", description = "이벤트 수정 화면에서 기존 이벤트를 수정합니다. 수정 후 스케줄러 정보도 함께 갱신됩니다.")
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
