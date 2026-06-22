@@ -46,6 +46,9 @@ notExistAccountIdError:
 notExistPhoneError:
   code: "1009"
   msg: "없는 전화번호입니다."
+notAgreeTerm:
+  code: "1010"
+  msg: "필수 약관에 동의해야 합니다."
 
 notApprovedUser:
   code: "1100"

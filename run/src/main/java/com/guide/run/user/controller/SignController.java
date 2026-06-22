@@ -9,7 +9,9 @@ import com.guide.run.user.dto.ReissuedAccessTokenDto;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
+import com.guide.run.user.dto.request.SignupRequest;
 import com.guide.run.user.dto.request.WithdrawalRequest;
+import com.guide.run.user.dto.response.IntegratedSignupResponse;
 import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.KakaoOAuthLoginResponse;
 import com.guide.run.user.dto.response.LoginPostResponse;
@@ -19,6 +21,7 @@ import com.guide.run.user.entity.user.User;
 import com.guide.run.user.profile.OAuthProfile;
 import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
+import com.guide.run.user.service.SignupService;
 import com.guide.run.user.service.UserService;
 import com.guide.run.user.service.ViService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,6 +56,7 @@ public class SignController {
     private final UserService userService;
     private final ViService viService;
     private final GuideService guideService;
+    private final SignupService signupService;
 
 
     @Operation(summary = "일반 로그인", description = "로그인 화면에서 계정 ID와 비밀번호로 로그인합니다. 응답 본문에는 accessToken을, HttpOnly Cookie에는 refreshToken을 내려줍니다.", security = {})
@@ -124,6 +128,15 @@ public class SignController {
                         .disabilityType(user.getType())
                         .build())
                 .build());
+    }
+
+    @Operation(summary = "통합 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 disabilityType(VI/GUIDE)에 따라 통합 회원가입 폼을 제출합니다. common 기본 정보와 vi/guide 전용 정보, 약관 동의를 함께 받으며, accessToken/refreshToken을 발급합니다.", security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/signup")
+    public ResponseEntity<IntegratedSignupResponse> signup(@RequestBody @Valid SignupRequest request,
+                                                           HttpServletRequest httpServletRequest){
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        IntegratedSignupResponse response = signupService.signup(privateId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "VI 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 VI 회원가입 폼을 제출할 때 호출됩니다. 프론트의 회원가입 화면에서 입력한 기본 정보, 러닝 정보, 약관 동의 정보를 함께 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))

@@ -86,6 +86,14 @@ public class UserDtoExceptionAdvice {
                 getMessage("notExistPhoneError.msg")));
     }
 
+    //1010
+    @ExceptionHandler(NotAgreeTermException.class)
+    protected ResponseEntity<FailResult> NotAgreeTermException(NotAgreeTermException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notAgreeTerm.code"),
+                getMessage("notAgreeTerm.msg")));
+    }
+
     private String getMessage(String code){
         return getMessage(code,null);
     }
