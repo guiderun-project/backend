@@ -238,7 +238,9 @@ public class SignupInfoService {
     @Transactional
     public UpdateRunningInfoResponse updateRunningInfo(String privateId, UpdateRunningInfoRequest request) {
         User user = userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
-        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        // ArchiveData가 없는 사용자(소셜 로그인 초기 상태)도 러닝 정보 수정이 가능하도록 없으면 새로 생성한다.
+        ArchiveData archiveData = archiveDataRepository.findById(privateId)
+                .orElseGet(() -> ArchiveData.builder().privateId(privateId).build());
 
         user.editRunningInfo(request.getRecordDegree(), request.getDetailRecord());
         archiveData.editRunningInfo(
@@ -247,6 +249,7 @@ public class SignupInfoService {
                 request.getHopePrefs(),
                 archiveData.getRunningPlace()
         );
+        archiveDataRepository.save(archiveData);
 
         return UpdateRunningInfoResponse.builder()
                 .type(user.getType() != null ? user.getType().name() : null)
