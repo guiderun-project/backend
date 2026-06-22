@@ -59,7 +59,7 @@ public class EventCommentController {
                                                            @Parameter(description = "페이지 크기", example = "10")
                                                            @RequestParam(defaultValue = "10") int size,
                                                            HttpServletRequest request) {
-        String userId = jwtProvider.extractUserId(request);
+        String userId = jwtProvider.tryExtractUserId(request);
         return ResponseEntity.status(200).body(eventCommentService.getComments(eventId, page, size, userId));
     }
 }

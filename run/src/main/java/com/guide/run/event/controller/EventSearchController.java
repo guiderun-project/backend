@@ -48,6 +48,7 @@ public class EventSearchController {
             @RequestParam(value = "cityName", required = false) CityName cityName,
             @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(value = "page", defaultValue = "0") int page,
             HttpServletRequest request) {
+        tab = normalizeTab(tab);
         validateParams(tab, type, kind);
         String privateId = extracted(request);
         int start = page * PAGE_SIZE;
@@ -63,9 +64,15 @@ public class EventSearchController {
             @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
             HttpServletRequest request) {
+        tab = normalizeTab(tab);
         validateParams(tab, type, kind);
         String privateId = extracted(request);
         return eventSearchService.getSearchAllEventsCount(keyword, tab, type, kind, privateId, cityName);
+    }
+
+    // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.
+    private String normalizeTab(String tab) {
+        return "PAST".equals(tab) ? "END" : tab;
     }
 
     private void validateParams(String tab, EventType type, EventRecruitStatus kind) {
@@ -75,10 +82,13 @@ public class EventSearchController {
                 && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
     }
 
+    // 비회원도 검색 가능. 토큰이 있으면 사용자 존재를 검증하고, 없으면 null(비회원)로 처리한다.
     private String extracted(HttpServletRequest request) {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId)
-                .orElseThrow(() -> new NotExistUserException());
+        String privateId = jwtProvider.tryExtractUserId(request);
+        if (privateId != null) {
+            userRepository.findUserByPrivateId(privateId)
+                    .orElseThrow(() -> new NotExistUserException());
+        }
         return privateId;
     }
 }

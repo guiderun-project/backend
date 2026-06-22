@@ -79,6 +79,11 @@ public class SecurityConfig {
                                 "/api/accountId/**",
                                 "/api/new-password/**").permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+$", "GET")).permitAll()
+                        // 비회원도 조회 가능한 공개 목록/검색/댓글 API (GET 한정)
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/all$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/search$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/upcoming$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+/comments$", "GET")).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(
                                 "/api/user/personal/**",

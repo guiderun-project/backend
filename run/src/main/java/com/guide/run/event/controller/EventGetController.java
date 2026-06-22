@@ -45,7 +45,7 @@ public class EventGetController {
             @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
             @RequestParam(value = "page", defaultValue = "0") int page,
             HttpServletRequest request) {
-        String userId = jwtProvider.extractUserId(request);
+        String userId = jwtProvider.tryExtractUserId(request);
         return ResponseEntity.ok(eventGetService.getUpcomingEvents(page, userId));
     }
 
@@ -78,6 +78,7 @@ public class EventGetController {
             @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
             HttpServletRequest request){
+        tab = normalizeTab(tab);
         if(!tab.equals("UPCOMING") && !tab.equals("END") && !tab.equals("MY")) throw new NotValidSortException();
         if(!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
         if(!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
@@ -85,6 +86,11 @@ public class EventGetController {
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).
                 body(Count.builder().count(eventGetService.getAllEventListCount(tab, type, kind, userId, cityName)).build());
+    }
+
+    // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.
+    private String normalizeTab(String tab){
+        return "PAST".equals(tab) ? "END" : tab;
     }
 
     @Operation(summary = "전체 이벤트 목록 조회", description = "전체 이벤트 탭에서 선택한 필터와 페이지네이션 조건에 맞는 이벤트 목록을 조회합니다.")
@@ -96,11 +102,12 @@ public class EventGetController {
             @RequestParam(value = "cityName", required = false) CityName cityName,
             @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(value = "page", defaultValue = "0") int page,
             HttpServletRequest request){
+        tab = normalizeTab(tab);
         if(!tab.equals("UPCOMING") && !tab.equals("END") && !tab.equals("MY")) throw new NotValidSortException();
         if(!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
         if(!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
                 && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
-        String userId = jwtProvider.extractUserId(request);
+        String userId = jwtProvider.tryExtractUserId(request);
         int start = page * PAGE_SIZE;
         return ResponseEntity.status(200).
                 body(eventGetService.getAllEventList(PAGE_SIZE, start, tab, type, kind, userId, cityName));

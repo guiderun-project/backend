@@ -18,6 +18,7 @@ import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.logic.ExistFormException;
 import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
+import com.guide.run.global.exception.event.resource.NotExistFormException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
@@ -121,7 +122,7 @@ public class EventFormService {
                 EventFormStatus.APPLIED
         );
         if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+            throw new NotExistFormException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
         }
         validateCompetitionInfo(event, createForm);
         form.setform(createForm.getGroup(), createForm.getPartner(), createForm.getDetail(),event.getEventCategory());
@@ -140,7 +141,7 @@ public class EventFormService {
                 EventFormStatus.APPLIED
         );
         if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+            throw new NotExistFormException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
         }
 
         return MyEventApplyGetResponse.builder()
@@ -209,7 +210,7 @@ public class EventFormService {
                 EventFormStatus.APPLIED
         );
         if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+            throw new NotExistFormException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
         }
 
         return EventApplicantFormResponse.builder()
@@ -285,7 +286,7 @@ public class EventFormService {
                 EventFormStatus.APPLIED
         );
         if (form == null) {
-            throw new NotExistEventException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+            throw new NotExistFormException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
         }
         form.cancel(LocalDateTime.now());
         eventFormRepository.save(form);

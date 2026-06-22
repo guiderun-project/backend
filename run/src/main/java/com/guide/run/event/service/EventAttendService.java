@@ -9,10 +9,12 @@ import com.guide.run.event.entity.dto.response.attend.AttendedGuideListResponse;
 import com.guide.run.event.entity.dto.response.attend.EventAttendanceResponse;
 import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
+import com.guide.run.global.exception.admin.authorize.NotAuthorityAdminException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.partner.service.PartnerService;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
@@ -170,7 +172,11 @@ public class EventAttendService {
                 .build();
     }
 
-    public AttendedGuideListResponse getAttendedGuides(Long eventId) {
+    public AttendedGuideListResponse getAttendedGuides(Long eventId, String requesterPrivateId) {
+        User requester = userRepository.findUserByPrivateId(requesterPrivateId).orElseThrow(NotExistUserException::new);
+        if (!Role.ROLE_ADMIN.equals(requester.getRole())) {
+            throw new NotAuthorityAdminException();
+        }
         List<AttendedGuideListResponse.AttendedGuide> guides = attendanceRepository
                 .findAllByEventIdAndIsAttend(eventId, true)
                 .stream()

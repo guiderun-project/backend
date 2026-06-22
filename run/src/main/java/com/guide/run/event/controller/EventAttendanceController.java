@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.attend.AttendanceUpdateResponse;
 import com.guide.run.event.entity.dto.response.attend.AttendedGuideListResponse;
 import com.guide.run.event.entity.dto.response.attend.EventAttendanceResponse;
 import com.guide.run.event.service.EventAttendService;
+import com.guide.run.global.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class EventAttendanceController {
     private final EventAttendService eventAttendService;
+    private final JwtProvider jwtProvider;
     @Operation(summary = "출석 현황 조회", description = "출석하기 페이지 렌더링. 그룹 구분 없이 출석 대기와 출석 완료 참가자를 반환합니다.")
     @GetMapping("/{eventId}/attendance")
     public ResponseEntity<EventAttendanceResponse> getEventAttendance(@PathVariable("eventId") Long eventId,
@@ -48,6 +50,7 @@ public class EventAttendanceController {
     @GetMapping("/{eventId}/attendance/guides")
     public ResponseEntity<AttendedGuideListResponse> getAttendedGuides(@PathVariable("eventId") Long eventId,
                                                                        HttpServletRequest request) {
-        return ResponseEntity.ok().body(eventAttendService.getAttendedGuides(eventId));
+        String requesterPrivateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventAttendService.getAttendedGuides(eventId, requesterPrivateId));
     }
 }
