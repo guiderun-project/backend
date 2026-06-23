@@ -2,12 +2,16 @@ package com.guide.run.event.entity.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.guide.run.event.entity.type.CityName;
+import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -39,4 +43,16 @@ public class EventCreateRequest {
     private EventCategory eventCategory; //이벤트 유형
     @Schema(description = "도시명", example = "SEOUL")
     private CityName cityName; //이벤트 지역
+    private Boolean isPrivate;
+    private BigDecimal expectedRunningDistanceKm;
+    private List<AdditionalQuestionRequest> additionalQuestions;
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AdditionalQuestionRequest {
+        private AdditionalQuestionType type;
+        private String title;
+        private List<String> options;
+    }
 }

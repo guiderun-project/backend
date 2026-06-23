@@ -63,6 +63,9 @@ public class S3Uploader {
 
     private File convert(MultipartFile file) throws IOException {
         String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null || originalFileName.isBlank()) {
+            throw new IllegalArgumentException("업로드 파일의 원본 파일명이 없습니다.");
+        }
         String uuid = UUID.randomUUID().toString();
         String uniqueFileName = uuid + "_" + originalFileName.replaceAll("\\s", "_");
 
@@ -83,19 +86,15 @@ public class S3Uploader {
     }
 
     public void deleteFile(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            log.warn("deleteFile: fileName이 null 또는 빈 값입니다. 삭제를 건너뜁니다.");
+            return;
+        }
         try {
-            // URL 디코딩을 통해 원래의 파일 이름을 가져옴.
-            //String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            log.info("Deleting file from S3: " + fileName);
-            log.info("file name is" + fileName.substring(cloudFrontUrl.length()-1));
+            log.info("Deleting file from S3: {}", fileName);
             amazonS3.deleteObject(bucket, fileName.substring(cloudFrontUrl.length()));
+        } catch (Exception e) {
+            log.error("S3 파일 삭제 실패 fileName={}: {}", fileName, e.getMessage(), e);
         }
-        catch (Exception e) {
-            log.error("Error while decoding the file name: {}", e.getMessage());
-        }
-        /*
-        catch (UnsupportedEncodingException e) {
-            log.error("Error while decoding the file name: {}", e.getMessage());
-        }*/
     }
 }

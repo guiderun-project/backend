@@ -1,10 +1,12 @@
 package com.guide.run.event.controller;
 
 
-import com.guide.run.event.entity.dto.response.attend.AttendCount;
-import com.guide.run.event.entity.dto.response.attend.ParticipationCount;
-import com.guide.run.event.entity.dto.response.attend.ParticipationInfos;
+import com.guide.run.event.entity.dto.response.attend.AttendanceCancelResponse;
+import com.guide.run.event.entity.dto.response.attend.AttendanceUpdateResponse;
+import com.guide.run.event.entity.dto.response.attend.AttendedGuideListResponse;
+import com.guide.run.event.entity.dto.response.attend.EventAttendanceResponse;
 import com.guide.run.event.service.EventAttendService;
+import com.guide.run.global.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,30 +22,35 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class EventAttendanceController {
     private final EventAttendService eventAttendService;
-    @Operation(summary = "출석 체크", description = "이벤트 상세의 출석 체크 모드에서 특정 신청자를 출석 처리합니다.")
-    @PostMapping("/{eventId}/attend/{userId}")
-    public ResponseEntity<String> requestAttend(@PathVariable("eventId") Long eventId,
-                                                @PathVariable("userId") String userId,
-                                                HttpServletRequest request){
-        eventAttendService.requestAttend(eventId,userId);
-        return ResponseEntity.status(200).body("200 ok");
+    private final JwtProvider jwtProvider;
+    @Operation(summary = "출석 현황 조회", description = "출석하기 페이지 렌더링. 그룹 구분 없이 출석 대기와 출석 완료 참가자를 반환합니다.")
+    @GetMapping("/{eventId}/attendance")
+    public ResponseEntity<EventAttendanceResponse> getEventAttendance(@PathVariable("eventId") Long eventId,
+                                                                      HttpServletRequest request) {
+        return ResponseEntity.ok().body(eventAttendService.getEventAttendance(eventId));
     }
-    @Operation(summary = "출석 현황 개수 조회", description = "출석 체크 화면에서 출석/미출석 인원 수를 조회합니다.")
-    @GetMapping("/{eventId}/attend/count")
-    public ResponseEntity<AttendCount> getAttendCount(@PathVariable("eventId") Long eventId,
-                                                      HttpServletRequest request){
-        return ResponseEntity.ok().body(eventAttendService.getAttendCount(eventId));
+
+    @Operation(summary = "출석 처리", description = "참가자를 출석 완료 상태로 설정합니다. 이미 출석 상태이면 현재 summary만 반환합니다.")
+    @PostMapping("/{eventId}/attendance/{userId}")
+    public ResponseEntity<AttendanceUpdateResponse> confirmAttend(@PathVariable("eventId") Long eventId,
+                                                                  @PathVariable("userId") String userId,
+                                                                  HttpServletRequest request) {
+        return ResponseEntity.ok().body(eventAttendService.confirmAttend(eventId, userId));
     }
-    @Operation(summary = "이벤트 신청 현황 개수 조회", description = "이벤트 상세의 출석/매칭 패널에서 총 신청자 수와 VI/Guide 수를 조회합니다.")
-    @GetMapping("/{eventId}/forms/count")
-    public ResponseEntity<ParticipationCount> getParticipationCount(@PathVariable("eventId") Long eventId,
-                                                                    HttpServletRequest request){
-        return ResponseEntity.ok().body(eventAttendService.getParticipationCount(eventId));
+
+    @Operation(summary = "출석 취소", description = "출석 완료 참가자를 출석 대기 상태로 되돌립니다. 이미 미출석 상태이면 현재 summary만 반환합니다.")
+    @DeleteMapping("/{eventId}/attendance/{userId}")
+    public ResponseEntity<AttendanceCancelResponse> cancelAttend(@PathVariable("eventId") Long eventId,
+                                                                 @PathVariable("userId") String userId,
+                                                                 HttpServletRequest request) {
+        return ResponseEntity.ok().body(eventAttendService.cancelAttend(eventId, userId));
     }
-    @Operation(summary = "이벤트 신청 현황 목록 조회", description = "이벤트 상세의 출석 패널에서 출석 완료/미완료 신청자 목록을 조회합니다.")
-    @GetMapping("/{eventId}/forms")
-    public ResponseEntity<ParticipationInfos> getParticipationInfos(@PathVariable("eventId") Long eventId,
-                                                                    HttpServletRequest request){
-        return ResponseEntity.ok().body(eventAttendService.getParticipationInfos(eventId));
+
+    @Operation(summary = "출석한 가이드러너 명단 조회", description = "ADMIN 전용. 해당 이벤트에서 출석 완료한 가이드러너 목록을 반환합니다.")
+    @GetMapping("/{eventId}/attendance/guides")
+    public ResponseEntity<AttendedGuideListResponse> getAttendedGuides(@PathVariable("eventId") Long eventId,
+                                                                       HttpServletRequest request) {
+        String requesterPrivateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventAttendService.getAttendedGuides(eventId, requesterPrivateId));
     }
 }

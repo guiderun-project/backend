@@ -12,4 +12,7 @@ import lombok.Getter;
 public class TokenResponse {
     @Schema(description = "아이디 찾기/비밀번호 재설정에 사용하는 임시 토큰", example = "tmp-token-1234")
     private String token;
+
+    @Schema(description = "인증 목적", example = "ACCOUNT_ID", allowableValues = {"ACCOUNT_ID", "PASSWORD"})
+    private String purpose;
 }

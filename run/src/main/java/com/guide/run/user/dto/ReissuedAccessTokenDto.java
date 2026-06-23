@@ -14,4 +14,7 @@ public class ReissuedAccessTokenDto {
     private String accessToken;
     @Schema(description = "추가 회원가입 없이 바로 서비스 사용 가능한지 여부", example = "true")
     private Boolean isExist;
+    @Schema(description = "추가 회원가입 없이 바로 서비스 사용 가능한지 상태", example = "true")
+    private String status;
+    
 }

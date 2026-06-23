@@ -38,6 +38,27 @@ out/
 
 ### Config file ###
 *.yml
+!src/test/resources/application-test.yml
 
 ## Environment files
 .env
+
+## DB info (sensitive)
+db_info.txt
+db_schema_issues.txt
+
+## Internal work documents
+미구현_API_목록.md
+
+## API test files (local only, contains tokens)
+http-tests/
+
+## 에러 확인 안내 문서 (로컬 전용)
+에러_확인_방법.txt
+
+## 애플리케이션 로그 (런타임 생성물)
+logs/
+
+## 통합테스트 결과 (로컬 전용, 토큰 포함)
+통합테스트결과/
+boot.log

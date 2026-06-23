@@ -10,6 +10,7 @@ import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.request.RefreshTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
@@ -90,15 +91,26 @@ public class JwtProvider {
     public String getSocialId(String token){
         try {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-        }catch (ExpiredJwtException e){
-            System.out.println(e.getClaims().getSubject()+"-----------------------------");
+        } catch (ExpiredJwtException e) {
+            log.warn("만료된 JWT 토큰 사용 시도: subject={}", e.getClaims().getSubject());
             return e.getClaims().getSubject();
+        } catch (JwtException e) {
+            log.error("유효하지 않은 JWT 토큰: {}", e.getMessage());
+            throw e;
         }
     }
 
     public String extractUserId(HttpServletRequest httpServletRequest){
         String accessToken = resolveToken(httpServletRequest);
         return getSocialId(accessToken);
+    }
+
+    public String tryExtractUserId(HttpServletRequest request) {
+        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (bearer == null || !bearer.startsWith("Bearer ")) {
+            return null;
+        }
+        return getSocialId(bearer.substring("Bearer ".length()));
     }
 
     public String resolveToken(HttpServletRequest request) {

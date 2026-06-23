@@ -83,6 +83,23 @@ public class EventLogicExceptionAdvice {
                 getMessage("NotDeleteEvent.code"),
                 getMessage("NotDeleteEvent.msg")));
     }
+
+    //2209
+    @ExceptionHandler(CannotModifyAdditionalQuestionsException.class)
+    protected ResponseEntity<FailResult> CannotModifyAdditionalQuestionsException(CannotModifyAdditionalQuestionsException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("CannotModifyAdditionalQuestions.code"),
+                getMessage("CannotModifyAdditionalQuestions.msg")));
+    }
+
+    //2210
+    @ExceptionHandler(EventValidationException.class)
+    protected ResponseEntity<FailResult> EventValidationException(EventValidationException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("EventValidation.code"),
+                e.getMessage()));
+    }
+
     private String getMessage(String code){
         return getMessage(code,null);
     }

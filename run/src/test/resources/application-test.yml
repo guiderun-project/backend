@@ -1,0 +1,86 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${TEST_RDS}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+      resolve-lazily: true
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show_sql: false
+
+  jwt:
+    secretKey: ${JWT_SECRET_KEY:test-jwt-secret-key}
+
+  social:
+    kakao:
+      client_id: test-kakao-client-id
+      redirect: http://localhost:3000/oauth
+      url:
+        login: https://kauth.kakao.com/oauth/authorize
+        token: https://kauth.kakao.com/oauth/token
+        profile: https://kapi.kakao.com/v2/user/me
+    google:
+      client_id: test-google-client-id
+      client_secret: test-google-client-secret
+      redirect: http://localhost:8080/login/oauth2/code/google
+      url:
+        login: https://accounts.google.com/o/oauth2/v2/auth
+        token: https://oauth2.googleapis.com/token
+        profile: https://www.googleapis.com/oauth2/v3/userinfo
+    naver:
+      client_id: test-naver-client-id
+      client_secret: test-naver-client-secret
+      redirect: http://localhost:8080/social/login/naver
+      url:
+        login: https://nid.naver.com/oauth2.0/authorize
+        token: https://nid.naver.com/oauth2.0/token
+        profile: https://openapi.naver.com/v1/nid/me
+
+  coolsms:
+    apiKey: test-sms-key
+    apiSecret: test-sms-secret
+    senderNumber: "01000000000"
+    adminNumber: "01000000000"
+    kakaoChId: test-kakao-channel-id
+    signupCompletionMsgId: test-signup-completion-message-id
+    signupApprovalMsgId: test-signup-approval-message-id
+    webhook-sms:
+      api-key: test-webhook-sms-key
+      api-secret: test-webhook-sms-secret
+      from-number: "01000000000"
+
+  tosspayments:
+    secret-key: test-tosspayments-secret-key
+
+  appsmith:
+    webhook-secret: test-appsmith-webhook-secret
+
+redis:
+  host: localhost
+  port: 6379
+
+cors:
+  origin: http://localhost:3000
+
+cloud:
+  aws:
+    s3:
+      bucket: test-bucket
+    credentials:
+      access-key: test-access-key
+      secret-key: test-secret-key
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+    url:
+      cloudFront: https://example.com

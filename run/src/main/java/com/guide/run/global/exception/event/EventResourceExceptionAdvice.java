@@ -3,6 +3,7 @@ package com.guide.run.global.exception.event;
 import com.guide.run.global.dto.response.FailResult;
 import com.guide.run.global.exception.event.resource.NotExistCommentException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
+import com.guide.run.global.exception.event.resource.NotExistFormException;
 import com.guide.run.global.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -31,6 +32,13 @@ public class EventResourceExceptionAdvice {
         return ResponseEntity.status(404).body(responseService.getFailResult(
                 getMessage("notExistComment.code"),
                 getMessage("notExistComment.msg")));
+    }
+    //2302
+    @ExceptionHandler(NotExistFormException.class)
+    protected ResponseEntity<FailResult> NotExistFormException(NotExistFormException e){
+        return ResponseEntity.status(404).body(responseService.getFailResult(
+                getMessage("notExistForm.code"),
+                getMessage("notExistForm.msg")));
     }
 
     private String getMessage(String code){

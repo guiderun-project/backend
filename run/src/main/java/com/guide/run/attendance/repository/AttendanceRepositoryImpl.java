@@ -5,6 +5,7 @@ import static com.guide.run.attendance.entity.QAttendance.attendance;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.user.entity.user.QUser.user;
 
+import com.guide.run.event.entity.dto.response.attend.AttendanceParticipant;
 import com.guide.run.event.entity.dto.response.attend.ParticipationInfo;
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.user.entity.type.UserType;
@@ -45,6 +46,19 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
                 .join(eventForm).on(attendance.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
                 .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
                 .orderBy(user.type.desc(),user.name.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<AttendanceParticipant> findAttendanceParticipants(Long eventId, boolean isAttend) {
+        return queryFactory.select(Projections.constructor(AttendanceParticipant.class,
+                user.userId.as("userId"),
+                user.name.as("name"),
+                user.type.as("type")))
+                .from(attendance)
+                .join(user).on(attendance.privateId.eq(user.privateId))
+                .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
+                .orderBy(user.type.desc(), user.name.asc())
                 .fetch();
     }
 

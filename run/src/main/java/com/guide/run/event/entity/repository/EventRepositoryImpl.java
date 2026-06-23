@@ -6,6 +6,8 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
+import com.querydsl.jpa.JPAExpressions;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventStatus;
@@ -252,6 +254,199 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .execute();
     }
 
+    @Override
+    public List<AllEvent> getSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .orderBy(event.startTime.desc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .orderBy(event.startTime.asc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<AllEvent> getMySearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName) {
+        return queryFactory.select(Projections.constructor(AllEvent.class,
+                        event.id.as("eventId"),
+                        event.type.as("eventType"),
+                        event.name.as("name"),
+                        event.startTime.as("date"),
+                        event.recruitStatus.as("recruitStatus")))
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .orderBy(event.startTime.desc())
+                .offset(start)
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        return queryFactory.select(event.count())
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .fetchOne();
+    }
+
+    @Override
+    public long getMySearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName) {
+        return queryFactory.select(event.count())
+                .from(event)
+                .join(eventForm).on(eventForm.eventId.eq(event.id))
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(eventForm.privateId.eq(privateId))
+                        .and(checkByCityName(cityName))
+                        .and(checkByTitle(title))
+                )
+                .fetchOne();
+    }
+
+    @Override
+    public List<MyActivityEventsResponse.Item> findActivityEvents(String privateId, EventType type, String relation, int page, int size) {
+        return queryFactory.select(
+                        Projections.constructor(MyActivityEventsResponse.Item.class,
+                                event.id,
+                                event.name,
+                                event.type,
+                                event.startTime))
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(activityTypeCond(type))
+                        .and(activityRelationCond(privateId, relation)))
+                .orderBy(event.startTime.desc())
+                .offset((long) page * size)
+                .limit(size)
+                .fetch();
+    }
+
+    @Override
+    public long countActivityEvents(String privateId, EventType type, String relation) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(activityTypeCond(type))
+                        .and(activityRelationCond(privateId, relation)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    private BooleanBuilder activityTypeCond(EventType type) {
+        if (type == null || type == EventType.TOTAL) return new BooleanBuilder();
+        return new BooleanBuilder(event.type.eq(type));
+    }
+
+    private BooleanBuilder activityRelationCond(String privateId, String relation) {
+        if ("PARTICIPATED".equals(relation)) {
+            return new BooleanBuilder(
+                    JPAExpressions.selectFrom(eventForm)
+                            .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
+                            .exists());
+        } else if ("HOSTED".equals(relation)) {
+            return new BooleanBuilder(event.organizer.eq(privateId));
+        } else {
+            return new BooleanBuilder(
+                    event.organizer.eq(privateId)
+                            .or(JPAExpressions.selectFrom(eventForm)
+                                    .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
+                                    .exists()));
+        }
+    }
+
+    @Override
+    public long countApprovedEventsByYear(int year) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(event.startTime.year().eq(year)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
+    public double sumDistanceByYear(int year) {
+        Double result = queryFactory.select(event.distance.sum())
+                .from(event)
+                .where(event.isApprove.eq(true)
+                        .and(event.startTime.year().eq(year)))
+                .fetchOne();
+        return result != null ? result : 0.0;
+    }
+
+    @Override
+    public long countMyParticipation(String privateId) {
+        Long result = queryFactory.select(eventForm.count())
+                .from(eventForm)
+                .join(event).on(eventForm.eventId.eq(event.id))
+                .where(eventForm.privateId.eq(privateId)
+                        .and(event.isApprove.eq(true)))
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
+    public double sumMyParticipationDistance(String privateId) {
+        Double result = queryFactory.select(event.distance.sum())
+                .from(eventForm)
+                .join(event).on(eventForm.eventId.eq(event.id))
+                .where(eventForm.privateId.eq(privateId)
+                        .and(event.isApprove.eq(true)))
+                .fetchOne();
+        return result != null ? result : 0.0;
+    }
+
+    private BooleanBuilder checkByTitle(String title) {
+        if (title == null || title.isEmpty()) {
+            return new BooleanBuilder();
+        }
+        return new BooleanBuilder(event.name.containsIgnoreCase(title).or(event.content.containsIgnoreCase(title)));
+    }
+
     private BooleanBuilder checkByCityName(CityName cityName){
         if(cityName==null){
             return new BooleanBuilder();
@@ -261,7 +456,6 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
             return new BooleanBuilder(event.cityName.eq(CityName.SEOUL));
         }
     }
-
 
     private BooleanBuilder checkByKind(EventRecruitStatus kind){
         if(kind==null){
@@ -279,7 +473,6 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         }
         return null;
     }
-
 
     private BooleanBuilder checkByType(EventType type){
         if(type==null){

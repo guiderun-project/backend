@@ -1,6 +1,9 @@
 package com.guide.run.event.service;
 
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.get.*;
+import java.time.LocalDate;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.CityName;
@@ -13,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
 import static com.guide.run.event.entity.type.EventType.TOTAL;
@@ -144,6 +150,73 @@ public class EventGetService {
                 }
             }
         }
-        return AllEventResponse.builder().items(allEvents).build();
+
+        long totalCount = getAllEventListCount(sort, type, kind, userId, cityName);
+
+        return AllEventResponse.builder()
+                .items(allEvents)
+                .pagination(AllEventResponse.Pagination.builder().totalCount(totalCount).build())
+                .build();
+    }
+
+    public UpcomingEventResponse getUpcomingEvents(int page, String privateId) {
+        final int PAGE_SIZE = 10;
+        int start = page * PAGE_SIZE;
+
+        List<AllEvent> allEvents = eventRepository.upcomingGetAllEventList(PAGE_SIZE, start, null, RECRUIT_ALL, null);
+
+        if (allEvents.isEmpty()) {
+            return UpcomingEventResponse.builder().items(List.of()).build();
+        }
+
+        List<Long> eventIds = allEvents.stream().map(AllEvent::getEventId).collect(Collectors.toList());
+
+        Set<Long> appliedEventIds = eventFormRepository.findAllByPrivateIdAndEventIdIn(privateId, eventIds)
+                .stream().map(EventForm::getEventId).collect(Collectors.toSet());
+
+        Map<Long, Event> eventMap = eventRepository.findAllById(eventIds).stream()
+                .collect(Collectors.toMap(Event::getId, e -> e));
+
+        List<UpcomingEvent> items = allEvents.stream().map(ae -> {
+            Event ev = eventMap.get(ae.getEventId());
+            return UpcomingEvent.builder()
+                    .eventId(ae.getEventId())
+                    .eventType(ae.getEventType())
+                    .name(ae.getName())
+                    .isApply(appliedEventIds.contains(ae.getEventId()))
+                    .date(ev != null ? ev.getStartTime().toLocalDate() : null)
+                    .recruitStatus(ae.getRecruitStatus())
+                    .build();
+        }).collect(Collectors.toList());
+
+        return UpcomingEventResponse.builder().items(items).build();
+    }
+
+    public EventsSummaryGetResponse getEventsSummary(String userId) {
+        int year = LocalDate.now().getYear();
+
+        long totalEventCount = eventRepository.countApprovedEventsByYear(year);
+        double totalRunningDistanceKm = eventRepository.sumDistanceByYear(year);
+
+        EventsSummaryGetResponse.PublicSummary publicSummary = EventsSummaryGetResponse.PublicSummary.builder()
+                .year(year)
+                .totalEventCount(totalEventCount)
+                .totalRunningDistanceKm(totalRunningDistanceKm)
+                .build();
+
+        EventsSummaryGetResponse.MySummary mySummary = null;
+        if (userId != null) {
+            long totalParticipationCount = eventRepository.countMyParticipation(userId);
+            double myTotalDistanceKm = eventRepository.sumMyParticipationDistance(userId);
+            mySummary = EventsSummaryGetResponse.MySummary.builder()
+                    .totalParticipationCount(totalParticipationCount)
+                    .totalRunningDistanceKm(myTotalDistanceKm)
+                    .build();
+        }
+
+        return EventsSummaryGetResponse.builder()
+                .publicSummary(publicSummary)
+                .mySummary(mySummary)
+                .build();
     }
 }

@@ -13,6 +13,6 @@ public class SearchAllEvent {
     private Long eventId;
     private EventType eventType;
     private String name;
-    private String endDate;
+    private String startDate;
     private EventRecruitStatus recruitStatus;
-}
+}

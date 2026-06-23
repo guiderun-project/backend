@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 public class UserInfoController {
     private final GetUserInfoService getUserInfoService;
-    @Operation(summary = "전체 사용자 정보 조회", description = "Guide/VI 전체 정보를 한 번에 조회하는 내부성 성격의 API입니다.")
-    @GetMapping("/api/user/info/all")
-    public ResponseEntity<UserInfoAllResponse> getUserInfoAll(){
-        return ResponseEntity.ok(getUserInfoService.getUserInfoAll());
-    }
+    
+    
+    
 }

@@ -4,6 +4,7 @@ import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.form.Form;
+import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
 import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,30 @@ public class EventMatchingService {
     private final EventFormRepository eventFormRepository;
     private final PartnerService partnerService;
     private final AttendanceRepository attendanceRepository;
+
+    @Transactional
+    public MatchingCreateResponse createMatching(Long eventId, MatchingCreateRequest request) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+
+        for (String guideId : request.getGuideIds()) {
+            matchUser(eventId, request.getViId(), guideId);
+        }
+
+        int waitingCount = (int) (unMatchingRepository.getUserTypeCount(eventId, UserType.VI)
+                + unMatchingRepository.getUserTypeCount(eventId, UserType.GUIDE));
+        int completedViCount = matchingRepository.findAllMatchedViByEventIdAndUserType(eventId, UserType.VI).size();
+        int matchedGuideCount = matchingRepository.findAllByEventId(eventId).size();
+
+        return MatchingCreateResponse.builder()
+                .viId(request.getViId())
+                .guideIds(request.getGuideIds())
+                .summary(MatchingCreateResponse.Summary.builder()
+                        .waitingCount(waitingCount)
+                        .completedViCount(completedViCount)
+                        .matchedGuideCount(matchedGuideCount)
+                        .build())
+                .build();
+    }
 
     @Transactional
     public void matchUser(Long eventId, String viId, String userId) {
@@ -91,6 +117,47 @@ public class EventMatchingService {
         updatePartnerOnAttendance(eventId, guide);
 
 
+    }
+
+    @Transactional
+    public MatchingCancelResponse cancelMatching(Long eventId, String viId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
+        String viPrivateId = vi.getPrivateId();
+
+        List<Matching> allMatching = matchingRepository.findAllByEventIdAndViId(eventId, viPrivateId);
+        partnerService.setNotAttendViPartnerList(eventId, vi);
+
+        List<String> canceledGuideIds = new ArrayList<>();
+        for (Matching m : allMatching) {
+            User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
+            canceledGuideIds.add(guide.getUserId());
+            matchingRepository.delete(m);
+            unMatchingRepository.save(UnMatching.builder()
+                    .privateId(m.getGuideId())
+                    .eventId(eventId)
+                    .build());
+        }
+
+        unMatchingRepository.save(UnMatching.builder()
+                .privateId(viPrivateId)
+                .eventId(eventId)
+                .build());
+
+        int waitingCount = (int) (unMatchingRepository.getUserTypeCount(eventId, UserType.VI)
+                + unMatchingRepository.getUserTypeCount(eventId, UserType.GUIDE));
+        int completedViCount = matchingRepository.findAllMatchedViByEventIdAndUserType(eventId, UserType.VI).size();
+        int matchedGuideCount = matchingRepository.findAllByEventId(eventId).size();
+
+        return MatchingCancelResponse.builder()
+                .viId(viId)
+                .canceledGuideIds(canceledGuideIds)
+                .summary(MatchingCancelResponse.Summary.builder()
+                        .waitingCount(waitingCount)
+                        .completedViCount(completedViCount)
+                        .matchedGuideCount(matchedGuideCount)
+                        .build())
+                .build();
     }
 
     @Transactional
@@ -188,6 +255,221 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         return MatchedViList.builder()
                 .vi(matchingRepository.findAllMatchedViByEventIdAndUserType(eventId,UserType.VI))
+                .build();
+    }
+
+    public EventMatchingStatusResponse getMatchingStatus(Long eventId, String loginPrivateId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+        User loginUser = userRepository.findUserByPrivateId(loginPrivateId).orElseThrow(NotExistUserException::new);
+
+        // 1. myPartners
+        List<MatchingStatusUser> myPartners = buildMyPartners(eventId, loginUser);
+
+        // 2. 매칭된 VI+Guide 쌍 → VI의 hopeTeam 기준 그룹핑
+        List<MatchingCompletedFlatDto> matchedFlat = matchingRepository.findMatchingCompletedByEventId(eventId);
+
+        // (runningGroup → (viUserId → MatchingStatusRow))
+        LinkedHashMap<String, LinkedHashMap<String, MatchingStatusRow>> groupRowMap = new LinkedHashMap<>();
+        for (MatchingCompletedFlatDto flat : matchedFlat) {
+            String rg = flat.getViRunningGroup() != null ? flat.getViRunningGroup() : "";
+            groupRowMap.computeIfAbsent(rg, k -> new LinkedHashMap<>());
+            LinkedHashMap<String, MatchingStatusRow> rowMap = groupRowMap.get(rg);
+
+            if (!rowMap.containsKey(flat.getViUserId())) {
+                MatchingStatusUser vi = MatchingStatusUser.builder()
+                        .userId(flat.getViUserId())
+                        .name(flat.getViName())
+                        .type(flat.getViType())
+                        .applyGroup(flat.getViRunningGroup())
+                        .build();
+                rowMap.put(flat.getViUserId(), MatchingStatusRow.builder()
+                        .vi(vi)
+                        .guides(new ArrayList<>())
+                        .build());
+            }
+            MatchingStatusUser guide = MatchingStatusUser.builder()
+                    .userId(flat.getGuideUserId())
+                    .name(flat.getGuideName())
+                    .type(flat.getGuideType())
+                    .applyGroup(flat.getGuideApplyRecord())
+                    .build();
+            rowMap.get(flat.getViUserId()).getGuides().add(guide);
+        }
+
+        // 3. 미매칭 Guide → guide의 hopeTeam 기준 vi=null 행으로 추가
+        List<MatchingWaitingFlatDto> waitingFlat = unMatchingRepository.findWaitingParticipants(eventId);
+        for (MatchingWaitingFlatDto flat : waitingFlat) {
+            if (flat.getType() != UserType.GUIDE) continue;
+            String rg = flat.getHopeTeam() != null ? flat.getHopeTeam() : "";
+            groupRowMap.computeIfAbsent(rg, k -> new LinkedHashMap<>());
+            MatchingStatusUser guideUser = MatchingStatusUser.builder()
+                    .userId(flat.getUserId())
+                    .name(flat.getName())
+                    .type(flat.getType())
+                    .applyGroup(flat.getHopeTeam())
+                    .build();
+            groupRowMap.get(rg).put("unmatched_" + flat.getUserId(), MatchingStatusRow.builder()
+                    .vi(null)
+                    .guides(Collections.singletonList(guideUser))
+                    .build());
+        }
+
+        // 4. groups 빌드 (runningGroup 오름차순 정렬)
+        List<MatchingStatusGroup> groups = groupRowMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> {
+                    List<MatchingStatusRow> rows = new ArrayList<>(e.getValue().values());
+                    return MatchingStatusGroup.builder()
+                            .runningGroup(e.getKey())
+                            .totalCount(rows.size())
+                            .rows(rows)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return EventMatchingStatusResponse.builder()
+                .myPartners(myPartners)
+                .groups(groups)
+                .build();
+    }
+
+    private List<MatchingStatusUser> buildMyPartners(Long eventId, User loginUser) {
+        List<MatchingStatusUser> partners = new ArrayList<>();
+        if (loginUser.getType() == UserType.VI) {
+            List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, loginUser.getPrivateId());
+            for (Matching m : matchings) {
+                User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElse(null);
+                if (guide == null) continue;
+                EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+                partners.add(MatchingStatusUser.builder()
+                        .userId(guide.getUserId())
+                        .name(guide.getName())
+                        .type(guide.getType())
+                        .applyGroup(form != null ? form.getHopeTeam() : null)
+                        .build());
+            }
+        } else if (loginUser.getType() == UserType.GUIDE) {
+            Matching matching = matchingRepository.findByEventIdAndGuideId(eventId, loginUser.getPrivateId());
+            if (matching != null) {
+                User vi = userRepository.findUserByPrivateId(matching.getViId()).orElse(null);
+                if (vi != null) {
+                    EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, vi.getPrivateId());
+                    partners.add(MatchingStatusUser.builder()
+                            .userId(vi.getUserId())
+                            .name(vi.getName())
+                            .type(vi.getType())
+                            .applyGroup(form != null ? form.getHopeTeam() : null)
+                            .build());
+                }
+            }
+        }
+        return partners;
+    }
+
+    public MatchingWaitingResponse getMatchingWaiting(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+
+        List<MatchingWaitingFlatDto> flatList = unMatchingRepository.findWaitingParticipants(eventId);
+
+        int viCount = (int) flatList.stream().filter(f -> f.getType() == UserType.VI).count();
+        int guideCount = (int) flatList.stream().filter(f -> f.getType() == UserType.GUIDE).count();
+
+        LinkedHashMap<String, List<MatchingWaitingParticipant>> groupMap = new LinkedHashMap<>();
+        for (MatchingWaitingFlatDto flat : flatList) {
+            String runningGroup = flat.getHopeTeam() != null ? flat.getHopeTeam() : "";
+            MatchingWaitingParticipant participant = MatchingWaitingParticipant.builder()
+                    .userId(flat.getUserId())
+                    .name(flat.getName())
+                    .type(flat.getType())
+                    .originalRunningGroup(flat.getHopeTeam())
+                    .isFirstParticipation(flat.getTrainingCnt() == 0 && flat.getCompetitionCnt() == 0)
+                    .hopePartner(flat.getHopePartner())
+                    .additionalComment(flat.getReferContent())
+                    .additionalAnswers(Collections.emptyList())
+                    .build();
+            groupMap.computeIfAbsent(runningGroup, k -> new ArrayList<>()).add(participant);
+        }
+
+        List<MatchingWaitingGroup> groups = groupMap.entrySet().stream()
+                .map(e -> MatchingWaitingGroup.builder()
+                        .runningGroup(e.getKey())
+                        .totalCount(e.getValue().size())
+                        .participants(e.getValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        return MatchingWaitingResponse.builder()
+                .summary(MatchingWaitingResponse.Summary.builder()
+                        .waitingCount(flatList.size())
+                        .viCount(viCount)
+                        .guideCount(guideCount)
+                        .build())
+                .groups(groups)
+                .build();
+    }
+
+    public MatchingCompletedResponse getMatchingCompleted(Long eventId) {
+        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
+
+        List<MatchingCompletedFlatDto> flatList = matchingRepository.findMatchingCompletedByEventId(eventId);
+
+        // viUserId 기준으로 그룹핑하여 VI별 row 구성
+        LinkedHashMap<String, MatchingCompletedRow> rowMap = new LinkedHashMap<>();
+        for (MatchingCompletedFlatDto flat : flatList) {
+            rowMap.computeIfAbsent(flat.getViUserId(), k -> {
+                MatchingUser vi = MatchingUser.builder()
+                        .userId(flat.getViUserId())
+                        .type(flat.getViType())
+                        .name(flat.getViName())
+                        .applyRecord(flat.getViApplyRecord())
+                        .isAttended(flat.getViIsAttended())
+                        .recordDegree(flat.getViRecordDegree())
+                        .build();
+                return MatchingCompletedRow.builder()
+                        .vi(vi)
+                        .guides(new ArrayList<>())
+                        .build();
+            });
+            MatchingUser guide = MatchingUser.builder()
+                    .userId(flat.getGuideUserId())
+                    .type(flat.getGuideType())
+                    .name(flat.getGuideName())
+                    .applyRecord(flat.getGuideApplyRecord())
+                    .isAttended(flat.getGuideIsAttended())
+                    .recordDegree(flat.getGuideRecordDegree())
+                    .build();
+            rowMap.get(flat.getViUserId()).getGuides().add(guide);
+        }
+
+        // runningGroup(VI hopeTeam) 기준으로 그룹핑
+        Map<String, String> viRunningGroupMap = new LinkedHashMap<>();
+        for (MatchingCompletedFlatDto flat : flatList) {
+            viRunningGroupMap.putIfAbsent(flat.getViUserId(), flat.getViRunningGroup());
+        }
+
+        LinkedHashMap<String, List<MatchingCompletedRow>> groupMap = new LinkedHashMap<>();
+        for (Map.Entry<String, MatchingCompletedRow> entry : rowMap.entrySet()) {
+            String runningGroup = viRunningGroupMap.getOrDefault(entry.getKey(), "");
+            groupMap.computeIfAbsent(runningGroup, k -> new ArrayList<>()).add(entry.getValue());
+        }
+
+        List<MatchingCompletedGroup> groups = groupMap.entrySet().stream()
+                .map(e -> MatchingCompletedGroup.builder()
+                        .runningGroup(e.getKey())
+                        .totalCount(e.getValue().size())
+                        .rows(e.getValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        int completedViCount = rowMap.size();
+        int matchedGuideCount = flatList.size();
+
+        return MatchingCompletedResponse.builder()
+                .summary(MatchingCompletedResponse.Summary.builder()
+                        .completedViCount(completedViCount)
+                        .matchedGuideCount(matchedGuideCount)
+                        .build())
+                .groups(groups)
                 .build();
     }
 

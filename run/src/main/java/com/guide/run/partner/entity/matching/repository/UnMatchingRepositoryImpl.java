@@ -1,5 +1,6 @@
 package com.guide.run.partner.entity.matching.repository;
 
+import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
@@ -44,6 +45,25 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
                 .orderBy(user.name.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<MatchingWaitingFlatDto> findWaitingParticipants(Long eventId) {
+        return queryFactory.select(Projections.constructor(MatchingWaitingFlatDto.class,
+                        user.userId.as("userId"),
+                        user.name.as("name"),
+                        user.type.as("type"),
+                        eventForm.hopeTeam.as("hopeTeam"),
+                        eventForm.hopePartner.as("hopePartner"),
+                        eventForm.referContent.as("referContent"),
+                        user.trainingCnt.as("trainingCnt"),
+                        user.competitionCnt.as("competitionCnt")))
+                .from(unMatching)
+                .join(user).on(unMatching.privateId.eq(user.privateId))
+                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
+                .where(unMatching.eventId.eq(eventId))
+                .orderBy(eventForm.hopeTeam.asc(), user.name.asc())
                 .fetch();
     }
 }

@@ -103,5 +103,16 @@ public class User extends BaseEntity {
     public void editId1365(String id1365){
         this.id1365 = id1365;
     }
+
+    public void editBirthDate(String birth) {
+        this.birth = birth;
+    }
+
+    public void editPersonalFields(String phoneNumber, String snsId, String id1365, String birth) {
+        this.phoneNumber = phoneNumber;
+        this.snsId = snsId;
+        this.id1365 = id1365;
+        this.birth = birth;
+    }
 }
 

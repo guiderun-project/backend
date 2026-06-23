@@ -3,6 +3,7 @@ package com.guide.run.partner.entity.partner.repository;
 import com.guide.run.admin.dto.response.partner.AdminPartnerResponse;
 import com.guide.run.global.scheduler.dto.AttendAndPartnerDto;
 import com.guide.run.partner.entity.dto.MyPagePartner;
+import com.guide.run.partner.entity.partner.Partner;
 import com.guide.run.user.entity.type.UserType;
 
 import java.util.List;
@@ -20,4 +21,7 @@ public interface PartnerRepositoryCustom {
     long searchAdminPartnerCount(String privateId, UserType type, String text);
 
     List<AttendAndPartnerDto> getEndEventAttendanceAndPartner(long eventId);
+
+    List<Partner> findActivityPartners(String privateId, UserType userType, String sort, int page, int size);
+    long countActivityPartners(String privateId, UserType userType);
 }

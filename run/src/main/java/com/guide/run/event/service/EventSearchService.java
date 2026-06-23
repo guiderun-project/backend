@@ -1,62 +1,113 @@
 package com.guide.run.event.service;
 
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
-import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
+import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.CityName;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_ALL;
+import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_END;
+import static com.guide.run.event.entity.type.EventType.TOTAL;
 
 @Service
 @RequiredArgsConstructor
 public class EventSearchService {
     private final EventRepository eventRepository;
-    public SearchAllEventsCount getSearchAllEventsCount(String title){
+
+    public long getSearchAllEventsCountValue(String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
+        if (sort.equals("UPCOMING")) {
+            if (type.equals(TOTAL)) {
+                return eventRepository.getSearchEventListCount(title, null, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
+            } else {
+                return eventRepository.getSearchEventListCount(title, type, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
+            }
+        } else if (sort.equals("END")) {
+            if (type.equals(TOTAL)) {
+                return eventRepository.getSearchEventListCount(title, null, RECRUIT_END, cityName);
+            } else {
+                return eventRepository.getSearchEventListCount(title, type, RECRUIT_END, cityName);
+            }
+        } else {
+            if (type.equals(TOTAL)) {
+                if (kind.equals(RECRUIT_ALL)) {
+                    return eventRepository.getMySearchEventListCount(title, null, null, privateId, cityName);
+                } else {
+                    return eventRepository.getMySearchEventListCount(title, null, kind, privateId, cityName);
+                }
+            } else {
+                if (kind.equals(RECRUIT_ALL)) {
+                    return eventRepository.getMySearchEventListCount(title, type, null, privateId, cityName);
+                } else {
+                    return eventRepository.getMySearchEventListCount(title, type, kind, privateId, cityName);
+                }
+            }
+        }
+    }
+
+    public SearchAllEventsCount getSearchAllEventsCount(String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
         return SearchAllEventsCount.builder()
-                        .count(eventRepository.findAllByNameContainingOrContentContaining(title,title).size())
+                .count((int) getSearchAllEventsCountValue(title, sort, type, kind, privateId, cityName))
                 .build();
     }
-    public List<SearchAllEvent> getSearchAllEvents(int start, int limit, String title){
-        Pageable pageable = PageRequest.of(
-                start / limit,
-                limit,
-                Sort.by(
-                        Sort.Order.desc("createdAt"),
-                        Sort.Order.desc("id")
-                )
-        );
-        Page<Event> findEventPage = eventRepository.findAllByNameContainingOrContentContaining(title, title, pageable);
-        List<SearchAllEvent> findEventList = new ArrayList<>();
-        for(Event e : findEventPage){
-            findEventList.add(SearchAllEvent.builder()
-                    .eventId(e.getId())
-                    .eventType(e.getType())
-                    .name(e.getName())
-                    .endDate(translateEndDate(e.getEndTime()))
-                    .recruitStatus(e.getRecruitStatus())
-                    .build());
+
+    public SearchAllEventList getSearchAllEvents(int start, int limit, String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
+        List<AllEvent> allEvents = new ArrayList<>();
+
+        if (sort.equals("UPCOMING")) {
+            if (kind.equals(RECRUIT_END)) throw new NotValidKindException();
+            if (type.equals(TOTAL)) {
+                allEvents = eventRepository.upcomingGetSearchEventList(limit, start, title, null, kind, cityName);
+            } else {
+                allEvents = eventRepository.upcomingGetSearchEventList(limit, start, title, type, kind, cityName);
+            }
+        } else if (sort.equals("END")) {
+            if (type.equals(TOTAL)) {
+                allEvents = eventRepository.getSearchEventList(limit, start, title, null, RECRUIT_END, cityName);
+            } else {
+                allEvents = eventRepository.getSearchEventList(limit, start, title, type, RECRUIT_END, cityName);
+            }
+        } else {
+            if (type.equals(TOTAL)) {
+                if (kind.equals(RECRUIT_ALL)) {
+                    allEvents = eventRepository.getMySearchEventList(limit, start, title, null, null, privateId, cityName);
+                } else {
+                    allEvents = eventRepository.getMySearchEventList(limit, start, title, null, kind, privateId, cityName);
+                }
+            } else {
+                if (kind.equals(RECRUIT_ALL)) {
+                    allEvents = eventRepository.getMySearchEventList(limit, start, title, type, null, privateId, cityName);
+                } else {
+                    allEvents = eventRepository.getMySearchEventList(limit, start, title, type, kind, privateId, cityName);
+                }
+            }
         }
-        return findEventList;
-    }
-    public String translateEndDate(LocalDateTime time){
-        StringBuilder sb = new StringBuilder();
-        sb.append(time.getYear());
-        sb.append(".");
-        sb.append(time.getMonthValue());
-        sb.append(".");
-        sb.append(time.getDayOfMonth());
-        sb.append(" ");
-        sb.append(time.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.KOREAN));
-        return sb.toString();
+
+        long totalCount = getSearchAllEventsCountValue(title, sort, type, kind, privateId, cityName);
+
+        List<SearchAllEvent> items = allEvents.stream()
+                .map(ae -> SearchAllEvent.builder()
+                        .eventId(ae.getEventId())
+                        .eventType(ae.getEventType())
+                        .name(ae.getName())
+                        .startDate(ae.getStartDate())
+                        .recruitStatus(ae.getRecruitStatus())
+                        .build())
+                .collect(Collectors.toList());
+
+        return SearchAllEventList.builder()
+                .items(items)
+                .pagination(SearchAllEventList.Pagination.builder().totalCount(totalCount).build())
+                .build();
     }
 }

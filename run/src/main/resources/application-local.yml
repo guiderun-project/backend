@@ -1,3 +1,14 @@
+logging:
+  level:
+    com.guide.run: DEBUG
+    com.guide.run.global.logging: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{30}) [%X{requestId}] - %msg%n"
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -57,7 +68,7 @@ spring:
   tosspayments:
     secret-key: ${TOSSPAYMENTS_SECRET_KEY}
   appsmith:
-    webhook-secret: ${APPSMITH_WEBHOOK_SECRET}
+    webhook-secret: ${APPSMITH_WEBHOOK_SECRET:local-dev-secret}
 
 cors:
   origin: http://localhost:3000

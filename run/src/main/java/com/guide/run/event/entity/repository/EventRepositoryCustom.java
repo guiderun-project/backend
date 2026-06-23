@@ -7,6 +7,7 @@ import com.guide.run.event.entity.dto.response.get.*;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,4 +29,18 @@ public interface EventRepositoryCustom {
     long countByPrivateIdAndCityName(String privateId, CityName cityName);
 
     long updateRecruitEndForClosedEvents();
+
+    List<AllEvent> getSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> getMySearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
+    long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    long getMySearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
+
+    long countApprovedEventsByYear(int year);
+    double sumDistanceByYear(int year);
+    long countMyParticipation(String privateId);
+    double sumMyParticipationDistance(String privateId);
+
+    List<MyActivityEventsResponse.Item> findActivityEvents(String privateId, EventType type, String relation, int page, int size);
+    long countActivityEvents(String privateId, EventType type, String relation);
 }
