@@ -19,14 +19,26 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 
 
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+    private static final List<String> DEFAULT_ALLOWED_ORIGINS = List.of(
+            "https://dev.guiderun.org",
+            "https://guiderun.org",
+            "https://www.guiderun.org"
+    );
+
     private final JwtProvider jwtProvider;
-     @Value("${cors.origin}")
+
+    @Value("${cors.allowed-origins:${cors.origin:}}")
     private String origin;
 
     @Bean
@@ -43,21 +55,7 @@ public class SecurityConfig {
                     .requestMatchers("/health")
                     .requestMatchers("/webhook/tosspayments")
                     .requestMatchers("/webhook/appsmith/user-approval")
-                    .requestMatchers("/favicon.ico")
-                    .requestMatchers("/member-upload")
-                    .requestMatchers("/event-upload")
-                    .requestMatchers("/attendance-upload")
-                    .requestMatchers("/api/oauth/**")
-                    .requestMatchers("/api/sms/**")
-                    .requestMatchers("/api/accountId")
-                    .requestMatchers("/api/new-password")
-                    .requestMatchers("/api/event/summary")
-                    .requestMatchers("/tmp/**")
-                    .requestMatchers("/api/login")
-                    .requestMatchers("/v3/api-docs/**")
-                    .requestMatchers("/v3/api-docs")
-                    .requestMatchers("/swagger-ui/**")
-                    .requestMatchers("/swagger-ui.html");
+                    .requestMatchers("/favicon.ico");
         };
     }
     @Bean
@@ -81,6 +79,7 @@ public class SecurityConfig {
                         // RegexRequestMatcher는 쿼리스트링까지 포함해 비교하므로 끝에 (\?.*)? 를 둬야 ?tab=... 가 붙어도 매칭된다.
                         .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+(\\?.*)?$", "GET")).permitAll()
                         // 비회원도 조회 가능한 공개 목록/검색/댓글 API (GET 한정)
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/summary(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/all(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/search(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/upcoming(\\?.*)?$", "GET")).permitAll()
@@ -111,7 +110,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin(origin);
+        allowedOrigins().forEach(config::addAllowedOrigin);
         config.addAllowedMethod("*"); // 모든 메소드 허용.
         config.addAllowedHeader("*");
         config.setMaxAge(3600L);
@@ -120,5 +119,18 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private Set<String> allowedOrigins() {
+        Set<String> allowedOrigins = new LinkedHashSet<>(DEFAULT_ALLOWED_ORIGINS);
+        if (origin == null || origin.isBlank()) {
+            return allowedOrigins;
+        }
+
+        Arrays.stream(origin.split(","))
+                .map(String::trim)
+                .filter(configuredOrigin -> !configuredOrigin.isEmpty())
+                .forEach(allowedOrigins::add);
+        return allowedOrigins;
     }
 }
