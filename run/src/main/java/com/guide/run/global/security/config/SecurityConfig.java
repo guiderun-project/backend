@@ -51,7 +51,6 @@ public class SecurityConfig {
                     .requestMatchers("/api/sms/**")
                     .requestMatchers("/api/accountId")
                     .requestMatchers("/api/new-password")
-                    .requestMatchers("/api/event/summary")
                     .requestMatchers("/tmp/**")
                     .requestMatchers("/api/login")
                     .requestMatchers("/v3/api-docs/**")
@@ -81,6 +80,7 @@ public class SecurityConfig {
                         // RegexRequestMatcher는 쿼리스트링까지 포함해 비교하므로 끝에 (\?.*)? 를 둬야 ?tab=... 가 붙어도 매칭된다.
                         .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+(\\?.*)?$", "GET")).permitAll()
                         // 비회원도 조회 가능한 공개 목록/검색/댓글 API (GET 한정)
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/summary(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/all(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/search(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers(new RegexRequestMatcher("^/api/event/upcoming(\\?.*)?$", "GET")).permitAll()
