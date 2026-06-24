@@ -29,9 +29,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 
-@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
-        maxAge = 3600,
-        allowCredentials = "true")
 @Tag(name = "Auth", description = "아이디 찾기, 비밀번호 재설정, 로그아웃과 관련된 인증 보조 API")
 @RestController
 @RequiredArgsConstructor

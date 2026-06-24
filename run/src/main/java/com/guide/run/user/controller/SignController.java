@@ -42,9 +42,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.CommunicationException;
 
 @Slf4j
-@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
-maxAge = 3600,
-allowCredentials = "true")
 @Tag(name = "Auth", description = "로그인, 회원가입, 토큰 재발급, 중복 확인과 회원 탈퇴를 다루는 인증 API")
 @RestController
 @RequiredArgsConstructor
