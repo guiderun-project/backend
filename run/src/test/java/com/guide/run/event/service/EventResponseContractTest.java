@@ -2,6 +2,7 @@ package com.guide.run.event.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guide.run.event.entity.dto.response.comments.GetComment;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
 import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
@@ -110,5 +111,22 @@ class EventResponseContractTest {
         assertThat(json.at("/items/0/myPartner/0/type").asText()).isEqualTo("VI");
         assertThat(json.at("/items/0/myPartner/0/name").asText()).isEqualTo("홍길동");
         assertThat(json.at("/items/0/date").isMissingNode()).isTrue();
+    }
+
+    @Test
+    @DisplayName("댓글 목록 항목의 createdAt은 초 단위까지 포함한 ISO datetime 문자열을 사용한다")
+    void commentCreatedAtIncludesTime() throws Exception {
+        GetComment comment = new GetComment(
+                301L,
+                "홍길동",
+                "guide_102",
+                UserType.GUIDE,
+                "이번 주 토요일에도 참여할게요.",
+                LocalDateTime.of(2026, 6, 24, 13, 45, 30)
+        );
+
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(comment));
+
+        assertThat(json.at("/createdAt").asText()).isEqualTo("2026-06-24T13:45:30");
     }
 }
