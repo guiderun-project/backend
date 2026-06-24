@@ -2,6 +2,12 @@ package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.UnauthorizedUserException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventFormStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.dto.GuideRunningInfoDto;
 import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.PersonalInfoDto;
@@ -22,7 +28,11 @@ import com.guide.run.user.entity.user.Vi;
 import com.guide.run.user.repository.*;
 import com.guide.run.user.repository.user.UserRepository;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +47,8 @@ public class SignupInfoService {
     private final UserRepository userRepository;
     private final ArchiveDataRepository archiveDataRepository;
     private final SignUpInfoRepository signUpInfoRepository;
+    private final EventFormRepository eventFormRepository;
+    private final EventRepository eventRepository;
 
     //약관 동의 조회
     @Transactional
@@ -296,11 +308,7 @@ public class SignupInfoService {
                 .recordDegree(user.getRecordDegree())
                 .build();
 
-        MyPageResponse.Participation participation = MyPageResponse.Participation.builder()
-                .trainingCount(user.getTrainingCnt())
-                .competitionCount(user.getCompetitionCnt())
-                .totalCount(user.getTrainingCnt() + user.getCompetitionCnt())
-                .build();
+        MyPageResponse.Participation participation = getParticipation(privateId);
 
         MyPageResponse.PersonalInfo personalInfo = MyPageResponse.PersonalInfo.builder()
                 .birthDate(user.getBirth())
@@ -322,6 +330,43 @@ public class SignupInfoService {
                 .participation(participation)
                 .personalInfo(personalInfo)
                 .runningInfo(runningInfo)
+                .build();
+    }
+
+    private MyPageResponse.Participation getParticipation(String privateId) {
+        List<Long> eventIds = eventFormRepository.findAllByPrivateId(privateId).stream()
+                .filter(form -> EventFormStatus.APPLIED.equals(form.getStatus()))
+                .map(EventForm::getEventId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (eventIds.isEmpty()) {
+            return participation(0, 0);
+        }
+
+        Map<Long, EventType> eventTypesById = eventRepository.findAllById(eventIds).stream()
+                .collect(Collectors.toMap(Event::getId, Event::getType, (first, second) -> first));
+
+        int trainingCount = 0;
+        int competitionCount = 0;
+        for (Long eventId : eventIds) {
+            EventType type = eventTypesById.get(eventId);
+            if (EventType.TRAINING.equals(type)) {
+                trainingCount++;
+            } else if (EventType.COMPETITION.equals(type)) {
+                competitionCount++;
+            }
+        }
+
+        return participation(trainingCount, competitionCount);
+    }
+
+    private MyPageResponse.Participation participation(int trainingCount, int competitionCount) {
+        return MyPageResponse.Participation.builder()
+                .trainingCount(trainingCount)
+                .competitionCount(competitionCount)
+                .totalCount(trainingCount + competitionCount)
                 .build();
     }
 }

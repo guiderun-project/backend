@@ -1,6 +1,13 @@
 package com.guide.run.user.service;
 
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventFormStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
+import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
 import com.guide.run.user.entity.ArchiveData;
 import com.guide.run.user.entity.type.UserType;
@@ -14,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +39,8 @@ class SignupInfoServiceTest {
     @Mock private com.guide.run.user.repository.ViRepository viRepository;
     @Mock private com.guide.run.user.repository.GuideRepository guideRepository;
     @Mock private com.guide.run.user.repository.SignUpInfoRepository signUpInfoRepository;
+    @Mock private EventFormRepository eventFormRepository;
+    @Mock private EventRepository eventRepository;
 
     @InjectMocks private SignupInfoService signupInfoService;
 
@@ -76,5 +86,53 @@ class SignupInfoServiceTest {
         assertThat(response.getHopePrefs()).isEqualTo("초보");
         assertThat(archiveData.getRunningPlace()).isEqualTo("한강");
         verify(archiveDataRepository).save(archiveData);
+    }
+
+    @Test
+    @DisplayName("마이페이지 참여 수는 사용자 카운터가 아니라 신청 완료된 이벤트 기준으로 계산한다")
+    void getMyPageCountsParticipationFromAppliedEventForms() {
+        User user = User.builder()
+                .userId("u1")
+                .privateId(PRIVATE_ID)
+                .type(UserType.GUIDE)
+                .trainingCnt(0)
+                .competitionCnt(0)
+                .build();
+        when(userRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(user));
+        when(archiveDataRepository.findById(PRIVATE_ID)).thenReturn(Optional.empty());
+        when(signUpInfoRepository.findById(PRIVATE_ID)).thenReturn(Optional.empty());
+        when(eventFormRepository.findAllByPrivateId(PRIVATE_ID)).thenReturn(List.of(
+                eventForm(1L, EventFormStatus.APPLIED),
+                eventForm(2L, EventFormStatus.APPLIED),
+                eventForm(3L, EventFormStatus.APPLIED),
+                eventForm(4L, EventFormStatus.CANCELED)
+        ));
+        when(eventRepository.findAllById(any())).thenReturn(List.of(
+                event(1L, EventType.TRAINING),
+                event(2L, EventType.TRAINING),
+                event(3L, EventType.COMPETITION),
+                event(4L, EventType.COMPETITION)
+        ));
+
+        MyPageResponse response = signupInfoService.getMyPage(PRIVATE_ID);
+
+        assertThat(response.getParticipation().getTrainingCount()).isEqualTo(2);
+        assertThat(response.getParticipation().getCompetitionCount()).isEqualTo(1);
+        assertThat(response.getParticipation().getTotalCount()).isEqualTo(3);
+    }
+
+    private EventForm eventForm(Long eventId, EventFormStatus status) {
+        return EventForm.builder()
+                .eventId(eventId)
+                .privateId(PRIVATE_ID)
+                .status(status)
+                .build();
+    }
+
+    private Event event(Long eventId, EventType type) {
+        return Event.builder()
+                .id(eventId)
+                .type(type)
+                .build();
     }
 }
