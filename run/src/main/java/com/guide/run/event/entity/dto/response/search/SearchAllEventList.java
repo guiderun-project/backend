@@ -20,6 +20,22 @@ public class SearchAllEventList {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Pagination {
+        private int page;
+        private int size;
         private long totalCount;
+        private int totalPages;
+        private boolean hasNext;
+
+        public static Pagination of(int page, int size, long totalCount) {
+            int normalizedPage = Math.max(page, 1);
+            int totalPages = size > 0 ? (int) Math.ceil((double) totalCount / size) : 0;
+            return Pagination.builder()
+                    .page(normalizedPage)
+                    .size(size)
+                    .totalCount(totalCount)
+                    .totalPages(totalPages)
+                    .hasNext(normalizedPage < totalPages)
+                    .build();
+        }
     }
 }

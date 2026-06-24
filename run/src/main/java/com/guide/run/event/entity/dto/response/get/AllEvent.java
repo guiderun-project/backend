@@ -10,17 +10,30 @@ import java.util.Locale;
 
 @Getter
 public class AllEvent {
-    private Long eventId;
-    private EventType eventType;
-    private String name;
-    private String startDate;
+    private Long id;
     private EventRecruitStatus recruitStatus;
+    private String name;
+    private EventType type;
+    private String dateText;
 
     public AllEvent(Long eventId, EventType eventType, String name, LocalDateTime startDate, EventRecruitStatus recruitStatus) {
-        this.eventId = eventId;
-        this.eventType = eventType;
+        this.id = eventId;
+        this.recruitStatus = toResponseRecruitStatus(recruitStatus);
         this.name = name;
-        this.startDate = startDate.getYear()+"."+ startDate.getMonthValue()+"."+ startDate.getDayOfMonth()+" "+ startDate.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA);
-        this.recruitStatus = recruitStatus;
+        this.type = eventType;
+        this.dateText = String.format(
+                "%04d. %02d. %02d %s",
+                startDate.getYear(),
+                startDate.getMonthValue(),
+                startDate.getDayOfMonth(),
+                startDate.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA)
+        );
+    }
+
+    private EventRecruitStatus toResponseRecruitStatus(EventRecruitStatus recruitStatus) {
+        if (recruitStatus == EventRecruitStatus.RECRUIT_END) {
+            return EventRecruitStatus.RECRUIT_CLOSE;
+        }
+        return recruitStatus;
     }
 }

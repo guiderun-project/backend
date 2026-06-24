@@ -28,9 +28,9 @@ public class EventSearchService {
     public long getSearchAllEventsCountValue(String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
         if (sort.equals("UPCOMING")) {
             if (type.equals(TOTAL)) {
-                return eventRepository.getSearchEventListCount(title, null, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
+                return eventRepository.upcomingGetSearchEventListCount(title, null, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
             } else {
-                return eventRepository.getSearchEventListCount(title, type, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
+                return eventRepository.upcomingGetSearchEventListCount(title, type, kind.equals(RECRUIT_ALL) ? RECRUIT_ALL : kind, cityName);
             }
         } else if (sort.equals("END")) {
             if (type.equals(TOTAL)) {
@@ -61,7 +61,7 @@ public class EventSearchService {
                 .build();
     }
 
-    public SearchAllEventList getSearchAllEvents(int start, int limit, String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
+    public SearchAllEventList getSearchAllEvents(int start, int limit, int page, String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
         List<AllEvent> allEvents = new ArrayList<>();
 
         if (sort.equals("UPCOMING")) {
@@ -97,17 +97,17 @@ public class EventSearchService {
 
         List<SearchAllEvent> items = allEvents.stream()
                 .map(ae -> SearchAllEvent.builder()
-                        .eventId(ae.getEventId())
-                        .eventType(ae.getEventType())
-                        .name(ae.getName())
-                        .startDate(ae.getStartDate())
+                        .id(ae.getId())
                         .recruitStatus(ae.getRecruitStatus())
+                        .name(ae.getName())
+                        .type(ae.getType())
+                        .dateText(ae.getDateText())
                         .build())
                 .collect(Collectors.toList());
 
         return SearchAllEventList.builder()
                 .items(items)
-                .pagination(SearchAllEventList.Pagination.builder().totalCount(totalCount).build())
+                .pagination(SearchAllEventList.Pagination.of(page, limit, totalCount))
                 .build();
     }
 }

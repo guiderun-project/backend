@@ -195,6 +195,35 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
+    public long countEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
+                )
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
+    public long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
+                        .and(checkByUpcomingDate())
+                )
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
     public List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus,CityName cityName) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
@@ -207,6 +236,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
                 )
                 .orderBy(event.startTime.desc())
                 .offset(start)
@@ -226,6 +256,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
+                        .and(checkByUpcomingDate())
                 )
                 .orderBy(event.startTime.asc())
                 .offset(start)
@@ -267,6 +299,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
                         .and(checkByTitle(title))
                 )
                 .orderBy(event.startTime.desc())
@@ -288,7 +321,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
                         .and(checkByTitle(title))
+                        .and(checkByUpcomingDate())
                 )
                 .orderBy(event.startTime.asc())
                 .offset(start)
@@ -320,6 +355,22 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
+    public long upcomingGetSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+        Long result = queryFactory.select(event.count())
+                .from(event)
+                .where(checkByKind(eventRecruitStatus)
+                        .and(checkByType(eventType))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
+                        .and(checkByTitle(title))
+                        .and(checkByUpcomingDate())
+                )
+                .fetchOne();
+        return result != null ? result : 0L;
+    }
+
+    @Override
     public long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
         return queryFactory.select(event.count())
                 .from(event)
@@ -327,6 +378,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
+                        .and(checkByPublicEvent())
                         .and(checkByTitle(title))
                 )
                 .fetchOne();
@@ -455,6 +507,14 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         } else{
             return new BooleanBuilder(event.cityName.eq(CityName.SEOUL));
         }
+    }
+
+    private BooleanBuilder checkByUpcomingDate() {
+        return new BooleanBuilder(event.startTime.goe(LocalDate.now().atStartOfDay()));
+    }
+
+    private BooleanBuilder checkByPublicEvent() {
+        return new BooleanBuilder(event.isPrivate.eq(false));
     }
 
     private BooleanBuilder checkByKind(EventRecruitStatus kind){

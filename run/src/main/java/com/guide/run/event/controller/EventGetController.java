@@ -36,14 +36,14 @@ public class EventGetController {
     private final JwtProvider jwtProvider;
     private final EventGetService eventGetService;
 
-    @Operation(summary = "다가오는 이벤트 목록 조회", description = "메인/홈 화면에서 모집 중이거나 모집 예정인 가까운 이벤트 목록을 최대 10건 조회합니다. isApply는 로그인 사용자의 신청 여부를 나타냅니다.")
+    @Operation(summary = "다가오는 이벤트 목록 조회", description = "메인/홈 화면에서 사용자 유형에 맞는 가까운 이벤트 목록을 조회합니다.")
     @GetMapping("/upcoming")
     public ResponseEntity<UpcomingEventResponse> getUpcomingEvents(
-            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
-            @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "기존 클라이언트 호환용 파라미터. 응답 계산에는 사용하지 않습니다.", example = "0")
+            @RequestParam(value = "page", required = false) Integer page,
             HttpServletRequest request) {
         String userId = jwtProvider.tryExtractUserId(request);
-        return ResponseEntity.ok(eventGetService.getUpcomingEvents(page, userId));
+        return ResponseEntity.ok(eventGetService.getUpcomingEvents(userId));
     }
 
     @Operation(summary = "이벤트 요약 조회", description = "메인페이지 상단 요약. 비회원은 올해 전체 이벤트 수와 거리, 회원은 개인 누적 참여 수와 거리도 조회합니다.")
@@ -72,17 +72,18 @@ public class EventGetController {
     public ResponseEntity<Count> getAllEventListCount(
             @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam("tab") String tab,
             @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
-            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
+            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
             HttpServletRequest request){
         tab = normalizeTab(tab);
+        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
         if(!tab.equals("UPCOMING") && !tab.equals("END") && !tab.equals("MY")) throw new NotValidSortException();
         if(!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
-        if(!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
-                && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
+        validateRecruitStatus(effectiveRecruitStatus);
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).
-                body(Count.builder().count(eventGetService.getAllEventListCount(tab, type, kind, userId, cityName)).build());
+                body(Count.builder().count(eventGetService.getAllEventListCount(tab, type, effectiveRecruitStatus, userId, cityName)).build());
     }
 
     // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.
@@ -90,23 +91,44 @@ public class EventGetController {
         return "PAST".equals(tab) ? "END" : tab;
     }
 
+    private EventRecruitStatus resolveRecruitStatus(EventRecruitStatus recruitStatus, EventRecruitStatus kind) {
+        if (recruitStatus != null) {
+            return recruitStatus;
+        }
+        if (kind != null) {
+            return kind;
+        }
+        return RECRUIT_ALL;
+    }
+
+    private void validateRecruitStatus(EventRecruitStatus recruitStatus) {
+        if(!recruitStatus.equals(RECRUIT_UPCOMING) && !recruitStatus.equals(RECRUIT_OPEN) && !recruitStatus.equals(RECRUIT_CLOSE)
+                && !recruitStatus.equals(RECRUIT_END) && !recruitStatus.equals(RECRUIT_ALL)) throw new NotValidKindException();
+    }
+
+    private int normalizePage(int page) {
+        return Math.max(page, 1);
+    }
+
     @Operation(summary = "전체 이벤트 목록 조회", description = "전체 이벤트 탭에서 선택한 필터와 페이지네이션 조건에 맞는 이벤트 목록을 조회합니다.")
     @GetMapping("/all")
     public ResponseEntity<AllEventResponse> getAllEventList(
             @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam("tab") String tab,
             @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
-            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
+            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
-            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "페이지 번호 (1부터 시작)", example = "1") @RequestParam(value = "page", defaultValue = "1") int page,
             HttpServletRequest request){
         tab = normalizeTab(tab);
+        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
         if(!tab.equals("UPCOMING") && !tab.equals("END") && !tab.equals("MY")) throw new NotValidSortException();
         if(!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
-        if(!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
-                && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
+        validateRecruitStatus(effectiveRecruitStatus);
         String userId = jwtProvider.tryExtractUserId(request);
-        int start = page * PAGE_SIZE;
+        int normalizedPage = normalizePage(page);
+        int start = (normalizedPage - 1) * PAGE_SIZE;
         return ResponseEntity.status(200).
-                body(eventGetService.getAllEventList(PAGE_SIZE, start, tab, type, kind, userId, cityName));
+                body(eventGetService.getAllEventList(PAGE_SIZE, start, normalizedPage, tab, type, effectiveRecruitStatus, userId, cityName));
     }
 }

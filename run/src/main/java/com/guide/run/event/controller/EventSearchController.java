@@ -41,15 +41,18 @@ public class EventSearchController {
             @Parameter(description = "검색어", example = "상계천") @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam(value = "tab", defaultValue = "UPCOMING") String tab,
             @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
-            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
+            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
-            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(value = "page", defaultValue = "0") int page,
+            @Parameter(description = "페이지 번호 (1부터 시작)", example = "1") @RequestParam(value = "page", defaultValue = "1") int page,
             HttpServletRequest request) {
         tab = normalizeTab(tab);
-        validateParams(tab, type, kind);
+        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
+        validateParams(tab, type, effectiveRecruitStatus);
         String privateId = extracted(request);
-        int start = page * PAGE_SIZE;
-        return eventSearchService.getSearchAllEvents(start, PAGE_SIZE, keyword, tab, type, kind, privateId, cityName);
+        int normalizedPage = normalizePage(page);
+        int start = (normalizedPage - 1) * PAGE_SIZE;
+        return eventSearchService.getSearchAllEvents(start, PAGE_SIZE, normalizedPage, keyword, tab, type, effectiveRecruitStatus, privateId, cityName);
     }
 
     @Operation(summary = "이벤트 검색 개수 조회", description = "이벤트 검색 화면에서 키워드 및 탭 조건 기준 검색 결과 개수를 조회합니다.")
@@ -58,13 +61,15 @@ public class EventSearchController {
             @Parameter(description = "검색어", example = "상계천") @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam(value = "tab", defaultValue = "UPCOMING") String tab,
             @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
-            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", defaultValue = "RECRUIT_ALL") EventRecruitStatus kind,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
+            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
             @RequestParam(value = "cityName", required = false) CityName cityName,
             HttpServletRequest request) {
         tab = normalizeTab(tab);
-        validateParams(tab, type, kind);
+        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
+        validateParams(tab, type, effectiveRecruitStatus);
         String privateId = extracted(request);
-        return eventSearchService.getSearchAllEventsCount(keyword, tab, type, kind, privateId, cityName);
+        return eventSearchService.getSearchAllEventsCount(keyword, tab, type, effectiveRecruitStatus, privateId, cityName);
     }
 
     // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.
@@ -77,6 +82,20 @@ public class EventSearchController {
         if (!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
         if (!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
                 && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
+    }
+
+    private EventRecruitStatus resolveRecruitStatus(EventRecruitStatus recruitStatus, EventRecruitStatus kind) {
+        if (recruitStatus != null) {
+            return recruitStatus;
+        }
+        if (kind != null) {
+            return kind;
+        }
+        return RECRUIT_ALL;
+    }
+
+    private int normalizePage(int page) {
+        return Math.max(page, 1);
     }
 
     // 비회원도 검색 가능. 토큰이 있으면 사용자 존재를 검증하고, 없으면 null(비회원)로 처리한다.
