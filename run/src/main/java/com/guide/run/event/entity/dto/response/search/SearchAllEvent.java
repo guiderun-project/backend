@@ -10,9 +10,9 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class SearchAllEvent {
-    private Long eventId;
-    private EventType eventType;
-    private String name;
-    private String startDate;
+    private Long id;
     private EventRecruitStatus recruitStatus;
-}
+    private String name;
+    private EventType type;
+    private String dateText;
+}
