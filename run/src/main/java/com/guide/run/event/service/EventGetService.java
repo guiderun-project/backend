@@ -67,7 +67,7 @@ public class EventGetService {
         if (sort.equals("UPCOMING")) {
             return eventRepository.countUpcomingEventList(type.equals(TOTAL) ? null : type, kind, cityName);
         } else if (sort.equals("END")) {
-            return eventRepository.countEventList(type.equals(TOTAL) ? null : type, RECRUIT_END, cityName);
+            return eventRepository.countPastEventList(type.equals(TOTAL) ? null : type, cityName);
         } else {
             if (type.equals(TOTAL)) {
                 if (kind.equals(RECRUIT_ALL)) {
@@ -117,9 +117,9 @@ public class EventGetService {
             }
         }else if(sort.equals("END")){
             if(type.equals(TOTAL)){
-                allEvents = eventRepository.getAllEventList(limit,start,null, RECRUIT_END,cityName);
+                allEvents = eventRepository.pastGetAllEventList(limit,start,null,cityName);
             }else{
-                allEvents = eventRepository.getAllEventList(limit,start,type,RECRUIT_END,cityName);
+                allEvents = eventRepository.pastGetAllEventList(limit,start,type,cityName);
             }
         }else{
             if(type.equals(TOTAL)){

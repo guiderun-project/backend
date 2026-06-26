@@ -25,8 +25,10 @@ public interface EventRepositoryCustom {
 
     long countEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
     long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    long countPastEventList(EventType eventType, CityName cityName);
     List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
     List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> pastGetAllEventList(int limit, int start, EventType eventType, CityName cityName);
 
     long countByPrivateIdAndCityName(String privateId, CityName cityName);
 
@@ -34,8 +36,10 @@ public interface EventRepositoryCustom {
 
     List<AllEvent> getSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
     List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    List<AllEvent> pastGetSearchEventList(int limit, int start, String title, EventType eventType, CityName cityName);
     List<AllEvent> getMySearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
     long upcomingGetSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
+    long pastGetSearchEventListCount(String title, EventType eventType, CityName cityName);
     long getSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
     long getMySearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
 
