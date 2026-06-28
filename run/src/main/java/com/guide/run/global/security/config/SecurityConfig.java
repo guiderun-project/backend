@@ -86,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+/comments(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(
+                                "/api/user/mypage",
                                 "/api/user/personal/**",
                                 "/api/user/permission/**",
                                 "/api/user/running/**",
