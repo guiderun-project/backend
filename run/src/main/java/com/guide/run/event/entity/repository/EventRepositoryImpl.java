@@ -6,6 +6,7 @@ import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.MyEvent;
 import com.guide.run.event.entity.dto.response.get.MyEventDday;
+import com.guide.run.event.service.EventTemporalStatusResolver;
 import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import com.querydsl.jpa.JPAExpressions;
 import com.guide.run.event.entity.type.CityName;
@@ -44,12 +45,15 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                             event.type.as("eventType"),
                             event.name.as("name"),
                             event.recruitStatus.as("recruitStatus"),
+                            event.recruitStartDate.as("recruitStartDate"),
+                            event.recruitEndDate.as("recruitEndDate"),
+                            event.startTime.as("startDate"),
                             event.endTime.as("endDate"))
                     )
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.eq(eventRecruitStatus)
+                    .where(checkByPastDateTime()
                             .and(event.isApprove.eq(true))
                             .and(event.startTime.year().eq(year))
                             .and(event.id.eq(eventForm.eventId))
@@ -65,12 +69,15 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                                     event.type.as("eventType"),
                                     event.name.as("name"),
                                     event.recruitStatus.as("recruitStatus"),
+                                    event.recruitStartDate.as("recruitStartDate"),
+                                    event.recruitEndDate.as("recruitEndDate"),
+                                    event.startTime.as("startDate"),
                                     event.endTime.as("endDate"))
                     )
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(event.recruitStatus.ne(RECRUIT_END)
+                    .where(checkByUpcomingDate()
                             .and(event.isApprove.eq(true))
                             .and(event.startTime.year().eq(year))
                             .and(event.id.eq(eventForm.eventId))
@@ -80,7 +87,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .limit(4)
                     .fetch();
             for(MyEvent myEvent : fetch){
-                myEvent.setdDay((int)DAYS.between(LocalDate.now(),myEvent.getEndDate()));
+                myEvent.setdDay((int)DAYS.between(EventTemporalStatusResolver.today(),myEvent.getEndDate()));
             }
             return fetch;
         }
@@ -111,6 +118,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                                 event.type.as("eventType"),
                                 event.name.as("name"),
                                 event.startTime.as("startDate"),
+                                event.endTime.as("endDate"),
+                                event.recruitStartDate.as("recruitStartDate"),
+                                event.recruitEndDate.as("recruitEndDate"),
                                 event.recruitStatus.as("recruitStatus"))
                 )
                 .from(event)
@@ -146,6 +156,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 event.type.as("eventType"),
                 event.name.as("name"),
                 event.startTime.as("date"),
+                event.endTime.as("endDate"),
+                event.recruitStartDate.as("recruitStartDate"),
+                event.recruitEndDate.as("recruitEndDate"),
                 event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
@@ -244,6 +257,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
@@ -264,6 +280,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
@@ -286,6 +305,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByType(eventType)
@@ -328,6 +350,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
@@ -350,6 +375,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
@@ -373,6 +401,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .where(checkByType(eventType)
@@ -395,6 +426,9 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         event.type.as("eventType"),
                         event.name.as("name"),
                         event.startTime.as("date"),
+                        event.endTime.as("endDate"),
+                        event.recruitStartDate.as("recruitStartDate"),
+                        event.recruitEndDate.as("recruitEndDate"),
                         event.recruitStatus.as("recruitStatus")))
                 .from(event)
                 .join(eventForm).on(eventForm.eventId.eq(event.id))
@@ -582,11 +616,11 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     private BooleanBuilder checkByUpcomingDate() {
-        return new BooleanBuilder(event.startTime.goe(LocalDate.now().atStartOfDay()));
+        return new BooleanBuilder(event.startTime.gt(EventTemporalStatusResolver.now()));
     }
 
     private BooleanBuilder checkByPastDateTime() {
-        return new BooleanBuilder(event.endTime.lt(LocalDateTime.now()));
+        return new BooleanBuilder(event.endTime.lt(EventTemporalStatusResolver.now()));
     }
 
     private BooleanBuilder checkByPublicEvent() {
@@ -597,15 +631,28 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         if(kind==null){
             return new BooleanBuilder();
         } else if(kind.equals(RECRUIT_UPCOMING)){
-            return new BooleanBuilder(event.recruitStatus.eq(EventRecruitStatus.RECRUIT_UPCOMING));
+            LocalDate today = EventTemporalStatusResolver.today();
+            LocalDateTime now = EventTemporalStatusResolver.now();
+            return new BooleanBuilder(event.recruitStatus.ne(RECRUIT_CLOSE)
+                    .and(event.startTime.gt(now))
+                    .and(event.recruitStartDate.gt(today)));
         } else if(kind.equals(RECRUIT_OPEN)){
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_OPEN));
+            LocalDate today = EventTemporalStatusResolver.today();
+            LocalDateTime now = EventTemporalStatusResolver.now();
+            return new BooleanBuilder(event.recruitStatus.ne(RECRUIT_CLOSE)
+                    .and(event.startTime.gt(now))
+                    .and(event.recruitStartDate.loe(today))
+                    .and(event.recruitEndDate.goe(today)));
         } else if(kind.equals(RECRUIT_CLOSE)){
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE));
+            LocalDate today = EventTemporalStatusResolver.today();
+            LocalDateTime now = EventTemporalStatusResolver.now();
+            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_CLOSE)
+                    .or(event.startTime.loe(now))
+                    .or(event.recruitEndDate.lt(today)));
         } else if (kind.equals(RECRUIT_END)) {
-            return new BooleanBuilder(event.recruitStatus.eq(RECRUIT_END));
+            return checkByPastDateTime();
         } else if(kind.equals(RECRUIT_ALL)){
-            return new BooleanBuilder(event.recruitStatus.ne(RECRUIT_END));
+            return new BooleanBuilder();
         }
         return null;
     }

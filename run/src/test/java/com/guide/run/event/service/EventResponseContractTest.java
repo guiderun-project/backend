@@ -60,6 +60,26 @@ class EventResponseContractTest {
     }
 
     @Test
+    @DisplayName("이벤트 목록 항목은 projection의 시간 필드로 현재 모집 상태를 계산한다")
+    void allEventComputesRecruitStatusFromTemporalFields() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+
+        AllEvent item = new AllEvent(
+                101L,
+                EventType.TRAINING,
+                "한강 러닝 모임",
+                now.plusDays(3),
+                now.plusDays(3).plusHours(2),
+                today.minusDays(5),
+                today.minusDays(1),
+                EventRecruitStatus.RECRUIT_OPEN
+        );
+
+        assertThat(item.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
+    }
+
+    @Test
     @DisplayName("다가오는 모임 비회원 응답은 viewerType=GUEST와 공개 모임 필드만 사용한다")
     void upcomingGuestResponseUsesNotionContract() throws Exception {
         UpcomingEventResponse response = UpcomingEventResponse.guest(List.of(
