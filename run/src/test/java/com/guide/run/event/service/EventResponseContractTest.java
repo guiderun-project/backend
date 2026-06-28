@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
+import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -57,6 +58,36 @@ class EventResponseContractTest {
         assertThat(json.at("/pagination/totalCount").asLong()).isEqualTo(27L);
         assertThat(json.at("/pagination/totalPages").asInt()).isEqualTo(3);
         assertThat(json.at("/pagination/hasNext").asBoolean()).isTrue();
+    }
+
+    @Test
+    @DisplayName("이벤트 목록 항목은 projection의 시간 필드로 현재 모집 상태를 계산한다")
+    void allEventComputesRecruitStatusFromTemporalFields() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+
+        AllEvent item = new AllEvent(
+                101L,
+                EventType.TRAINING,
+                "한강 러닝 모임",
+                now.plusDays(3),
+                now.plusDays(3).plusHours(2),
+                today.minusDays(5),
+                today.minusDays(1),
+                EventRecruitStatus.RECRUIT_OPEN
+        );
+
+        assertThat(item.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
+    }
+
+    @Test
+    @DisplayName("나의 이벤트 D-day 항목은 날짜 기준으로 남은 일수를 계산한다")
+    void myEventDdayUsesDateBasedDayCount() {
+        LocalDateTime eventDate = EventTemporalStatusResolver.now().plusDays(2);
+
+        MyEventDday item = new MyEventDday("한강 러닝 모임", eventDate);
+
+        assertThat(item.getDDay()).isEqualTo(2L);
     }
 
     @Test

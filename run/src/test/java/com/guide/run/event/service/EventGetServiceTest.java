@@ -1,10 +1,16 @@
 package com.guide.run.event.service;
 
+import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.user.entity.type.Role;
+import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.repository.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +35,10 @@ class EventGetServiceTest {
     private EventRepository eventRepository;
     @Mock
     private EventFormRepository eventFormRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private MatchingRepository matchingRepository;
 
     @InjectMocks
     private EventGetService eventGetService;
@@ -98,5 +110,67 @@ class EventGetServiceTest {
         assertThat(response.getItems()).hasSize(1);
         verify(eventRepository).pastGetAllEventList(10, 0, null, null);
         verify(eventRepository, never()).getAllEventList(10, 0, null, EventRecruitStatus.RECRUIT_END, null);
+    }
+
+    @Test
+    @DisplayName("회원 다가오는 이벤트는 저장 상태가 이벤트 종료여도 시작 시간이 미래면 반환한다")
+    void getUpcomingEventsIncludesFutureEventWithStaleRecruitEndStatus() {
+        User member = User.builder()
+                .privateId("member-private")
+                .role(Role.ROLE_USER)
+                .type(UserType.GUIDE)
+                .build();
+        Event futureEvent = createEvent(
+                1L,
+                EventRecruitStatus.RECRUIT_END,
+                EventTemporalStatusResolver.now().plusDays(2)
+        );
+
+        when(userRepository.findUserByPrivateId("member-private")).thenReturn(Optional.of(member));
+        when(eventFormRepository.findAllByPrivateId("member-private")).thenReturn(List.of());
+        when(eventRepository.findAllById(any())).thenReturn(List.of());
+        when(eventRepository.findAllByOrganizer("member-private")).thenReturn(List.of(futureEvent));
+
+        var response = eventGetService.getUpcomingEvents("member-private");
+
+        assertThat(response.getItems()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("회원 다가오는 이벤트는 저장 상태가 모집중이어도 이미 시작했으면 제외한다")
+    void getUpcomingEventsExcludesStartedEventWithStaleOpenStatus() {
+        User member = User.builder()
+                .privateId("member-private")
+                .role(Role.ROLE_USER)
+                .type(UserType.GUIDE)
+                .build();
+        Event startedEvent = createEvent(
+                1L,
+                EventRecruitStatus.RECRUIT_OPEN,
+                EventTemporalStatusResolver.now().minusMinutes(1)
+        );
+
+        when(userRepository.findUserByPrivateId("member-private")).thenReturn(Optional.of(member));
+        when(eventFormRepository.findAllByPrivateId("member-private")).thenReturn(List.of());
+        when(eventRepository.findAllById(any())).thenReturn(List.of());
+        when(eventRepository.findAllByOrganizer("member-private")).thenReturn(List.of(startedEvent));
+
+        var response = eventGetService.getUpcomingEvents("member-private");
+
+        assertThat(response.getItems()).isEmpty();
+    }
+
+    private Event createEvent(Long id, EventRecruitStatus recruitStatus, LocalDateTime startTime) {
+        return Event.builder()
+                .id(id)
+                .name("상계천천히달리기")
+                .organizer("member-private")
+                .recruitStatus(recruitStatus)
+                .isApprove(true)
+                .type(EventType.TRAINING)
+                .startTime(startTime)
+                .endTime(startTime.plusHours(2))
+                .place("서울")
+                .build();
     }
 }

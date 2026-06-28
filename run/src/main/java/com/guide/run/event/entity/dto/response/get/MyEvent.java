@@ -1,5 +1,6 @@
 package com.guide.run.event.entity.dto.response.get;
 
+import com.guide.run.event.service.EventTemporalStatusResolver;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,26 @@ public class MyEvent {
         this.eventType = eventType;
         this.name = name;
         this.recruitStatus = recruitStatus;
+        this.endDate = endDate.toLocalDate();
+    }
+
+    public MyEvent(Long eventId,
+                   EventType eventType,
+                   String name,
+                   EventRecruitStatus recruitStatus,
+                   LocalDate recruitStartDate,
+                   LocalDate recruitEndDate,
+                   LocalDateTime startDate,
+                   LocalDateTime endDate) {
+        this.eventId = eventId;
+        this.eventType = eventType;
+        this.name = name;
+        this.recruitStatus = EventTemporalStatusResolver.resolveRecruitStatus(
+                recruitStatus,
+                recruitStartDate,
+                recruitEndDate,
+                startDate
+        );
         this.endDate = endDate.toLocalDate();
     }
 

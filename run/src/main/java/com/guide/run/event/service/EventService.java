@@ -259,7 +259,7 @@ public class EventService {
     public void eventDelete(String userId, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = EventTemporalStatusResolver.now();
         if(event.getEndTime().isBefore(now) ||event.getEndTime().isEqual(now)){
             throw new NotDeleteEventException(); //종료된 이벤트는 삭제 못함.
         }
@@ -336,7 +336,7 @@ public class EventService {
                 .organizer(organizerName)
                 .organizerRecord(organizerRecord)
                 .organizerType(organizerType)
-                .recruitStatus(event.getRecruitStatus())
+                .recruitStatus(EventTemporalStatusResolver.resolveRecruitStatus(event))
                 .date(LocalDate.from(event.getStartTime()))
                 .startTime(timeFormatter.getHHMM(event.getStartTime()))
                 .endTime(timeFormatter.getHHMM(event.getEndTime()))
@@ -345,7 +345,7 @@ public class EventService {
                 .viCnt(event.getViCnt())
                 .guideCnt(event.getGuideCnt())
                 .place(event.getPlace())
-                .status(event.getStatus())
+                .status(EventTemporalStatusResolver.resolveEventStatus(event))
                 .content(event.getContent())
                 .updatedAt(LocalDate.from(event.getUpdatedAt()))
                 .isApply(apply)
@@ -423,7 +423,7 @@ public class EventService {
         List<MissingRunningDistanceGetResponse.Item> items = eventRepository
                 .findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
                         privateId,
-                        LocalDateTime.now(),
+                        EventTemporalStatusResolver.now(),
                         PageRequest.of(0, 1)
                 )
                 .stream()
@@ -458,7 +458,8 @@ public class EventService {
         if (!event.getOrganizer().equals(privateId)) {
             throw new NotEventOrganizerException();
         }
-        if (event.getEndTime().isAfter(LocalDateTime.now()) || event.getEndTime().isEqual(LocalDateTime.now())) {
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        if (event.getEndTime().isAfter(now) || event.getEndTime().isEqual(now)) {
             throw new EventValidationException("종료된 이벤트만 러닝 거리를 등록할 수 있습니다.");
         }
 
@@ -485,7 +486,7 @@ public class EventService {
                 .name(event.getName())
                 .eventType(event.getType())
                 .eventCategory(event.getEventCategory())
-                .recruitStatus(event.getRecruitStatus())
+                .recruitStatus(EventTemporalStatusResolver.resolveRecruitStatus(event))
                 .isPrivate(event.isPrivate())
                 .recruitStartDate(event.getRecruitStartDate())
                 .recruitEndDate(event.getRecruitEndDate())

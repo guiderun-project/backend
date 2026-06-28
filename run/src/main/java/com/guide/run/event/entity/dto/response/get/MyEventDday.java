@@ -1,6 +1,7 @@
 package com.guide.run.event.entity.dto.response.get;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.guide.run.event.service.EventTemporalStatusResolver;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,9 @@ public class MyEventDday {
 
     public MyEventDday(String name, LocalDateTime dDay) {
         this.name = name;
-        this.dDay = LocalDateTime.now().until(dDay, ChronoUnit.DAYS)+1L;
+        this.dDay = ChronoUnit.DAYS.between(
+                EventTemporalStatusResolver.today(),
+                dDay.toLocalDate()
+        );
     }
 }

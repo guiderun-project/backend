@@ -60,7 +60,7 @@ public class EventFormService {
     @Transactional
     public Long createForm(EventApplyRequest createForm, Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
+        if(!EventTemporalStatusResolver.resolveRecruitStatus(event).equals(RECRUIT_OPEN))
             throw new NotValidDurationException();
         User user = userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
         EventForm appliedForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
@@ -113,7 +113,7 @@ public class EventFormService {
     @Transactional
     public Long patchForm(EventApplyRequest createForm, Long eventId, String userId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if(!event.getRecruitStatus().equals(RECRUIT_OPEN))
+        if(!EventTemporalStatusResolver.resolveRecruitStatus(event).equals(RECRUIT_OPEN))
             throw new NotValidDurationException();
         userRepository.findUserByPrivateId(userId).orElseThrow(NotExistUserException::new);
         EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(

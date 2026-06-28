@@ -229,13 +229,8 @@ public class EventGetService {
     private boolean isMemberUpcomingEvent(Event event) {
         return event != null
                 && event.isApprove()
-                && event.getRecruitStatus() != RECRUIT_END
                 && event.getStartTime() != null
-                && !event.getStartTime().isBefore(todayStart());
-    }
-
-    private LocalDateTime todayStart() {
-        return LocalDate.now(SERVICE_ZONE).atStartOfDay();
+                && event.getStartTime().isAfter(EventTemporalStatusResolver.now());
     }
 
     private int getDDay(LocalDate date) {

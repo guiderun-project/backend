@@ -17,6 +17,7 @@ import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.EventValidationException;
+import com.guide.run.global.exception.event.logic.NotValidDurationException;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
@@ -34,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -150,6 +152,64 @@ class EventFormRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("신청서 생성은 저장된 상태가 모집중이어도 이벤트 시작 시간이 지났으면 거절한다")
+    void createFormRejectsStaleOpenStatusAfterEventStart() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_OPEN,
+                today.minusDays(2),
+                today.plusDays(2),
+                now.minusMinutes(1),
+                now.plusHours(1)
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventFormService.createForm(
+                new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of()),
+                1L,
+                "user-private"
+        )).isInstanceOf(NotValidDurationException.class);
+
+        verify(userRepository, never()).findUserByPrivateId("user-private");
+    }
+
+    @Test
+    @DisplayName("신청서 생성은 저장된 상태가 모집예정이어도 모집 시간이 열려 있으면 허용한다")
+    void createFormAllowsStaleUpcomingStatusDuringRecruitPeriod() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_UPCOMING,
+                today.minusDays(1),
+                today.plusDays(1),
+                now.plusDays(2),
+                now.plusDays(2).plusHours(1)
+        );
+        User user = createUser("user-private", UserType.VI);
+        EventApplyRequest request = new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(null);
+        when(eventFormRepository.save(any(EventForm.class))).thenReturn(EventForm.builder()
+                .id(55L)
+                .eventId(1L)
+                .privateId("user-private")
+                .status(EventFormStatus.APPLIED)
+                .build());
+
+        Long formId = eventFormService.createForm(request, 1L, "user-private");
+
+        assertThat(formId).isEqualTo(55L);
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
+    }
+
+    @Test
     @DisplayName("대회 신청서 생성은 대회 정보가 없으면 거부한다")
     void createCompetitionFormRejectsMissingCompetitionInfo() {
         Event event = createEvent(EventType.COMPETITION);
@@ -201,6 +261,65 @@ class EventFormRenewalServiceTest {
         assertThat(form.getReferContent()).isEqualTo("대회 참가");
         assertThat(form.getBirthDate()).isEqualTo(LocalDate.of(1990, 1, 2));
         assertThat(form.getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(formId).isEqualTo(55L);
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
+    }
+
+    @Test
+    @DisplayName("신청서 수정은 저장된 상태가 모집중이어도 이벤트 시작 시간이 지났으면 거절한다")
+    void patchFormRejectsStaleOpenStatusAfterEventStart() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_OPEN,
+                today.minusDays(2),
+                today.plusDays(2),
+                now.minusMinutes(1),
+                now.plusHours(1)
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventFormService.patchForm(
+                new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of()),
+                1L,
+                "user-private"
+        )).isInstanceOf(NotValidDurationException.class);
+
+        verify(userRepository, never()).findUserByPrivateId("user-private");
+    }
+
+    @Test
+    @DisplayName("신청서 수정은 저장된 상태가 모집예정이어도 모집 시간이 열려 있으면 허용한다")
+    void patchFormAllowsStaleUpcomingStatusDuringRecruitPeriod() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_UPCOMING,
+                today.minusDays(1),
+                today.plusDays(1),
+                now.plusDays(2),
+                now.plusDays(2).plusHours(1)
+        );
+        User user = createUser("user-private", UserType.VI);
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .eventId(1L)
+                .privateId("user-private")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        EventApplyRequest request = new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(form);
+        when(eventFormRepository.save(form)).thenReturn(form);
+
+        Long formId = eventFormService.patchForm(request, 1L, "user-private");
+
         assertThat(formId).isEqualTo(55L);
         verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
     }
@@ -460,6 +579,25 @@ class EventFormRenewalServiceTest {
                 .recruitStatus(EventRecruitStatus.RECRUIT_OPEN)
                 .eventCategory(EventCategory.GENERAL)
                 .expectedRunningDistanceKm(expectedRunningDistanceKm)
+                .build();
+    }
+
+    private Event createEvent(EventType eventType,
+                              EventRecruitStatus recruitStatus,
+                              LocalDate recruitStartDate,
+                              LocalDate recruitEndDate,
+                              LocalDateTime startTime,
+                              LocalDateTime endTime) {
+        return Event.builder()
+                .id(1L)
+                .name("상계천천히달리기")
+                .type(eventType)
+                .recruitStatus(recruitStatus)
+                .recruitStartDate(recruitStartDate)
+                .recruitEndDate(recruitEndDate)
+                .startTime(startTime)
+                .endTime(endTime)
+                .eventCategory(EventCategory.GENERAL)
                 .build();
     }
 

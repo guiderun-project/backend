@@ -396,6 +396,31 @@ class EventRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("이벤트 상세 조회는 저장된 모집 상태 대신 시간 기준 모집 상태를 반환한다")
+    void getDetailEventReturnsComputedRecruitStatus() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                "organizer-private",
+                EventRecruitStatus.RECRUIT_OPEN,
+                EventStatus.EVENT_UPCOMING,
+                today.minusDays(5),
+                today.minusDays(1),
+                now.plusDays(2),
+                now.plusDays(2).plusHours(2)
+        );
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(eventAdditionalInfoService.getQuestions(1L)).thenReturn(List.of());
+
+        EventDetailResponse response = eventService.getDetailEvent(1L, null);
+
+        assertThat(response.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
+    }
+
+    @Test
     @DisplayName("비회원 비공개 이벤트 상세 조회는 거부한다")
     void getDetailEventRejectsPrivateEventForGuest() {
         Event event = createEvent("organizer-private", true);
@@ -459,6 +484,38 @@ class EventRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("이벤트 팝업은 저장된 상태 대신 시간 기준 모집 상태와 이벤트 상태를 반환한다")
+    void eventPopUpReturnsComputedRecruitAndEventStatus() {
+        User viewer = createUser("viewer-private", "viewer-user", "김철수", UserType.GUIDE);
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                "organizer-private",
+                EventRecruitStatus.RECRUIT_OPEN,
+                EventStatus.EVENT_UPCOMING,
+                today.minusDays(5),
+                today.plusDays(5),
+                now.minusHours(3),
+                now.minusHours(1)
+        );
+        ReflectionTestUtils.setField(event, "updatedAt", now);
+
+        when(userRepository.findUserByPrivateId("viewer-private")).thenReturn(Optional.of(viewer));
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getHHMM(event.getStartTime())).thenReturn("09:00");
+        when(timeFormatter.getHHMM(event.getEndTime())).thenReturn("11:00");
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED))
+                .thenReturn(null);
+
+        EventPopUpResponse response = eventService.eventPopUp(1L, "viewer-private");
+
+        assertThat(response.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
+        assertThat(response.getStatus()).isEqualTo(EventStatus.EVENT_END);
+    }
+
+    @Test
     @DisplayName("이벤트 상세 응답 boolean 필드는 is 접두사 JSON 키를 유지한다")
     void eventDetailResponseSerializesBooleanKeysWithIsPrefix() throws Exception {
         EventDetailResponse response = EventDetailResponse.builder()
@@ -502,6 +559,35 @@ class EventRenewalServiceTest {
                 .place("서울")
                 .content("내용")
                 .status(EventStatus.EVENT_UPCOMING)
+                .eventCategory(EventCategory.GENERAL)
+                .expectedRunningDistanceKm(new BigDecimal("7.50"))
+                .build();
+    }
+
+    private Event createEvent(String organizer,
+                              EventRecruitStatus recruitStatus,
+                              EventStatus status,
+                              LocalDate recruitStartDate,
+                              LocalDate recruitEndDate,
+                              LocalDateTime startTime,
+                              LocalDateTime endTime) {
+        return Event.builder()
+                .id(1L)
+                .organizer(organizer)
+                .recruitStartDate(recruitStartDate)
+                .recruitEndDate(recruitEndDate)
+                .name("상계천천히달리기")
+                .recruitStatus(recruitStatus)
+                .isPrivate(false)
+                .isApprove(true)
+                .type(EventType.TRAINING)
+                .startTime(startTime)
+                .endTime(endTime)
+                .maxNumV(4)
+                .maxNumG(4)
+                .place("서울")
+                .content("내용")
+                .status(status)
                 .eventCategory(EventCategory.GENERAL)
                 .expectedRunningDistanceKm(new BigDecimal("7.50"))
                 .build();
