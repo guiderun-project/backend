@@ -266,6 +266,65 @@ class EventFormRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("신청서 수정은 저장된 상태가 모집중이어도 이벤트 시작 시간이 지났으면 거절한다")
+    void patchFormRejectsStaleOpenStatusAfterEventStart() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_OPEN,
+                today.minusDays(2),
+                today.plusDays(2),
+                now.minusMinutes(1),
+                now.plusHours(1)
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventFormService.patchForm(
+                new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of()),
+                1L,
+                "user-private"
+        )).isInstanceOf(NotValidDurationException.class);
+
+        verify(userRepository, never()).findUserByPrivateId("user-private");
+    }
+
+    @Test
+    @DisplayName("신청서 수정은 저장된 상태가 모집예정이어도 모집 시간이 열려 있으면 허용한다")
+    void patchFormAllowsStaleUpcomingStatusDuringRecruitPeriod() {
+        LocalDate today = EventTemporalStatusResolver.today();
+        LocalDateTime now = EventTemporalStatusResolver.now();
+        Event event = createEvent(
+                EventType.TRAINING,
+                EventRecruitStatus.RECRUIT_UPCOMING,
+                today.minusDays(1),
+                today.plusDays(1),
+                now.plusDays(2),
+                now.plusDays(2).plusHours(1)
+        );
+        User user = createUser("user-private", UserType.VI);
+        EventForm form = EventForm.builder()
+                .id(55L)
+                .eventId(1L)
+                .privateId("user-private")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        EventApplyRequest request = new EventApplyRequest("A", "김가이드", "훈련 참가", null, List.of());
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("user-private")).thenReturn(Optional.of(user));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "user-private", EventFormStatus.APPLIED))
+                .thenReturn(form);
+        when(eventFormRepository.save(form)).thenReturn(form);
+
+        Long formId = eventFormService.patchForm(request, 1L, "user-private");
+
+        assertThat(formId).isEqualTo(55L);
+        verify(eventAdditionalInfoService).replaceAnswers(1L, 55L, request.getAdditionalAnswers());
+    }
+
+    @Test
     @DisplayName("내 신청서 조회는 이벤트, 사용자, 신청 정보와 추가답변을 반환한다")
     void getMyFormReturnsApplicationDetail() {
         Event event = createEvent(EventType.COMPETITION);

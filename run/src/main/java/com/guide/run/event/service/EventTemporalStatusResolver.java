@@ -23,7 +23,8 @@ public final class EventTemporalStatusResolver {
     }
 
     public static EventRecruitStatus resolveRecruitStatus(Event event) {
-        return resolveRecruitStatus(event, now(), today());
+        LocalDateTime now = now();
+        return resolveRecruitStatus(event, now, now.toLocalDate());
     }
 
     public static EventRecruitStatus resolveRecruitStatus(Event event, LocalDateTime now, LocalDate today) {
@@ -34,6 +35,21 @@ public final class EventTemporalStatusResolver {
                 event.getStartTime(),
                 now,
                 today
+        );
+    }
+
+    public static EventRecruitStatus resolveRecruitStatus(EventRecruitStatus storedRecruitStatus,
+                                                          LocalDate recruitStartDate,
+                                                          LocalDate recruitEndDate,
+                                                          LocalDateTime startTime) {
+        LocalDateTime now = now();
+        return resolveRecruitStatus(
+                storedRecruitStatus,
+                recruitStartDate,
+                recruitEndDate,
+                startTime,
+                now,
+                now.toLocalDate()
         );
     }
 
@@ -66,7 +82,7 @@ public final class EventTemporalStatusResolver {
         if (event.getStartTime() != null && now.isBefore(event.getStartTime())) {
             return EventStatus.EVENT_UPCOMING;
         }
-        if (event.getEndTime() != null && event.getEndTime().isBefore(now)) {
+        if (event.getEndTime() != null && !now.isBefore(event.getEndTime())) {
             return EventStatus.EVENT_END;
         }
         return EventStatus.EVENT_OPEN;

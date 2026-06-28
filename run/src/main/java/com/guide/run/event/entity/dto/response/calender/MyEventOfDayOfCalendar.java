@@ -40,9 +40,7 @@ public class MyEventOfDayOfCalendar {
                 recruitStatus,
                 recruitStartDate,
                 recruitEndDate,
-                startDate,
-                EventTemporalStatusResolver.now(),
-                EventTemporalStatusResolver.today()
+                startDate
         );
     }
 }

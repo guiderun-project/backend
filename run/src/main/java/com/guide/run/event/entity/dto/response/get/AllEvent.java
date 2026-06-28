@@ -45,9 +45,7 @@ public class AllEvent {
                 recruitStatus,
                 recruitStartDate,
                 recruitEndDate,
-                startDate,
-                EventTemporalStatusResolver.now(),
-                EventTemporalStatusResolver.today()
+                startDate
         );
         this.name = name;
         this.type = eventType;

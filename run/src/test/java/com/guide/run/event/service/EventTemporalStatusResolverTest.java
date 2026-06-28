@@ -124,6 +124,35 @@ class EventTemporalStatusResolverTest {
         ), now)).isEqualTo(EventStatus.EVENT_END);
     }
 
+    @Test
+    @DisplayName("이벤트 종료 시각 정각이면 종료 상태로 계산한다")
+    void resolveEventStatusReturnsEndAtExactEndTime() {
+        Event event = createEvent(
+                EventRecruitStatus.RECRUIT_OPEN,
+                today,
+                today,
+                now.minusHours(2),
+                now
+        );
+
+        EventStatus status = EventTemporalStatusResolver.resolveEventStatus(event, now);
+
+        assertThat(status).isEqualTo(EventStatus.EVENT_END);
+    }
+
+    @Test
+    @DisplayName("모집 상태 raw 필드 계산은 같은 현재 시각에서 날짜를 파생한다")
+    void resolveRecruitStatusWithRawFieldsDerivesTodayFromSameNow() {
+        EventRecruitStatus status = EventTemporalStatusResolver.resolveRecruitStatus(
+                EventRecruitStatus.RECRUIT_UPCOMING,
+                today.minusDays(1),
+                today.plusDays(1),
+                now.plusDays(2)
+        );
+
+        assertThat(status).isEqualTo(EventRecruitStatus.RECRUIT_OPEN);
+    }
+
     private Event createEvent(EventRecruitStatus recruitStatus,
                               LocalDate recruitStartDate,
                               LocalDate recruitEndDate,

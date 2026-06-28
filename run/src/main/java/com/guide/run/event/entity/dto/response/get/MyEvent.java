@@ -50,9 +50,7 @@ public class MyEvent {
                 recruitStatus,
                 recruitStartDate,
                 recruitEndDate,
-                startDate,
-                EventTemporalStatusResolver.now(),
-                EventTemporalStatusResolver.today()
+                startDate
         );
         this.endDate = endDate.toLocalDate();
     }

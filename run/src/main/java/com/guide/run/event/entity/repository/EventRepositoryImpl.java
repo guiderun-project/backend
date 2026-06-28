@@ -181,7 +181,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(event.recruitStatus.ne(RECRUIT_END)
+                .where(checkByUpcomingDate()
                         .and(event.isApprove.eq(true))
                         .and(eventForm.eventId.eq(event.id))
                         .and(eventForm.privateId.eq(privateId)))

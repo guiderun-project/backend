@@ -17,6 +17,9 @@ public class MyEventDday {
 
     public MyEventDday(String name, LocalDateTime dDay) {
         this.name = name;
-        this.dDay = EventTemporalStatusResolver.now().until(dDay, ChronoUnit.DAYS)+1L;
+        this.dDay = ChronoUnit.DAYS.between(
+                EventTemporalStatusResolver.today(),
+                dDay.toLocalDate()
+        );
     }
 }
