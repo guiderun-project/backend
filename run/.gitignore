@@ -43,22 +43,16 @@ out/
 ## Environment files
 .env
 
-## DB info (sensitive)
-db_info.txt
-db_schema_issues.txt
-
-## Internal work documents
-미구현_API_목록.md
+## 로컬 전용 작업 문서 (DB 접속정보/토큰 등 민감정보 포함, 버전관리 제외)
+##  - db_info.txt, db_schema_issues.txt : DB 접속정보 및 스키마 이슈
+##  - 미구현_API_목록.md                : API 명세 대비 미구현 정리
+##  - 스케줄러_분석.txt                 : 스케줄러 구조 분석
+##  - 통합테스트결과/                   : 통합테스트 결과 (토큰 포함)
+docs-local/
 
 ## API test files (local only, contains tokens)
 http-tests/
 
-## 에러 확인 안내 문서 (로컬 전용)
-에러_확인_방법.txt
-
 ## 애플리케이션 로그 (런타임 생성물)
 logs/
-
-## 통합테스트 결과 (로컬 전용, 토큰 포함)
-통합테스트결과/
 boot.log
