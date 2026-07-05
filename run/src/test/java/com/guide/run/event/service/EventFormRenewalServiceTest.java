@@ -7,6 +7,7 @@ import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
 import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
+import com.guide.run.event.entity.dto.response.form.EventCanceledApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -465,6 +466,61 @@ class EventFormRenewalServiceTest {
                 .containsExactly("vi-user", "guide-user");
         assertThat(group.getApplicants().get(0).isFirstParticipation()).isTrue();
         assertThat(group.getApplicants().get(1).isFirstParticipation()).isFalse();
+    }
+
+    @Test
+    @DisplayName("취소자 명단은 재신청해서 APPLIED 상태인 참가자를 제외한다")
+    void getCanceledApplicantFormsExcludesReappliedUsers() {
+        Event event = createEvent(EventType.TRAINING);
+        EventForm canceledOnlyForm = EventForm.builder()
+                .id(55L)
+                .privateId("canceled-only-private")
+                .eventId(1L)
+                .status(EventFormStatus.CANCELED)
+                .canceledAt(LocalDateTime.of(2026, 1, 1, 10, 0))
+                .build();
+        EventForm reappliedCanceledForm = EventForm.builder()
+                .id(56L)
+                .privateId("reapplied-private")
+                .eventId(1L)
+                .status(EventFormStatus.CANCELED)
+                .canceledAt(LocalDateTime.of(2026, 1, 1, 11, 0))
+                .build();
+        EventForm reappliedActiveForm = EventForm.builder()
+                .id(57L)
+                .privateId("reapplied-private")
+                .eventId(1L)
+                .status(EventFormStatus.APPLIED)
+                .build();
+        User canceledOnlyUser = User.builder()
+                .privateId("canceled-only-private")
+                .userId("canceled-only-user")
+                .name("취소만한 사용자")
+                .type(UserType.VI)
+                .build();
+        User reappliedUser = User.builder()
+                .privateId("reapplied-private")
+                .userId("reapplied-user")
+                .name("재신청 사용자")
+                .type(UserType.GUIDE)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(eventFormRepository.findAllByEventIdAndStatus(1L, EventFormStatus.CANCELED))
+                .thenReturn(List.of(canceledOnlyForm, reappliedCanceledForm));
+        lenient().when(eventFormRepository.findAllByEventIdAndStatus(1L, EventFormStatus.APPLIED))
+                .thenReturn(List.of(reappliedActiveForm));
+        when(userRepository.findUserByPrivateId("canceled-only-private")).thenReturn(Optional.of(canceledOnlyUser));
+        lenient().when(userRepository.findUserByPrivateId("reapplied-private")).thenReturn(Optional.of(reappliedUser));
+
+        EventCanceledApplicantListResponse response = eventFormService.getCanceledApplicantForms(1L);
+
+        assertThat(response.getSummary().getTotalCount()).isEqualTo(1);
+        assertThat(response.getSummary().getViCount()).isEqualTo(1);
+        assertThat(response.getSummary().getGuideCount()).isZero();
+        assertThat(response.getCanceledApplicants())
+                .extracting(EventCanceledApplicantListResponse.CanceledApplicant::getUserId)
+                .containsExactly("canceled-only-user");
     }
 
     @Test

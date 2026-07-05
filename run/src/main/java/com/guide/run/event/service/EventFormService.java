@@ -42,6 +42,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_OPEN;
 
@@ -233,8 +235,13 @@ public class EventFormService {
     public EventCanceledApplicantListResponse getCanceledApplicantForms(Long eventId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         List<EventForm> canceledForms = eventFormRepository.findAllByEventIdAndStatus(eventId, EventFormStatus.CANCELED);
+        Set<String> activePrivateIds = eventFormRepository.findAllByEventIdAndStatus(eventId, EventFormStatus.APPLIED)
+                .stream()
+                .map(EventForm::getPrivateId)
+                .collect(Collectors.toSet());
 
         List<EventCanceledApplicantListResponse.CanceledApplicant> applicants = canceledForms.stream()
+                .filter(form -> !activePrivateIds.contains(form.getPrivateId()))
                 .map(form -> {
                     User user = userRepository.findUserByPrivateId(form.getPrivateId()).orElse(null);
                     if (user == null) return null;
