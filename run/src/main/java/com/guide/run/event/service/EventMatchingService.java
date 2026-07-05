@@ -8,7 +8,9 @@ import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
 import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
+import com.guide.run.global.exception.event.resource.NotExistFormException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
@@ -65,8 +67,19 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         User guide = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
-        EventForm viForm = eventFormRepository.findByEventIdAndPrivateId(eventId, vi.getPrivateId());
-        EventForm guideForm = eventFormRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+        EventForm viForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                vi.getPrivateId(),
+                EventFormStatus.APPLIED
+        );
+        EventForm guideForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                eventId,
+                guide.getPrivateId(),
+                EventFormStatus.APPLIED
+        );
+        if (viForm == null || guideForm == null) {
+            throw new NotExistFormException("해당 이벤트에 대한 신청 폼이 존재하지 않습니다.");
+        }
         Matching existGuide = matchingRepository.findByEventIdAndGuideId(eventId, guide.getPrivateId());
         if(existGuide!=null){
             //existGuide의 파트너 삭제 추가
@@ -340,7 +353,11 @@ public class EventMatchingService {
             for (Matching m : matchings) {
                 User guide = userRepository.findUserByPrivateId(m.getGuideId()).orElse(null);
                 if (guide == null) continue;
-                EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, guide.getPrivateId());
+                EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                        eventId,
+                        guide.getPrivateId(),
+                        EventFormStatus.APPLIED
+                );
                 partners.add(MatchingStatusUser.builder()
                         .userId(guide.getUserId())
                         .name(guide.getName())
@@ -353,7 +370,11 @@ public class EventMatchingService {
             if (matching != null) {
                 User vi = userRepository.findUserByPrivateId(matching.getViId()).orElse(null);
                 if (vi != null) {
-                    EventForm form = eventFormRepository.findByEventIdAndPrivateId(eventId, vi.getPrivateId());
+                    EventForm form = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
+                            eventId,
+                            vi.getPrivateId(),
+                            EventFormStatus.APPLIED
+                    );
                     partners.add(MatchingStatusUser.builder()
                             .userId(vi.getUserId())
                             .name(vi.getName())
