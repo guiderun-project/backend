@@ -38,8 +38,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,6 +51,14 @@ import static com.guide.run.event.entity.type.EventRecruitStatus.RECRUIT_OPEN;
 @Service
 @RequiredArgsConstructor
 public class EventFormService {
+    private static final Comparator<String> TEXT_ORDER = Comparator.nullsLast(String::compareTo);
+    private static final Comparator<Map.Entry<String, List<EventForm>>> GROUP_ORDER = Comparator
+            .comparingInt((Map.Entry<String, List<EventForm>> entry) -> runningGroupOrder(entry.getKey()))
+            .thenComparing(Map.Entry::getKey, TEXT_ORDER);
+    private static final Comparator<EventApplicantListResponse.EventApplicant> APPLICANT_ORDER = Comparator
+            .comparingInt((EventApplicantListResponse.EventApplicant applicant) -> userTypeOrder(applicant.getType()))
+            .thenComparing(EventApplicantListResponse.EventApplicant::getName, TEXT_ORDER);
+
     private final EventFormRepository eventFormRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -177,11 +187,13 @@ public class EventFormService {
         }
 
         List<EventApplicantListResponse.EventApplicantGroup> groups = groupedForms.entrySet().stream()
+                .sorted(GROUP_ORDER)
                 .map(entry -> EventApplicantListResponse.EventApplicantGroup.builder()
                         .runningGroup(entry.getKey())
                         .totalCount(entry.getValue().size())
                         .applicants(entry.getValue().stream()
                                 .map(this::toApplicant)
+                                .sorted(APPLICANT_ORDER)
                                 .toList())
                         .build())
                 .toList();
@@ -384,6 +396,33 @@ public class EventFormService {
                 .type(user.getType())
                 .isFirstParticipation(user.getTrainingCnt() + user.getCompetitionCnt() == 0)
                 .build();
+    }
+
+    private static int runningGroupOrder(String runningGroup) {
+        if (runningGroup == null) {
+            return Integer.MAX_VALUE;
+        }
+
+        String normalized = runningGroup.trim().toUpperCase(Locale.ROOT);
+        if (normalized.isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+
+        char group = normalized.charAt(0);
+        if (group >= 'A' && group <= 'E') {
+            return group - 'A';
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    private static int userTypeOrder(UserType type) {
+        if (type == UserType.VI) {
+            return 0;
+        }
+        if (type == UserType.GUIDE) {
+            return 1;
+        }
+        return 2;
     }
 
     private List<EventApplicantFormResponse.AdditionalAnswer> toApplicantAdditionalAnswers(Long formId) {
