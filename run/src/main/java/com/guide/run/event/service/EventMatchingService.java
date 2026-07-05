@@ -309,12 +309,25 @@ public class EventMatchingService {
             rowMap.get(flat.getViUserId()).getGuides().add(guide);
         }
 
-        // 3. 미매칭 Guide → guide의 hopeTeam 기준 vi=null 행으로 추가
+        // 3. 미매칭 참가자 → VI는 독립 행, Guide는 vi=null 행으로 추가
         List<MatchingWaitingFlatDto> waitingFlat = unMatchingRepository.findWaitingParticipants(eventId);
         for (MatchingWaitingFlatDto flat : waitingFlat) {
-            if (flat.getType() != UserType.GUIDE) continue;
             String rg = flat.getHopeTeam() != null ? flat.getHopeTeam() : "";
             groupRowMap.computeIfAbsent(rg, k -> new LinkedHashMap<>());
+            if (flat.getType() == UserType.VI) {
+                MatchingStatusUser viUser = MatchingStatusUser.builder()
+                        .userId(flat.getUserId())
+                        .name(flat.getName())
+                        .type(flat.getType())
+                        .applyGroup(flat.getHopeTeam())
+                        .build();
+                groupRowMap.get(rg).put("unmatched_vi_" + flat.getUserId(), MatchingStatusRow.builder()
+                        .vi(viUser)
+                        .guides(Collections.emptyList())
+                        .build());
+                continue;
+            }
+            if (flat.getType() != UserType.GUIDE) continue;
             MatchingStatusUser guideUser = MatchingStatusUser.builder()
                     .userId(flat.getUserId())
                     .name(flat.getName())

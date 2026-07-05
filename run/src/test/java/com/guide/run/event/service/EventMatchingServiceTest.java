@@ -3,6 +3,9 @@ package com.guide.run.event.service;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.dto.response.match.EventMatchingStatusResponse;
+import com.guide.run.event.entity.dto.response.match.MatchingStatusGroup;
+import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
@@ -21,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,5 +114,61 @@ class EventMatchingServiceTest {
         assertThat(savedMatching.getGuideRecord()).isEqualTo("GUIDE-APPLIED");
         verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "vi-private", EventFormStatus.APPLIED);
         verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "guide-private", EventFormStatus.APPLIED);
+    }
+
+    @Test
+    @DisplayName("매칭 현황은 미매칭 VI도 신청 그룹의 독립 행으로 반환한다")
+    void getMatchingStatusIncludesUnmatchedViRows() {
+        User loginUser = User.builder()
+                .privateId("login-guide-private")
+                .userId("login-guide-user")
+                .type(UserType.GUIDE)
+                .build();
+        MatchingWaitingFlatDto waitingVi = new MatchingWaitingFlatDto(
+                "vi-user",
+                "김민지",
+                UserType.VI,
+                "A",
+                "상관없음",
+                "천천히 출발하고 싶습니다.",
+                0,
+                0
+        );
+        MatchingWaitingFlatDto waitingGuide = new MatchingWaitingFlatDto(
+                "guide-user",
+                "정현우",
+                UserType.GUIDE,
+                "A",
+                "상관없음",
+                "안전하게 보조 가능합니다.",
+                0,
+                0
+        );
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(userRepository.findUserByPrivateId("login-guide-private")).thenReturn(Optional.of(loginUser));
+        when(matchingRepository.findByEventIdAndGuideId(1L, "login-guide-private")).thenReturn(null);
+        when(matchingRepository.findMatchingCompletedByEventId(1L)).thenReturn(List.of());
+        when(unMatchingRepository.findWaitingParticipants(1L)).thenReturn(List.of(waitingVi, waitingGuide));
+
+        EventMatchingStatusResponse response = eventMatchingService.getMatchingStatus(1L, "login-guide-private");
+
+        assertThat(response.getGroups()).hasSize(1);
+        MatchingStatusGroup group = response.getGroups().get(0);
+        assertThat(group.getRunningGroup()).isEqualTo("A");
+        assertThat(group.getTotalCount()).isEqualTo(2);
+        assertThat(group.getRows())
+                .anySatisfy(row -> {
+                    assertThat(row.getVi()).isNotNull();
+                    assertThat(row.getVi().getUserId()).isEqualTo("vi-user");
+                    assertThat(row.getVi().getType()).isEqualTo(UserType.VI);
+                    assertThat(row.getGuides()).isEmpty();
+                })
+                .anySatisfy(row -> {
+                    assertThat(row.getVi()).isNull();
+                    assertThat(row.getGuides()).hasSize(1);
+                    assertThat(row.getGuides().get(0).getUserId()).isEqualTo("guide-user");
+                    assertThat(row.getGuides().get(0).getType()).isEqualTo(UserType.GUIDE);
+                });
     }
 }
