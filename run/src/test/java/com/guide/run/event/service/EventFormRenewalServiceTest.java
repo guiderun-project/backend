@@ -469,6 +469,41 @@ class EventFormRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("신청자 명단은 러닝그룹 A-E 순서와 그룹 내 VI, Guide 이름순으로 정렬한다")
+    void getApplicantFormsSortsGroupsAndApplicants() {
+        EventForm guideB = applicantForm("guide-b-private", UserType.GUIDE, "B");
+        EventForm viC = applicantForm("vi-c-private", UserType.VI, "C");
+        EventForm guideAHa = applicantForm("guide-a-ha-private", UserType.GUIDE, "A");
+        EventForm viANa = applicantForm("vi-a-na-private", UserType.VI, "A");
+        EventForm guideAGa = applicantForm("guide-a-ga-private", UserType.GUIDE, "A");
+        EventForm viAGa = applicantForm("vi-a-ga-private", UserType.VI, "A");
+
+        when(eventFormRepository.findAllByEventIdAndStatus(1L, EventFormStatus.APPLIED))
+                .thenReturn(List.of(guideB, viC, guideAHa, viANa, guideAGa, viAGa));
+        when(userRepository.findUserByPrivateId("guide-b-private"))
+                .thenReturn(Optional.of(applicantUser("guide-b", "나가이드", UserType.GUIDE)));
+        when(userRepository.findUserByPrivateId("vi-c-private"))
+                .thenReturn(Optional.of(applicantUser("vi-c", "다비", UserType.VI)));
+        when(userRepository.findUserByPrivateId("guide-a-ha-private"))
+                .thenReturn(Optional.of(applicantUser("guide-a-ha", "하가이드", UserType.GUIDE)));
+        when(userRepository.findUserByPrivateId("vi-a-na-private"))
+                .thenReturn(Optional.of(applicantUser("vi-a-na", "나비", UserType.VI)));
+        when(userRepository.findUserByPrivateId("guide-a-ga-private"))
+                .thenReturn(Optional.of(applicantUser("guide-a-ga", "가가이드", UserType.GUIDE)));
+        when(userRepository.findUserByPrivateId("vi-a-ga-private"))
+                .thenReturn(Optional.of(applicantUser("vi-a-ga", "가비", UserType.VI)));
+
+        EventApplicantListResponse response = eventFormService.getApplicantForms(1L);
+
+        assertThat(response.getGroups())
+                .extracting(EventApplicantListResponse.EventApplicantGroup::getRunningGroup)
+                .containsExactly("A", "B", "C");
+        assertThat(response.getGroups().get(0).getApplicants())
+                .extracting(EventApplicantListResponse.EventApplicant::getUserId)
+                .containsExactly("vi-a-ga", "vi-a-na", "guide-a-ga", "guide-a-ha");
+    }
+
+    @Test
     @DisplayName("취소자 명단은 재신청해서 APPLIED 상태인 참가자를 제외한다")
     void getCanceledApplicantFormsExcludesReappliedUsers() {
         Event event = createEvent(EventType.TRAINING);
@@ -663,6 +698,27 @@ class EventFormRenewalServiceTest {
                 .type(type)
                 .age(30)
                 .gender("M")
+                .build();
+    }
+
+    private EventForm applicantForm(String privateId, UserType type, String hopeTeam) {
+        return EventForm.builder()
+                .privateId(privateId)
+                .eventId(1L)
+                .type(type)
+                .hopeTeam(hopeTeam)
+                .status(EventFormStatus.APPLIED)
+                .build();
+    }
+
+    private User applicantUser(String userId, String name, UserType type) {
+        return User.builder()
+                .privateId(userId + "-private")
+                .userId(userId)
+                .name(name)
+                .type(type)
+                .trainingCnt(1)
+                .competitionCnt(0)
                 .build();
     }
 
