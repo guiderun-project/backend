@@ -5,6 +5,7 @@ import com.guide.run.event.entity.QEventForm;
 import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
 import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
 import com.guide.run.event.entity.dto.response.match.MatchingCompletedFlatDto;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.QUser;
 import com.querydsl.core.types.Projections;
@@ -38,7 +39,9 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                 .from(matching)
                 .where(matching.eventId.eq(eventId).and(matching.viId.eq(viId)))
                 .join(user).on(user.privateId.eq(matching.guideId))
-                .join(eventForm).on(user.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
+                .join(eventForm).on(user.privateId.eq(eventForm.privateId)
+                        .and(eventForm.eventId.eq(eventId))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .orderBy(user.name.asc())
                 .fetch();
@@ -55,7 +58,9 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                         user.recordDegree.as("recordDegree")))
                 .from(matching)
                 .join(user).on(user.privateId.eq(matching.viId))
-                .join(eventForm).on(user.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
+                .join(eventForm).on(user.privateId.eq(eventForm.privateId)
+                        .and(eventForm.eventId.eq(eventId))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
                 .orderBy(user.name.asc())
@@ -88,10 +93,14 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
                         guideUser.recordDegree.as("guideRecordDegree")))
                 .from(matching)
                 .join(viUser).on(viUser.privateId.eq(matching.viId))
-                .join(viForm).on(viForm.privateId.eq(matching.viId).and(viForm.eventId.eq(eventId)))
+                .join(viForm).on(viForm.privateId.eq(matching.viId)
+                        .and(viForm.eventId.eq(eventId))
+                        .and(viForm.status.eq(EventFormStatus.APPLIED)))
                 .join(viAttendance).on(viAttendance.privateId.eq(matching.viId).and(viAttendance.eventId.eq(eventId)))
                 .join(guideUser).on(guideUser.privateId.eq(matching.guideId))
-                .join(guideForm).on(guideForm.privateId.eq(matching.guideId).and(guideForm.eventId.eq(eventId)))
+                .join(guideForm).on(guideForm.privateId.eq(matching.guideId)
+                        .and(guideForm.eventId.eq(eventId))
+                        .and(guideForm.status.eq(EventFormStatus.APPLIED)))
                 .join(guideAttendance).on(guideAttendance.privateId.eq(matching.guideId).and(guideAttendance.eventId.eq(eventId)))
                 .where(matching.eventId.eq(eventId))
                 .orderBy(viForm.hopeTeam.asc(), viUser.name.asc(), guideUser.name.asc())

@@ -2,6 +2,7 @@ package com.guide.run.partner.entity.matching.repository;
 
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
 import com.guide.run.event.entity.dto.response.match.NotMatchUserInfo;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.user.entity.type.UserType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -41,7 +42,9 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                 user.recordDegree.as("recordDegree")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
-                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
+                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId)
+                        .and(eventForm.eventId.eq(eventId))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .join(attendance).on(unMatching.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
                 .where(unMatching.eventId.eq(eventId))
                 .orderBy(user.name.asc())
@@ -61,7 +64,9 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                         user.competitionCnt.as("competitionCnt")))
                 .from(unMatching)
                 .join(user).on(unMatching.privateId.eq(user.privateId))
-                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId).and(eventForm.eventId.eq(eventId)))
+                .join(eventForm).on(unMatching.privateId.eq(eventForm.privateId)
+                        .and(eventForm.eventId.eq(eventId))
+                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
                 .where(unMatching.eventId.eq(eventId))
                 .orderBy(eventForm.hopeTeam.asc(), user.name.asc())
                 .fetch();

@@ -1,0 +1,114 @@
+package com.guide.run.event.service;
+
+import com.guide.run.attendance.repository.AttendanceRepository;
+import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
+import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventFormStatus;
+import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.repository.MatchingRepository;
+import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
+import com.guide.run.partner.service.PartnerService;
+import com.guide.run.user.entity.type.UserType;
+import com.guide.run.user.entity.user.User;
+import com.guide.run.user.repository.user.UserRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class EventMatchingServiceTest {
+    @Mock
+    private UnMatchingRepository unMatchingRepository;
+    @Mock
+    private MatchingRepository matchingRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private EventRepository eventRepository;
+    @Mock
+    private EventFormRepository eventFormRepository;
+    @Mock
+    private PartnerService partnerService;
+    @Mock
+    private AttendanceRepository attendanceRepository;
+
+    @InjectMocks
+    private EventMatchingService eventMatchingService;
+
+    @Test
+    @DisplayName("수동 매칭은 취소 이력이 있어도 APPLIED 신청서를 기준으로 생성한다")
+    void matchUserUsesAppliedFormsWhenCanceledHistoryExists() {
+        User vi = User.builder()
+                .privateId("vi-private")
+                .userId("vi-user")
+                .type(UserType.VI)
+                .build();
+        User guide = User.builder()
+                .privateId("guide-private")
+                .userId("guide-user")
+                .type(UserType.GUIDE)
+                .build();
+        EventForm canceledViForm = EventForm.builder()
+                .eventId(1L)
+                .privateId("vi-private")
+                .hopeTeam("VI-CANCELED")
+                .status(EventFormStatus.CANCELED)
+                .build();
+        EventForm canceledGuideForm = EventForm.builder()
+                .eventId(1L)
+                .privateId("guide-private")
+                .hopeTeam("GUIDE-CANCELED")
+                .status(EventFormStatus.CANCELED)
+                .build();
+        EventForm appliedViForm = EventForm.builder()
+                .eventId(1L)
+                .privateId("vi-private")
+                .hopeTeam("VI-APPLIED")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        EventForm appliedGuideForm = EventForm.builder()
+                .eventId(1L)
+                .privateId("guide-private")
+                .hopeTeam("GUIDE-APPLIED")
+                .status(EventFormStatus.APPLIED)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(userRepository.findUserByUserId("vi-user")).thenReturn(Optional.of(vi));
+        when(userRepository.findUserByUserId("guide-user")).thenReturn(Optional.of(guide));
+        lenient().when(eventFormRepository.findByEventIdAndPrivateId(1L, "vi-private"))
+                .thenReturn(canceledViForm);
+        lenient().when(eventFormRepository.findByEventIdAndPrivateId(1L, "guide-private"))
+                .thenReturn(canceledGuideForm);
+        lenient().when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "vi-private", EventFormStatus.APPLIED))
+                .thenReturn(appliedViForm);
+        lenient().when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "guide-private", EventFormStatus.APPLIED))
+                .thenReturn(appliedGuideForm);
+        when(matchingRepository.findByEventIdAndGuideId(1L, "guide-private")).thenReturn(null);
+        when(unMatchingRepository.findByPrivateIdAndEventId("vi-private", 1L)).thenReturn(Optional.empty());
+
+        eventMatchingService.matchUser(1L, "vi-user", "guide-user");
+
+        ArgumentCaptor<Matching> matchingCaptor = ArgumentCaptor.forClass(Matching.class);
+        verify(matchingRepository).save(matchingCaptor.capture());
+        Matching savedMatching = matchingCaptor.getValue();
+        assertThat(savedMatching.getViRecord()).isEqualTo("VI-APPLIED");
+        assertThat(savedMatching.getGuideRecord()).isEqualTo("GUIDE-APPLIED");
+        verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "vi-private", EventFormStatus.APPLIED);
+        verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "guide-private", EventFormStatus.APPLIED);
+    }
+}
