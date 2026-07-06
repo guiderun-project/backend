@@ -5,6 +5,7 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.match.EventMatchingStatusResponse;
 import com.guide.run.event.entity.dto.response.match.MatchingStatusGroup;
+import com.guide.run.event.entity.dto.response.match.MatchingWaitingResponse;
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -170,5 +171,94 @@ class EventMatchingServiceTest {
                     assertThat(row.getGuides().get(0).getUserId()).isEqualTo("guide-user");
                     assertThat(row.getGuides().get(0).getType()).isEqualTo(UserType.GUIDE);
                 });
+    }
+
+    @Test
+    @DisplayName("매칭 현황은 미매칭 참가자를 VI 먼저, Guide 나중, 각 타입 가나다순으로 반환한다")
+    void getMatchingStatusSortsUnmatchedRowsByTypeAndName() {
+        User loginUser = User.builder()
+                .privateId("login-guide-private")
+                .userId("login-guide-user")
+                .type(UserType.GUIDE)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(userRepository.findUserByPrivateId("login-guide-private")).thenReturn(Optional.of(loginUser));
+        when(matchingRepository.findByEventIdAndGuideId(1L, "login-guide-private")).thenReturn(null);
+        when(matchingRepository.findMatchingCompletedByEventId(1L)).thenReturn(List.of());
+        when(unMatchingRepository.findWaitingParticipants(1L)).thenReturn(unsortedWaitingParticipants());
+
+        EventMatchingStatusResponse response = eventMatchingService.getMatchingStatus(1L, "login-guide-private");
+
+        List<String> orderedNames = response.getGroups().get(0).getRows().stream()
+                .map(row -> row.getVi() != null ? row.getVi().getName() : row.getGuides().get(0).getName())
+                .toList();
+        List<UserType> orderedTypes = response.getGroups().get(0).getRows().stream()
+                .map(row -> row.getVi() != null ? row.getVi().getType() : row.getGuides().get(0).getType())
+                .toList();
+        assertThat(orderedNames).containsExactly("김시각", "최시각", "김가이드", "하가이드");
+        assertThat(orderedTypes).containsExactly(UserType.VI, UserType.VI, UserType.GUIDE, UserType.GUIDE);
+    }
+
+    @Test
+    @DisplayName("매칭 대기는 미매칭 참가자를 VI 먼저, Guide 나중, 각 타입 가나다순으로 반환한다")
+    void getMatchingWaitingSortsParticipantsByTypeAndName() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(unMatchingRepository.findWaitingParticipants(1L)).thenReturn(unsortedWaitingParticipants());
+
+        MatchingWaitingResponse response = eventMatchingService.getMatchingWaiting(1L);
+
+        assertThat(response.getGroups()).hasSize(1);
+        assertThat(response.getGroups().get(0).getParticipants())
+                .extracting("name")
+                .containsExactly("김시각", "최시각", "김가이드", "하가이드");
+        assertThat(response.getGroups().get(0).getParticipants())
+                .extracting("type")
+                .containsExactly(UserType.VI, UserType.VI, UserType.GUIDE, UserType.GUIDE);
+    }
+
+    private List<MatchingWaitingFlatDto> unsortedWaitingParticipants() {
+        return List.of(
+                new MatchingWaitingFlatDto(
+                        "guide-ha",
+                        "하가이드",
+                        UserType.GUIDE,
+                        "A",
+                        "상관없음",
+                        "가이드 먼저 들어온 원본 순서입니다.",
+                        0,
+                        0
+                ),
+                new MatchingWaitingFlatDto(
+                        "vi-choi",
+                        "최시각",
+                        UserType.VI,
+                        "A",
+                        "상관없음",
+                        "시각 참가자입니다.",
+                        0,
+                        0
+                ),
+                new MatchingWaitingFlatDto(
+                        "guide-kim",
+                        "김가이드",
+                        UserType.GUIDE,
+                        "A",
+                        "상관없음",
+                        "가이드 참가자입니다.",
+                        0,
+                        0
+                ),
+                new MatchingWaitingFlatDto(
+                        "vi-kim",
+                        "김시각",
+                        UserType.VI,
+                        "A",
+                        "상관없음",
+                        "시각 참가자입니다.",
+                        0,
+                        0
+                )
+        );
     }
 }
