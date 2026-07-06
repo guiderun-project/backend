@@ -30,6 +30,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EventMatchingService {
+    private static final Comparator<String> TEXT_ORDER = Comparator.nullsLast(String::compareTo);
+    private static final Comparator<MatchingStatusRow> MATCHING_STATUS_ROW_ORDER = Comparator
+            .comparingInt(EventMatchingService::matchingStatusRowUserTypeOrder)
+            .thenComparing(EventMatchingService::matchingStatusRowName, TEXT_ORDER)
+            .thenComparing(EventMatchingService::matchingStatusRowUserId, TEXT_ORDER);
+    private static final Comparator<MatchingWaitingParticipant> MATCHING_WAITING_PARTICIPANT_ORDER = Comparator
+            .comparingInt((MatchingWaitingParticipant participant) -> userTypeOrder(participant.getType()))
+            .thenComparing(MatchingWaitingParticipant::getName, TEXT_ORDER)
+            .thenComparing(MatchingWaitingParticipant::getUserId, TEXT_ORDER);
+
     private final UnMatchingRepository unMatchingRepository;
     private final MatchingRepository matchingRepository;
     private final UserRepository userRepository;
@@ -344,7 +354,9 @@ public class EventMatchingService {
         List<MatchingStatusGroup> groups = groupRowMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> {
-                    List<MatchingStatusRow> rows = new ArrayList<>(e.getValue().values());
+                    List<MatchingStatusRow> rows = e.getValue().values().stream()
+                            .sorted(MATCHING_STATUS_ROW_ORDER)
+                            .collect(Collectors.toList());
                     return MatchingStatusGroup.builder()
                             .runningGroup(e.getKey())
                             .totalCount(rows.size())
@@ -425,10 +437,13 @@ public class EventMatchingService {
         }
 
         List<MatchingWaitingGroup> groups = groupMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
                 .map(e -> MatchingWaitingGroup.builder()
                         .runningGroup(e.getKey())
                         .totalCount(e.getValue().size())
-                        .participants(e.getValue())
+                        .participants(e.getValue().stream()
+                                .sorted(MATCHING_WAITING_PARTICIPANT_ORDER)
+                                .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
 
@@ -594,6 +609,51 @@ public class EventMatchingService {
             partnerService.setAttendGuidePartner(eventId, guide);
         }
         }
+
+    private static int matchingStatusRowUserTypeOrder(MatchingStatusRow row) {
+        if (row.getVi() != null) {
+            return userTypeOrder(row.getVi().getType());
+        }
+        return firstGuide(row)
+                .map(MatchingStatusUser::getType)
+                .map(EventMatchingService::userTypeOrder)
+                .orElse(Integer.MAX_VALUE);
+    }
+
+    private static String matchingStatusRowName(MatchingStatusRow row) {
+        if (row.getVi() != null) {
+            return row.getVi().getName();
+        }
+        return firstGuide(row)
+                .map(MatchingStatusUser::getName)
+                .orElse(null);
+    }
+
+    private static String matchingStatusRowUserId(MatchingStatusRow row) {
+        if (row.getVi() != null) {
+            return row.getVi().getUserId();
+        }
+        return firstGuide(row)
+                .map(MatchingStatusUser::getUserId)
+                .orElse(null);
+    }
+
+    private static Optional<MatchingStatusUser> firstGuide(MatchingStatusRow row) {
+        if (row.getGuides() == null || row.getGuides().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(row.getGuides().get(0));
+    }
+
+    private static int userTypeOrder(UserType type) {
+        if (type == UserType.VI) {
+            return 0;
+        }
+        if (type == UserType.GUIDE) {
+            return 1;
+        }
+        return Integer.MAX_VALUE;
+    }
 
     /*
     public int autoMatchBetweenTwoGroup(List<Form> vi,List<Form> guide){
