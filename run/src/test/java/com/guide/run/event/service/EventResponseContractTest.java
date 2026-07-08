@@ -2,6 +2,7 @@ package com.guide.run.event.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guide.run.event.entity.dto.response.attend.AttendanceParticipant;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
@@ -159,5 +160,43 @@ class EventResponseContractTest {
         JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(comment));
 
         assertThat(json.at("/createdAt").asText()).isEqualTo("2026-06-24T13:45:30");
+    }
+
+    @Test
+    @DisplayName("출석 참가자 응답은 첫 참여 여부를 isFirstParticipation 필드로 내려준다")
+    void attendanceParticipantUsesIsFirstParticipationContract() throws Exception {
+        AttendanceParticipant participant = AttendanceParticipant.builder()
+                .userId("guide-101")
+                .name("홍길동")
+                .type(UserType.GUIDE)
+                .build();
+
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(participant));
+
+        assertThat(json.at("/isFirstParticipation").isMissingNode()).isFalse();
+        assertThat(json.at("/isFirstParticipation").isBoolean()).isTrue();
+        assertThat(json.at("/firstParticipation").isMissingNode()).isTrue();
+    }
+
+    @Test
+    @DisplayName("출석 참가자 응답은 projection에서 계산한 첫 참여 true 값을 담을 수 있다")
+    void attendanceParticipantConstructorAcceptsFirstParticipationValue() throws Exception {
+        var constructor = AttendanceParticipant.class.getConstructor(
+                String.class,
+                String.class,
+                UserType.class,
+                Boolean.class
+        );
+        AttendanceParticipant participant = constructor.newInstance(
+                "vi-101",
+                "김가나",
+                UserType.VI,
+                true
+        );
+
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(participant));
+
+        assertThat(json.at("/isFirstParticipation").asBoolean()).isTrue();
+        assertThat(json.at("/firstParticipation").isMissingNode()).isTrue();
     }
 }
