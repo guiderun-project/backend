@@ -5,6 +5,7 @@ import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventType;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ public class EventCreateRequest {
     @Schema(description = "이벤트 장소", example = "서울 상계천천히공원")
     private String place;//이벤트 장소
     @Schema(description = "이벤트 상세 내용", example = "초급자 대상 오전 러닝 행사")
+    @Size(max = 1000, message = "이벤트 내용은 1000자 이하로 입력해주세요.")
     private String content;//이벤트 내용
     @Schema(description = "이벤트 카테고리", example = "TEAM")
     private EventCategory eventCategory; //이벤트 유형
