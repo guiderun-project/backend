@@ -54,7 +54,8 @@ public class AttendanceRepositoryImpl implements AttendanceCustomRepository{
         return queryFactory.select(Projections.constructor(AttendanceParticipant.class,
                 user.userId.as("userId"),
                 user.name.as("name"),
-                user.type.as("type")))
+                user.type.as("type"),
+                user.trainingCnt.add(user.competitionCnt).eq(0)))
                 .from(attendance)
                 .join(user).on(attendance.privateId.eq(user.privateId))
                 .where(attendance.isAttend.eq(isAttend).and(attendance.eventId.eq(eventId)))
