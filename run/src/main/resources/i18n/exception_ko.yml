@@ -1,7 +1,7 @@
 # exception_ko.yml
 unknown:
   code: "0000"
-  msg: "알 수 없는 에러가 발생했습니다"
+  msg: "일시적인 오류가 발생했어요. 잠시 후 다시 시도해주세요."
 
 notValidAccountId:
   code: "0001"

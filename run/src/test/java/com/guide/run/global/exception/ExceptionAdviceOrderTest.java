@@ -13,6 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ExceptionAdviceOrderTest {
 
     @Test
+    @DisplayName("공통 예외 advice는 알 수 없는 예외 advice보다 먼저 실행된다")
+    void globalAdviceRunsBeforeUnknownAdvice() {
+        assertThat(orderValue(GlobalExceptionAdvice.class))
+                .isLessThan(orderValue(UnknownExceptionAdvice.class));
+    }
+
+    @Test
     @DisplayName("인증 예외 advice는 알 수 없는 예외 advice보다 먼저 실행된다")
     void authAdviceRunsBeforeUnknownAdvice() {
         assertThat(orderValue(AuthAuthorizeExceptionAdvice.class))
