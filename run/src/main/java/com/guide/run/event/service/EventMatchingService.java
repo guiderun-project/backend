@@ -359,7 +359,7 @@ public class EventMatchingService {
                             .collect(Collectors.toList());
                     return MatchingStatusGroup.builder()
                             .runningGroup(e.getKey())
-                            .totalCount(rows.size())
+                            .totalCount(countMatchingStatusPeople(rows))
                             .rows(rows)
                             .build();
                 })
@@ -505,7 +505,7 @@ public class EventMatchingService {
         List<MatchingCompletedGroup> groups = groupMap.entrySet().stream()
                 .map(e -> MatchingCompletedGroup.builder()
                         .runningGroup(e.getKey())
-                        .totalCount(e.getValue().size())
+                        .totalCount(countMatchingCompletedPeople(e.getValue()))
                         .rows(e.getValue())
                         .build())
                 .collect(Collectors.toList());
@@ -643,6 +643,34 @@ public class EventMatchingService {
             return Optional.empty();
         }
         return Optional.ofNullable(row.getGuides().get(0));
+    }
+
+    private static int countMatchingStatusPeople(List<MatchingStatusRow> rows) {
+        return rows.stream()
+                .mapToInt(EventMatchingService::countMatchingStatusRowPeople)
+                .sum();
+    }
+
+    private static int countMatchingStatusRowPeople(MatchingStatusRow row) {
+        int count = row.getVi() != null ? 1 : 0;
+        if (row.getGuides() != null) {
+            count += row.getGuides().size();
+        }
+        return count;
+    }
+
+    private static int countMatchingCompletedPeople(List<MatchingCompletedRow> rows) {
+        return rows.stream()
+                .mapToInt(EventMatchingService::countMatchingCompletedRowPeople)
+                .sum();
+    }
+
+    private static int countMatchingCompletedRowPeople(MatchingCompletedRow row) {
+        int count = row.getVi() != null ? 1 : 0;
+        if (row.getGuides() != null) {
+            count += row.getGuides().size();
+        }
+        return count;
     }
 
     private static int userTypeOrder(UserType type) {
