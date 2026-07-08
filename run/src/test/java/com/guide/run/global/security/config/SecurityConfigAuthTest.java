@@ -1,6 +1,7 @@
 package com.guide.run.global.security.config;
 
 import com.guide.run.global.cookie.service.CookieService;
+import com.guide.run.global.exception.ErrorResponseFactory;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.service.ResponseService;
 import com.guide.run.user.controller.SignController;
@@ -56,6 +57,9 @@ class SecurityConfigAuthTest {
 
     @MockBean
     private ResponseService responseService;
+
+    @MockBean
+    private ErrorResponseFactory errorResponseFactory;
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
