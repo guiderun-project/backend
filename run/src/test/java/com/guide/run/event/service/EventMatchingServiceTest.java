@@ -4,6 +4,8 @@ import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.match.EventMatchingStatusResponse;
+import com.guide.run.event.entity.dto.response.match.MatchingCompletedFlatDto;
+import com.guide.run.event.entity.dto.response.match.MatchingCompletedResponse;
 import com.guide.run.event.entity.dto.response.match.MatchingStatusGroup;
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingResponse;
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
@@ -201,6 +203,51 @@ class EventMatchingServiceTest {
     }
 
     @Test
+    @DisplayName("매칭 현황 그룹 totalCount는 row 수가 아니라 그룹에 표시되는 전체 인원 수를 반환한다")
+    void getMatchingStatusCountsPeopleInGroup() {
+        User loginUser = User.builder()
+                .privateId("login-guide-private")
+                .userId("login-guide-user")
+                .type(UserType.GUIDE)
+                .build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(userRepository.findUserByPrivateId("login-guide-private")).thenReturn(Optional.of(loginUser));
+        when(matchingRepository.findByEventIdAndGuideId(1L, "login-guide-private")).thenReturn(null);
+        when(matchingRepository.findMatchingCompletedByEventId(1L)).thenReturn(List.of(
+                matchedFlat("vi-a", "김시각", "A", "guide-b", "박가이드", "B"),
+                matchedFlat("vi-a", "김시각", "A", "guide-c", "이가이드", "C")
+        ));
+        when(unMatchingRepository.findWaitingParticipants(1L)).thenReturn(List.of());
+
+        EventMatchingStatusResponse response = eventMatchingService.getMatchingStatus(1L, "login-guide-private");
+
+        assertThat(response.getGroups()).hasSize(1);
+        assertThat(response.getGroups().get(0).getRunningGroup()).isEqualTo("A");
+        assertThat(response.getGroups().get(0).getRows()).hasSize(1);
+        assertThat(response.getGroups().get(0).getTotalCount()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("매칭 완료 그룹 totalCount는 row 수가 아니라 그룹에 표시되는 전체 인원 수를 반환한다")
+    void getMatchingCompletedCountsPeopleInGroup() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(matchingRepository.findMatchingCompletedByEventId(1L)).thenReturn(List.of(
+                matchedFlat("vi-a", "김시각", "A", "guide-b", "박가이드", "B"),
+                matchedFlat("vi-a", "김시각", "A", "guide-c", "이가이드", "C")
+        ));
+
+        MatchingCompletedResponse response = eventMatchingService.getMatchingCompleted(1L);
+
+        assertThat(response.getGroups()).hasSize(1);
+        assertThat(response.getGroups().get(0).getRunningGroup()).isEqualTo("A");
+        assertThat(response.getGroups().get(0).getRows()).hasSize(1);
+        assertThat(response.getGroups().get(0).getTotalCount()).isEqualTo(3);
+        assertThat(response.getSummary().getCompletedViCount()).isEqualTo(1);
+        assertThat(response.getSummary().getMatchedGuideCount()).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("매칭 대기는 미매칭 참가자를 VI 먼저, Guide 나중, 각 타입 가나다순으로 반환한다")
     void getMatchingWaitingSortsParticipantsByTypeAndName() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
@@ -259,6 +306,31 @@ class EventMatchingServiceTest {
                         0,
                         0
                 )
+        );
+    }
+
+    private MatchingCompletedFlatDto matchedFlat(
+            String viUserId,
+            String viName,
+            String viGroup,
+            String guideUserId,
+            String guideName,
+            String guideGroup
+    ) {
+        return new MatchingCompletedFlatDto(
+                viUserId,
+                UserType.VI,
+                viName,
+                viGroup,
+                false,
+                viGroup,
+                viGroup,
+                guideUserId,
+                UserType.GUIDE,
+                guideName,
+                guideGroup,
+                false,
+                guideGroup
         );
     }
 }
