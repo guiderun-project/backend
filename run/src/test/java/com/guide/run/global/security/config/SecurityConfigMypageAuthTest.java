@@ -32,13 +32,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = SignupInfoController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, ErrorResponseFactory.class})
 @ActiveProfiles("test")
 class SecurityConfigMypageAuthTest {
 
+    private static final String TIMESTAMP_PATTERN = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?\\+09:00$";
     private static final String WAIT_TOKEN = "wait-token";
     private static final String PRIVATE_ID = "private-id";
 
@@ -58,10 +60,34 @@ class SecurityConfigMypageAuthTest {
     private ResponseService responseService;
 
     @MockBean
-    private ErrorResponseFactory errorResponseFactory;
-
-    @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @Test
+    @DisplayName("보호 API에 Authorization 헤더가 없으면 공통 에러 응답 형식으로 401 응답한다")
+    void missingAuthorizationHeaderReturnsCommonErrorBody() throws Exception {
+        mockMvc.perform(get("/api/user/mypage"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorCode").value("0101"))
+                .andExpect(jsonPath("$.message").value("인증할 수 있는 사용자 데이터가 존재하지 않습니다"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.path").value("/api/user/mypage"))
+                .andExpect(jsonPath("$.timestamp").value(org.hamcrest.Matchers.matchesPattern(TIMESTAMP_PATTERN)));
+    }
+
+    @Test
+    @DisplayName("권한이 부족하면 공통 에러 응답 형식으로 403 응답한다")
+    void accessDeniedReturnsCommonErrorBody() throws Exception {
+        authenticateWaitUser();
+
+        mockMvc.perform(get("/api/admin/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + WAIT_TOKEN))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("1102"))
+                .andExpect(jsonPath("$.message").value("권한이 없는 사용자 입니다."))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.path").value("/api/admin/users"))
+                .andExpect(jsonPath("$.timestamp").value(org.hamcrest.Matchers.matchesPattern(TIMESTAMP_PATTERN)));
+    }
 
     @Test
     @DisplayName("ROLE_WAIT 회원은 마이페이지를 조회할 수 있다")

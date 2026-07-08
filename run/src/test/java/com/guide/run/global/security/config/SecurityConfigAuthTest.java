@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = SignController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, ErrorResponseFactory.class})
 @ActiveProfiles("test")
 class SecurityConfigAuthTest {
 
@@ -57,9 +57,6 @@ class SecurityConfigAuthTest {
 
     @MockBean
     private ResponseService responseService;
-
-    @MockBean
-    private ErrorResponseFactory errorResponseFactory;
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
