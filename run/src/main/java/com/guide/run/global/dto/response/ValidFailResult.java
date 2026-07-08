@@ -14,6 +14,10 @@ import java.util.List;
 public class ValidFailResult {
     private String errorCode;
     private String message;
+    private Integer status;
+    private String path;
+    private String timestamp;
+    private List<FieldErrorResult> fieldErrors;
 
     public static ResponseEntity<ValidFailResult> toResult(MethodArgumentNotValidException e) {
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();
