@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class EventCommentController {
     @PostMapping("/{eventId}/comments")
     public ResponseEntity<CommentsCreatedResponse> createComment(@PathVariable Long eventId,
                                                                  HttpServletRequest request,
-                                                                 @RequestBody EventCommentCreateRequest eventCommentCreateRequest){
+                                                                 @RequestBody @Valid EventCommentCreateRequest eventCommentCreateRequest){
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(CommentsCreatedResponse.builder()
                 .commentId(eventCommentService.createComment(eventId,userId,eventCommentCreateRequest)).build());
@@ -45,7 +46,7 @@ public class EventCommentController {
     @PatchMapping("/{eventId}/comments/{commentId}")
     public ResponseEntity<CommentsCreatedResponse> patchComment(@PathVariable Long eventId,
                                                                  @PathVariable Long commentId,
-                                                                @RequestBody EventCommentCreateRequest eventCommentCreateRequest,
+                                                                @RequestBody @Valid EventCommentCreateRequest eventCommentCreateRequest,
                                                                  HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(CommentsCreatedResponse.builder()

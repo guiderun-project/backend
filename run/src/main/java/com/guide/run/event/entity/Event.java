@@ -42,6 +42,7 @@ public class Event extends BaseEntity {
     private int maxNumV;//vi 모집 인원
     private int maxNumG;//guide 모집 인원
     private String place;//이벤트 장소
+    @Column(length = 1000)
     private String content;//이벤트 내용
 
     //이 부분 추가됐습니다~

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class EventController {
 
     @Operation(summary = "이벤트 생성", description = "신규 이벤트 생성 화면에서 이벤트를 등록합니다. 생성 직후 스케줄러 등록이 함께 수행됩니다.")
     @PostMapping
-    public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
+    public ResponseEntity<EventCreatedResponse> eventCreate(@RequestBody @Valid EventCreateRequest request, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
         EventCreatedResponse eventCreatedResponse = eventService.eventCreate(request, privateId);
         //스케줄러에 등록
@@ -76,7 +77,7 @@ public class EventController {
 
     @Operation(summary = "이벤트 수정", description = "이벤트 수정 화면에서 기존 이벤트를 수정합니다. 수정 후 스케줄러 정보도 함께 갱신됩니다.")
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody EventCreateRequest request, HttpServletRequest httpServletRequest){
+    public ResponseEntity<EventUpdatedResponse> eventUpdate(@PathVariable Long eventId,@RequestBody @Valid EventCreateRequest request, HttpServletRequest httpServletRequest){
         String priavateId = jwtProvider.extractUserId(httpServletRequest);
         EventUpdatedResponse eventUpdatedResponse = eventService.eventUpdate(request, priavateId,eventId);
         //스케줄러에 등록
