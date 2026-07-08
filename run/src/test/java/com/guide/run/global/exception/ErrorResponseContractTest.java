@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class ErrorResponseContractTest {
 
@@ -63,7 +64,7 @@ class ErrorResponseContractTest {
         assertThat(result.getPath()).isEqualTo("/api/event");
         assertThat(result.getTimestamp()).isEqualTo("2026-07-09T10:20:30+09:00");
         assertThat(result.getFieldErrors())
-                .extracting(FieldErrorResult::getField)
-                .containsExactly("eventContent");
+                .extracting(FieldErrorResult::getField, FieldErrorResult::getMessage)
+                .containsExactly(tuple("eventContent", "모임 내용은 500자 이하로 입력해주세요."));
     }
 }

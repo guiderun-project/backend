@@ -1,6 +1,8 @@
 package com.guide.run.global.exception.validation;
 
 import com.guide.run.global.dto.response.ValidFailResult;
+import com.guide.run.global.exception.ErrorResponseFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +14,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RequiredArgsConstructor
 @RestControllerAdvice
 public class ValidationExceptionAdvice {
+    private final ErrorResponseFactory errorResponseFactory;
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ValidFailResult> handleValidationException(MethodArgumentNotValidException e) {
-        return ValidFailResult.toResult(e);
+    protected ResponseEntity<ValidFailResult> handleValidationException(
+            MethodArgumentNotValidException e,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(errorResponseFactory.validation(
+                "7000",
+                "입력값이 올바르지 않아요.",
+                e.getBindingResult().getFieldErrors(),
+                request
+        ));
     }
 }
