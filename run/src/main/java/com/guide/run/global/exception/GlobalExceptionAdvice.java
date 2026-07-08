@@ -135,6 +135,10 @@ public class GlobalExceptionAdvice {
             return new ErrorMessage("4001", ILLEGAL_ARGUMENT_MESSAGE);
         }
 
+        if (!isEventRequest(request)) {
+            return new ErrorMessage("4001", ILLEGAL_ARGUMENT_MESSAGE);
+        }
+
         Class<?> requiredType = e.getRequiredType();
         if ("type".equals(parameterName) && EventType.class.equals(requiredType)) {
             return errorMessage("notValidType");
@@ -142,9 +146,6 @@ public class GlobalExceptionAdvice {
         if (("kind".equals(parameterName) || "recruitStatus".equals(parameterName))
                 && EventRecruitStatus.class.equals(requiredType)) {
             return errorMessage("notValidKind");
-        }
-        if (!isEventRequest(request)) {
-            return new ErrorMessage("4001", ILLEGAL_ARGUMENT_MESSAGE);
         }
 
         return switch (parameterName) {

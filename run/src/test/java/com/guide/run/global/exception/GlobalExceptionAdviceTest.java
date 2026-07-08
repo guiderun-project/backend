@@ -257,7 +257,7 @@ class GlobalExceptionAdviceTest {
     }
 
     @Test
-    @DisplayName("이벤트 타입이 아닌 type 파라미터 바인딩 오류는 일반 요청값 오류로 처리한다")
+    @DisplayName("이벤트 경로가 아닌 type 파라미터 바인딩 오류는 일반 요청값 오류로 처리한다")
     void nonEventTypeMismatchReturnsGenericMessage() throws Exception {
         ResultActions result = mockMvc.perform(get("/test/admin-type")
                 .param("type", "BAD"));
@@ -350,7 +350,7 @@ class GlobalExceptionAdviceTest {
         }
 
         @GetMapping("/test/admin-type")
-        void adminType(@RequestParam("type") int type) {
+        void adminType(@RequestParam("type") EventType type) {
         }
     }
 }
