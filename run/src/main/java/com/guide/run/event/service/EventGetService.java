@@ -230,7 +230,8 @@ public class EventGetService {
         return event != null
                 && event.isApprove()
                 && event.getStartTime() != null
-                && event.getStartTime().isAfter(EventTemporalStatusResolver.now());
+                && event.getEndTime() != null
+                && event.getEndTime().isAfter(EventTemporalStatusResolver.now());
     }
 
     private int getDDay(LocalDate date) {
