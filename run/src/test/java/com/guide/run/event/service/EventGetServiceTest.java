@@ -44,7 +44,7 @@ class EventGetServiceTest {
     private EventGetService eventGetService;
 
     @Test
-    @DisplayName("예정 이벤트 카운트는 시작일 필터가 포함된 전용 쿼리를 사용한다")
+    @DisplayName("예정 이벤트 카운트는 종료 전 필터가 포함된 전용 쿼리를 사용한다")
     void getAllEventListCountUsesUpcomingCountQuery() {
         when(eventRepository.countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null))
                 .thenReturn(7L);
@@ -137,8 +137,8 @@ class EventGetServiceTest {
     }
 
     @Test
-    @DisplayName("회원 다가오는 이벤트는 저장 상태가 모집중이어도 이미 시작했으면 제외한다")
-    void getUpcomingEventsExcludesStartedEventWithStaleOpenStatus() {
+    @DisplayName("회원 다가오는 이벤트는 이미 시작했어도 종료 전이면 반환한다")
+    void getUpcomingEventsIncludesStartedEventBeforeEndTime() {
         User member = User.builder()
                 .privateId("member-private")
                 .role(Role.ROLE_USER)
@@ -157,7 +157,7 @@ class EventGetServiceTest {
 
         var response = eventGetService.getUpcomingEvents("member-private");
 
-        assertThat(response.getItems()).isEmpty();
+        assertThat(response.getItems()).hasSize(1);
     }
 
     private Event createEvent(Long id, EventRecruitStatus recruitStatus, LocalDateTime startTime) {

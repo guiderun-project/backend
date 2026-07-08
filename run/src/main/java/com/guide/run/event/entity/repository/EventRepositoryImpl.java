@@ -77,7 +77,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                     .from(event)
                     .join(eventForm).on(event.id.eq(eventForm.eventId),
                             eventForm.privateId.eq(privateId))
-                    .where(checkByUpcomingDate()
+                    .where(checkByNotEndedDateTime()
                             .and(event.isApprove.eq(true))
                             .and(event.startTime.year().eq(year))
                             .and(event.id.eq(eventForm.eventId))
@@ -181,7 +181,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(event)
                 .join(eventForm).on(event.id.eq(eventForm.eventId),
                         eventForm.privateId.eq(privateId))
-                .where(checkByUpcomingDate()
+                .where(checkByNotEndedDateTime()
                         .and(event.isApprove.eq(true))
                         .and(eventForm.eventId.eq(event.id))
                         .and(eventForm.privateId.eq(privateId)))
@@ -230,7 +230,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
                         .and(checkByPublicEvent())
-                        .and(checkByUpcomingDate())
+                        .and(checkByNotEndedDateTime())
                 )
                 .fetchOne();
         return result != null ? result : 0L;
@@ -290,7 +290,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
                         .and(checkByPublicEvent())
-                        .and(checkByUpcomingDate())
+                        .and(checkByNotEndedDateTime())
                 )
                 .orderBy(event.startTime.asc())
                 .offset(start)
@@ -386,7 +386,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByCityName(cityName))
                         .and(checkByPublicEvent())
                         .and(checkByTitle(title))
-                        .and(checkByUpcomingDate())
+                        .and(checkByNotEndedDateTime())
                 )
                 .orderBy(event.startTime.asc())
                 .offset(start)
@@ -455,7 +455,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByCityName(cityName))
                         .and(checkByPublicEvent())
                         .and(checkByTitle(title))
-                        .and(checkByUpcomingDate())
+                        .and(checkByNotEndedDateTime())
                 )
                 .fetchOne();
         return result != null ? result : 0L;
@@ -615,8 +615,8 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         }
     }
 
-    private BooleanBuilder checkByUpcomingDate() {
-        return new BooleanBuilder(event.startTime.gt(EventTemporalStatusResolver.now()));
+    private BooleanBuilder checkByNotEndedDateTime() {
+        return new BooleanBuilder(event.endTime.gt(EventTemporalStatusResolver.now()));
     }
 
     private BooleanBuilder checkByPastDateTime() {

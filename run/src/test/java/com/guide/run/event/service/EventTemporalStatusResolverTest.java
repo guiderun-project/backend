@@ -143,11 +143,14 @@ class EventTemporalStatusResolverTest {
     @Test
     @DisplayName("모집 상태 raw 필드 계산은 같은 현재 시각에서 날짜를 파생한다")
     void resolveRecruitStatusWithRawFieldsDerivesTodayFromSameNow() {
+        LocalDate serviceToday = EventTemporalStatusResolver.today();
+        LocalDateTime serviceNow = EventTemporalStatusResolver.now();
+
         EventRecruitStatus status = EventTemporalStatusResolver.resolveRecruitStatus(
                 EventRecruitStatus.RECRUIT_UPCOMING,
-                today.minusDays(1),
-                today.plusDays(1),
-                now.plusDays(2)
+                serviceToday.minusDays(1),
+                serviceToday.plusDays(1),
+                serviceNow.plusDays(2)
         );
 
         assertThat(status).isEqualTo(EventRecruitStatus.RECRUIT_OPEN);

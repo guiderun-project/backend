@@ -29,7 +29,7 @@ class EventSearchServiceTest {
     private EventSearchService eventSearchService;
 
     @Test
-    @DisplayName("예정 이벤트 검색 카운트는 시작일 필터가 포함된 전용 쿼리를 사용한다")
+    @DisplayName("예정 이벤트 검색 카운트는 종료 전 필터가 포함된 전용 쿼리를 사용한다")
     void getSearchAllEventsCountValueUsesUpcomingSearchCountQuery() {
         when(eventRepository.upcomingGetSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_ALL, null))
                 .thenReturn(3L);
