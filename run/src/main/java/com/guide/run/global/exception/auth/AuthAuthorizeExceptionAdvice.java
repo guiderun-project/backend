@@ -48,7 +48,7 @@ public class AuthAuthorizeExceptionAdvice {
     //0101
     @ExceptionHandler(NotExistAuthorizationException.class)
     protected ResponseEntity<FailResult> NotExistAuthorizationException(NotExistAuthorizationException e){
-        return ResponseEntity.status(404).body(responseService.getFailResult(
+        return ResponseEntity.status(401).body(responseService.getFailResult(
                 getMessage("notExistAuthorization.code"),
                 getMessage("notExistAuthorization.msg")));
     }

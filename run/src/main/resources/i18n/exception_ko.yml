@@ -93,25 +93,25 @@ notCommentWriter:
   msg: "해당 댓글 작성자가 아닙니다."
 notValidSort:
   code: "2200"
-  msg: "잘못된 sort값 입니다."
+  msg: "이벤트 탭을 예정 이벤트, 지난 이벤트, 나의 이벤트 중에서 선택해주세요."
 notValidType:
   code: "2201"
-  msg: "잘못된 type값 입니다."
+  msg: "이벤트 유형을 전체, 대회, 훈련 중에서 선택해주세요."
 notValidKind:
   code: "2202"
-  msg: "잘못된 kind값 입니다."
+  msg: "모집구분을 전체, 모집중, 모집예정, 모집마감, 종료 중에서 선택해주세요."
 notValidDuration:
   code: "2203"
   msg: "이벤트 신청 기간이 아닙니다."
 notValidYear:
   code: "2204"
-  msg: "잘못된 year값 입니다."
+  msg: "연도 선택 값이 올바르지 않아요."
 notValidMonth:
   code: "2205"
-  msg: "잘못된 month값 입니다."
+  msg: "월 선택 값이 올바르지 않아요."
 notValidDay:
   code: "2206"
-  msg: "잘못된 day값 입니다."
+  msg: "일자 선택 값이 올바르지 않아요."
 ExistForm:
   code: "2207"
   msg: "이미 신청한 이벤트 입니다."
