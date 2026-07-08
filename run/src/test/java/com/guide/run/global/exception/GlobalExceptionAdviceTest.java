@@ -77,15 +77,27 @@ class GlobalExceptionAdviceTest {
     }
 
     @Test
-    @DisplayName("ResponseStatusException 응답은 실제 상태 코드와 reason 메시지를 사용한다")
-    void responseStatusExceptionUsesStatusAndReason() throws Exception {
+    @DisplayName("ResponseStatusException reason이 사용자용 한글 메시지가 아니면 기본 메시지를 사용한다")
+    void responseStatusExceptionWithNonKoreanReasonUsesDefaultMessage() throws Exception {
         ResultActions result = mockMvc.perform(post("/test/response-status")
                 .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("4000"))
-                .andExpect(jsonPath("$.message").value("userId and role are required."));
+                .andExpect(jsonPath("$.message").value("요청을 처리하지 못했어요."));
         expectMetadata(result, 400, "/test/response-status");
+    }
+
+    @Test
+    @DisplayName("ResponseStatusException reason이 사용자용 한글 메시지면 그대로 사용한다")
+    void responseStatusExceptionWithKoreanReasonUsesReason() throws Exception {
+        ResultActions result = mockMvc.perform(post("/test/response-status-korean")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("4000"))
+                .andExpect(jsonPath("$.message").value("이미 승인된 사용자예요."));
+        expectMetadata(result, 400, "/test/response-status-korean");
     }
 
     @Test
@@ -125,75 +137,135 @@ class GlobalExceptionAdviceTest {
     }
 
     @Test
+    @DisplayName("잘못된 JSON 요청 본문은 클라이언트 요청 오류로 처리한다")
+    void malformedJsonReturnsBadRequest() throws Exception {
+        ResultActions result = mockMvc.perform(post("/test/validation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("4001"))
+                .andExpect(jsonPath("$.message").value("요청 본문 형식이 올바르지 않아요."));
+        expectMetadata(result, 400, "/test/validation");
+    }
+
+    @Test
+    @DisplayName("필수 요청 파라미터 누락은 클라이언트 요청 오류로 처리한다")
+    void missingRequestParameterReturnsBadRequest() throws Exception {
+        ResultActions result = mockMvc.perform(get("/api/event/test/year"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("4001"))
+                .andExpect(jsonPath("$.message").value("필수 요청 값이 누락됐어요."));
+        expectMetadata(result, 400, "/api/event/test/year");
+    }
+
+    @Test
+    @DisplayName("지원하지 않는 HTTP method는 405로 처리한다")
+    void unsupportedMethodReturnsMethodNotAllowed() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/response-status"));
+
+        result.andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.errorCode").value("4050"))
+                .andExpect(jsonPath("$.message").value("지원하지 않는 요청 방식이에요."));
+        expectMetadata(result, 405, "/test/response-status");
+    }
+
+    @Test
+    @DisplayName("지원하지 않는 media type은 415로 처리한다")
+    void unsupportedMediaTypeReturnsUnsupportedMediaType() throws Exception {
+        ResultActions result = mockMvc.perform(post("/test/media-type")
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("plain"));
+
+        result.andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.errorCode").value("4150"))
+                .andExpect(jsonPath("$.message").value("지원하지 않는 요청 형식이에요."));
+        expectMetadata(result, 415, "/test/media-type");
+    }
+
+    @Test
     @DisplayName("sort 값 오류는 한글 선택지 메시지와 요청 메타데이터를 포함한다")
     void sortExceptionReturnsFriendlyMessageAndMetadata() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/sort")
+        ResultActions result = mockMvc.perform(get("/api/event/test/sort")
                 .param("sort", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2200"))
                 .andExpect(jsonPath("$.message").value("이벤트 탭을 예정 이벤트, 지난 이벤트, 나의 이벤트 중에서 선택해주세요."));
-        expectMetadata(result, 400, "/test/sort");
+        expectMetadata(result, 400, "/api/event/test/sort");
     }
 
     @Test
     @DisplayName("type 파라미터 바인딩 오류는 이벤트 유형 선택지 메시지로 처리한다")
     void typeMismatchReturnsFriendlyMessage() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/type")
+        ResultActions result = mockMvc.perform(get("/api/event/test/type")
                 .param("type", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2201"))
                 .andExpect(jsonPath("$.message").value("이벤트 유형을 전체, 대회, 훈련 중에서 선택해주세요."));
-        expectMetadata(result, 400, "/test/type");
+        expectMetadata(result, 400, "/api/event/test/type");
     }
 
     @Test
     @DisplayName("kind 파라미터 바인딩 오류는 모집구분 선택지 메시지로 처리한다")
     void kindMismatchReturnsFriendlyMessage() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/kind")
+        ResultActions result = mockMvc.perform(get("/api/event/test/kind")
                 .param("kind", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2202"))
                 .andExpect(jsonPath("$.message").value("모집구분을 전체, 모집중, 모집예정, 모집마감, 종료 중에서 선택해주세요."));
-        expectMetadata(result, 400, "/test/kind");
+        expectMetadata(result, 400, "/api/event/test/kind");
     }
 
     @Test
     @DisplayName("year 파라미터 바인딩 오류는 연도 선택 메시지로 처리한다")
     void yearMismatchReturnsFriendlyMessage() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/year")
+        ResultActions result = mockMvc.perform(get("/api/event/test/year")
                 .param("year", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2204"))
                 .andExpect(jsonPath("$.message").value("연도 선택 값이 올바르지 않아요."));
-        expectMetadata(result, 400, "/test/year");
+        expectMetadata(result, 400, "/api/event/test/year");
     }
 
     @Test
     @DisplayName("month 파라미터 바인딩 오류는 월 선택 메시지로 처리한다")
     void monthMismatchReturnsFriendlyMessage() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/month")
+        ResultActions result = mockMvc.perform(get("/api/event/test/month")
                 .param("month", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2205"))
                 .andExpect(jsonPath("$.message").value("월 선택 값이 올바르지 않아요."));
-        expectMetadata(result, 400, "/test/month");
+        expectMetadata(result, 400, "/api/event/test/month");
     }
 
     @Test
     @DisplayName("day 파라미터 바인딩 오류는 일자 선택 메시지로 처리한다")
     void dayMismatchReturnsFriendlyMessage() throws Exception {
-        ResultActions result = mockMvc.perform(get("/test/day")
+        ResultActions result = mockMvc.perform(get("/api/event/test/day")
                 .param("day", "BAD"));
 
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("2206"))
                 .andExpect(jsonPath("$.message").value("일자 선택 값이 올바르지 않아요."));
-        expectMetadata(result, 400, "/test/day");
+        expectMetadata(result, 400, "/api/event/test/day");
+    }
+
+    @Test
+    @DisplayName("이벤트 타입이 아닌 type 파라미터 바인딩 오류는 일반 요청값 오류로 처리한다")
+    void nonEventTypeMismatchReturnsGenericMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/admin-type")
+                .param("type", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("4001"))
+                .andExpect(jsonPath("$.message").value("요청 값이 올바르지 않아요."));
+        expectMetadata(result, 400, "/test/admin-type");
     }
 
     private static void expectMetadata(ResultActions result, int status, String path) throws Exception {
@@ -233,6 +305,11 @@ class GlobalExceptionAdviceTest {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
+        @PostMapping("/test/response-status-korean")
+        void responseStatusKorean() {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 승인된 사용자예요.");
+        }
+
         @PostMapping("/test/illegal-argument")
         void illegalArgument() {
             throw new IllegalArgumentException("bad request value");
@@ -243,29 +320,37 @@ class GlobalExceptionAdviceTest {
             throw new IllegalStateException("illegal state");
         }
 
-        @GetMapping("/test/sort")
+        @PostMapping(value = "/test/media-type", consumes = MediaType.APPLICATION_JSON_VALUE)
+        void mediaType(@RequestBody ValidationRequest request) {
+        }
+
+        @GetMapping("/api/event/test/sort")
         void sort(@RequestParam("sort") String sort) {
             throw new NotValidSortException();
         }
 
-        @GetMapping("/test/type")
+        @GetMapping("/api/event/test/type")
         void type(@RequestParam("type") EventType type) {
         }
 
-        @GetMapping("/test/kind")
+        @GetMapping("/api/event/test/kind")
         void kind(@RequestParam("kind") EventRecruitStatus kind) {
         }
 
-        @GetMapping("/test/year")
+        @GetMapping("/api/event/test/year")
         void year(@RequestParam("year") int year) {
         }
 
-        @GetMapping("/test/month")
+        @GetMapping("/api/event/test/month")
         void month(@RequestParam("month") int month) {
         }
 
-        @GetMapping("/test/day")
+        @GetMapping("/api/event/test/day")
         void day(@RequestParam("day") int day) {
+        }
+
+        @GetMapping("/test/admin-type")
+        void adminType(@RequestParam("type") int type) {
         }
     }
 }

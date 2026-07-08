@@ -1,5 +1,6 @@
 package com.guide.run.global.security.config;
 
+import com.guide.run.global.exception.ErrorResponseFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class SecurityConfigCorsTest {
     @Test
     @DisplayName("전역 CORS 설정은 dev/prod/www 도메인을 항상 허용한다")
     void globalCorsAllowsRequiredOrigins() {
-        SecurityConfig securityConfig = new SecurityConfig(null);
+        SecurityConfig securityConfig = new SecurityConfig(null, new ErrorResponseFactory());
         ReflectionTestUtils.setField(securityConfig, "origin", "http://localhost:3000");
 
         CorsConfiguration corsConfiguration = corsConfiguration(securityConfig, "/api/event/summary");
@@ -38,7 +39,7 @@ class SecurityConfigCorsTest {
     @Test
     @DisplayName("전역 CORS 설정은 환경변수로 주입한 origin도 함께 허용한다")
     void globalCorsAllowsConfiguredOrigin() {
-        SecurityConfig securityConfig = new SecurityConfig(null);
+        SecurityConfig securityConfig = new SecurityConfig(null, new ErrorResponseFactory());
         ReflectionTestUtils.setField(securityConfig, "origin", "http://localhost:3000");
 
         CorsConfiguration corsConfiguration = corsConfiguration(securityConfig, "/api/user/mypage");
