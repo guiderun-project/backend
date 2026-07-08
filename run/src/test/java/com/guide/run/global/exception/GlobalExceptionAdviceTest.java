@@ -1,26 +1,33 @@
 package com.guide.run.global.exception;
 
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
+import com.guide.run.global.config.MessageConfig;
+import com.guide.run.global.exception.event.EventLogicExceptionAdvice;
+import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.global.exception.validation.ValidationExceptionAdvice;
+import com.guide.run.global.service.ResponseService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.support.StaticMessageSource;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Locale;
-
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,12 +41,15 @@ class GlobalExceptionAdviceTest {
     @BeforeEach
     void setUp() {
         ErrorResponseFactory errorResponseFactory = new ErrorResponseFactory();
+        MessageSource messageSource = messageSource();
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new ValidationTestController(), new CommonExceptionTestController())
                 .setControllerAdvice(
+                        new FailResultResponseBodyAdvice(),
+                        new EventLogicExceptionAdvice(messageSource, new ResponseService()),
                         new ValidationExceptionAdvice(errorResponseFactory),
-                        new GlobalExceptionAdvice(errorResponseFactory),
-                        new UnknownExceptionAdvice(messageSource(), errorResponseFactory)
+                        new GlobalExceptionAdvice(errorResponseFactory, messageSource),
+                        new UnknownExceptionAdvice(messageSource, errorResponseFactory)
                 )
                 .build();
     }
@@ -114,21 +124,86 @@ class GlobalExceptionAdviceTest {
         expectMetadata(result, 500, "/test/illegal-state");
     }
 
+    @Test
+    @DisplayName("sort 값 오류는 한글 선택지 메시지와 요청 메타데이터를 포함한다")
+    void sortExceptionReturnsFriendlyMessageAndMetadata() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/sort")
+                .param("sort", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2200"))
+                .andExpect(jsonPath("$.message").value("이벤트 탭을 예정 이벤트, 지난 이벤트, 나의 이벤트 중에서 선택해주세요."));
+        expectMetadata(result, 400, "/test/sort");
+    }
+
+    @Test
+    @DisplayName("type 파라미터 바인딩 오류는 이벤트 유형 선택지 메시지로 처리한다")
+    void typeMismatchReturnsFriendlyMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/type")
+                .param("type", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2201"))
+                .andExpect(jsonPath("$.message").value("이벤트 유형을 전체, 대회, 훈련 중에서 선택해주세요."));
+        expectMetadata(result, 400, "/test/type");
+    }
+
+    @Test
+    @DisplayName("kind 파라미터 바인딩 오류는 모집구분 선택지 메시지로 처리한다")
+    void kindMismatchReturnsFriendlyMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/kind")
+                .param("kind", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2202"))
+                .andExpect(jsonPath("$.message").value("모집구분을 전체, 모집중, 모집예정, 모집마감, 종료 중에서 선택해주세요."));
+        expectMetadata(result, 400, "/test/kind");
+    }
+
+    @Test
+    @DisplayName("year 파라미터 바인딩 오류는 연도 선택 메시지로 처리한다")
+    void yearMismatchReturnsFriendlyMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/year")
+                .param("year", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2204"))
+                .andExpect(jsonPath("$.message").value("연도 선택 값이 올바르지 않아요."));
+        expectMetadata(result, 400, "/test/year");
+    }
+
+    @Test
+    @DisplayName("month 파라미터 바인딩 오류는 월 선택 메시지로 처리한다")
+    void monthMismatchReturnsFriendlyMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/month")
+                .param("month", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2205"))
+                .andExpect(jsonPath("$.message").value("월 선택 값이 올바르지 않아요."));
+        expectMetadata(result, 400, "/test/month");
+    }
+
+    @Test
+    @DisplayName("day 파라미터 바인딩 오류는 일자 선택 메시지로 처리한다")
+    void dayMismatchReturnsFriendlyMessage() throws Exception {
+        ResultActions result = mockMvc.perform(get("/test/day")
+                .param("day", "BAD"));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value("2206"))
+                .andExpect(jsonPath("$.message").value("일자 선택 값이 올바르지 않아요."));
+        expectMetadata(result, 400, "/test/day");
+    }
+
     private static void expectMetadata(ResultActions result, int status, String path) throws Exception {
         result.andExpect(jsonPath("$.status").value(status))
                 .andExpect(jsonPath("$.path").value(path))
                 .andExpect(jsonPath("$.timestamp").value(matchesPattern(TIMESTAMP_PATTERN)));
     }
 
-    private static StaticMessageSource messageSource() {
-        StaticMessageSource messageSource = new StaticMessageSource();
-        messageSource.addMessage("unknown.code", Locale.KOREA, "0000");
-        messageSource.addMessage("unknown.msg", Locale.KOREA, UNKNOWN_MESSAGE);
-        messageSource.addMessage("unknown.code", Locale.getDefault(), "0000");
-        messageSource.addMessage("unknown.msg", Locale.getDefault(), UNKNOWN_MESSAGE);
-        messageSource.addMessage("unknown.code", Locale.ENGLISH, "0000");
-        messageSource.addMessage("unknown.msg", Locale.ENGLISH, UNKNOWN_MESSAGE);
-        return messageSource;
+    private static MessageSource messageSource() {
+        return new MessageConfig().messageSource("i18n/exception", "UTF-8");
     }
 
     @RestController
@@ -166,6 +241,31 @@ class GlobalExceptionAdviceTest {
         @PostMapping("/test/illegal-state")
         void illegalState() {
             throw new IllegalStateException("illegal state");
+        }
+
+        @GetMapping("/test/sort")
+        void sort(@RequestParam("sort") String sort) {
+            throw new NotValidSortException();
+        }
+
+        @GetMapping("/test/type")
+        void type(@RequestParam("type") EventType type) {
+        }
+
+        @GetMapping("/test/kind")
+        void kind(@RequestParam("kind") EventRecruitStatus kind) {
+        }
+
+        @GetMapping("/test/year")
+        void year(@RequestParam("year") int year) {
+        }
+
+        @GetMapping("/test/month")
+        void month(@RequestParam("month") int month) {
+        }
+
+        @GetMapping("/test/day")
+        void day(@RequestParam("day") int day) {
         }
     }
 }
