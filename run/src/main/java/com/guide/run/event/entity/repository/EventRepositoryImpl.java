@@ -15,6 +15,7 @@ import com.guide.run.event.entity.type.EventStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
@@ -543,19 +544,22 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     private BooleanBuilder activityRelationCond(String privateId, String relation) {
         if ("PARTICIPATED".equals(relation)) {
-            return new BooleanBuilder(
-                    JPAExpressions.selectFrom(eventForm)
-                            .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
-                            .exists());
+            return new BooleanBuilder(activeParticipationExists(privateId));
         } else if ("HOSTED".equals(relation)) {
             return new BooleanBuilder(event.organizer.eq(privateId));
         } else {
             return new BooleanBuilder(
                     event.organizer.eq(privateId)
-                            .or(JPAExpressions.selectFrom(eventForm)
-                                    .where(eventForm.eventId.eq(event.id).and(eventForm.privateId.eq(privateId)))
-                                    .exists()));
+                            .or(activeParticipationExists(privateId)));
         }
+    }
+
+    private BooleanExpression activeParticipationExists(String privateId) {
+        return JPAExpressions.selectFrom(eventForm)
+                .where(eventForm.eventId.eq(event.id)
+                        .and(eventForm.privateId.eq(privateId))
+                        .and(eventForm.status.eq(APPLIED)))
+                .exists();
     }
 
     @Override

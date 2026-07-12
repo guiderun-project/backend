@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,6 +82,36 @@ class EventRepositoryImplTest {
                 .doesNotContain("sum(event.distance)");
     }
 
+    @Test
+    @DisplayName("참여 활동 목록은 신청 상태 이벤트만 조회한다")
+    void activityParticipatedEventsUseAppliedForms() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.findActivityEvents("member-private", null, "PARTICIPATED", 0, 10);
+
+        String jpql = captureJpql(entityManager);
+        assertThat(jpql)
+                .contains("eventForm.status")
+                .contains("exists");
+    }
+
+    @Test
+    @DisplayName("전체 활동 목록도 신청 상태 이벤트만 조회한다")
+    void totalActivityEventsUseAppliedForms() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.findActivityEvents("member-private", null, "TOTAL", 0, 10);
+
+        String jpql = captureJpql(entityManager);
+        assertThat(jpql)
+                .contains("eventForm.status")
+                .contains("exists");
+    }
+
     private Query stubSingleResultQuery(EntityManager entityManager, Object result) {
         EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
         when(entityManagerFactory.getProperties()).thenReturn(Map.of());
@@ -88,6 +119,7 @@ class EventRepositoryImplTest {
 
         Query query = mock(Query.class, RETURNS_SELF);
         when(query.getSingleResult()).thenReturn(result);
+        when(query.getResultList()).thenReturn(List.of());
         when(entityManager.createQuery(anyString())).thenReturn(query);
         return query;
     }
