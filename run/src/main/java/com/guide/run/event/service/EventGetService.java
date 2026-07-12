@@ -195,8 +195,7 @@ public class EventGetService {
                 .sorted(Comparator.comparing(Event::getStartTime))
                 .limit(UPCOMING_MEMBER_LIMIT)
                 .map(event -> {
-                    boolean isOrganizer = privateId.equals(event.getOrganizer());
-                    List<UpcomingEventResponse.PartnerItem> partners = isOrganizer ? List.of() : findPartners(event, member);
+                    List<UpcomingEventResponse.PartnerItem> partners = findPartners(event, member);
                     return UpcomingEventResponse.MemberItem.builder()
                             .id(event.getId())
                             .name(event.getName())

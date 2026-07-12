@@ -1,11 +1,15 @@
 package com.guide.run.event.service;
 
 import com.guide.run.event.entity.Event;
+import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
+import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
+import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
@@ -158,6 +162,51 @@ class EventGetServiceTest {
         var response = eventGetService.getUpcomingEvents("member-private");
 
         assertThat(response.getItems()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("회원 다가오는 이벤트는 주최자여도 신청자 매칭 파트너를 반환한다")
+    void getUpcomingEventsReturnsMatchedPartnersWhenOrganizerAlsoApplied() {
+        User member = User.builder()
+                .privateId("member-private")
+                .role(Role.ROLE_USER)
+                .type(UserType.VI)
+                .build();
+        User guide = User.builder()
+                .privateId("guide-private")
+                .name("가이드 테스트")
+                .type(UserType.GUIDE)
+                .build();
+        Event event = createEvent(
+                1L,
+                EventRecruitStatus.RECRUIT_OPEN,
+                EventTemporalStatusResolver.now().plusDays(2)
+        );
+        EventForm form = EventForm.builder()
+                .eventId(1L)
+                .privateId("member-private")
+                .status(EventFormStatus.APPLIED)
+                .build();
+        Matching matching = Matching.builder()
+                .eventId(1L)
+                .viId("member-private")
+                .guideId("guide-private")
+                .build();
+
+        when(userRepository.findUserByPrivateId("member-private")).thenReturn(Optional.of(member));
+        when(eventFormRepository.findAllByPrivateId("member-private")).thenReturn(List.of(form));
+        when(eventRepository.findAllById(any())).thenReturn(List.of(event));
+        when(eventRepository.findAllByOrganizer("member-private")).thenReturn(List.of(event));
+        when(matchingRepository.findAllByEventIdAndViId(1L, "member-private")).thenReturn(List.of(matching));
+        when(userRepository.findAllById(List.of("guide-private"))).thenReturn(List.of(guide));
+
+        var response = eventGetService.getUpcomingEvents("member-private");
+        List<?> items = response.getItems();
+        UpcomingEventResponse.MemberItem item = (UpcomingEventResponse.MemberItem) items.get(0);
+
+        assertThat(item.getMyPartner()).hasSize(1);
+        assertThat(item.getMyPartner().get(0).getName()).isEqualTo("가이드 테스트");
+        assertThat(item.getMyPartner().get(0).getType()).isEqualTo(UserType.GUIDE);
     }
 
     private Event createEvent(Long id, EventRecruitStatus recruitStatus, LocalDateTime startTime) {
