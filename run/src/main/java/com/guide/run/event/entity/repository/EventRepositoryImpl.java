@@ -18,12 +18,14 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
+import static com.guide.run.event.entity.type.EventFormStatus.APPLIED;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -568,12 +570,12 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
 
     @Override
     public double sumDistanceByYear(int year) {
-        Double result = queryFactory.select(event.distance.sum())
+        BigDecimal result = queryFactory.select(event.expectedRunningDistanceKm.sum())
                 .from(event)
                 .where(event.isApprove.eq(true)
                         .and(event.startTime.year().eq(year)))
                 .fetchOne();
-        return result != null ? result : 0.0;
+        return result != null ? result.doubleValue() : 0.0;
     }
 
     @Override
@@ -582,20 +584,24 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .from(eventForm)
                 .join(event).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId)
-                        .and(event.isApprove.eq(true)))
+                        .and(eventForm.status.eq(APPLIED))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByPastDateTime()))
                 .fetchOne();
         return result != null ? result : 0L;
     }
 
     @Override
     public double sumMyParticipationDistance(String privateId) {
-        Double result = queryFactory.select(event.distance.sum())
+        BigDecimal result = queryFactory.select(event.expectedRunningDistanceKm.sum())
                 .from(eventForm)
                 .join(event).on(eventForm.eventId.eq(event.id))
                 .where(eventForm.privateId.eq(privateId)
-                        .and(event.isApprove.eq(true)))
+                        .and(eventForm.status.eq(APPLIED))
+                        .and(event.isApprove.eq(true))
+                        .and(checkByPastDateTime()))
                 .fetchOne();
-        return result != null ? result : 0.0;
+        return result != null ? result.doubleValue() : 0.0;
     }
 
     private BooleanBuilder checkByTitle(String title) {
