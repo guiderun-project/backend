@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface MatchingRepository extends JpaRepository<Matching, MatchingId>,MatchingRepositoryCustom {
     Matching findByEventIdAndGuideId(long eventId, String guideId);
-    Optional<Matching> findByEventIdAndViId(long eventId, String viId);
     Optional<Matching> findByViId(String viId);
     List<Matching> findAllByEventIdAndViId(long eventId,String viId);
     long countByEventIdAndViId(long eventId,String viId);

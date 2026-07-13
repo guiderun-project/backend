@@ -32,14 +32,6 @@ public class ArchiveData {
 
 
 
-    public void editPermisson(
-            boolean privacy,
-            boolean portraitRights
-    ){
-        this.privacy = privacy;
-        this.portraitRights = portraitRights;
-    }
-
     public void agreeTrainingSafety() {
         this.trainingSafety = true;
     }

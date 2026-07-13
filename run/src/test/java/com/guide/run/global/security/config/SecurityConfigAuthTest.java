@@ -5,11 +5,9 @@ import com.guide.run.global.exception.ErrorResponseFactory;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.service.ResponseService;
 import com.guide.run.user.controller.SignController;
-import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.SignupService;
 import com.guide.run.user.service.UserService;
-import com.guide.run.user.service.ViService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,12 +43,6 @@ class SecurityConfigAuthTest {
 
     @MockBean
     private UserService userService;
-
-    @MockBean
-    private ViService viService;
-
-    @MockBean
-    private GuideService guideService;
 
     @MockBean
     private SignupService signupService;

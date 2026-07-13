@@ -7,7 +7,6 @@ import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.security.user.CustomUserDetailsService;
 import com.guide.run.global.redis.RefreshToken;
 import com.guide.run.global.redis.RefreshTokenRepository;
-import com.guide.run.user.dto.request.RefreshTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -156,10 +155,7 @@ public class JwtProvider {
         return token.getToken();
     }
 
-    public String getPrivateIdForRefreshToken(RefreshTokenDto refreshToken) {
-        RefreshToken token = refreshTokenRepository.findById(refreshToken.getRefreshToken()).orElseThrow(() -> new NotValidRefreshTokenException());
-        return token.getPrivateId();
-    }public String getPrivateIdForRefreshToken(String refreshToken) {
+    public String getPrivateIdForRefreshToken(String refreshToken) {
         RefreshToken token = refreshTokenRepository.findById(refreshToken).orElseThrow(() -> new NotValidRefreshTokenException());
         return token.getPrivateId();
     }

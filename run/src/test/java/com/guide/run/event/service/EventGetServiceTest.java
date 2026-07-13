@@ -63,7 +63,6 @@ class EventGetServiceTest {
 
         assertThat(count).isEqualTo(7L);
         verify(eventRepository).countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null);
-        verify(eventRepository, never()).countByRecruitStatusNotAndIsApprove(EventRecruitStatus.RECRUIT_END, true);
     }
 
     @Test

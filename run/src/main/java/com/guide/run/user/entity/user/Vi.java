@@ -16,8 +16,4 @@ public class Vi {
     private Boolean isRunningExp;
     private String guideName;
 
-    public void editViRunningInfo(Boolean runningExp, String guideName){
-        this.isRunningExp = runningExp;
-        this.guideName = guideName;
-    }
 }

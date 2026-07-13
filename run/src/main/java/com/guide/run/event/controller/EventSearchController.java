@@ -1,6 +1,5 @@
 package com.guide.run.event.controller;
 
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -53,23 +52,6 @@ public class EventSearchController {
         int normalizedPage = normalizePage(page);
         int start = (normalizedPage - 1) * PAGE_SIZE;
         return eventSearchService.getSearchAllEvents(start, PAGE_SIZE, normalizedPage, keyword, tab, type, effectiveRecruitStatus, privateId, cityName);
-    }
-
-    @Operation(summary = "이벤트 검색 개수 조회", description = "이벤트 검색 화면에서 키워드 및 탭 조건 기준 검색 결과 개수를 조회합니다.")
-    @GetMapping("/search/count")
-    public SearchAllEventsCount searchAllEventCount(
-            @Parameter(description = "검색어", example = "상계천") @RequestParam(value = "keyword", defaultValue = "") String keyword,
-            @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam(value = "tab", defaultValue = "UPCOMING") String tab,
-            @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
-            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
-            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
-            @RequestParam(value = "cityName", required = false) CityName cityName,
-            HttpServletRequest request) {
-        tab = normalizeTab(tab);
-        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
-        validateParams(tab, type, effectiveRecruitStatus);
-        String privateId = extracted(request);
-        return eventSearchService.getSearchAllEventsCount(keyword, tab, type, effectiveRecruitStatus, privateId, cityName);
     }
 
     // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.

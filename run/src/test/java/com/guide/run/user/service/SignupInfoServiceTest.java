@@ -37,8 +37,6 @@ class SignupInfoServiceTest {
     @Mock private ArchiveDataRepository archiveDataRepository;
     @Mock private UserRepository userRepository;
     // 생성자 주입에 필요한 나머지 레포지토리는 사용하지 않으므로 mock만 주입
-    @Mock private com.guide.run.user.repository.ViRepository viRepository;
-    @Mock private com.guide.run.user.repository.GuideRepository guideRepository;
     @Mock private com.guide.run.user.repository.SignUpInfoRepository signUpInfoRepository;
     @Mock private EventFormRepository eventFormRepository;
     @Mock private EventRepository eventRepository;

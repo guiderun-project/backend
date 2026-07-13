@@ -2,28 +2,18 @@ package com.guide.run.user.controller;
 
 import com.guide.run.global.cookie.service.CookieService;
 import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenException;
-import com.guide.run.global.exception.user.dto.DuplicatedUserIdException;
 import com.guide.run.global.jwt.JwtProvider;
-import com.guide.run.user.dto.GuideSignupDto;
-import com.guide.run.user.dto.ReissuedAccessTokenDto;
-import com.guide.run.user.dto.ViSignupDto;
-import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.GeneralLoginRequest;
 import com.guide.run.user.dto.request.SignupRequest;
 import com.guide.run.user.dto.request.WithdrawalRequest;
 import com.guide.run.user.dto.response.IntegratedSignupResponse;
-import com.guide.run.user.dto.response.IsDuplicatedResponse;
 import com.guide.run.user.dto.response.KakaoOAuthLoginResponse;
 import com.guide.run.user.dto.response.LoginPostResponse;
-import com.guide.run.user.dto.response.LoginResponse;
-import com.guide.run.user.dto.response.SignupResponse;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.profile.OAuthProfile;
-import com.guide.run.user.service.GuideService;
 import com.guide.run.user.service.ProviderService;
 import com.guide.run.user.service.SignupService;
 import com.guide.run.user.service.UserService;
-import com.guide.run.user.service.ViService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.CommunicationException;
 
 @Slf4j
-@Tag(name = "Auth", description = "로그인, 회원가입, 토큰 재발급, 중복 확인과 회원 탈퇴를 다루는 인증 API")
+@Tag(name = "Auth", description = "로그인, 회원가입, 토큰 재발급과 회원 탈퇴를 다루는 인증 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -51,8 +41,6 @@ public class SignController {
     private final JwtProvider jwtProvider;
     private final CookieService cookieService;
     private final UserService userService;
-    private final ViService viService;
-    private final GuideService guideService;
     private final SignupService signupService;
 
 
@@ -136,45 +124,6 @@ public class SignController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "VI 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 VI 회원가입 폼을 제출할 때 호출됩니다. 프론트의 회원가입 화면에서 입력한 기본 정보, 러닝 정보, 약관 동의 정보를 함께 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("/signup/vi")
-    public ResponseEntity<SignupResponse> viSignup(@RequestBody @Valid ViSignupDto viSignupDto, HttpServletRequest httpServletRequest){
-        String privateId = jwtProvider.extractUserId(httpServletRequest);
-        if(userService.isAccountIdExist(viSignupDto.getAccountId())){
-            throw new DuplicatedUserIdException();
-        }else{
-            SignupResponse response = viService.viSignup(privateId, viSignupDto);
-            userService.signUpATA(privateId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-    }
-
-
-    @Operation(summary = "Guide 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 Guide 회원가입 폼을 제출할 때 호출됩니다. 프론트의 회원가입 화면에서 입력한 기본 정보와 가이드 경험 정보를 함께 받습니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("/signup/guide")
-    public ResponseEntity<SignupResponse> guideSignup(@RequestBody @Valid GuideSignupDto guideSignupDto, HttpServletRequest httpServletRequest){
-        String privateId = jwtProvider.extractUserId(httpServletRequest);
-        if(userService.isAccountIdExist(guideSignupDto.getAccountId())){
-            throw new DuplicatedUserIdException();
-        }else{
-            SignupResponse response = guideService.guideSignup(privateId, guideSignupDto);
-            userService.signUpATA(privateId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-    }
-
-
-    @Operation(summary = "구글 OAuth 토큰 교환", description = "구글 인가 코드를 액세스 토큰으로 교환합니다. 현재 프론트 실사용 흐름보다는 보조 인증 경로에 가깝습니다.", security = {})
-    @PostMapping("/oauth/token/google")
-    public LoginResponse googleSignup(@RequestParam("code") String code,HttpServletResponse response) throws CommunicationException {
-        String accessToken = providerService.getAccessToken(code, "google").getAccess_token();
-        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"google");
-        String userId = oAuthProfile.getSocialId();
-
-        return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(userId))
-                .build();
-    }
     @Operation(summary = "액세스 토큰 재발급", description = "HttpOnly Cookie의 refreshToken으로 accessToken을 재발급합니다. refreshToken도 rotate되어 Cookie가 갱신됩니다.", security = {})
     @PostMapping("/oauth/login/reissue")
     public ResponseEntity<LoginPostResponse> accessTokenReissue(HttpServletRequest request, HttpServletResponse response) {
@@ -208,39 +157,12 @@ public class SignController {
         throw new NotValidRefreshTokenException();
     }
 
-    //아이디 중복확인
-    @Operation(summary = "회원가입용 계정 ID 중복 확인", description = "회원가입 화면에서 입력한 accountId가 사용 가능한지 확인합니다. 소셜 로그인 이후 NEW 권한 상태에서 호출됩니다.", security = @SecurityRequirement(name = "bearerAuth"))
-    @PostMapping("/signup/duplicated")
-    public ResponseEntity<IsDuplicatedResponse> isIdDuplicated(@RequestBody AccountIdDto aa){
-        IsDuplicatedResponse response =
-                IsDuplicatedResponse.builder()
-                        .isUnique(!userService.isAccountIdExist(aa.getAccountId()))
-                        .build();
-        return ResponseEntity.ok().body(response);
-    }
-
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 화면에서 선택한 탈퇴 사유 목록을 저장하고 계정을 탈퇴 처리합니다.", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/withdrawal")
     public ResponseEntity<String> withDrawal(@RequestBody WithdrawalRequest request, HttpServletRequest httpServletRequest){
         String privateId = jwtProvider.extractUserId(httpServletRequest);
         userService.withDrawal(request, privateId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
-    }
-
-    @Operation(summary = "네이버 OAuth 로그인", description = "네이버 인가 코드를 전달받아 로그인합니다. 현재 프론트의 주 인증 경로는 아니지만 운영 가능한 공개 인증 API입니다.", security = {})
-    @PostMapping("/oauth/login/naver")
-    public LoginResponse naverLogin(@RequestParam("code") String code, HttpServletRequest request,HttpServletResponse response) throws CommunicationException {
-        String accessToken = providerService.getAccessToken(code, "naver").getAccess_token();
-        OAuthProfile oAuthProfile = providerService.getProfile(accessToken,"naver");
-        String privateId = oAuthProfile.getSocialId();
-        String status = userService.getUserStatus(privateId);
-
-
-        return LoginResponse.builder()
-                .accessToken(jwtProvider.createAccessToken(privateId))
-                .refreshToken(jwtProvider.createRefreshToken(privateId))
-                .status(status)
-                .build();
     }
 
 }

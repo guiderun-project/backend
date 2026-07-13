@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface PartnerRepository extends JpaRepository<Partner, PartnerId>, PartnerRepositoryCustom {
     Optional<Partner> findByViId(String privateId);
-    Optional<Partner> findByGuideId(String privateId);
     List<Partner> findAllByViId(String privateId);
     List<Partner> findAllByGuideId(String privateId);
     Optional<Partner> findByViIdAndGuideId(String privateId1, String privateId2);

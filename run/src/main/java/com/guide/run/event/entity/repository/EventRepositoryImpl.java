@@ -1,11 +1,6 @@
 package com.guide.run.event.entity.repository;
 
-import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.dto.response.calender.MyEventOfDayOfCalendar;
-import com.guide.run.event.entity.dto.response.calender.MyEventOfMonth;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
-import com.guide.run.event.entity.dto.response.get.MyEvent;
-import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.service.EventTemporalStatusResolver;
 import com.guide.run.user.dto.response.MyActivityEventsResponse;
 import com.querydsl.jpa.JPAExpressions;
@@ -28,7 +23,6 @@ import static com.guide.run.event.entity.QEvent.event;
 import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.event.entity.type.EventFormStatus.APPLIED;
 import static com.guide.run.event.entity.type.EventRecruitStatus.*;
-import static java.time.temporal.ChronoUnit.DAYS;
 
 public class EventRepositoryImpl implements EventRepositoryCustom{
 
@@ -38,106 +32,6 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-
-    @Override
-    public List<MyEvent> findMyEventByYear(String privateId, int year, EventRecruitStatus eventRecruitStatus){
-        if(eventRecruitStatus.equals(RECRUIT_END)){
-            return queryFactory.select(
-                    Projections.constructor(MyEvent.class,
-                            event.id.as("eventId"),
-                            event.type.as("eventType"),
-                            event.name.as("name"),
-                            event.recruitStatus.as("recruitStatus"),
-                            event.recruitStartDate.as("recruitStartDate"),
-                            event.recruitEndDate.as("recruitEndDate"),
-                            event.startTime.as("startDate"),
-                            event.endTime.as("endDate"))
-                    )
-                    .from(event)
-                    .join(eventForm).on(event.id.eq(eventForm.eventId),
-                            eventForm.privateId.eq(privateId))
-                    .where(checkByPastDateTime()
-                            .and(event.isApprove.eq(true))
-                            .and(event.startTime.year().eq(year))
-                            .and(event.id.eq(eventForm.eventId))
-                            .and(eventForm.privateId.eq(privateId)))
-                    .orderBy(event.endTime.desc())
-                    .offset(0)
-                    .limit(4)
-                    .fetch();
-        }else{
-            List<MyEvent> fetch = queryFactory.select(
-                            Projections.constructor(MyEvent.class,
-                                    event.id.as("eventId"),
-                                    event.type.as("eventType"),
-                                    event.name.as("name"),
-                                    event.recruitStatus.as("recruitStatus"),
-                                    event.recruitStartDate.as("recruitStartDate"),
-                                    event.recruitEndDate.as("recruitEndDate"),
-                                    event.startTime.as("startDate"),
-                                    event.endTime.as("endDate"))
-                    )
-                    .from(event)
-                    .join(eventForm).on(event.id.eq(eventForm.eventId),
-                            eventForm.privateId.eq(privateId))
-                    .where(checkByNotEndedDateTime()
-                            .and(event.isApprove.eq(true))
-                            .and(event.startTime.year().eq(year))
-                            .and(event.id.eq(eventForm.eventId))
-                            .and(eventForm.privateId.eq(privateId)))
-                    .orderBy(event.endTime.asc())
-                    .offset(0)
-                    .limit(4)
-                    .fetch();
-            for(MyEvent myEvent : fetch){
-                myEvent.setdDay((int)DAYS.between(EventTemporalStatusResolver.today(),myEvent.getEndDate()));
-            }
-            return fetch;
-        }
-    }
-
-    @Override
-    public List<MyEventOfMonth> findMyEventsOfMonth(LocalDateTime startTime, LocalDateTime endTime, String privateId){
-        List<MyEventOfMonth> fetch = queryFactory.select(
-                        Projections.constructor(MyEventOfMonth.class,
-                                event.type.as("eventType"),
-                                event.startTime.as("startTime"))
-                )
-                .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId))
-                .where(event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
-                .orderBy(event.startTime.desc())
-                .fetch();
-
-        return fetch;
-    }
-
-    @Override
-    public List<MyEventOfDayOfCalendar> findMyEventsOfDay(LocalDateTime startTime,LocalDateTime endTime, String privateId) {
-        List<MyEventOfDayOfCalendar> fetch = queryFactory.select(
-                        Projections.constructor(MyEventOfDayOfCalendar.class,
-                                event.id.as("eventId"),
-                                event.type.as("eventType"),
-                                event.name.as("name"),
-                                event.startTime.as("startDate"),
-                                event.endTime.as("endDate"),
-                                event.recruitStartDate.as("recruitStartDate"),
-                                event.recruitEndDate.as("recruitEndDate"),
-                                event.recruitStatus.as("recruitStatus"))
-                )
-                .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId))
-                .where(
-                        event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId),
-                        event.startTime.between(startTime, endTime).and(event.isApprove.eq(true)))
-                .orderBy(event.startTime.desc())
-                .fetch();
-
-        return fetch;
-    }
 
     @Override
     public long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName) {
@@ -173,40 +67,6 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .orderBy(event.startTime.desc())
                 .offset(start)
                 .limit(limit)
-                .fetch();
-    }
-
-    @Override
-    public List<MyEventDday> getMyEventDday(String privateId) {
-        return queryFactory.select(Projections.constructor(MyEventDday.class,
-                event.name.as("name"),
-                event.startTime.as("dDay")))
-                .from(event)
-                .join(eventForm).on(event.id.eq(eventForm.eventId),
-                        eventForm.privateId.eq(privateId))
-                .where(checkByNotEndedDateTime()
-                        .and(event.isApprove.eq(true))
-                        .and(eventForm.eventId.eq(event.id))
-                        .and(eventForm.privateId.eq(privateId)))
-                .orderBy(event.startTime.asc())
-                .limit(2)
-                .fetch();
-    }
-
-    @Override
-    public List<Event> getSchedulerEvent() {
-        return queryFactory.selectFrom(event)
-                .where(event.recruitStatus.eq(RECRUIT_CLOSE),
-                        event.status.ne(EventStatus.EVENT_END))
-                .fetch();
-    }
-
-    @Override
-    public List<Event> getSchedulerRecruit() {
-        return queryFactory.selectFrom(event)
-                .where(event.status.eq(EventStatus.EVENT_UPCOMING),
-                        event.recruitStatus.ne(RECRUIT_END),
-                        event.recruitStatus.ne(RECRUIT_CLOSE))
                 .fetch();
     }
 

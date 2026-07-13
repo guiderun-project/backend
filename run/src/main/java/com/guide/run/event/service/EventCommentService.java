@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +73,4 @@ public class EventCommentService {
                 .build();
     }
 
-    public long getCommentsCount(Long eventId) {
-        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        return eventCommentRepository.countByEventId(eventId);
-    }
 }

@@ -2,12 +2,11 @@ package com.guide.run.event.entity.repository;
 
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.type.EventFormStatus;
-import com.guide.run.user.entity.type.UserType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface EventFormRepository extends JpaRepository <EventForm,Long> ,EventFormRepositoryAdmin,EventFormRepositoryCustom {
+public interface EventFormRepository extends JpaRepository<EventForm, Long> {
     EventForm findByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByEventIdAndPrivateId(Long eventId,String privateId);
     List<EventForm> findAllByPrivateId(String privateId);
@@ -17,9 +16,5 @@ public interface EventFormRepository extends JpaRepository <EventForm,Long> ,Eve
     EventForm findByEventIdAndPrivateIdAndStatus(Long eventId, String privateId, EventFormStatus status);
     List<EventForm> findAllByEventIdAndStatus(Long eventId, EventFormStatus status);
     long countByEventIdAndStatus(Long eventId, EventFormStatus status);
-    long countByEventIdAndTypeAndStatus(Long eventId, UserType type, EventFormStatus status);
-
     long countByPrivateId(String privateId);
-
-    List<EventForm> findAllByPrivateIdAndEventIdIn(String privateId, List<Long> eventIds);
 }

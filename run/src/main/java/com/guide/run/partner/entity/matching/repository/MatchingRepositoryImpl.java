@@ -2,8 +2,6 @@ package com.guide.run.partner.entity.matching.repository;
 
 import com.guide.run.attendance.entity.QAttendance;
 import com.guide.run.event.entity.QEventForm;
-import com.guide.run.event.entity.dto.response.match.MatchedGuideInfo;
-import com.guide.run.event.entity.dto.response.match.MatchedViInfo;
 import com.guide.run.event.entity.dto.response.match.MatchingCompletedFlatDto;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.user.entity.type.UserType;
@@ -14,10 +12,7 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
-import static com.guide.run.attendance.entity.QAttendance.attendance;
-import static com.guide.run.event.entity.QEventForm.eventForm;
 import static com.guide.run.partner.entity.matching.QMatching.matching;
-import static com.guide.run.user.entity.user.QUser.user;
 
 public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -28,44 +23,22 @@ public class MatchingRepositoryImpl implements MatchingRepositoryCustom {
 
 
     @Override
-    public List<MatchedGuideInfo> findAllMatchedGuideByEventIdAndViId(Long eventId, String viId) {
-        return queryFactory.select(Projections.constructor(MatchedGuideInfo.class,
-                user.userId.as("userId"),
-                user.type.as("type"),
-                user.name.as("name"),
-                eventForm.hopeTeam.as("applyRecord"),
-                        attendance.isAttend.as("isAttended"),
-                user.recordDegree.as("recordDegree")))
-                .from(matching)
-                .where(matching.eventId.eq(eventId).and(matching.viId.eq(viId)))
-                .join(user).on(user.privateId.eq(matching.guideId))
-                .join(eventForm).on(user.privateId.eq(eventForm.privateId)
-                        .and(eventForm.eventId.eq(eventId))
-                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
-                .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
-                .orderBy(user.name.asc())
-                .fetch();
-    }
+    public long countDistinctViByEventId(Long eventId) {
+        QUser matchedVi = new QUser("matchedVi");
+        QEventForm matchedViForm = new QEventForm("matchedViForm");
+        QAttendance matchedViAttendance = new QAttendance("matchedViAttendance");
 
-    @Override
-    public List<MatchedViInfo> findAllMatchedViByEventIdAndUserType(Long eventId, UserType userType) {
-        return queryFactory.select(Projections.constructor(MatchedViInfo.class,
-                        user.userId.as("userId"),
-                        user.type.as("type"),
-                        user.name.as("name"),
-                        eventForm.hopeTeam.as("applyRecord"),
-                        attendance.isAttend.as("isAttended"),
-                        user.recordDegree.as("recordDegree")))
+        Long count = queryFactory.select(matching.viId.countDistinct())
                 .from(matching)
-                .join(user).on(user.privateId.eq(matching.viId))
-                .join(eventForm).on(user.privateId.eq(eventForm.privateId)
-                        .and(eventForm.eventId.eq(eventId))
-                        .and(eventForm.status.eq(EventFormStatus.APPLIED)))
-                .join(attendance).on(user.privateId.eq(attendance.privateId).and(attendance.eventId.eq(eventId)))
-                .where(matching.eventId.eq(eventId).and(user.type.eq(userType)))
-                .orderBy(user.name.asc())
-                .distinct()
-                .fetch();
+                .join(matchedVi).on(matchedVi.privateId.eq(matching.viId))
+                .join(matchedViForm).on(matchedViForm.privateId.eq(matching.viId)
+                        .and(matchedViForm.eventId.eq(eventId))
+                        .and(matchedViForm.status.eq(EventFormStatus.APPLIED)))
+                .join(matchedViAttendance).on(matchedViAttendance.privateId.eq(matching.viId)
+                        .and(matchedViAttendance.eventId.eq(eventId)))
+                .where(matching.eventId.eq(eventId).and(matchedVi.type.eq(UserType.VI)))
+                .fetchOne();
+        return count != null ? count : 0L;
     }
 
     @Override
