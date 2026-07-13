@@ -1,6 +1,7 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
+import com.guide.run.global.exception.user.dto.NotAgreeTermException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.ViSignupDto;
 import com.guide.run.user.dto.response.SignupResponse;
@@ -34,6 +35,12 @@ public class ViService {
 
     @Transactional
     public SignupResponse viSignup(String privateId, ViSignupDto viSignupDto){
+        if (!viSignupDto.isPrivacy()
+                || !viSignupDto.isPortraitRights()
+                || !viSignupDto.isTrainingSafety()) {
+            throw new NotAgreeTermException();
+        }
+
         User user = userRepository.findById(privateId).orElse(null);
         log.info(privateId);
         if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
@@ -80,6 +87,7 @@ public class ViService {
                     .privacy(viSignupDto.isPrivacy())
                     .hopePrefs(viSignupDto.getHopePrefs())
                     .portraitRights(viSignupDto.isPortraitRights())
+                    .trainingSafety(viSignupDto.isTrainingSafety())
                     .runningPlace(viSignupDto.getRunningPlace())
                     .build();
 

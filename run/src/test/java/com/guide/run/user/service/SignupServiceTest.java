@@ -49,24 +49,24 @@ class SignupServiceTest {
 
     private static final String PRIVATE_ID = "kakao_1";
 
-    private SignupRequest.Common common(boolean privacy, boolean portraitRights) {
+    private SignupRequest.Common common(boolean privacy, boolean portraitRights, boolean trainingSafety) {
         return new SignupRequest.Common(
                 "홍길동", "1990-01-01", "010-1234-5678", "@guiderun",
-                "MALE", false, false, privacy, portraitRights);
+                "MALE", false, false, privacy, portraitRights, trainingSafety);
     }
 
-    private SignupRequest viRequest(boolean privacy, boolean portraitRights) {
+    private SignupRequest viRequest(boolean privacy, boolean portraitRights, boolean trainingSafety) {
         SignupRequest.Vi vi = new SignupRequest.Vi(
                 "A", "5km 30분", "초보 환영", true, "김가이드", "올림픽공원",
                 List.of("지인 소개"), "건강을 위해");
-        return new SignupRequest(UserType.VI, common(privacy, portraitRights), vi, null);
+        return new SignupRequest(UserType.VI, common(privacy, portraitRights, trainingSafety), vi, null);
     }
 
     private SignupRequest guideRequest() {
         SignupRequest.Guide guide = new SignupRequest.Guide(
                 "B", "10km 50분", "주말 선호", true, "박비아이", "5km 30분", "3", "6:00",
                 "한강공원", List.of("SNS"), "봉사하고 싶어서");
-        return new SignupRequest(UserType.GUIDE, common(true, true), null, guide);
+        return new SignupRequest(UserType.GUIDE, common(true, true, true), null, guide);
     }
 
     @Test
@@ -78,7 +78,7 @@ class SignupServiceTest {
         when(jwtProvider.createAccessToken(PRIVATE_ID)).thenReturn("access");
         when(jwtProvider.createRefreshToken(PRIVATE_ID)).thenReturn("refresh");
 
-        IntegratedSignupResponse response = signupService.signup(PRIVATE_ID, viRequest(true, true));
+        IntegratedSignupResponse response = signupService.signup(PRIVATE_ID, viRequest(true, true, true));
 
         assertThat(response.getUserId()).isEqualTo("vi_1");
         assertThat(response.getAccessToken()).isEqualTo("access");
@@ -112,7 +112,15 @@ class SignupServiceTest {
     @Test
     @DisplayName("약관에 동의하지 않으면 NotAgreeTermException(400)을 던진다")
     void notAgreeTerm() {
-        assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, viRequest(false, true)))
+        assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, viRequest(false, true, true)))
+                .isInstanceOf(NotAgreeTermException.class);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("훈련 참여 및 안전 면책 약관에 동의하지 않으면 NotAgreeTermException(400)을 던진다")
+    void notAgreeTrainingSafetyTerm() {
+        assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, viRequest(true, true, false)))
                 .isInstanceOf(NotAgreeTermException.class);
         verify(userRepository, never()).save(any());
     }
@@ -124,7 +132,7 @@ class SignupServiceTest {
         lenient().when(userService.extractNumber(anyString())).thenReturn("01012345678");
         lenient().when(userService.getUUID()).thenReturn("vi_1");
 
-        SignupRequest request = new SignupRequest(UserType.VI, common(true, true), null, null);
+        SignupRequest request = new SignupRequest(UserType.VI, common(true, true, true), null, null);
 
         assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, request))
                 .isInstanceOf(BlankRequiredInfoException.class);
@@ -137,7 +145,7 @@ class SignupServiceTest {
                 .userId("u1").privateId(PRIVATE_ID).role(Role.ROLE_USER).type(UserType.VI).build();
         when(userRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, viRequest(true, true)))
+        assertThatThrownBy(() -> signupService.signup(PRIVATE_ID, viRequest(true, true, true)))
                 .isInstanceOf(ExistUserException.class);
         verify(userRepository, never()).save(any());
     }

@@ -59,6 +59,8 @@ public class GuideSignupDto {
     private boolean privacy;
     @NotNull
     private boolean portraitRights;
+    @NotNull
+    private boolean trainingSafety;
 
     private String id1365;
     private String birth;

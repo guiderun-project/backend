@@ -1,6 +1,7 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.authorize.ExistUserException;
+import com.guide.run.global.exception.user.dto.NotAgreeTermException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.dto.GuideSignupDto;
@@ -35,6 +36,12 @@ public class GuideService {
 
     @Transactional
     public SignupResponse guideSignup(String privateId, GuideSignupDto guideSignupDto){
+        if (!guideSignupDto.isPrivacy()
+                || !guideSignupDto.isPortraitRights()
+                || !guideSignupDto.isTrainingSafety()) {
+            throw new NotAgreeTermException();
+        }
+
         User user = userRepository.findById(privateId).orElse(null);
         if(user!=null && !user.getRole().equals(Role.ROLE_NEW)) {
             //log.info("에러발생");
@@ -87,6 +94,7 @@ public class GuideService {
                     .privacy(guideSignupDto.isPrivacy())
                     .hopePrefs(guideSignupDto.getHopePrefs())
                     .portraitRights(guideSignupDto.isPortraitRights())
+                    .trainingSafety(guideSignupDto.isTrainingSafety())
                     .runningPlace(guideSignupDto.getRunningPlace())
                     .build();
 

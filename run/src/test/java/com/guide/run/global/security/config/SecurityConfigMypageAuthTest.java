@@ -4,6 +4,7 @@ import com.guide.run.global.exception.ErrorResponseFactory;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.service.ResponseService;
 import com.guide.run.user.controller.SignupInfoController;
+import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.SetAccountResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
@@ -179,6 +180,62 @@ class SecurityConfigMypageAuthTest {
                                 }
                                 """))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("ROLE_WAIT 회원은 자신의 약관 동의 상태를 조회할 수 있다")
+    void waitUserCanGetOwnPermission() throws Exception {
+        authenticateWaitUser();
+        when(jwtProvider.extractUserId(any(HttpServletRequest.class))).thenReturn(PRIVATE_ID);
+        when(signupInfoService.getMyPermission(PRIVATE_ID)).thenReturn(PermissionDto.builder()
+                .privacy(true)
+                .portraitRights(true)
+                .trainingSafety(false)
+                .build());
+
+        mockMvc.perform(get("/api/user/permission")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + WAIT_TOKEN))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trainingSafety").value(false));
+    }
+
+    @Test
+    @DisplayName("ROLE_WAIT 회원은 훈련 참여 및 안전 면책 약관에 동의할 수 있다")
+    void waitUserCanAgreeTrainingSafety() throws Exception {
+        authenticateWaitUser();
+        when(jwtProvider.extractUserId(any(HttpServletRequest.class))).thenReturn(PRIVATE_ID);
+        when(signupInfoService.agreeTrainingSafety(PRIVATE_ID)).thenReturn(PermissionDto.builder()
+                .privacy(true)
+                .portraitRights(true)
+                .trainingSafety(true)
+                .build());
+
+        mockMvc.perform(patch("/api/user/permission/training-safety")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + WAIT_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "trainingSafety": true
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trainingSafety").value(true));
+    }
+
+    @Test
+    @DisplayName("훈련 참여 및 안전 면책 약관에 동의하지 않은 요청은 400을 반환한다")
+    void trainingSafetyMustBeTrue() throws Exception {
+        authenticateWaitUser();
+
+        mockMvc.perform(patch("/api/user/permission/training-safety")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + WAIT_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "trainingSafety": false
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
     }
 
     private void authenticateWaitUser() {

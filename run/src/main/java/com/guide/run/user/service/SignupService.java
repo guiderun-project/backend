@@ -43,8 +43,8 @@ public class SignupService {
     public IntegratedSignupResponse signup(String privateId, SignupRequest request) {
         SignupRequest.Common common = request.getCommon();
 
-        // 약관 동의 검증: 둘 다 true 여야 함
-        if (!common.isPrivacy() || !common.isPortraitRights()) {
+        // 필수 약관은 모두 true 여야 함
+        if (!common.isPrivacy() || !common.isPortraitRights() || !common.isTrainingSafety()) {
             throw new NotAgreeTermException();
         }
 
@@ -103,6 +103,7 @@ public class SignupService {
                     .privacy(common.isPrivacy())
                     .hopePrefs(viReq.getHopePrefs())
                     .portraitRights(common.isPortraitRights())
+                    .trainingSafety(common.isTrainingSafety())
                     .runningPlace(viReq.getRunningPlace())
                     .build();
         } else if (UserType.GUIDE.equals(type)) {
@@ -129,6 +130,7 @@ public class SignupService {
                     .privacy(common.isPrivacy())
                     .hopePrefs(guideReq.getHopePrefs())
                     .portraitRights(common.isPortraitRights())
+                    .trainingSafety(common.isTrainingSafety())
                     .runningPlace(guideReq.getRunningPlace())
                     .build();
         } else {

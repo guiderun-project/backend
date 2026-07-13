@@ -34,5 +34,6 @@ public class ViApplyResponse {
 
     private boolean privacy;
     private boolean portraitRights;
+    private boolean trainingSafety;
 
 }

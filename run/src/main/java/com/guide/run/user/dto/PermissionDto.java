@@ -14,4 +14,6 @@ public class PermissionDto {
     private boolean privacy;
     @Schema(description = "초상권 활용 동의", example = "true")
     private boolean portraitRights;
+    @Schema(description = "훈련 참여 및 안전 면책 동의", example = "true")
+    private boolean trainingSafety;
 }
