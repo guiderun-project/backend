@@ -237,7 +237,10 @@ public class SignupInfoService {
         if(viewer.getRole()!= Role.ROLE_ADMIN && !user.getPrivateId().equals(privateId)){
             throw new UnauthorizedUserException();
         }
-        return PersonalInfoDto.userToInfoDto(user);
+        ArchiveData archiveData = archiveDataRepository.findById(user.getPrivateId()).orElseThrow(
+                NotExistUserException::new
+        );
+        return PersonalInfoDto.userToInfoDto(user, archiveData.isTrainingSafety());
     }
     //개인 정보 수정
     @Transactional

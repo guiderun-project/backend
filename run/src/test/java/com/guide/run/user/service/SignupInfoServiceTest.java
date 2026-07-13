@@ -7,10 +7,12 @@ import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.user.dto.PermissionDto;
+import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
 import com.guide.run.user.entity.ArchiveData;
+import com.guide.run.user.entity.type.Role;
 import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.ArchiveDataRepository;
@@ -46,6 +48,28 @@ class SignupInfoServiceTest {
     @InjectMocks private SignupInfoService signupInfoService;
 
     private static final String PRIVATE_ID = "kakao_1";
+
+    @Test
+    @DisplayName("개인정보 조회 응답에 훈련 안전 면책 동의 상태를 포함한다")
+    void getPersonalInfoReturnsTrainingSafety() {
+        User user = User.builder()
+                .userId("u1")
+                .privateId(PRIVATE_ID)
+                .role(Role.ROLE_USER)
+                .type(UserType.GUIDE)
+                .build();
+        ArchiveData archiveData = ArchiveData.builder()
+                .privateId(PRIVATE_ID)
+                .trainingSafety(true)
+                .build();
+        when(userRepository.findUserByUserId("u1")).thenReturn(Optional.of(user));
+        when(userRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(user));
+        when(archiveDataRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(archiveData));
+
+        PersonalInfoDto response = signupInfoService.getPersonalInfo(PRIVATE_ID, "u1");
+
+        assertThat(response.isTrainingSafety()).isTrue();
+    }
 
     @Test
     @DisplayName("내 약관 동의 조회 시 훈련 안전 면책 동의 상태를 함께 반환한다")
