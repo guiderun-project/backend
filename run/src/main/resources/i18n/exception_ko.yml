@@ -11,17 +11,17 @@ notValidPassword:
   msg: "비밀번호가 일치하지 않습니다"
 notValidAccessToken:
   code: "0100"
-  msg: "유효하지 않은 accessToken 입니다."
+  msg: "유효하지 않은 액세스토큰입니다."
 notExistAuthorization:
   code: "0101"
   msg: "인증할 수 있는 사용자 데이터가 존재하지 않습니다"
 notValidRefreshToken:
   code: "0104"
-  msg: "유효하지 않은 refreshToken 입니다."
+  msg: "유효하지 않은 리프레시토큰입니다."
 
 duplicatedUserId:
   code: "1001"
-  msg: "이미 존재하는 id 입니다"
+  msg: "이미 존재하는 아이디입니다"
 notValidPasswordCombination:
   code: "1002"
   msg: "비밀번호의 조합이 유효하지 않습니다."
@@ -137,19 +137,19 @@ notExistForm:
 
 notAuthorityVi:
   code: "3100"
-  msg: "Vi 권한이 없습니다."
+  msg: "시각장애러너 권한이 없습니다."
 
 notAuthorityGuide:
   code: "4100"
-  msg: "Guide 권한이 없습니다."
+  msg: "가이드러너 권한이 없습니다."
 
 notAuthorityAdmin:
   code: "5100"
-  msg: "Admin 권한이 없습니다."
+  msg: "운영진 권한이 없습니다."
 
 notAuthorityCoach:
   code: "6100"
-  msg: "Coach 권한이 없습니다."
+  msg: "운영진 권한이 없습니다."
 
 notValidImgFormat:
   code: "7001"
@@ -157,6 +157,5 @@ notValidImgFormat:
 exceededImgSize:
   code: "7002"
   msg: "최대 업로드 용량을 초과했습니다."
-
 
 

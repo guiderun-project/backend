@@ -29,7 +29,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         try{
             filterChain.doFilter(request, response);
         } catch (NotValidAccessTokenException e){
-            sendError(request, response, "0100", "유효하지 않은 accessToken 입니다.");
+            sendError(request, response, "0100", "유효하지 않은 액세스토큰입니다.");
             log.error("유효하지 않은 엑세스 토큰");
             return;
         }catch (NotExistAuthorizationException e){
