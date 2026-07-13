@@ -27,14 +27,8 @@ public class PersonalInfoDto {
     private Boolean isOpenSns;
     private String id1365;
     private String birth;
-    @Schema(description = "훈련 참여 및 안전 면책 동의 여부", example = "true")
-    private boolean trainingSafety;
 
     public static PersonalInfoDto userToInfoDto(User user){
-        return userToInfoDto(user, false);
-    }
-
-    public static PersonalInfoDto userToInfoDto(User user, boolean trainingSafety){
         return PersonalInfoDto.builder()
                 .role(user.getRole().getValue().substring(5))
                 .type(user.getType().getValue())
@@ -47,7 +41,6 @@ public class PersonalInfoDto {
                 .isOpenNumber(user.getIsOpenNumber())
                 .id1365(user.getId1365())
                 .birth(user.getBirth())
-                .trainingSafety(trainingSafety)
                 .build();
     }
 }

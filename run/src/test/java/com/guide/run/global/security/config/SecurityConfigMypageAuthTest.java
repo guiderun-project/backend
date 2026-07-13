@@ -5,7 +5,6 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.service.ResponseService;
 import com.guide.run.user.controller.SignupInfoController;
 import com.guide.run.user.dto.PermissionDto;
-import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.SetAccountResponse;
 import com.guide.run.user.dto.response.UpdatePersonalInfoResponse;
@@ -161,21 +160,6 @@ class SecurityConfigMypageAuthTest {
                                 }
                                 """))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("개인정보 조회 응답에 훈련 안전 면책 동의 상태를 반환한다")
-    void personalInfoReturnsTrainingSafety() throws Exception {
-        authenticateWaitUser();
-        when(jwtProvider.extractUserId(any(HttpServletRequest.class))).thenReturn(PRIVATE_ID);
-        when(signupInfoService.getPersonalInfo(PRIVATE_ID, "u1")).thenReturn(PersonalInfoDto.builder()
-                .trainingSafety(false)
-                .build());
-
-        mockMvc.perform(get("/api/user/personal/u1")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + WAIT_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.trainingSafety").value(false));
     }
 
     @Test
