@@ -6,6 +6,7 @@ import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventType;
+import com.guide.run.user.dto.PermissionDto;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.response.MyPageResponse;
 import com.guide.run.user.dto.response.UpdateRunningInfoResponse;
@@ -45,6 +46,45 @@ class SignupInfoServiceTest {
     @InjectMocks private SignupInfoService signupInfoService;
 
     private static final String PRIVATE_ID = "kakao_1";
+
+    @Test
+    @DisplayName("내 약관 동의 조회 시 훈련 안전 면책 동의 상태를 함께 반환한다")
+    void getMyPermissionReturnsTrainingSafety() {
+        User user = User.builder().userId("u1").privateId(PRIVATE_ID).build();
+        ArchiveData archiveData = ArchiveData.builder()
+                .privateId(PRIVATE_ID)
+                .privacy(true)
+                .portraitRights(true)
+                .trainingSafety(false)
+                .build();
+        when(userRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(user));
+        when(archiveDataRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(archiveData));
+
+        PermissionDto response = signupInfoService.getMyPermission(PRIVATE_ID);
+
+        assertThat(response.isPrivacy()).isTrue();
+        assertThat(response.isPortraitRights()).isTrue();
+        assertThat(response.isTrainingSafety()).isFalse();
+    }
+
+    @Test
+    @DisplayName("기존 회원의 훈련 안전 면책 동의는 다른 약관 값을 변경하지 않고 true로 저장한다")
+    void agreeTrainingSafetyPreservesExistingPermissions() {
+        ArchiveData archiveData = ArchiveData.builder()
+                .privateId(PRIVATE_ID)
+                .privacy(true)
+                .portraitRights(false)
+                .trainingSafety(false)
+                .build();
+        when(archiveDataRepository.findById(PRIVATE_ID)).thenReturn(Optional.of(archiveData));
+
+        PermissionDto response = signupInfoService.agreeTrainingSafety(PRIVATE_ID);
+
+        assertThat(response.isPrivacy()).isTrue();
+        assertThat(response.isPortraitRights()).isFalse();
+        assertThat(response.isTrainingSafety()).isTrue();
+        assertThat(archiveData.isTrainingSafety()).isTrue();
+    }
 
     @Test
     @DisplayName("ArchiveData가 없는 사용자도 러닝 정보 수정 시 ArchiveData를 새로 생성하여 저장한다 (500 방지)")

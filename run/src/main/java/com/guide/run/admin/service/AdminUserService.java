@@ -72,6 +72,7 @@ public class AdminUserService {
                 .motive(archiveData.getMotive())
                 .privacy(archiveData.isPrivacy())
                 .portraitRights(archiveData.isPortraitRights())
+                .trainingSafety(archiveData.isTrainingSafety())
                 .build();
      return response;
     }
@@ -99,6 +100,7 @@ public class AdminUserService {
                 .motive(archiveData.getMotive())
 
                 .privacy(archiveData.isPrivacy())
+                .trainingSafety(archiveData.isTrainingSafety())
                 .snsId(user.getSnsId())
                 .build();
         return response;

@@ -70,7 +70,18 @@ public class SignupInfoService {
         return PermissionDto.builder()
                 .privacy(archiveData.isPrivacy())
                 .portraitRights(archiveData.isPortraitRights())
+                .trainingSafety(archiveData.isTrainingSafety())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public PermissionDto getMyPermission(String privateId) {
+        userRepository.findById(privateId).orElseThrow(NotExistUserException::new);
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        return toPermissionDto(archiveData);
     }
 
     @Transactional
@@ -87,6 +98,25 @@ public class SignupInfoService {
         return PermissionDto.builder()
                 .privacy(archiveData.isPrivacy())
                 .portraitRights(archiveData.isPortraitRights())
+                .trainingSafety(archiveData.isTrainingSafety())
+                .build();
+    }
+
+    @Transactional
+    public PermissionDto agreeTrainingSafety(String privateId) {
+        ArchiveData archiveData = archiveDataRepository.findById(privateId).orElseThrow(
+                NotExistUserException::new
+        );
+
+        archiveData.agreeTrainingSafety();
+        return toPermissionDto(archiveData);
+    }
+
+    private PermissionDto toPermissionDto(ArchiveData archiveData) {
+        return PermissionDto.builder()
+                .privacy(archiveData.isPrivacy())
+                .portraitRights(archiveData.isPortraitRights())
+                .trainingSafety(archiveData.isTrainingSafety())
                 .build();
     }
 

@@ -7,6 +7,7 @@ import com.guide.run.user.dto.PersonalInfoDto;
 import com.guide.run.user.dto.ViRunningInfoDto;
 import com.guide.run.user.dto.request.AccountIdDto;
 import com.guide.run.user.dto.request.SetAccountRequest;
+import com.guide.run.user.dto.request.TrainingSafetyAgreementRequest;
 import com.guide.run.user.dto.request.UpdatePersonalInfoRequest;
 import com.guide.run.user.dto.request.UpdateRunningInfoRequest;
 import com.guide.run.user.dto.request.UserBirthDatePatchRequest;
@@ -79,6 +80,13 @@ public class SignupInfoController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "내 약관 동의 조회", description = "로그인한 사용자의 개인정보/초상권/훈련 안전 면책 동의 상태를 조회합니다.")
+    @GetMapping("/user/permission")
+    public ResponseEntity<PermissionDto> getMyPermission(HttpServletRequest httpServletRequest) {
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        return ResponseEntity.ok(signupInfoService.getMyPermission(privateId));
+    }
+
     //약관 동의 수정
     @Operation(summary = "약관 동의 수정", description = "정보 수정 화면에서 개인정보/초상권 동의 여부를 저장합니다.")
     @PatchMapping("/user/permission")
@@ -88,6 +96,15 @@ public class SignupInfoController {
         PermissionDto response = signupInfoService.editPermission(privateId, request);
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @Operation(summary = "훈련 참여 및 안전 면책 동의", description = "기존 회원이 바텀시트에서 필수 훈련 안전 면책 약관에 동의합니다.")
+    @PatchMapping("/user/permission/training-safety")
+    public ResponseEntity<PermissionDto> agreeTrainingSafety(
+            @RequestBody @Valid TrainingSafetyAgreementRequest request,
+            HttpServletRequest httpServletRequest) {
+        String privateId = jwtProvider.extractUserId(httpServletRequest);
+        return ResponseEntity.ok(signupInfoService.agreeTrainingSafety(privateId));
     }
 
     //인적사항 조회

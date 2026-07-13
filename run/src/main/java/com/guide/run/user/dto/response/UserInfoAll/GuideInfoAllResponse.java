@@ -41,4 +41,5 @@ public class GuideInfoAllResponse {
     //약관동의
     private boolean privacy;
     private boolean portraitRights;
+    private boolean trainingSafety;
 }

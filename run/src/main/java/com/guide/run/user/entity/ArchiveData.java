@@ -28,6 +28,7 @@ public class ArchiveData {
     private String hopePrefs;
     private boolean privacy;
     private boolean portraitRights;
+    private boolean trainingSafety;
 
 
 
@@ -37,6 +38,10 @@ public class ArchiveData {
     ){
         this.privacy = privacy;
         this.portraitRights = portraitRights;
+    }
+
+    public void agreeTrainingSafety() {
+        this.trainingSafety = true;
     }
 
     public void editRunningInfo(

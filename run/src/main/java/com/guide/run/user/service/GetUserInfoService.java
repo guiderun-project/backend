@@ -63,6 +63,7 @@ public class GetUserInfoService {
 
                                 .portraitRights(archiveData.isPortraitRights())
                                 .privacy(archiveData.isPrivacy())
+                                .trainingSafety(archiveData.isTrainingSafety())
                                 .build();
 
                         viResponse.add(viInfoAllResponse);
@@ -96,6 +97,7 @@ public class GetUserInfoService {
 
                                 .portraitRights(archiveData.isPortraitRights())
                                 .privacy(archiveData.isPrivacy())
+                                .trainingSafety(archiveData.isTrainingSafety())
 
                                 .build();
 

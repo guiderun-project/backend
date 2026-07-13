@@ -70,6 +70,9 @@ public class SignupRequest {
 
         @Schema(description = "초상권 활용 동의 (true 필수)", example = "true")
         private boolean portraitRights;
+
+        @Schema(description = "훈련 참여 및 안전 면책 동의 (true 필수)", example = "true")
+        private boolean trainingSafety;
     }
 
     @Getter

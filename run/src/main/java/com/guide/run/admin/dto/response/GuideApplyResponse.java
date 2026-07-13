@@ -37,5 +37,6 @@ public class GuideApplyResponse {
 
     private boolean privacy;
     private boolean portraitRights;
+    private boolean trainingSafety;
 
 }
