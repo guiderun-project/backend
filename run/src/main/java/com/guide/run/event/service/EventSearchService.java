@@ -3,7 +3,6 @@ package com.guide.run.event.service;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
 import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -53,12 +52,6 @@ public class EventSearchService {
                 }
             }
         }
-    }
-
-    public SearchAllEventsCount getSearchAllEventsCount(String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
-        return SearchAllEventsCount.builder()
-                .count((int) getSearchAllEventsCountValue(title, sort, type, kind, privateId, cityName))
-                .build();
     }
 
     public SearchAllEventList getSearchAllEvents(int start, int limit, int page, String title, String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {

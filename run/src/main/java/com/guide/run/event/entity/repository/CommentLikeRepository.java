@@ -4,13 +4,7 @@ import com.guide.run.event.entity.CommentLike;
 import com.guide.run.event.entity.CommentLikeId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface CommentLikeRepository extends JpaRepository<CommentLike, CommentLikeId> {
-    List<CommentLike> findAllByCommentId(Long commentId);
-    Optional<CommentLike> findByCommentIdAndPrivateId(Long commentId, String privateId);
-    Long countByCommentId(Long commentId);
     void deleteAllByCommentId(long commentId);
     void deleteAllByPrivateId(String privateId);
 }

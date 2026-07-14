@@ -7,7 +7,6 @@ import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.response.form.EventApplicantFormResponse;
 import com.guide.run.event.entity.dto.response.form.EventApplicantListResponse;
 import com.guide.run.event.entity.dto.response.form.EventCanceledApplicantListResponse;
-import com.guide.run.event.entity.dto.response.form.GetAllForms;
 import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -278,21 +277,6 @@ public class EventFormService {
                         .build())
                 .canceledApplicants(applicants)
                 .build();
-    }
-
-    public GetAllForms getAllForms(Long eventId, String privateId) {
-        User user = userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
-        if(user.getRole().equals(Role.ROLE_ADMIN)){
-            return (GetAllForms.builder()
-                    .vi(eventFormRepository.findAllFormsWithPhone(eventId, UserType.VI, EventFormStatus.APPLIED))
-                    .guide(eventFormRepository.findAllFormsWithPhone(eventId,UserType.GUIDE, EventFormStatus.APPLIED))
-                    .build());
-        }else{
-            return (GetAllForms.builder()
-                    .vi(eventFormRepository.findAllFormsWithoutPhone(eventId, UserType.VI, EventFormStatus.APPLIED))
-                    .guide(eventFormRepository.findAllFormsWithoutPhone(eventId,UserType.GUIDE, EventFormStatus.APPLIED))
-                    .build());
-        }
     }
 
     @Transactional

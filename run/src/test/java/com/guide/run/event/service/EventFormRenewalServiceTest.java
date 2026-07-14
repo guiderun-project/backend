@@ -638,26 +638,6 @@ class EventFormRenewalServiceTest {
         )).isInstanceOf(NotEventOrganizerException.class);
     }
 
-    @Test
-    @DisplayName("기존 전체 신청자 상세 조회는 APPLIED 신청서만 조회한다")
-    void getAllFormsUsesAppliedStatusFilters() {
-        User admin = User.builder()
-                .privateId("admin-private")
-                .role(Role.ROLE_ADMIN)
-                .build();
-
-        when(userRepository.findUserByPrivateId("admin-private")).thenReturn(Optional.of(admin));
-        when(eventFormRepository.findAllFormsWithPhone(1L, UserType.VI, EventFormStatus.APPLIED))
-                .thenReturn(List.of());
-        when(eventFormRepository.findAllFormsWithPhone(1L, UserType.GUIDE, EventFormStatus.APPLIED))
-                .thenReturn(List.of());
-
-        eventFormService.getAllForms(1L, "admin-private");
-
-        verify(eventFormRepository).findAllFormsWithPhone(1L, UserType.VI, EventFormStatus.APPLIED);
-        verify(eventFormRepository).findAllFormsWithPhone(1L, UserType.GUIDE, EventFormStatus.APPLIED);
-    }
-
     private Event createEvent(EventType eventType) {
         return createEvent(eventType, null);
     }

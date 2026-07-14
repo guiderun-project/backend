@@ -6,15 +6,11 @@ import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
-import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.partner.Partner;
-import com.guide.run.partner.entity.partner.PartnerLike;
-import com.guide.run.partner.entity.partner.repository.PartnerLikeRepository;
 import com.guide.run.partner.entity.partner.repository.PartnerRepository;
 import com.guide.run.user.entity.user.User;
-import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,29 +25,9 @@ import java.util.Set;
 @Slf4j
 public class PartnerService {
     private final PartnerRepository partnerRepository;
-    private final PartnerLikeRepository partnerLikeRepository;
-    private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final MatchingRepository matchingRepository;
     private final AttendanceRepository attendanceRepository;
-
-    @Transactional
-    public void partnerLike(String userId, String privateId){
-        userRepository.findUserByPrivateId(privateId).orElseThrow(NotExistUserException::new);
-        User partner = userRepository.findUserByUserId(userId).orElseThrow(RuntimeException::new); //todo : 존재하지 않는 파트너 에러 추가 필요
-        PartnerLike partnerLike = partnerLikeRepository.findByRecIdAndSendId(partner.getPrivateId(),privateId).orElse(null);
-
-        if(partnerLike!=null){ //이미 있으면 취소
-            partnerLikeRepository.delete(partnerLike);
-        }else{//없을 시 생성
-            partnerLikeRepository.save(PartnerLike.builder()
-                    .recId(partner.getPrivateId())
-                    .sendId(privateId)
-                    .build());
-        }
-
-    }
-
 
     @Transactional
     public void setAttendViPartnerList(long eventId, User vi){

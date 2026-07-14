@@ -9,7 +9,6 @@ import com.guide.run.global.exception.event.EventLogicExceptionAdvice;
 import com.guide.run.global.exception.event.EventResourceExceptionAdvice;
 import com.guide.run.global.exception.guide.GuideAuthorizeExceptionAdvice;
 import com.guide.run.global.exception.validation.ValidationExceptionAdvice;
-import com.guide.run.global.exception.validation.img.ImgNotValidExceptionAdvice;
 import com.guide.run.global.exception.user.UserAuthorizeExceptionAdvice;
 import com.guide.run.global.exception.user.UserDtoExceptionAdvice;
 import com.guide.run.global.exception.user.UserLogicExceptionAdvice;
@@ -42,7 +41,6 @@ class ExceptionAdviceOrderTest {
                 GuideAuthorizeExceptionAdvice.class,
                 ViAuthorizeExceptionAdvice.class,
                 ValidationExceptionAdvice.class,
-                ImgNotValidExceptionAdvice.class,
                 UserResourceExceptionAdvice.class,
                 UserAuthorizeExceptionAdvice.class,
                 UserDtoExceptionAdvice.class,

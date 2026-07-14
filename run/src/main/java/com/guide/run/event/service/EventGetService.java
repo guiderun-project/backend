@@ -10,7 +10,6 @@ import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
 import com.guide.run.global.exception.event.logic.NotValidKindException;
-import com.guide.run.global.exception.event.logic.NotValidSortException;
 import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.user.entity.type.Role;
@@ -50,18 +49,6 @@ public class EventGetService {
     private final UserRepository userRepository;
     private final MatchingRepository matchingRepository;
 
-
-    public MyEventResponse getMyEvent(String sort, int year,String privateId) {
-       List<MyEvent> myEvents;
-       if(sort.equals("UPCOMING")){
-           myEvents = eventRepository.findMyEventByYear(privateId, year, RECRUIT_ALL);
-       }else if(sort.equals("END")){
-           myEvents = eventRepository.findMyEventByYear(privateId, year, RECRUIT_END);
-       }else{
-           throw new NotValidSortException();
-       }
-       return MyEventResponse.builder().items(myEvents).build();
-    }
 
     public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
         if (sort.equals("UPCOMING")) {

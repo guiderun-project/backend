@@ -1,6 +1,5 @@
 package com.guide.run.event.entity.dto.response.form;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

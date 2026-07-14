@@ -3,13 +3,11 @@ package com.guide.run.event.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guide.run.attendance.repository.AttendanceRepository;
-import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
-import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
@@ -44,7 +42,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -84,8 +81,6 @@ class EventRenewalServiceTest {
     private CommentLikeRepository commentLikeRepository;
     @Mock
     private EventLikeRepository eventLikeRepository;
-    @Mock
-    private AttendService attendService;
     @Mock
     private EventAdditionalInfoService eventAdditionalInfoService;
 
@@ -453,66 +448,6 @@ class EventRenewalServiceTest {
         assertThat(response.getViewer()).isNotNull();
         assertThat(response.getViewer().isApplied()).isTrue();
         assertThat(response.getViewer().isOrganizer()).isFalse();
-    }
-
-    @Test
-    @DisplayName("이벤트 팝업 신청 여부는 APPLIED 상태 신청서만 기준으로 판단한다")
-    void eventPopUpUsesAppliedFormForApplyStatus() {
-        User viewer = createUser("viewer-private", "viewer-user", "김철수", UserType.GUIDE);
-        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
-        Event event = createEvent("organizer-private");
-        EventForm appliedForm = EventForm.builder()
-                .eventId(1L)
-                .privateId("viewer-private")
-                .status(EventFormStatus.APPLIED)
-                .build();
-        ReflectionTestUtils.setField(event, "updatedAt", LocalDateTime.now());
-
-        when(userRepository.findUserByPrivateId("viewer-private")).thenReturn(Optional.of(viewer));
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
-        when(timeFormatter.getHHMM(event.getStartTime())).thenReturn("09:00");
-        when(timeFormatter.getHHMM(event.getEndTime())).thenReturn("11:00");
-        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED))
-                .thenReturn(appliedForm);
-
-        EventPopUpResponse response = eventService.eventPopUp(1L, "viewer-private");
-
-        assertThat(response.getIsApply()).isTrue();
-        verify(eventFormRepository).findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED);
-        verify(eventFormRepository, never()).findByEventIdAndPrivateId(1L, "viewer-private");
-    }
-
-    @Test
-    @DisplayName("이벤트 팝업은 저장된 상태 대신 시간 기준 모집 상태와 이벤트 상태를 반환한다")
-    void eventPopUpReturnsComputedRecruitAndEventStatus() {
-        User viewer = createUser("viewer-private", "viewer-user", "김철수", UserType.GUIDE);
-        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
-        LocalDate today = EventTemporalStatusResolver.today();
-        LocalDateTime now = EventTemporalStatusResolver.now();
-        Event event = createEvent(
-                "organizer-private",
-                EventRecruitStatus.RECRUIT_OPEN,
-                EventStatus.EVENT_UPCOMING,
-                today.minusDays(5),
-                today.plusDays(5),
-                now.minusHours(3),
-                now.minusHours(1)
-        );
-        ReflectionTestUtils.setField(event, "updatedAt", now);
-
-        when(userRepository.findUserByPrivateId("viewer-private")).thenReturn(Optional.of(viewer));
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
-        when(timeFormatter.getHHMM(event.getStartTime())).thenReturn("09:00");
-        when(timeFormatter.getHHMM(event.getEndTime())).thenReturn("11:00");
-        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "viewer-private", EventFormStatus.APPLIED))
-                .thenReturn(null);
-
-        EventPopUpResponse response = eventService.eventPopUp(1L, "viewer-private");
-
-        assertThat(response.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
-        assertThat(response.getStatus()).isEqualTo(EventStatus.EVENT_END);
     }
 
     @Test

@@ -137,24 +137,6 @@ public class UserService {
     }
 
 
-    //userId = privateId로 변경, uuid -> userId 로 변경
-    //기가입자 및 이미 정보를 입력한 회원은 재할당 하지 않음
-    private String reAssignSocialId(String privateId) {
-        if(privateId.startsWith("kakao_")){
-            return privateId;
-        }else if(privateId.startsWith("kakao")){
-            return "kakao_"+privateId.substring(6);
-        }
-        else{
-            return "Error"; //todo : 이 부분 에러코드 추가해야 합니다.
-        }
-    }
-
-    public String reAssignReturn(String privateId){
-        return reAssignSocialId(privateId);
-    }
-
-
     public String extractNumber(String phoneNum){
         return phoneNum.replaceAll("[^0-9]", "");
     }

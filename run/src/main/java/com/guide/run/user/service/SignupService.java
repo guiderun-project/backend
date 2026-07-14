@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * VI/Guide 구분 없이 하나의 엔드포인트로 처리하는 통합 회원가입 서비스.
- * 기존 ViService/GuideService의 가입 로직을 신규 요청 구조에 맞춰 통합한다.
+ * VI/Guide로 나뉘던 가입 로직을 신규 요청 구조에 맞춰 통합한다.
  */
 @Slf4j
 @Service

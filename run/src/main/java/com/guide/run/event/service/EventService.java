@@ -3,19 +3,15 @@ package com.guide.run.event.service;
 
 import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
-import com.guide.run.attendance.service.AttendService;
 import com.guide.run.event.entity.Comment;
 import com.guide.run.event.entity.Event;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
 import com.guide.run.event.entity.dto.response.EventCreatedResponse;
 import com.guide.run.event.entity.dto.response.EventDetailResponse;
-import com.guide.run.event.entity.dto.response.EventPopUpPartner;
-import com.guide.run.event.entity.dto.response.EventPopUpResponse;
 import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse;
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
-import com.guide.run.event.entity.dto.response.get.MyEventDdayResponse;
 import com.guide.run.event.entity.repository.*;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventFormStatus;
@@ -31,12 +27,10 @@ import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
-import com.guide.run.partner.entity.matching.Matching;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.Role;
-import com.guide.run.user.entity.type.UserType;
 import com.guide.run.user.entity.user.User;
 import com.guide.run.user.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +44,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -72,7 +65,6 @@ public class EventService {
     private final CommentLikeRepository commentLikeRepository;
     private final EventLikeRepository eventLikeRepository;
 
-    private final AttendService attendService;
     private final EventAdditionalInfoService eventAdditionalInfoService;
 
 
@@ -293,131 +285,6 @@ public class EventService {
             throw new NotEventOrganizerException();
     }
 
-
-    @Transactional
-    public EventPopUpResponse eventPopUp(Long eventId, String privateId) {
-        User user = userRepository.findUserByPrivateId(privateId).
-                orElseThrow(NotExistUserException::new);
-
-        Event event = eventRepository.findById(eventId).orElseThrow(
-                NotExistEventException::new
-        );
-        
-        //출석 인원 반영
-        attendService.countAttendUser(eventId,true);
-
-        //개최자 찾기
-        User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElse(null);
-
-        String organizerId = null;
-        String organizerRecord = null;
-        UserType organizerType = UserType.GUIDE;
-        String organizerName = null;
-
-        Matching matching;
-        List<EventPopUpPartner> partnerList = new ArrayList<>();
-
-        boolean apply = false;
-        boolean hasPartner = false;
-
-        if(organizer!=null){
-            organizerId = organizer.getUserId();
-            organizerName = organizer.getName();
-            organizerRecord = organizer.getRecordDegree();
-            organizerType = organizer.getType();
-        }
-
-
-        EventPopUpResponse response = EventPopUpResponse.builder()
-                .eventId(event.getId())
-                .type(event.getType())
-                .name(event.getName())
-                .organizerId(organizerId)
-                .organizer(organizerName)
-                .organizerRecord(organizerRecord)
-                .organizerType(organizerType)
-                .recruitStatus(EventTemporalStatusResolver.resolveRecruitStatus(event))
-                .date(LocalDate.from(event.getStartTime()))
-                .startTime(timeFormatter.getHHMM(event.getStartTime()))
-                .endTime(timeFormatter.getHHMM(event.getEndTime()))
-                .recruitVi(event.getMaxNumV())
-                .recruitGuide(event.getMaxNumG())
-                .viCnt(event.getViCnt())
-                .guideCnt(event.getGuideCnt())
-                .place(event.getPlace())
-                .status(EventTemporalStatusResolver.resolveEventStatus(event))
-                .content(event.getContent())
-                .updatedAt(LocalDate.from(event.getUpdatedAt()))
-                .isApply(apply)
-                //todo : 2차에서 추가된 부분
-                .hasPartner(false) //파트너 존재 여부
-                .partner(partnerList)
-                .eventCategory(event.getEventCategory())
-                .cityName(event.getCityName())
-                .build();
-
-        //매칭 여부로 파트너 정보 추가
-        //신청 여부
-        EventForm eventForm = eventFormRepository.findByEventIdAndPrivateIdAndStatus(
-                eventId,
-                privateId,
-                EventFormStatus.APPLIED
-        );
-        if (eventForm != null) {
-            //이벤트 신청서가 있을 때.
-            apply = true;
-                if (user.getType().equals(UserType.GUIDE)) {//가이드일 때
-                    matching = matchingRepository.findByEventIdAndGuideId(eventId, user.getPrivateId());
-                    if(matching!=null){
-                        //매칭이 있을 때
-                        User partner = userRepository.findUserByPrivateId(matching.getViId()).orElseThrow(NotExistUserException::new);
-                        hasPartner = true;
-
-                        EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
-                                .partnerType(partner.getType())
-                                .partnerName(partner.getName())
-                                .partnerRecord(partner.getRecordDegree())
-                                .build();
-                        partnerList.add(partnerInfo);
-
-
-                        response.setPartner(apply, hasPartner, partnerList);
-                    }else{
-                        hasPartner = false;
-                        response.setPartner(apply, hasPartner, partnerList);
-                    }
-
-                } else { //vi일 때
-                    List<Matching> matchings = matchingRepository.findAllByEventIdAndViId(eventId, user.getPrivateId());
-                    if (matchings.size() == 0) {
-                        //매칭이 없을 때
-                        hasPartner = false;
-                        response.setPartner(apply, hasPartner, partnerList);
-                    } else {
-                            //매칭이 있을 때
-                            hasPartner = true;
-
-                            for(Matching m : matchings){
-                                User partner = userRepository.findUserByPrivateId(m.getGuideId()).orElseThrow(NotExistUserException::new);
-                                EventPopUpPartner partnerInfo = EventPopUpPartner.builder()
-                                        .partnerType(partner.getType())
-                                        .partnerName(partner.getName())
-                                        .partnerRecord(partner.getRecordDegree())
-                                        .build();
-                                partnerList.add(partnerInfo);
-                            }
-
-                            response.setPartner(apply, hasPartner, partnerList);
-                    }
-                }
-            }
-
-        return response;
-    }
-
-    public MyEventDdayResponse getMyEventDday(String privateId) {
-        return MyEventDdayResponse.builder().eventItems(eventRepository.getMyEventDday(privateId)).build();
-    }
 
     public MissingRunningDistanceGetResponse getMissingRunningDistance(String privateId) {
         List<MissingRunningDistanceGetResponse.Item> items = eventRepository

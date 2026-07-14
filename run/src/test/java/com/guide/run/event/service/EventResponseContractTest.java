@@ -6,7 +6,6 @@ import com.guide.run.event.entity.dto.response.attend.AttendanceParticipant;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
 import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.dto.response.get.AllEventResponse;
-import com.guide.run.event.entity.dto.response.get.MyEventDday;
 import com.guide.run.event.entity.dto.response.get.UpcomingEventResponse;
 import com.guide.run.event.entity.type.EventRecruitStatus;
 import com.guide.run.event.entity.type.EventType;
@@ -79,16 +78,6 @@ class EventResponseContractTest {
         );
 
         assertThat(item.getRecruitStatus()).isEqualTo(EventRecruitStatus.RECRUIT_CLOSE);
-    }
-
-    @Test
-    @DisplayName("나의 이벤트 D-day 항목은 날짜 기준으로 남은 일수를 계산한다")
-    void myEventDdayUsesDateBasedDayCount() {
-        LocalDateTime eventDate = EventTemporalStatusResolver.now().plusDays(2);
-
-        MyEventDday item = new MyEventDday("한강 러닝 모임", eventDate);
-
-        assertThat(item.getDDay()).isEqualTo(2L);
     }
 
     @Test
