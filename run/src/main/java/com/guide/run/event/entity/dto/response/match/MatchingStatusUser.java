@@ -12,5 +12,6 @@ public class MatchingStatusUser {
     private String userId;
     private String name;
     private UserType type;
-    private String applyGroup;
+    private String applyGroup; //이벤트 참가 신청 시 입력한 희망 그룹
+    private String defaultGroup; //회원가입 시 입력한 기본 그룹
 }

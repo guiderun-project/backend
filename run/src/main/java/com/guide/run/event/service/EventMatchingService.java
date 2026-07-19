@@ -289,6 +289,7 @@ public class EventMatchingService {
                         .name(guide.getName())
                         .type(guide.getType())
                         .applyGroup(form != null ? form.getHopeTeam() : null)
+                        .defaultGroup(guide.getRecordDegree())
                         .build());
             }
         } else if (loginUser.getType() == UserType.GUIDE) {
@@ -306,6 +307,7 @@ public class EventMatchingService {
                             .name(vi.getName())
                             .type(vi.getType())
                             .applyGroup(form != null ? form.getHopeTeam() : null)
+                            .defaultGroup(vi.getRecordDegree())
                             .build());
                 }
             }
