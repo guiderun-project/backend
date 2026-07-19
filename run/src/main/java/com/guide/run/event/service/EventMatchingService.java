@@ -8,6 +8,7 @@ import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
 import com.guide.run.global.exception.event.resource.NotExistFormException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
@@ -51,7 +52,30 @@ public class EventMatchingService {
     public MatchingCreateResponse createMatching(Long eventId, MatchingCreateRequest request) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
-        for (String guideId : request.getGuideIds()) {
+        List<String> guideIds = request.getGuideIds();
+        // 빈 배열 정책: 최소 1명 이상 선택해야 함 (FE 합의 전 기본값 — 전량 해제는 DELETE 엔드포인트 사용)
+        if (guideIds == null || guideIds.isEmpty()) {
+            throw new EventValidationException("매칭할 가이드를 최소 1명 이상 선택해야 합니다.");
+        }
+
+        // === replace 시맨틱: 요청 guideIds 를 이 VI 의 '최종 가이드 집합'으로 맞춘다 ===
+        // 요청에서 빠진 기존 매칭 가이드는 먼저 해제(매칭 삭제 + 대기 전환 + 파트너 원복)한다.
+        // 요청에 남아있는/새로 추가되는 가이드는 아래 matchUser 루프가 처리하며,
+        // 다른 VI 에 물린 가이드 자동 재배정(steal) 로직도 그대로 동작한다.
+        User vi = userRepository.findUserByUserId(request.getViId()).orElseThrow(NotExistUserException::new);
+        Set<String> requestGuidePrivateIds = new HashSet<>();
+        for (String guideId : guideIds) {
+            userRepository.findUserByUserId(guideId)
+                    .ifPresent(g -> requestGuidePrivateIds.add(g.getPrivateId()));
+        }
+        List<Matching> currentMatchings = matchingRepository.findAllByEventIdAndViId(eventId, vi.getPrivateId());
+        for (Matching current : currentMatchings) {
+            if (!requestGuidePrivateIds.contains(current.getGuideId())) {
+                releaseGuideFromMatching(eventId, current);
+            }
+        }
+
+        for (String guideId : guideIds) {
             matchUser(eventId, request.getViId(), guideId);
         }
 
@@ -423,6 +447,26 @@ public class EventMatchingService {
                         .build())
                 .groups(groups)
                 .build();
+    }
+
+    /**
+     * replace 시맨틱에서 요청 guideIds 에 포함되지 않은 기존 매칭 가이드를 해제한다.
+     * 매칭 row 삭제 → 가이드를 대기(UnMatching)로 전환 → 가이드 파트너/출석 상태 원복.
+     * (다른 VI 로 옮겨가는 steal 과 달리, 여기서는 가이드가 대기로 돌아가므로 UnMatching 저장이 필요하다.)
+     */
+    private void releaseGuideFromMatching(Long eventId, Matching matching) {
+        User guide = userRepository.findUserByPrivateId(matching.getGuideId()).orElseThrow(NotExistUserException::new);
+
+        // 가이드 파트너/출석 상태 원복
+        partnerService.setNotAttendGuidePartner(eventId, guide);
+
+        matchingRepository.delete(matching);
+
+        // 해제된 가이드는 대기로 전환
+        unMatchingRepository.save(UnMatching.builder()
+                .eventId(eventId)
+                .privateId(matching.getGuideId())
+                .build());
     }
 
     private void updatePartnerOnAttendance(Long eventId, User guide) {

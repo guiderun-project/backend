@@ -8,11 +8,14 @@ import com.guide.run.event.entity.dto.response.match.MatchingCompletedFlatDto;
 import com.guide.run.event.entity.dto.response.match.MatchingCompletedResponse;
 import com.guide.run.event.entity.dto.response.match.MatchingStatusGroup;
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingResponse;
+import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
 import com.guide.run.event.entity.dto.response.match.MatchingWaitingFlatDto;
 import com.guide.run.event.entity.repository.EventFormRepository;
+import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.partner.entity.matching.Matching;
+import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.partner.service.PartnerService;
@@ -31,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -262,6 +266,63 @@ class EventMatchingServiceTest {
         assertThat(response.getGroups().get(0).getParticipants())
                 .extracting("type")
                 .containsExactly(UserType.VI, UserType.VI, UserType.GUIDE, UserType.GUIDE);
+    }
+
+    @Test
+    @DisplayName("매칭 생성은 replace 시맨틱: 요청 guideIds 에 없는 기존 가이드를 해제하고 대기로 전환한다")
+    void createMatchingReplacesGuideSet() {
+        User vi = User.builder()
+                .privateId("vi-private").userId("vi-user").type(UserType.VI).build();
+        User g1 = User.builder()
+                .privateId("g1-private").userId("g1-user").type(UserType.GUIDE).build();
+        User g2 = User.builder()
+                .privateId("g2-private").userId("g2-user").type(UserType.GUIDE).build();
+        Matching g1Matching = Matching.builder()
+                .eventId(1L).guideId("g1-private").viId("vi-private").build();
+        EventForm viForm = EventForm.builder()
+                .eventId(1L).privateId("vi-private").hopeTeam("A").status(EventFormStatus.APPLIED).build();
+        EventForm g2Form = EventForm.builder()
+                .eventId(1L).privateId("g2-private").hopeTeam("A").status(EventFormStatus.APPLIED).build();
+
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+        when(userRepository.findUserByUserId("vi-user")).thenReturn(Optional.of(vi));
+        when(userRepository.findUserByUserId("g2-user")).thenReturn(Optional.of(g2));
+        when(userRepository.findUserByPrivateId("g1-private")).thenReturn(Optional.of(g1));
+        // 현재 VI-A ↔ [G1]
+        when(matchingRepository.findAllByEventIdAndViId(1L, "vi-private")).thenReturn(List.of(g1Matching));
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "vi-private", EventFormStatus.APPLIED))
+                .thenReturn(viForm);
+        when(eventFormRepository.findByEventIdAndPrivateIdAndStatus(1L, "g2-private", EventFormStatus.APPLIED))
+                .thenReturn(g2Form);
+        when(matchingRepository.findByEventIdAndGuideId(1L, "g2-private")).thenReturn(null);
+        when(unMatchingRepository.findByPrivateIdAndEventId("vi-private", 1L)).thenReturn(Optional.empty());
+        lenient().when(attendanceRepository.findByEventIdAndPrivateId(1L, "g2-private")).thenReturn(null);
+
+        MatchingCreateRequest request = new MatchingCreateRequest("vi-user", List.of("g2-user"));
+        eventMatchingService.createMatching(1L, request);
+
+        // G1 은 매칭 해제 + 파트너 원복 + 대기 전환
+        verify(matchingRepository).delete(g1Matching);
+        verify(partnerService).setNotAttendGuidePartner(1L, g1);
+        ArgumentCaptor<UnMatching> unMatchingCaptor = ArgumentCaptor.forClass(UnMatching.class);
+        verify(unMatchingRepository).save(unMatchingCaptor.capture());
+        assertThat(unMatchingCaptor.getValue().getPrivateId()).isEqualTo("g1-private");
+        // G2 는 VI-A 에 매칭 저장
+        ArgumentCaptor<Matching> matchingCaptor = ArgumentCaptor.forClass(Matching.class);
+        verify(matchingRepository).save(matchingCaptor.capture());
+        assertThat(matchingCaptor.getValue().getGuideId()).isEqualTo("g2-private");
+        assertThat(matchingCaptor.getValue().getViId()).isEqualTo("vi-private");
+    }
+
+    @Test
+    @DisplayName("매칭 생성은 빈 guideIds 를 거절한다(최소 1명)")
+    void createMatchingRejectsEmptyGuideIds() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
+
+        MatchingCreateRequest request = new MatchingCreateRequest("vi-user", List.of());
+
+        assertThatThrownBy(() -> eventMatchingService.createMatching(1L, request))
+                .isInstanceOf(EventValidationException.class);
     }
 
     private List<MatchingWaitingFlatDto> unsortedWaitingParticipants() {
