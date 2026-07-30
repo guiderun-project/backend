@@ -1,8 +1,13 @@
 package com.guide.run.event.controller;
 
-import com.guide.run.event.entity.dto.response.search.SearchAllEventsCount;
 import com.guide.run.event.entity.dto.response.search.SearchAllEventList;
+import com.guide.run.event.entity.type.CityName;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import com.guide.run.event.service.EventSearchService;
+import com.guide.run.global.exception.event.logic.NotValidKindException;
+import com.guide.run.global.exception.event.logic.NotValidSortException;
+import com.guide.run.global.exception.event.logic.NotValidTypeException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.user.repository.user.UserRepository;
@@ -14,9 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
+import static com.guide.run.event.entity.type.EventRecruitStatus.*;
+import static com.guide.run.event.entity.type.EventType.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
@@ -26,32 +31,62 @@ public class EventSearchController {
     private final JwtProvider jwtProvider;
     private final EventSearchService eventSearchService;
     private final UserRepository userRepository;
-    @Operation(summary = "이벤트 검색 목록 조회", description = "이벤트 검색 화면에서 제목 기준으로 이벤트 목록을 페이지네이션 조회합니다.")
+
+    private static final int PAGE_SIZE = 10;
+
+    @Operation(summary = "이벤트 검색 목록 조회", description = "이벤트 검색 화면에서 키워드 및 탭 조건으로 이벤트 목록을 페이지 조회합니다.")
     @GetMapping("/search")
-    public SearchAllEventList searchAllEventList(@Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
-                                                 @Parameter(description = "페이지 크기", example = "10") @RequestParam("limit") int limit,
-                                                 @Parameter(description = "페이지 시작 offset", example = "0") @RequestParam("start") int start,
-                                                 HttpServletRequest request){
-        extracted(request);
-        System.out.println("title = " + title);
-        return SearchAllEventList.builder().
-                items(eventSearchService.getSearchAllEvents(start,limit,title))
-                .build();
+    public SearchAllEventList searchAllEventList(
+            @Parameter(description = "검색어", example = "상계천") @RequestParam(value = "keyword", defaultValue = "") String keyword,
+            @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam(value = "tab", defaultValue = "UPCOMING") String tab,
+            @Parameter(description = "이벤트 유형 필터", example = "TOTAL") @RequestParam(value = "type", defaultValue = "TOTAL") EventType type,
+            @Parameter(description = "모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "recruitStatus", required = false) EventRecruitStatus recruitStatus,
+            @Parameter(description = "기존 클라이언트 호환용 모집 상태 필터", example = "RECRUIT_ALL") @RequestParam(value = "kind", required = false) EventRecruitStatus kind,
+            @RequestParam(value = "cityName", required = false) CityName cityName,
+            @Parameter(description = "페이지 번호 (1부터 시작)", example = "1") @RequestParam(value = "page", defaultValue = "1") int page,
+            HttpServletRequest request) {
+        tab = normalizeTab(tab);
+        EventRecruitStatus effectiveRecruitStatus = resolveRecruitStatus(recruitStatus, kind);
+        validateParams(tab, type, effectiveRecruitStatus);
+        String privateId = extracted(request);
+        int normalizedPage = normalizePage(page);
+        int start = (normalizedPage - 1) * PAGE_SIZE;
+        return eventSearchService.getSearchAllEvents(start, PAGE_SIZE, normalizedPage, keyword, tab, type, effectiveRecruitStatus, privateId, cityName);
     }
 
-    @Operation(summary = "이벤트 검색 개수 조회", description = "이벤트 검색 화면에서 제목 기준 검색 결과 개수를 조회합니다.")
-    @GetMapping("/search/count")
-    public SearchAllEventsCount searchAllEventCount(@Parameter(description = "검색어", example = "상계천") @RequestParam("title") String title,
-                                                    HttpServletRequest request){
-        extracted(request);
-        return eventSearchService.getSearchAllEventsCount(title);
+    // 명세의 tab=PAST 를 내부 sort 체계(END)로 매핑. UPCOMING/MY 는 그대로 둔다.
+    private String normalizeTab(String tab) {
+        return "PAST".equals(tab) ? "END" : tab;
     }
 
+    private void validateParams(String tab, EventType type, EventRecruitStatus kind) {
+        if (!tab.equals("UPCOMING") && !tab.equals("END") && !tab.equals("MY")) throw new NotValidSortException();
+        if (!type.equals(TRAINING) && !type.equals(COMPETITION) && !type.equals(TOTAL)) throw new NotValidTypeException();
+        if (!kind.equals(RECRUIT_UPCOMING) && !kind.equals(RECRUIT_OPEN) && !kind.equals(RECRUIT_CLOSE)
+                && !kind.equals(RECRUIT_END) && !kind.equals(RECRUIT_ALL)) throw new NotValidKindException();
+    }
+
+    private EventRecruitStatus resolveRecruitStatus(EventRecruitStatus recruitStatus, EventRecruitStatus kind) {
+        if (recruitStatus != null) {
+            return recruitStatus;
+        }
+        if (kind != null) {
+            return kind;
+        }
+        return RECRUIT_ALL;
+    }
+
+    private int normalizePage(int page) {
+        return Math.max(page, 1);
+    }
+
+    // 비회원도 검색 가능. 토큰이 있으면 사용자 존재를 검증하고, 없으면 null(비회원)로 처리한다.
     private String extracted(HttpServletRequest request) {
-        String privateId = jwtProvider.extractUserId(request);
-        userRepository.findUserByPrivateId(privateId).
-                orElseThrow(() -> new NotExistUserException());
+        String privateId = jwtProvider.tryExtractUserId(request);
+        if (privateId != null) {
+            userRepository.findUserByPrivateId(privateId)
+                    .orElseThrow(() -> new NotExistUserException());
+        }
         return privateId;
     }
-
 }

@@ -1,5 +1,6 @@
 package com.guide.run.event.controller;
 
+import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
 import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.service.EventMatchingService;
 import com.guide.run.global.jwt.JwtProvider;
@@ -11,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = {"https://guide-run-qa.netlify.app", "https://guiderun.org",
-        "https://guide-run.netlify.app","https://www.guiderun.org", "http://localhost:3000"},
-        maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/event")
@@ -23,77 +21,46 @@ public class EventMatchingController {
     private final JwtProvider jwtProvider;
     private final EventMatchingService eventMatchingService;
 
-    @Operation(summary = "수동 매칭 생성", description = "이벤트 상세의 매칭 패널에서 VI와 Guide를 수동으로 매칭합니다.")
-    @PostMapping("{eventId}/match/{viId}/{userId}")
-    public ResponseEntity<String> matchUser(@PathVariable("eventId") Long eventId,
-                                            @PathVariable("viId") String viId,
-                                            @PathVariable("userId") String userId,
-                                            HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        eventMatchingService.matchUser(eventId,viId,userId);
-        return ResponseEntity.ok().body("200 ok");
+    @Operation(summary = "매칭 생성 (VI 1명 + Guide 여러 명)", description = "매칭하기 페이지에서 VI 1명과 Guide 여러 명을 한 번의 요청으로 매칭합니다.")
+    @PostMapping("{eventId}/matching")
+    public ResponseEntity<MatchingCreateResponse> createMatching(@PathVariable("eventId") Long eventId,
+                                                                 @RequestBody MatchingCreateRequest request,
+                                                                 HttpServletRequest httpRequest) {
+        jwtProvider.extractUserId(httpRequest);
+        return ResponseEntity.ok().body(eventMatchingService.createMatching(eventId, request));
     }
-    @Operation(summary = "매칭 취소", description = "이벤트 상세의 매칭 패널에서 특정 사용자 매칭을 해제합니다.")
-    @DeleteMapping("{eventId}/match/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable("eventId") Long eventId,
-                                            @PathVariable("userId") String userId,
-                                            HttpServletRequest request){
+
+    @Operation(summary = "VI 매칭 전체 취소", description = "매칭하기 페이지에서 특정 VI에 연결된 모든 Guide 매칭을 한 번에 취소합니다.")
+    @DeleteMapping("{eventId}/matching/{viId}")
+    public ResponseEntity<MatchingCancelResponse> cancelMatching(@PathVariable("eventId") Long eventId,
+                                                                 @PathVariable("viId") String viId,
+                                                                 HttpServletRequest request) {
         jwtProvider.extractUserId(request);
-        eventMatchingService.deleteMatchUser(eventId,userId);
-        return ResponseEntity.ok().body("200 ok");
+        return ResponseEntity.ok().body(eventMatchingService.cancelMatching(eventId, viId));
     }
-    @Operation(summary = "미매칭 사용자 수 조회", description = "이벤트 상세의 매칭 패널에서 미매칭 VI/Guide 수를 조회합니다.")
-    @GetMapping("{eventId}/match/not/count")
-    public ResponseEntity<UserTypeCount> getUserTypeCount(@PathVariable("eventId") Long eventId,
-                                                          HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getUserTypeCount(eventId));
+
+    @Operation(summary = "이벤트 매칭 현황 조회", description = "내 파트너와 신청 그룹별 매칭 현황(매칭된 VI+Guide, 미매칭 Guide)을 반환합니다.")
+    @GetMapping("{eventId}/matching/status")
+    public ResponseEntity<EventMatchingStatusResponse> getMatchingStatus(@PathVariable("eventId") Long eventId,
+                                                                         HttpServletRequest request) {
+        String privateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingStatus(eventId, privateId));
     }
-    @Operation(summary = "미매칭 사용자 목록 조회", description = "이벤트 상세의 매칭 패널에서 아직 매칭되지 않은 신청자 목록을 조회합니다.")
-    @GetMapping("{eventId}/match/list")
-    public ResponseEntity<NotMatchList> getNotMatchList(@PathVariable("eventId") Long eventId,
-                                                         HttpServletRequest request){
+
+    @Operation(summary = "매칭 대기 참가자 조회", description = "매칭하기 페이지의 매칭 대기 탭. 아직 매칭되지 않은 참가자를 RunningGroup별로 반환합니다.")
+    @GetMapping("{eventId}/matching/waiting")
+    public ResponseEntity<MatchingWaitingResponse> getMatchingWaiting(@PathVariable("eventId") Long eventId,
+                                                                       HttpServletRequest request) {
         jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(NotMatchList.builder()
-                .notMatch(eventMatchingService.getNotMatchList(eventId)).build());
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingWaiting(eventId));
     }
-    @Operation(summary = "특정 VI의 매칭된 Guide 수 조회", description = "매칭 패널에서 특정 VI에 연결된 Guide 수를 조회합니다.")
-    @GetMapping("{eventId}/match/{viId}/count")
-    public ResponseEntity<MatchedGuideCount> getMatchedGuideCount(@PathVariable("eventId") Long eventId,
-                                                                  @PathVariable("viId") String viId,
-                                                                  HttpServletRequest request){
+
+    @Operation(summary = "매칭 완료 참가자 조회", description = "매칭하기 페이지의 매칭 완료 탭. VI와 매칭된 Guide 배열을 RunningGroup별로 반환합니다.")
+    @GetMapping("{eventId}/matching/completed")
+    public ResponseEntity<MatchingCompletedResponse> getMatchingCompleted(@PathVariable("eventId") Long eventId,
+                                                                          HttpServletRequest request) {
         jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchedGuideCount(eventId,viId));
-    }
-    @Operation(summary = "특정 VI의 매칭된 Guide 목록 조회", description = "매칭 패널과 매칭 박스에서 특정 VI에 연결된 Guide 목록을 조회합니다.")
-    @GetMapping("{eventId}/match/{viId}/list")
-    public ResponseEntity<MatchedGuideList> getMatchedGuideList(@PathVariable("eventId") Long eventId,
-                                                                @PathVariable("viId") String viId,
-                                                                HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchedGuideList(eventId,viId));
-    }
-    @Operation(summary = "매칭된 VI 수 조회", description = "이벤트 상세의 매칭 패널에서 매칭이 존재하는 VI 수를 조회합니다.")
-    @GetMapping("{eventId}/match/vi/count")
-    public ResponseEntity<MatchedViCount> getMatchedViCount(@PathVariable("eventId") Long eventId,
-                                                               HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchedViCount(eventId));
-    }
-    @Operation(summary = "매칭된 VI 목록 조회", description = "이벤트 상세의 매칭 패널에서 매칭이 존재하는 VI 목록을 조회합니다.")
-    @GetMapping("{eventId}/match/vi/list")
-    public ResponseEntity<MatchedViList> getMatchedViList(@PathVariable("eventId") Long eventId,
-                                                            HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchedViList(eventId));
-    }
-    @Operation(summary = "자동 매칭 실행", description = "이벤트 상세의 매칭 패널에서 현재 신청자 기준 자동 매칭을 실행합니다.")
-    @PostMapping("{eventId}/match/auto")
-    public ResponseEntity<String> autoMatchUsers(@PathVariable("eventId") Long eventId,
-                                                 HttpServletRequest request){
-        jwtProvider.extractUserId(request);
-        eventMatchingService.autoMatchUsers(eventId);
-        return ResponseEntity.ok().body("200 ok");
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingCompleted(eventId));
     }
 
 }

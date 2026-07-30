@@ -58,10 +58,9 @@ public class CoolSmsService {
 
             return response;
         } catch (NurigoMessageNotReceivedException exception) {
-            log.info("fail :", exception.getFailedMessageList());
-            log.info(exception.getMessage());
+            log.error("SMS 발송 실패 - failedMessages={}, message={}", exception.getFailedMessageList(), exception.getMessage());
         } catch (Exception exception) {
-            log.info(exception.getMessage());
+            log.error("SMS 발송 중 예외 발생: {}", exception.getMessage(), exception);
         }
         return null;
     }

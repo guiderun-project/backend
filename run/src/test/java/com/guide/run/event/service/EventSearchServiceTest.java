@@ -1,59 +1,102 @@
 package com.guide.run.event.service;
 
-import com.guide.run.event.entity.Event;
-import com.guide.run.event.entity.dto.response.search.SearchAllEvent;
+import com.guide.run.event.entity.dto.response.get.AllEvent;
 import com.guide.run.event.entity.repository.EventRepository;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import com.guide.run.event.entity.type.EventRecruitStatus;
+import com.guide.run.event.entity.type.EventType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class EventSearchServiceTest {
-    @Autowired
-    EventSearchService eventSearchService;
 
-    @Autowired
-    EventRepository eventRepository;
+    @Mock
+    private EventRepository eventRepository;
 
-    private Long firstEventId;
-    private Long secondEventId;
-    private Long thirdEventId;
+    @InjectMocks
+    private EventSearchService eventSearchService;
 
-    @BeforeEach
-    public void init(){
-        eventRepository.deleteAll();
-        firstEventId = eventRepository.save(Event.builder()
-                .name("테스트")
-                .content("중입니다.")
-                .build()).getId();
-        secondEventId = eventRepository.save(Event.builder()
-                .name("토스트")
-                .content("아닙니다.")
-                .build()).getId();
-        thirdEventId = eventRepository.save(Event.builder()
-                .name("ㅇㅇ")
-                .content("스트라이크")
-                .build()).getId();
+    @Test
+    @DisplayName("예정 이벤트 검색 카운트는 종료 전 필터가 포함된 전용 쿼리를 사용한다")
+    void getSearchAllEventsCountValueUsesUpcomingSearchCountQuery() {
+        when(eventRepository.upcomingGetSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_ALL, null))
+                .thenReturn(3L);
+
+        long count = eventSearchService.getSearchAllEventsCountValue(
+                "러닝",
+                "UPCOMING",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                null,
+                null
+        );
+
+        assertThat(count).isEqualTo(3L);
+        verify(eventRepository).upcomingGetSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_ALL, null);
+        verify(eventRepository, never()).getSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_ALL, null);
     }
 
     @Test
-    @DisplayName("전체 이벤트 검색 개수")
-    void getSearchAllEventsCount() {
-        Assertions.assertThat(eventSearchService.getSearchAllEventsCount("스트").getCount()).isEqualTo(3);
+    @DisplayName("지난 이벤트 검색 카운트는 종료 시간 필터가 포함된 전용 쿼리를 사용한다")
+    void getSearchAllEventsCountValueUsesPastSearchCountQuery() {
+        when(eventRepository.pastGetSearchEventListCount("러닝", null, null))
+                .thenReturn(4L);
+
+        long count = eventSearchService.getSearchAllEventsCountValue(
+                "러닝",
+                "END",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                null,
+                null
+        );
+
+        assertThat(count).isEqualTo(4L);
+        verify(eventRepository).pastGetSearchEventListCount("러닝", null, null);
+        verify(eventRepository, never()).getSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_END, null);
     }
 
     @Test
-    @DisplayName("전체 이벤트 검색은 최신순으로 조회된다")
-    void getSearchAllEventsByLatest() {
-        List<SearchAllEvent> events = eventSearchService.getSearchAllEvents(0, 10, "스트");
+    @DisplayName("지난 이벤트 검색 목록은 종료 시간 필터가 포함된 전용 쿼리를 사용한다")
+    void getSearchAllEventsUsesPastSearchListQuery() {
+        List<AllEvent> pastEvents = List.of(new AllEvent(
+                1L,
+                EventType.TRAINING,
+                "지난 이벤트",
+                LocalDateTime.of(2026, 6, 1, 9, 0),
+                EventRecruitStatus.RECRUIT_OPEN
+        ));
+        when(eventRepository.pastGetSearchEventList(10, 0, "러닝", null, null))
+                .thenReturn(pastEvents);
+        when(eventRepository.pastGetSearchEventListCount("러닝", null, null))
+                .thenReturn(1L);
 
-        Assertions.assertThat(events).extracting(SearchAllEvent::getEventId)
-                .containsExactly(thirdEventId, secondEventId, firstEventId);
+        var response = eventSearchService.getSearchAllEvents(
+                0,
+                10,
+                1,
+                "러닝",
+                "END",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                null,
+                null
+        );
+
+        assertThat(response.getItems()).hasSize(1);
+        verify(eventRepository).pastGetSearchEventList(10, 0, "러닝", null, null);
+        verify(eventRepository, never()).getSearchEventList(10, 0, "러닝", null, EventRecruitStatus.RECRUIT_END, null);
     }
 }

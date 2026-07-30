@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -41,6 +42,7 @@ public class Event extends BaseEntity {
     private int maxNumV;//vi 모집 인원
     private int maxNumG;//guide 모집 인원
     private String place;//이벤트 장소
+    @Column(length = 1000)
     private String content;//이벤트 내용
 
     //이 부분 추가됐습니다~
@@ -53,6 +55,10 @@ public class Event extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private CityName cityName; //이벤트 지역
+
+    private Double distance; //러닝 거리 (km)
+    private boolean isPrivate;
+    private BigDecimal expectedRunningDistanceKm;
 
 
     public void closeEvent(){
@@ -79,5 +85,9 @@ public class Event extends BaseEntity {
     public void countAttendGAndV(int guideCnt, int viCnt) {
         this.guideCnt = guideCnt;
         this.viCnt = viCnt;
+    }
+
+    public void updateExpectedRunningDistanceKm(BigDecimal expectedRunningDistanceKm) {
+        this.expectedRunningDistanceKm = expectedRunningDistanceKm;
     }
 }

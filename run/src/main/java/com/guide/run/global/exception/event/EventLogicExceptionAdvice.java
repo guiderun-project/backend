@@ -7,12 +7,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RequiredArgsConstructor
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
 @RestControllerAdvice
 public class EventLogicExceptionAdvice {
     private final MessageSource messageSource;
@@ -83,6 +86,23 @@ public class EventLogicExceptionAdvice {
                 getMessage("NotDeleteEvent.code"),
                 getMessage("NotDeleteEvent.msg")));
     }
+
+    //2209
+    @ExceptionHandler(CannotModifyAdditionalQuestionsException.class)
+    protected ResponseEntity<FailResult> CannotModifyAdditionalQuestionsException(CannotModifyAdditionalQuestionsException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("CannotModifyAdditionalQuestions.code"),
+                getMessage("CannotModifyAdditionalQuestions.msg")));
+    }
+
+    //2210
+    @ExceptionHandler(EventValidationException.class)
+    protected ResponseEntity<FailResult> EventValidationException(EventValidationException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("EventValidation.code"),
+                e.getMessage()));
+    }
+
     private String getMessage(String code){
         return getMessage(code,null);
     }

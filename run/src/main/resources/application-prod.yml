@@ -55,6 +55,8 @@ spring:
       from-number: ${SEND_NUMBER}
   tosspayments:
     secret-key: ${TOSSPAYMENTS_SECRET_KEY}
+  appsmith:
+    webhook-secret: ${APPSMITH_WEBHOOK_SECRET}
 cors:
   origin: https://guiderun.org
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 
-public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId> ,  AttendanceCustomRepository, AttendanceRepositoryAdmin{
+public interface AttendanceRepository extends JpaRepository<Attendance, AttendanceId>, AttendanceCustomRepository {
     List<Attendance> findAllByPrivateId(String privateId);
     Attendance findByEventIdAndPrivateId(Long eventId,String privateId);
     Long countByIsAttendAndEventId(boolean isAttend,Long eventId);

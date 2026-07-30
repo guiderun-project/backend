@@ -3,6 +3,7 @@ package com.guide.run.event.service;
 import com.guide.run.event.entity.Comment;
 import com.guide.run.event.entity.dto.request.EventCommentCreateRequest;
 import com.guide.run.event.entity.dto.response.comments.GetComment;
+import com.guide.run.event.entity.dto.response.comments.response.CommentsGetResponse;
 import com.guide.run.event.entity.repository.EventCommentRepository;
 import com.guide.run.event.entity.repository.EventRepository;
 import com.guide.run.global.exception.event.authorize.NotEventCommentWriterException;
@@ -56,13 +57,20 @@ public class EventCommentService {
         ).getCommentId();
     }
 
-    public List<GetComment> getComments(Long eventId, int limit, int start,String userId) {
+    public CommentsGetResponse getComments(Long eventId, int page, int size, String userId) {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        return eventCommentRepository.findGetComments(limit,start,eventId,userId);
+        List<GetComment> items = eventCommentRepository.findGetComments(page, size, eventId, userId);
+        long totalCount = eventCommentRepository.countByEventId(eventId);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+        return CommentsGetResponse.builder()
+                .items(items)
+                .page(CommentsGetResponse.Page.builder()
+                        .page(page)
+                        .size(size)
+                        .totalCount(totalCount)
+                        .totalPages(totalPages)
+                        .build())
+                .build();
     }
 
-    public long getCommentsCount(Long eventId) {
-        eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        return eventCommentRepository.countByEventId(eventId);
-    }
 }

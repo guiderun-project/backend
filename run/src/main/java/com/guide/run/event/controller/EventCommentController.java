@@ -4,7 +4,6 @@ import com.guide.run.event.entity.dto.request.EventCommentCreateRequest;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsCreatedResponse;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsDeletedResponse;
 import com.guide.run.event.entity.dto.response.comments.response.CommentsGetResponse;
-import com.guide.run.event.entity.dto.response.get.Count;
 import com.guide.run.event.service.EventCommentService;
 import com.guide.run.global.jwt.JwtProvider;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +28,13 @@ public class EventCommentController {
     @PostMapping("/{eventId}/comments")
     public ResponseEntity<CommentsCreatedResponse> createComment(@PathVariable Long eventId,
                                                                  HttpServletRequest request,
-                                                                 @RequestBody EventCommentCreateRequest eventCommentCreateRequest){
+                                                                 @RequestBody @Valid EventCommentCreateRequest eventCommentCreateRequest){
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(CommentsCreatedResponse.builder()
                 .commentId(eventCommentService.createComment(eventId,userId,eventCommentCreateRequest)).build());
     }
     @Operation(summary = "이벤트 댓글 삭제", description = "이벤트 상세 화면의 댓글 항목에서 댓글을 삭제합니다.")
-    @DeleteMapping("/{eventId}/{commentId}")
+    @DeleteMapping("/{eventId}/comments/{commentId}")
     public ResponseEntity<CommentsDeletedResponse> deleteComment(@PathVariable Long eventId,
                                                                  @PathVariable Long commentId,
                                                                  HttpServletRequest request){
@@ -43,32 +43,24 @@ public class EventCommentController {
                 .commentId(eventCommentService.deleteComment(eventId,commentId,userId)).build());
     }
     @Operation(summary = "이벤트 댓글 수정", description = "이벤트 상세 화면의 댓글 항목에서 댓글 내용을 수정합니다.")
-    @PatchMapping("/{eventId}/{commentId}")
+    @PatchMapping("/{eventId}/comments/{commentId}")
     public ResponseEntity<CommentsCreatedResponse> patchComment(@PathVariable Long eventId,
                                                                  @PathVariable Long commentId,
-                                                                @RequestBody EventCommentCreateRequest eventCommentCreateRequest,
+                                                                @RequestBody @Valid EventCommentCreateRequest eventCommentCreateRequest,
                                                                  HttpServletRequest request){
         String userId = jwtProvider.extractUserId(request);
         return ResponseEntity.status(200).body(CommentsCreatedResponse.builder()
                 .commentId(eventCommentService.patchComment(eventId,commentId,eventCommentCreateRequest,userId)).build());
     }
-    @Operation(summary = "이벤트 댓글 목록 조회", description = "이벤트 상세 화면의 댓글 섹션에서 페이지네이션 댓글 목록을 조회합니다.")
+    @Operation(summary = "이벤트 댓글 목록 조회", description = "이벤트 상세 화면의 댓글 섹션에서 페이지네이션 댓글 목록을 조회합니다. 댓글 개수는 page.totalCount로 확인합니다.")
     @GetMapping("/{eventId}/comments")
     public ResponseEntity<CommentsGetResponse> getComments(@PathVariable Long eventId,
-                                                           @Parameter(description = "조회 개수", example = "4")
-                                                           @RequestParam int limit,
-                                                           @Parameter(description = "페이지 시작 offset", example = "0")
-                                                           @RequestParam int start,
-                                                           HttpServletRequest request){
-        String userId = jwtProvider.extractUserId(request);
-        return ResponseEntity.status(200).body(CommentsGetResponse.builder()
-                .comments(eventCommentService.getComments(eventId,limit,start,userId)).build());
-    }
-    @Operation(summary = "이벤트 댓글 개수 조회", description = "이벤트 상세 화면에서 댓글 총 개수를 조회합니다.")
-    @GetMapping("/{eventId}/comments/count")
-    public ResponseEntity<Count> getCommentsCount(@PathVariable Long eventId,
-                                                  HttpServletRequest request){
-        return ResponseEntity.status(200).body(Count.builder()
-                .count(eventCommentService.getCommentsCount(eventId)).build());
+                                                           @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @Parameter(description = "페이지 크기", example = "10")
+                                                           @RequestParam(defaultValue = "10") int size,
+                                                           HttpServletRequest request) {
+        String userId = jwtProvider.tryExtractUserId(request);
+        return ResponseEntity.status(200).body(eventCommentService.getComments(eventId, page, size, userId));
     }
 }

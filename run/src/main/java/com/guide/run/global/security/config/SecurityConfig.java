@@ -1,12 +1,19 @@
 package com.guide.run.global.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.guide.run.global.dto.response.FailResult;
+import com.guide.run.global.exception.ErrorResponseFactory;
 import com.guide.run.global.jwt.JwtAuthenticationFilter;
 import com.guide.run.global.jwt.JwtExceptionFilter;
 import com.guide.run.global.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -14,9 +21,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 
 
@@ -24,8 +37,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+    private static final String NOT_EXIST_AUTHORIZATION_CODE = "0101";
+    private static final String NOT_EXIST_AUTHORIZATION_MESSAGE = "인증할 수 있는 사용자 데이터가 존재하지 않습니다";
+    private static final String UNAUTHORIZED_USER_CODE = "1102";
+    private static final String UNAUTHORIZED_USER_MESSAGE = "권한이 없는 사용자 입니다.";
+    private static final List<String> DEFAULT_ALLOWED_ORIGINS = List.of(
+            "https://dev.guiderun.org",
+            "https://guiderun.org",
+            "https://www.guiderun.org"
+    );
+
     private final JwtProvider jwtProvider;
-     @Value("${cors.origin}")
+    private final ErrorResponseFactory errorResponseFactory;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${cors.allowed-origins:${cors.origin:}}")
     private String origin;
 
     @Bean
@@ -41,20 +67,8 @@ public class SecurityConfig {
             web.ignoring()
                     .requestMatchers("/health")
                     .requestMatchers("/webhook/tosspayments")
-                    .requestMatchers("/favicon.ico")
-                    .requestMatchers("/member-upload")
-                    .requestMatchers("/event-upload")
-                    .requestMatchers("/attendance-upload")
-                    .requestMatchers("/api/oauth/**")
-                    .requestMatchers("/api/sms/**")
-                    .requestMatchers("/api/accountId")
-                    .requestMatchers("/api/new-password")
-                    .requestMatchers("/tmp/**")
-                    .requestMatchers("/api/login")
-                    .requestMatchers("/v3/api-docs/**")
-                    .requestMatchers("/v3/api-docs")
-                    .requestMatchers("/swagger-ui/**")
-                    .requestMatchers("/swagger-ui.html");
+                    .requestMatchers("/webhook/appsmith/user-approval")
+                    .requestMatchers("/favicon.ico");
         };
     }
     @Bean
@@ -62,12 +76,27 @@ public class SecurityConfig {
         http
                 .csrf(csrf->csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> writeError(
+                                request,
+                                response,
+                                NOT_EXIST_AUTHORIZATION_CODE,
+                                NOT_EXIST_AUTHORIZATION_MESSAGE,
+                                HttpStatus.UNAUTHORIZED
+                        ))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> writeError(
+                                request,
+                                response,
+                                UNAUTHORIZED_USER_CODE,
+                                UNAUTHORIZED_USER_MESSAGE,
+                                HttpStatus.FORBIDDEN
+                        )))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/signup/**").hasRole("NEW")
-                        .requestMatchers("/api/oauth/login/reissue").hasAnyRole("ADMIN", "USER", "COACH", "WAIT", "REJECT")
+                        .requestMatchers("/api/oauth/login/reissue").permitAll()
                         .requestMatchers(
                                 "/api/sms/**",
                                 "/api/oauth/**",
@@ -75,8 +104,19 @@ public class SecurityConfig {
                                 "/api/login/**",
                                 "/api/accountId/**",
                                 "/api/new-password/**").permitAll()
+                        // RegexRequestMatcher는 쿼리스트링까지 포함해 비교하므로 끝에 (\?.*)? 를 둬야 ?tab=... 가 붙어도 매칭된다.
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+(\\?.*)?$", "GET")).permitAll()
+                        // 비회원도 조회 가능한 공개 목록/검색/댓글 API (GET 한정)
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/summary(\\?.*)?$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/all(\\?.*)?$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/search(\\?.*)?$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/upcoming(\\?.*)?$", "GET")).permitAll()
+                        .requestMatchers(new RegexRequestMatcher("^/api/event/[0-9]+/comments(\\?.*)?$", "GET")).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(
+                                "/api/user/account",
+                                "/api/user/account/duplicated",
+                                "/api/user/mypage",
                                 "/api/user/personal/**",
                                 "/api/user/permission/**",
                                 "/api/user/running/**",
@@ -97,11 +137,25 @@ public class SecurityConfig {
         return http.build();
     }
 
+    private void writeError(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String errorCode,
+            String message,
+            HttpStatus status
+    ) throws java.io.IOException {
+        FailResult failResult = errorResponseFactory.fail(errorCode, message, status, request);
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(failResult));
+    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin(origin);
+        allowedOrigins().forEach(config::addAllowedOrigin);
         config.addAllowedMethod("*"); // 모든 메소드 허용.
         config.addAllowedHeader("*");
         config.setMaxAge(3600L);
@@ -110,5 +164,18 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private Set<String> allowedOrigins() {
+        Set<String> allowedOrigins = new LinkedHashSet<>(DEFAULT_ALLOWED_ORIGINS);
+        if (origin == null || origin.isBlank()) {
+            return allowedOrigins;
+        }
+
+        Arrays.stream(origin.split(","))
+                .map(String::trim)
+                .filter(configuredOrigin -> !configuredOrigin.isEmpty())
+                .forEach(allowedOrigins::add);
+        return allowedOrigins;
     }
 }

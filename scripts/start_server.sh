@@ -11,7 +11,9 @@ fi
 echo ">>> Starting application: $JAR_FILE"
 
 # 환경변수 로드 (MAIN_RDS, REDIS_DOMAIN 등)
+set -a
 source /home/ubuntu/.env
+set +a
 
 # 각 EC2에 미리 만들어둔 .deploy_profile에서 프로필 읽기
 # main-1: prod / main-2: batch
@@ -23,6 +25,9 @@ else
 fi
 
 echo ">>> Using profile: $PROFILE"
+
+mkdir -p "$DEPLOY_DIR/logs"
+cd "$DEPLOY_DIR" || exit 1
 
 nohup java \
   -Dspring.profiles.active=$PROFILE \

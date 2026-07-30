@@ -8,12 +8,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RequiredArgsConstructor
+// catch-all(UnknownExceptionAdvice, Exception.class)보다 먼저 조회되도록 우선순위를 높인다.
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
 @RestControllerAdvice
 public class UserDtoExceptionAdvice {
     private final MessageSource messageSource;
@@ -84,6 +88,14 @@ public class UserDtoExceptionAdvice {
         return ResponseEntity.status(400).body(responseService.getFailResult(
                 getMessage("notExistPhoneError.code"),
                 getMessage("notExistPhoneError.msg")));
+    }
+
+    //1010
+    @ExceptionHandler(NotAgreeTermException.class)
+    protected ResponseEntity<FailResult> NotAgreeTermException(NotAgreeTermException e){
+        return ResponseEntity.status(400).body(responseService.getFailResult(
+                getMessage("notAgreeTerm.code"),
+                getMessage("notAgreeTerm.msg")));
     }
 
     private String getMessage(String code){

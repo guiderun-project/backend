@@ -6,7 +6,10 @@ import com.guide.run.global.exception.auth.authorize.NotValidRefreshTokenExcepti
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.redis.RefreshTokenRepository;
 import com.guide.run.user.dto.request.*;
+import com.guide.run.user.dto.request.SmsVerificationExtendRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
+import com.guide.run.user.dto.response.SmsVerificationExtendResponse;
+import com.guide.run.user.dto.response.SmsVerificationIssueResponse;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.service.LoginInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +29,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 
-@CrossOrigin(origins = {"https://dev.guiderun.org", "https://guiderun.org","https://www.guiderun.org", "http://localhost:3000", "http://localhost:8080"},
-        maxAge = 3600,
-        allowCredentials = "true")
 @Tag(name = "Auth", description = "아이디 찾기, 비밀번호 재설정, 로그아웃과 관련된 인증 보조 API")
 @RestController
 @RequiredArgsConstructor
@@ -42,18 +42,23 @@ public class LoginInfoController {
     //인증번호 요청(아이디 찾기)
     @Operation(summary = "아이디 찾기용 인증번호 요청", description = "전화번호만으로 아이디 찾기 인증번호를 발송합니다.", security = {})
     @PostMapping("/sms/accountId")
-    public ResponseEntity<String> getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        loginInfoService.getNumberForAccountId(request.getPhoneNum());
-        return ResponseEntity.ok("");
+    public ResponseEntity<SmsVerificationIssueResponse> getNumberForAccountId(@RequestBody PhoneNumberRequest request) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
+        return ResponseEntity.ok(loginInfoService.getNumberForAccountId(request.getPhoneNum()));
     }
 
     //인증번호 요청(비밀번호 재설정)
     @Operation(summary = "비밀번호 재설정용 인증번호 요청", description = "accountId와 전화번호를 함께 받아 비밀번호 재설정용 인증번호를 발송합니다.", security = {})
     @PostMapping("/sms/password")
-    public ResponseEntity<String> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
+    public ResponseEntity<SmsVerificationIssueResponse> getNumberForPassword(@RequestBody AccountIdPhoneRequest request)
             throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
-        loginInfoService.getNumberForPassword(request);
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok(loginInfoService.getNumberForPassword(request));
+    }
+
+    //인증번호 제한시간 연장
+    @Operation(summary = "인증번호 제한시간 연장", description = "기존 인증번호를 재발송하지 않고 만료시간을 연장합니다. 연장 후 canExtend는 false가 됩니다.", security = {})
+    @PostMapping("/sms/verification/extend")
+    public ResponseEntity<SmsVerificationExtendResponse> extendVerification(@RequestBody SmsVerificationExtendRequest request) {
+        return ResponseEntity.ok(loginInfoService.extendVerification(request.getVerificationId()));
     }
 
     //인증번호 확인(아이디 찾기, 비밀번호 재설정용 토큰 발급)

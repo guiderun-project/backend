@@ -54,26 +54,6 @@ public class User extends BaseEntity {
 
     private String birth;
     
-    public void editUser(String name,
-                         String gender,
-                         String phoneNumber,
-                         boolean openNumber,
-                         int age,
-                         String snsId,
-                         boolean openSns,
-                         String id1365,
-                         String birth) {
-        this.name = name;
-        this.gender = gender;
-        this.phoneNumber = phoneNumber;
-        this.isOpenNumber = openNumber;
-        this.age = age;
-        this.snsId = snsId;
-        this.isOpenSns = openSns;
-        this.id1365 = id1365;
-        this.birth = birth;
-    }
-
     public void editRunningInfo(String recordDegree, String detailRecord){
         this.recordDegree = recordDegree;
         this.detailRecord = detailRecord;
@@ -96,12 +76,14 @@ public class User extends BaseEntity {
     public void addContestCnt(int contestCnt){
         this.competitionCnt += contestCnt;
     }
-    public void editImg(String img){
-        this.img = img;
+    public void editBirthDate(String birth) {
+        this.birth = birth;
     }
 
-    public void editId1365(String id1365){
+    public void editPersonalFields(String phoneNumber, String snsId, String id1365, String birth) {
+        this.phoneNumber = phoneNumber;
+        this.snsId = snsId;
         this.id1365 = id1365;
+        this.birth = birth;
     }
 }
-
