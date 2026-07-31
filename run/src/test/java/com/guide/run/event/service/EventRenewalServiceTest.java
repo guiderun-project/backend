@@ -192,6 +192,50 @@ class EventRenewalServiceTest {
     }
 
     @Test
+    @DisplayName("이벤트 생성 시 도시를 보내지 않으면 SEOUL 로 저장한다")
+    void eventCreateDefaultsCityNameToSeoulWhenMissing() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        EventCreateRequest request = createEventRequest(false, null, null, null);
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.save(any(Event.class)))
+                .thenReturn(Event.builder().id(99L).isApprove(true).build());
+
+        eventService.eventCreate(request, "organizer-private");
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getCityName()).isEqualTo(CityName.SEOUL);
+    }
+
+    @Test
+    @DisplayName("이벤트 수정 시 도시를 보내지 않으면 SEOUL 로 저장한다")
+    void eventUpdateDefaultsCityNameToSeoulWhenMissing() {
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
+        Event event = createEvent("organizer-private");
+        EventCreateRequest request = createEventRequest(false, null, null, null);
+
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(timeFormatter.getDateTime("2026-06-20", "09:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 9, 0));
+        when(timeFormatter.getDateTime("2026-06-20", "11:00"))
+                .thenReturn(LocalDateTime.of(2026, 6, 20, 11, 0));
+        when(eventRepository.findById(99L)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class)))
+                .thenReturn(Event.builder().id(99L).isApprove(true).build());
+
+        eventService.eventUpdate(request, "organizer-private", 99L);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getCityName()).isEqualTo(CityName.SEOUL);
+    }
+
+    @Test
     @DisplayName("이벤트 수정은 신청자가 있으면 추가 질문 변경을 거부한다")
     void eventUpdateRejectsAdditionalQuestionsWhenAppliedFormExists() {
         User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
@@ -544,6 +588,15 @@ class EventRenewalServiceTest {
             BigDecimal expectedRunningDistanceKm,
             List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions
     ) {
+        return createEventRequest(isPrivate, expectedRunningDistanceKm, additionalQuestions, CityName.SEOUL);
+    }
+
+    private EventCreateRequest createEventRequest(
+            Boolean isPrivate,
+            BigDecimal expectedRunningDistanceKm,
+            List<EventCreateRequest.AdditionalQuestionRequest> additionalQuestions,
+            CityName cityName
+    ) {
         return new EventCreateRequest(
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 10),
@@ -557,7 +610,7 @@ class EventRenewalServiceTest {
                 "서울",
                 "내용",
                 EventCategory.GENERAL,
-                CityName.SEOUL,
+                cityName,
                 isPrivate,
                 expectedRunningDistanceKm,
                 additionalQuestions
