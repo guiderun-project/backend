@@ -13,6 +13,7 @@ import com.guide.run.event.entity.dto.response.EventRunningDistancePatchResponse
 import com.guide.run.event.entity.dto.response.EventUpdatedResponse;
 import com.guide.run.event.entity.dto.response.MissingRunningDistanceGetResponse;
 import com.guide.run.event.entity.repository.*;
+import com.guide.run.event.entity.type.CityName;
 import com.guide.run.event.entity.type.EventCategory;
 import com.guide.run.event.entity.type.EventFormStatus;
 import com.guide.run.event.entity.type.EventRecruitStatus;
@@ -67,6 +68,9 @@ public class EventService {
 
     private final EventAdditionalInfoService eventAdditionalInfoService;
 
+    private CityName resolveCityName(CityName cityName) {
+        return cityName == null ? CityName.SEOUL : cityName;
+    }
 
     @Transactional
     public EventCreatedResponse eventCreate(EventCreateRequest request, String privateId) {
@@ -120,7 +124,7 @@ public class EventService {
                 .maxNumG(request.getMinNumG())
                 .place(request.getPlace())
                 .status(status)
-                .cityName(request.getCityName())
+                .cityName(resolveCityName(request.getCityName()))
                 .eventCategory(eventCategory)
                 .content(request.getContent())
                 .isPrivate(Boolean.TRUE.equals(request.getIsPrivate()))
@@ -212,7 +216,7 @@ public class EventService {
                     .place(request.getPlace())
                     .status(event.getStatus())
                     .content(request.getContent())
-                    .cityName(request.getCityName())
+                    .cityName(resolveCityName(request.getCityName()))
                     .eventCategory(eventCategory)
                     .isPrivate(Boolean.TRUE.equals(request.getIsPrivate()))
                     .expectedRunningDistanceKm(request.getExpectedRunningDistanceKm())
