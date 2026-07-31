@@ -292,12 +292,13 @@ public class EventService {
 
     public MissingRunningDistanceGetResponse getMissingRunningDistance(String privateId) {
         List<MissingRunningDistanceGetResponse.Item> items = eventRepository
-                .findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
+                .findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
                         privateId,
                         EventTemporalStatusResolver.now(),
                         PageRequest.of(0, 1)
                 )
                 .stream()
+                .filter(event -> event.getExpectedRunningDistanceKm() == null)
                 .map(event -> MissingRunningDistanceGetResponse.Item.builder()
                         .eventId(event.getId())
                         .name(event.getName())
