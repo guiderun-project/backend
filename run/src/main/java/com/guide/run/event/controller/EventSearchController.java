@@ -34,7 +34,8 @@ public class EventSearchController {
 
     private static final int PAGE_SIZE = 10;
 
-    @Operation(summary = "이벤트 검색 목록 조회", description = "이벤트 검색 화면에서 키워드 및 탭 조건으로 이벤트 목록을 페이지 조회합니다.")
+    @Operation(summary = "이벤트 검색 목록 조회", description = "이벤트 검색 화면에서 키워드 및 탭 조건으로 이벤트 목록을 페이지 조회합니다. "
+            + "UPCOMING/PAST 탭은 비공개 이벤트를 제외하지만, 관리자(ROLE_ADMIN)는 비공개 이벤트까지 조회합니다.")
     @GetMapping("/search")
     public SearchAllEventList searchAllEventList(
             @Parameter(description = "검색어", example = "상계천") @RequestParam(value = "keyword", defaultValue = "") String keyword,

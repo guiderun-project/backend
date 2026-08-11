@@ -50,7 +50,7 @@ class EventGetServiceTest {
     @Test
     @DisplayName("예정 이벤트 카운트는 종료 전 필터가 포함된 전용 쿼리를 사용한다")
     void getAllEventListCountUsesUpcomingCountQuery() {
-        when(eventRepository.countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null))
+        when(eventRepository.countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null, false))
                 .thenReturn(7L);
 
         long count = eventGetService.getAllEventListCount(
@@ -62,13 +62,13 @@ class EventGetServiceTest {
         );
 
         assertThat(count).isEqualTo(7L);
-        verify(eventRepository).countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null);
+        verify(eventRepository).countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null, false);
     }
 
     @Test
     @DisplayName("지난 이벤트 카운트는 종료 시간 필터가 포함된 전용 쿼리를 사용한다")
     void getAllEventListCountUsesPastCountQueryForEndedEvents() {
-        when(eventRepository.countPastEventList(null, null))
+        when(eventRepository.countPastEventList(null, null, false))
                 .thenReturn(5L);
 
         long count = eventGetService.getAllEventListCount(
@@ -80,7 +80,7 @@ class EventGetServiceTest {
         );
 
         assertThat(count).isEqualTo(5L);
-        verify(eventRepository).countPastEventList(null, null);
+        verify(eventRepository).countPastEventList(null, null, false);
         verify(eventRepository, never()).countEventList(null, EventRecruitStatus.RECRUIT_END, null);
     }
 
@@ -94,9 +94,9 @@ class EventGetServiceTest {
                 LocalDateTime.of(2026, 6, 1, 9, 0),
                 EventRecruitStatus.RECRUIT_OPEN
         ));
-        when(eventRepository.pastGetAllEventList(10, 0, null, null))
+        when(eventRepository.pastGetAllEventList(10, 0, null, null, false))
                 .thenReturn(pastEvents);
-        when(eventRepository.countPastEventList(null, null))
+        when(eventRepository.countPastEventList(null, null, false))
                 .thenReturn(1L);
 
         var response = eventGetService.getAllEventList(
@@ -111,8 +111,83 @@ class EventGetServiceTest {
         );
 
         assertThat(response.getItems()).hasSize(1);
-        verify(eventRepository).pastGetAllEventList(10, 0, null, null);
+        verify(eventRepository).pastGetAllEventList(10, 0, null, null, false);
         verify(eventRepository, never()).getAllEventList(10, 0, null, EventRecruitStatus.RECRUIT_END, null);
+    }
+
+    @Test
+    @DisplayName("예정 이벤트 목록은 관리자면 비공개 이벤트를 포함해 조회한다")
+    void getAllEventListIncludesPrivateEventsForAdminOnUpcomingTab() {
+        User admin = User.builder()
+                .privateId("admin-private")
+                .role(Role.ROLE_ADMIN)
+                .type(UserType.GUIDE)
+                .build();
+        when(userRepository.findUserByPrivateId("admin-private")).thenReturn(Optional.of(admin));
+
+        eventGetService.getAllEventList(
+                10,
+                0,
+                1,
+                "UPCOMING",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                "admin-private",
+                null
+        );
+
+        verify(eventRepository).upcomingGetAllEventList(10, 0, null, EventRecruitStatus.RECRUIT_ALL, null, true);
+        verify(eventRepository).countUpcomingEventList(null, EventRecruitStatus.RECRUIT_ALL, null, true);
+    }
+
+    @Test
+    @DisplayName("종료 이벤트 목록은 관리자면 비공개 이벤트를 포함해 조회한다")
+    void getAllEventListIncludesPrivateEventsForAdminOnEndTab() {
+        User admin = User.builder()
+                .privateId("admin-private")
+                .role(Role.ROLE_ADMIN)
+                .type(UserType.GUIDE)
+                .build();
+        when(userRepository.findUserByPrivateId("admin-private")).thenReturn(Optional.of(admin));
+
+        eventGetService.getAllEventList(
+                10,
+                0,
+                1,
+                "END",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                "admin-private",
+                null
+        );
+
+        verify(eventRepository).pastGetAllEventList(10, 0, null, null, true);
+        verify(eventRepository).countPastEventList(null, null, true);
+    }
+
+    @Test
+    @DisplayName("종료 이벤트 목록은 일반 회원이면 비공개 이벤트를 제외한다")
+    void getAllEventListExcludesPrivateEventsForNonAdminMember() {
+        User member = User.builder()
+                .privateId("member-private")
+                .role(Role.ROLE_USER)
+                .type(UserType.GUIDE)
+                .build();
+        when(userRepository.findUserByPrivateId("member-private")).thenReturn(Optional.of(member));
+
+        eventGetService.getAllEventList(
+                10,
+                0,
+                1,
+                "END",
+                EventType.TOTAL,
+                EventRecruitStatus.RECRUIT_ALL,
+                "member-private",
+                null
+        );
+
+        verify(eventRepository).pastGetAllEventList(10, 0, null, null, false);
+        verify(eventRepository).countPastEventList(null, null, false);
     }
 
     @Test
