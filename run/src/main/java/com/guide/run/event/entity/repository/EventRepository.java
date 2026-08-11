@@ -12,7 +12,7 @@ public interface EventRepository extends JpaRepository<Event,Long>, EventReposit
     Page<Event> findAll( Pageable pageable);
     List<Event> findAllByOrganizer(String organizer);
 
-    List<Event> findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
+    List<Event> findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
             String organizer,
             LocalDateTime now,
             Pageable pageable

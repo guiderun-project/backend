@@ -26,7 +26,6 @@ import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestion
 import com.guide.run.global.exception.event.logic.EventValidationException;
 import com.guide.run.global.exception.event.logic.NotDeleteEventException;
 import com.guide.run.global.exception.event.resource.NotExistEventException;
-import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.global.exception.user.resource.NotExistUserException;
 import com.guide.run.partner.entity.matching.UnMatching;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
@@ -292,12 +291,13 @@ public class EventService {
 
     public MissingRunningDistanceGetResponse getMissingRunningDistance(String privateId) {
         List<MissingRunningDistanceGetResponse.Item> items = eventRepository
-                .findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
+                .findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
                         privateId,
                         EventTemporalStatusResolver.now(),
                         PageRequest.of(0, 1)
                 )
                 .stream()
+                .filter(event -> event.getExpectedRunningDistanceKm() == null)
                 .map(event -> MissingRunningDistanceGetResponse.Item.builder()
                         .eventId(event.getId())
                         .name(event.getName())
@@ -346,10 +346,6 @@ public class EventService {
 
     public EventDetailResponse getDetailEvent(Long eventId, String privateId) {
         Event event = eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
-        if (event.isPrivate() && privateId == null) {
-            throw new NotAuthorizationException();
-        }
-
         User organizer = userRepository.findUserByPrivateId(event.getOrganizer()).orElseThrow(NotExistUserException::new);
 
         return EventDetailResponse.builder()

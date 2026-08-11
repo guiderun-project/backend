@@ -85,14 +85,14 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+    public long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName, boolean includePrivate) {
         Long result = queryFactory.select(event.count())
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByNotEndedDateTime())
                 )
                 .fetchOne();
@@ -100,13 +100,13 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public long countPastEventList(EventType eventType, CityName cityName) {
+    public long countPastEventList(EventType eventType, CityName cityName, boolean includePrivate) {
         Long result = queryFactory.select(event.count())
                 .from(event)
                 .where(checkByType(eventType)
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByPastDateTime())
                 )
                 .fetchOne();
@@ -137,7 +137,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .fetch();
     }
     @Override
-    public List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus,CityName cityName) {
+    public List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus,CityName cityName, boolean includePrivate) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -152,7 +152,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByNotEndedDateTime())
                 )
                 .orderBy(event.startTime.asc())
@@ -162,7 +162,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public List<AllEvent> pastGetAllEventList(int limit, int start, EventType eventType, CityName cityName) {
+    public List<AllEvent> pastGetAllEventList(int limit, int start, EventType eventType, CityName cityName, boolean includePrivate) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -176,7 +176,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByType(eventType)
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByPastDateTime())
                 )
                 .orderBy(event.startTime.desc())
@@ -232,7 +232,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+    public List<AllEvent> upcomingGetSearchEventList(int limit, int start, String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName, boolean includePrivate) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -247,7 +247,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByTitle(title))
                         .and(checkByNotEndedDateTime())
                 )
@@ -258,7 +258,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public List<AllEvent> pastGetSearchEventList(int limit, int start, String title, EventType eventType, CityName cityName) {
+    public List<AllEvent> pastGetSearchEventList(int limit, int start, String title, EventType eventType, CityName cityName, boolean includePrivate) {
         return queryFactory.select(Projections.constructor(AllEvent.class,
                         event.id.as("eventId"),
                         event.type.as("eventType"),
@@ -272,7 +272,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
                 .where(checkByType(eventType)
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByTitle(title))
                         .and(checkByPastDateTime())
                 )
@@ -309,14 +309,14 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public long upcomingGetSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName) {
+    public long upcomingGetSearchEventListCount(String title, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName, boolean includePrivate) {
         Long result = queryFactory.select(event.count())
                 .from(event)
                 .where(checkByKind(eventRecruitStatus)
                         .and(checkByType(eventType))
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByTitle(title))
                         .and(checkByNotEndedDateTime())
                 )
@@ -325,13 +325,13 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     @Override
-    public long pastGetSearchEventListCount(String title, EventType eventType, CityName cityName) {
+    public long pastGetSearchEventListCount(String title, EventType eventType, CityName cityName, boolean includePrivate) {
         Long result = queryFactory.select(event.count())
                 .from(event)
                 .where(checkByType(eventType)
                         .and(event.isApprove.eq(true))
                         .and(checkByCityName(cityName))
-                        .and(checkByPublicEvent())
+                        .and(checkByPublicEvent(includePrivate))
                         .and(checkByTitle(title))
                         .and(checkByPastDateTime())
                 )
@@ -494,6 +494,14 @@ public class EventRepositoryImpl implements EventRepositoryCustom{
     }
 
     private BooleanBuilder checkByPublicEvent() {
+        return checkByPublicEvent(false);
+    }
+
+    //관리자는 비공개 이벤트까지 조회할 수 있어 공개 여부 조건을 걸지 않는다.
+    private BooleanBuilder checkByPublicEvent(boolean includePrivate) {
+        if (includePrivate) {
+            return new BooleanBuilder();
+        }
         return new BooleanBuilder(event.isPrivate.eq(false));
     }
 

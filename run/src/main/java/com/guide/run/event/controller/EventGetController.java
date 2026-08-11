@@ -76,7 +76,8 @@ public class EventGetController {
         return Math.max(page, 1);
     }
 
-    @Operation(summary = "전체 이벤트 목록 조회", description = "전체 이벤트 탭에서 선택한 필터와 페이지네이션 조건에 맞는 이벤트 목록을 조회합니다.")
+    @Operation(summary = "전체 이벤트 목록 조회", description = "전체 이벤트 탭에서 선택한 필터와 페이지네이션 조건에 맞는 이벤트 목록을 조회합니다. "
+            + "UPCOMING/PAST 탭은 비공개 이벤트를 제외하지만, 관리자(ROLE_ADMIN)는 비공개 이벤트까지 조회합니다.")
     @GetMapping("/all")
     public ResponseEntity<AllEventResponse> getAllEventList(
             @Parameter(description = "탭 구분", example = "UPCOMING") @RequestParam("tab") String tab,

@@ -102,7 +102,8 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @Operation(summary = "이벤트 상세 조회", description = "이벤트 상세 화면과 관리자 이벤트 다이얼로그에서 사용하는 전체 이벤트 상세 정보를 조회합니다.")
+    @Operation(summary = "이벤트 상세 조회", description = "이벤트 상세 화면과 관리자 이벤트 다이얼로그에서 사용하는 전체 이벤트 상세 정보를 조회합니다. "
+            + "비공개 이벤트도 링크로 접근하면 비회원이 조회할 수 있으며, 비회원 응답에는 viewer가 포함되지 않습니다.")
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDetailResponse> getDetailEvent(@PathVariable("eventId")Long eventId,
                                                               HttpServletRequest request){

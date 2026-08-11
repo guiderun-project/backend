@@ -27,7 +27,6 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.global.exception.event.logic.EventValidationException;
-import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -278,7 +277,7 @@ class EventRenewalServiceTest {
     @DisplayName("러닝 거리 미입력 이벤트 조회는 내가 주최한 종료 이벤트 중 최신 1개를 반환한다")
     void getMissingRunningDistanceReturnsLatestOrganizerEndedEvent() {
         Event missingDistanceEvent = createEndedEventWithoutExpectedDistance(10L, "상계천천히달리기");
-        when(eventRepository.findAllByOrganizerAndEndTimeBeforeAndExpectedRunningDistanceKmIsNullOrderByEndTimeDescIdDesc(
+        when(eventRepository.findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
                 eq("organizer-private"),
                 any(LocalDateTime.class),
                 any(Pageable.class)
@@ -291,6 +290,42 @@ class EventRenewalServiceTest {
         assertThat(item.getEventId()).isEqualTo(10L);
         assertThat(item.getName()).isEqualTo("상계천천히달리기");
         assertThat(item.getDateText()).isEqualTo("6월 1일 (월)");
+    }
+
+    @Test
+    @DisplayName("가장 최신 종료 이벤트에 러닝 거리가 이미 있으면 빈 목록을 반환한다")
+    void getMissingRunningDistanceReturnsEmptyWhenLatestEndedEventAlreadyHasDistance() {
+        Event latestEventWithDistance = createEndedEventWithExpectedDistance(20L, "최신이벤트", new BigDecimal("15.00"));
+        when(eventRepository.findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
+                eq("organizer-private"),
+                any(LocalDateTime.class),
+                any(Pageable.class)
+        )).thenReturn(List.of(latestEventWithDistance));
+
+        MissingRunningDistanceGetResponse response = eventService.getMissingRunningDistance("organizer-private");
+
+        assertThat(response.getItems()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("러닝 거리 미입력 이벤트 조회는 최신 종료 이벤트 1건만 조회한다")
+    void getMissingRunningDistanceQueriesOnlyTheSingleLatestEndedEvent() {
+        when(eventRepository.findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
+                eq("organizer-private"),
+                any(LocalDateTime.class),
+                any(Pageable.class)
+        )).thenReturn(List.of());
+
+        eventService.getMissingRunningDistance("organizer-private");
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(eventRepository).findAllByOrganizerAndEndTimeBeforeOrderByEndTimeDescIdDesc(
+                eq("organizer-private"),
+                any(LocalDateTime.class),
+                pageableCaptor.capture()
+        );
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+        assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
     }
 
     @Test
@@ -460,14 +495,20 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("비회원 비공개 이벤트 상세 조회는 거부한다")
-    void getDetailEventRejectsPrivateEventForGuest() {
+    @DisplayName("비회원도 링크로 접근한 비공개 이벤트 상세를 viewer 없이 조회할 수 있다")
+    void getDetailEventReturnsPrivateEventForGuest() {
         Event event = createEvent("organizer-private", true);
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(eventAdditionalInfoService.getQuestions(1L)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> eventService.getDetailEvent(1L, null))
-                .isInstanceOf(NotAuthorizationException.class);
+        EventDetailResponse response = eventService.getDetailEvent(1L, null);
+
+        assertThat(response.getEventId()).isEqualTo(1L);
+        assertThat(response.isPrivate()).isTrue();
+        assertThat(response.getViewer()).isNull();
     }
 
     @Test
@@ -580,6 +621,17 @@ class EventRenewalServiceTest {
                 .startTime(LocalDateTime.of(2026, 6, 1, 9, 0))
                 .endTime(LocalDateTime.of(2026, 6, 1, 11, 0))
                 .expectedRunningDistanceKm(null)
+                .build();
+    }
+
+    private Event createEndedEventWithExpectedDistance(Long eventId, String name, BigDecimal distance) {
+        return Event.builder()
+                .id(eventId)
+                .organizer("organizer-private")
+                .name(name)
+                .startTime(LocalDateTime.of(2026, 7, 1, 9, 0))
+                .endTime(LocalDateTime.of(2026, 7, 1, 11, 0))
+                .expectedRunningDistanceKm(distance)
                 .build();
     }
 

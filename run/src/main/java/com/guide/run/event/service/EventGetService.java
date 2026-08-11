@@ -50,11 +50,25 @@ public class EventGetService {
     private final MatchingRepository matchingRepository;
 
 
+    //관리자는 예정/종료 이벤트 목록에서 비공개 이벤트까지 조회할 수 있다.
+    private boolean isAdmin(String privateId) {
+        if (privateId == null) {
+            return false;
+        }
+        return userRepository.findUserByPrivateId(privateId)
+                .map(user -> user.getRole() == Role.ROLE_ADMIN)
+                .orElse(false);
+    }
+
     public long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName) {
+        return getAllEventListCount(sort, type, kind, privateId, cityName, isAdmin(privateId));
+    }
+
+    private long getAllEventListCount(String sort, EventType type, EventRecruitStatus kind, String privateId, CityName cityName, boolean includePrivate) {
         if (sort.equals("UPCOMING")) {
-            return eventRepository.countUpcomingEventList(type.equals(TOTAL) ? null : type, kind, cityName);
+            return eventRepository.countUpcomingEventList(type.equals(TOTAL) ? null : type, kind, cityName, includePrivate);
         } else if (sort.equals("END")) {
-            return eventRepository.countPastEventList(type.equals(TOTAL) ? null : type, cityName);
+            return eventRepository.countPastEventList(type.equals(TOTAL) ? null : type, cityName, includePrivate);
         } else {
             if (type.equals(TOTAL)) {
                 if (kind.equals(RECRUIT_ALL)) {
@@ -84,29 +98,30 @@ public class EventGetService {
                                             String userId,
                                             CityName cityName) {
         List<AllEvent> allEvents = new ArrayList<>();
+        boolean includePrivate = isAdmin(userId);
         if(sort.equals("UPCOMING")){
             if(kind.equals(RECRUIT_END))
                 throw new NotValidKindException();
             if(type.equals(TOTAL)){
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,RECRUIT_ALL,cityName);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,RECRUIT_ALL,cityName,includePrivate);
                 }
                 else{
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,kind,cityName);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,null,kind,cityName,includePrivate);
                 }
             }else{
                 if(kind.equals(RECRUIT_ALL)){
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,RECRUIT_ALL,cityName);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,RECRUIT_ALL,cityName,includePrivate);
                 }
                 else{
-                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,kind,cityName);
+                    allEvents = eventRepository.upcomingGetAllEventList(limit,start,type,kind,cityName,includePrivate);
                 }
             }
         }else if(sort.equals("END")){
             if(type.equals(TOTAL)){
-                allEvents = eventRepository.pastGetAllEventList(limit,start,null,cityName);
+                allEvents = eventRepository.pastGetAllEventList(limit,start,null,cityName,includePrivate);
             }else{
-                allEvents = eventRepository.pastGetAllEventList(limit,start,type,cityName);
+                allEvents = eventRepository.pastGetAllEventList(limit,start,type,cityName,includePrivate);
             }
         }else{
             if(type.equals(TOTAL)){
@@ -126,7 +141,7 @@ public class EventGetService {
             }
         }
 
-        long totalCount = getAllEventListCount(sort, type, kind, userId, cityName);
+        long totalCount = getAllEventListCount(sort, type, kind, userId, cityName, includePrivate);
 
         return AllEventResponse.builder()
                 .items(allEvents)
@@ -143,7 +158,7 @@ public class EventGetService {
     }
 
     private UpcomingEventResponse getGuestUpcomingEvents() {
-        List<AllEvent> allEvents = eventRepository.upcomingGetAllEventList(UPCOMING_GUEST_LIMIT, 0, null, RECRUIT_ALL, null);
+        List<AllEvent> allEvents = eventRepository.upcomingGetAllEventList(UPCOMING_GUEST_LIMIT, 0, null, RECRUIT_ALL, null, false);
         if (allEvents.isEmpty()) {
             return UpcomingEventResponse.guest(List.of());
         }
