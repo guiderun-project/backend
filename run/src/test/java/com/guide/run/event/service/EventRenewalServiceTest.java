@@ -27,7 +27,6 @@ import com.guide.run.global.converter.TimeFormatter;
 import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import com.guide.run.global.exception.event.logic.CannotModifyAdditionalQuestionsException;
 import com.guide.run.global.exception.event.logic.EventValidationException;
-import com.guide.run.global.exception.user.authorize.NotAuthorizationException;
 import com.guide.run.partner.entity.matching.repository.MatchingRepository;
 import com.guide.run.partner.entity.matching.repository.UnMatchingRepository;
 import com.guide.run.user.entity.type.UserType;
@@ -496,14 +495,20 @@ class EventRenewalServiceTest {
     }
 
     @Test
-    @DisplayName("비회원 비공개 이벤트 상세 조회는 거부한다")
-    void getDetailEventRejectsPrivateEventForGuest() {
+    @DisplayName("비회원도 링크로 접근한 비공개 이벤트 상세를 viewer 없이 조회할 수 있다")
+    void getDetailEventReturnsPrivateEventForGuest() {
         Event event = createEvent("organizer-private", true);
+        User organizer = createUser("organizer-private", "organizer-user", "홍길동", UserType.GUIDE);
 
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+        when(userRepository.findUserByPrivateId("organizer-private")).thenReturn(Optional.of(organizer));
+        when(eventAdditionalInfoService.getQuestions(1L)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> eventService.getDetailEvent(1L, null))
-                .isInstanceOf(NotAuthorizationException.class);
+        EventDetailResponse response = eventService.getDetailEvent(1L, null);
+
+        assertThat(response.getEventId()).isEqualTo(1L);
+        assertThat(response.isPrivate()).isTrue();
+        assertThat(response.getViewer()).isNull();
     }
 
     @Test
