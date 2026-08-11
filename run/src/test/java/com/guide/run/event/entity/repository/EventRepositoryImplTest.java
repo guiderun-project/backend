@@ -185,6 +185,78 @@ class EventRepositoryImplTest {
         assertThat(captureJpql(entityManager)).doesNotContain("event.isPrivate");
     }
 
+    @Test
+    @DisplayName("예정 이벤트 검색 목록은 관리자가 아니면 비공개 이벤트를 제외한다")
+    void upcomingGetSearchEventListExcludesPrivateEventsForNonAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.upcomingGetSearchEventList(10, 0, "러닝", null, EventRecruitStatus.RECRUIT_ALL, null, false);
+
+        assertThat(captureJpql(entityManager)).contains("event.isPrivate");
+    }
+
+    @Test
+    @DisplayName("예정 이벤트 검색 목록은 관리자면 비공개 이벤트도 포함한다")
+    void upcomingGetSearchEventListIncludesPrivateEventsForAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.upcomingGetSearchEventList(10, 0, "러닝", null, EventRecruitStatus.RECRUIT_ALL, null, true);
+
+        assertThat(captureJpql(entityManager)).doesNotContain("event.isPrivate");
+    }
+
+    @Test
+    @DisplayName("종료 이벤트 검색 목록은 관리자가 아니면 비공개 이벤트를 제외한다")
+    void pastGetSearchEventListExcludesPrivateEventsForNonAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.pastGetSearchEventList(10, 0, "러닝", null, null, false);
+
+        assertThat(captureJpql(entityManager)).contains("event.isPrivate");
+    }
+
+    @Test
+    @DisplayName("종료 이벤트 검색 목록은 관리자면 비공개 이벤트도 포함한다")
+    void pastGetSearchEventListIncludesPrivateEventsForAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.pastGetSearchEventList(10, 0, "러닝", null, null, true);
+
+        assertThat(captureJpql(entityManager)).doesNotContain("event.isPrivate");
+    }
+
+    @Test
+    @DisplayName("예정 이벤트 검색 카운트는 관리자면 비공개 이벤트도 포함한다")
+    void upcomingGetSearchEventListCountIncludesPrivateEventsForAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.upcomingGetSearchEventListCount("러닝", null, EventRecruitStatus.RECRUIT_ALL, null, true);
+
+        assertThat(captureJpql(entityManager)).doesNotContain("event.isPrivate");
+    }
+
+    @Test
+    @DisplayName("종료 이벤트 검색 카운트는 관리자면 비공개 이벤트도 포함한다")
+    void pastGetSearchEventListCountIncludesPrivateEventsForAdmin() {
+        EntityManager entityManager = mock(EntityManager.class);
+        stubSingleResultQuery(entityManager, null);
+        EventRepositoryImpl repository = new EventRepositoryImpl(entityManager);
+
+        repository.pastGetSearchEventListCount("러닝", null, null, true);
+
+        assertThat(captureJpql(entityManager)).doesNotContain("event.isPrivate");
+    }
+
     private Query stubSingleResultQuery(EntityManager entityManager, Object result) {
         EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
         when(entityManagerFactory.getProperties()).thenReturn(Map.of());
