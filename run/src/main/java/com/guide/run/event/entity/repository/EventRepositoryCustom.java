@@ -12,11 +12,11 @@ public interface EventRepositoryCustom {
     long getAllMyEventListCount(EventType eventType, EventRecruitStatus eventRecruitStatus, String privateId, CityName cityName);
     List<AllEvent> getAllMyEventList(int limit,int start,EventType eventType,EventRecruitStatus eventRecruitStatus,String privateId, CityName cityName);
     long countEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
-    long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
-    long countPastEventList(EventType eventType, CityName cityName);
+    long countUpcomingEventList(EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName, boolean includePrivate);
+    long countPastEventList(EventType eventType, CityName cityName, boolean includePrivate);
     List<AllEvent> getAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
-    List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName);
-    List<AllEvent> pastGetAllEventList(int limit, int start, EventType eventType, CityName cityName);
+    List<AllEvent> upcomingGetAllEventList(int limit, int start, EventType eventType, EventRecruitStatus eventRecruitStatus, CityName cityName, boolean includePrivate);
+    List<AllEvent> pastGetAllEventList(int limit, int start, EventType eventType, CityName cityName, boolean includePrivate);
 
     long countByPrivateIdAndCityName(String privateId, CityName cityName);
 
