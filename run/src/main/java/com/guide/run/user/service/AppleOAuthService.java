@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -46,7 +47,7 @@ public class AppleOAuthService {
     @Value("${apple.frontend-url:}") private String frontendUrl;
 
     @Autowired
-    public AppleOAuthService(RedisTemplate<String, String> redis) {
+    public AppleOAuthService(@Qualifier("redisTemplate") RedisTemplate<String, String> redis) {
         this.redis = redis;
         this.http = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(5))
                 .setReadTimeout(Duration.ofSeconds(10)).build();
@@ -128,17 +129,21 @@ public class AppleOAuthService {
     }
 
     private String clientSecret() throws Exception {
-        String pem = privateKey.replace("\\n", "\n")
-                .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-        ECPrivateKey key = (ECPrivateKey) KeyFactory.getInstance("EC")
-                .generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(pem)));
+        ECPrivateKey key = signingKey();
         Instant now = Instant.now();
         SignedJWT jwt = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(keyId).build(),
                 new JWTClaimsSet.Builder().issuer(teamId).subject(clientId).audience(ISSUER)
                         .issueTime(Date.from(now)).expirationTime(Date.from(now.plusSeconds(300))).build());
         jwt.sign(new ECDSASigner(key));
         return jwt.serialize();
+    }
+
+    private ECPrivateKey signingKey() throws Exception {
+        String pem = privateKey.replace("\\n", "\n")
+                .replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+        return (ECPrivateKey) KeyFactory.getInstance("EC")
+                .generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(pem)));
     }
 
     private void requireConfiguration() {
@@ -149,6 +154,11 @@ public class AppleOAuthService {
                 && "https://dev.guiderun.org".equals(frontendUrl);
         if ((!production && !development) || privateKey.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Apple 로그인이 아직 설정되지 않았습니다.");
+        }
+        try {
+            signingKey();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Apple 로그인 키 설정이 올바르지 않습니다.");
         }
     }
 
