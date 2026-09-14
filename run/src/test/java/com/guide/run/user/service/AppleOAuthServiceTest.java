@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -79,6 +80,17 @@ class AppleOAuthServiceTest {
         ReflectionTestUtils.setField(service, "frontendUrl", "https://guiderun.org");
         ReflectionTestUtils.setField(service, "privateKey", "");
         assertThrows(ResponseStatusException.class, () -> service.start("challenge"));
+        verifyNoInteractions(values);
+    }
+
+    @Test void malformedPrivateKeyFailsBeforeRedirectingToApple() {
+        ReflectionTestUtils.setField(service, "frontendUrl", "https://dev.guiderun.org");
+        ReflectionTestUtils.setField(service, "privateKey", "not-a-private-key");
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.start("challenge"));
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
         verifyNoInteractions(values);
     }
 
