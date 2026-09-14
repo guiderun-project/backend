@@ -2,7 +2,9 @@ package com.guide.run.user.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -78,5 +80,22 @@ class AppleOAuthServiceTest {
         ReflectionTestUtils.setField(service, "privateKey", "");
         assertThrows(ResponseStatusException.class, () -> service.start("challenge"));
         verifyNoInteractions(values);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void applicationContextUsesProjectRedisTemplateWhenStringRedisTemplateAlsoExists() {
+        RedisTemplate<String, String> projectRedisTemplate = mock(RedisTemplate.class);
+        StringRedisTemplate stringRedisTemplate = mock(StringRedisTemplate.class);
+
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.registerBean("redisTemplate", RedisTemplate.class, () -> projectRedisTemplate);
+            context.registerBean("stringRedisTemplate", StringRedisTemplate.class, () -> stringRedisTemplate);
+            context.register(AppleOAuthService.class);
+            context.refresh();
+
+            AppleOAuthService service = context.getBean(AppleOAuthService.class);
+            assertSame(projectRedisTemplate, ReflectionTestUtils.getField(service, "redis"));
+        }
     }
 }
