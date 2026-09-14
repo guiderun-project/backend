@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -46,7 +47,7 @@ public class AppleOAuthService {
     @Value("${apple.frontend-url:}") private String frontendUrl;
 
     @Autowired
-    public AppleOAuthService(RedisTemplate<String, String> redis) {
+    public AppleOAuthService(@Qualifier("redisTemplate") RedisTemplate<String, String> redis) {
         this.redis = redis;
         this.http = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(5))
                 .setReadTimeout(Duration.ofSeconds(10)).build();
