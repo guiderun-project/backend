@@ -6,6 +6,7 @@ import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.service.ResponseService;
 import com.guide.run.user.controller.SignController;
 import com.guide.run.user.service.ProviderService;
+import com.guide.run.user.service.AppleOAuthService;
 import com.guide.run.user.service.SignupService;
 import com.guide.run.user.service.UserService;
 import jakarta.servlet.http.Cookie;
@@ -40,6 +41,9 @@ class SecurityConfigAuthTest {
 
     @MockBean
     private ProviderService providerService;
+
+    @MockBean
+    private AppleOAuthService appleOAuthService;
 
     @MockBean
     private UserService userService;

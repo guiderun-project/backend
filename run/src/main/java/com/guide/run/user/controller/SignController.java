@@ -38,6 +38,7 @@ import javax.naming.CommunicationException;
 @RequestMapping("/api")
 public class SignController {
     private final ProviderService providerService;
+    private final com.guide.run.user.service.AppleOAuthService appleOAuthService;
     private final JwtProvider jwtProvider;
     private final CookieService cookieService;
     private final UserService userService;
@@ -77,6 +78,12 @@ public class SignController {
         String kakaoAccessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(kakaoAccessToken, "kakao");
         String privateId = oAuthProfile.getSocialId();
+        return completeSocialLogin(privateId, "KAKAO", request, response);
+    }
+
+    private ResponseEntity<KakaoOAuthLoginResponse> completeSocialLogin(String privateId, String provider,
+            HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
         String status = userService.getUserStatus(privateId);
 
         if ("0".equals(status)) {
@@ -85,7 +92,7 @@ public class SignController {
             return ResponseEntity.ok(KakaoOAuthLoginResponse.builder()
                     .status("SIGNUP_REQUIRED")
                     .signupToken(signupToken)
-                    .provider("KAKAO")
+                    .provider(provider)
                     .build());
         }
 
@@ -113,6 +120,36 @@ public class SignController {
                         .disabilityType(user.getType())
                         .build())
                 .build());
+    }
+
+    public record AppleStartRequest(@jakarta.validation.constraints.Pattern(regexp = "[A-Za-z0-9_-]{43}")
+                                    @jakarta.validation.constraints.NotNull String challenge) {}
+    public record AppleExchangeRequest(@jakarta.validation.constraints.Pattern(regexp = "[A-Za-z0-9_-]{43}")
+                                       @jakarta.validation.constraints.NotNull String ticket,
+                                       @jakarta.validation.constraints.Pattern(regexp = "[A-Za-z0-9_-]{43}")
+                                       @jakarta.validation.constraints.NotNull String verifier) {}
+
+    @PostMapping("/oauth/apple/start")
+    public ResponseEntity<java.util.Map<String, String>> appleStart(@Valid @RequestBody AppleStartRequest input) {
+        return ResponseEntity.ok().header("Cache-Control", "no-store")
+                .body(java.util.Map.of("authorizationUrl", appleOAuthService.start(input.challenge())));
+    }
+
+    @PostMapping(value = "/oauth/apple/callback", consumes = "application/x-www-form-urlencoded")
+    public ResponseEntity<Void> appleCallback(@RequestParam(required = false) String code,
+                                              @RequestParam(required = false) String state,
+                                              @RequestParam(required = false) String error) {
+        String destination = appleOAuthService.callback(code, state, error);
+        return ResponseEntity.status(HttpStatus.SEE_OTHER).header("Location", destination)
+                .header("Cache-Control", "no-store").header("Referrer-Policy", "no-referrer").build();
+    }
+
+    @PostMapping("/oauth/apple/exchange")
+    public ResponseEntity<KakaoOAuthLoginResponse> appleExchange(@Valid @RequestBody AppleExchangeRequest input,
+                                                                HttpServletRequest request,
+                                                                HttpServletResponse response) {
+        String privateId = appleOAuthService.exchange(input.ticket(), input.verifier());
+        return completeSocialLogin(privateId, "APPLE", request, response);
     }
 
     @Operation(summary = "통합 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 disabilityType(VI/GUIDE)에 따라 통합 회원가입 폼을 제출합니다. common 기본 정보와 vi/guide 전용 정보, 약관 동의를 함께 받으며, accessToken/refreshToken을 발급합니다.", security = @SecurityRequirement(name = "bearerAuth"))
