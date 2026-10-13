@@ -88,7 +88,7 @@ public class SignController {
 
         if ("0".equals(status)) {
             // 신규 회원 또는 미완성 회원 → 회원가입 플로우
-            String signupToken = jwtProvider.createAccessToken(privateId);
+            String signupToken = jwtProvider.createSignupToken(privateId);
             return ResponseEntity.ok(KakaoOAuthLoginResponse.builder()
                     .status("SIGNUP_REQUIRED")
                     .signupToken(signupToken)

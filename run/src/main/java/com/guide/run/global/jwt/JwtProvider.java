@@ -7,6 +7,7 @@ import com.guide.run.global.redis.TmpTokenRepository;
 import com.guide.run.global.security.user.CustomUserDetailsService;
 import com.guide.run.global.redis.RefreshToken;
 import com.guide.run.global.redis.RefreshTokenRepository;
+import com.guide.run.user.entity.type.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -21,12 +22,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsUtils;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -41,6 +44,9 @@ public class JwtProvider {
     public static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60 * 60 * 24 * 30; //한 달
 
     public static final long TMP_VALID_TIME = 1000L*60*30; //문자인증 후 주는 임시토큰 30분
+
+    private static final String TOKEN_TYPE_CLAIM = "type";
+    private static final String SIGNUP_TOKEN_TYPE = "signup";
 
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -64,6 +70,21 @@ public class JwtProvider {
                 .signWith(SignatureAlgorithm.HS256,secretKey)
                 .compact();
     }
+
+    // 가입 전 사용자용 토큰. DB에 회원 row가 없어도 /api/signup을 호출할 수 있다.
+    public String createSignupToken(String privateId){
+        Claims claims = Jwts.claims().setSubject(privateId);
+        claims.put(TOKEN_TYPE_CLAIM, SIGNUP_TOKEN_TYPE);
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime()+TOKEN_VALID_TIME))
+                .signWith(SignatureAlgorithm.HS256,secretKey)
+                .compact();
+    }
+
     public String createRefreshToken(String privateId){
         Optional<RefreshToken> oldRefreshToken = refreshTokenRepository.findByPrivateId(privateId);
         if(!oldRefreshToken.isEmpty()){
@@ -83,16 +104,26 @@ public class JwtProvider {
         log.info("리프레시 토큰 제거 완료 refreshToken : "+refreshToken.getToken());
     }
     public Authentication getAuthentication(String token){
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(getSocialId(token));
+        Claims claims = parseClaims(token);
+        if (SIGNUP_TOKEN_TYPE.equals(claims.get(TOKEN_TYPE_CLAIM, String.class))) {
+            // 가입 전 사용자는 DB에 row가 없으므로 토큰만으로 ROLE_NEW 권한을 준다.
+            return new UsernamePasswordAuthenticationToken(claims.getSubject(), "",
+                    List.of(new SimpleGrantedAuthority(Role.ROLE_NEW.getValue())));
+        }
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(claims.getSubject());
         return new UsernamePasswordAuthenticationToken(userDetails,"",userDetails.getAuthorities());
     }
 
     public String getSocialId(String token){
+        return parseClaims(token).getSubject();
+    }
+
+    private Claims parseClaims(String token){
         try {
-            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             log.warn("만료된 JWT 토큰 사용 시도: subject={}", e.getClaims().getSubject());
-            return e.getClaims().getSubject();
+            return e.getClaims();
         } catch (JwtException e) {
             log.error("유효하지 않은 JWT 토큰: {}", e.getMessage());
             throw e;
