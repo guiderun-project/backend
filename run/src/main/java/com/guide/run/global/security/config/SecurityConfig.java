@@ -162,6 +162,12 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apple posts its authorization response from this origin; restrict the exception to its callback.
+        CorsConfiguration appleCallback = new CorsConfiguration();
+        appleCallback.setAllowedOrigins(List.of("https://appleid.apple.com"));
+        appleCallback.setAllowedMethods(List.of("POST"));
+        appleCallback.setAllowedHeaders(List.of("Content-Type"));
+        source.registerCorsConfiguration("/api/oauth/apple/callback", appleCallback);
         source.registerCorsConfiguration("/**", config);
         return source;
     }

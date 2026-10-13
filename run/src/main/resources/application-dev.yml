@@ -61,6 +61,14 @@ spring:
 cors:
   origin: https://dev.guiderun.org
 
+apple:
+  client-id: ${APPLE_CLIENT_ID:com.guiderun.web.login}
+  team-id: ${APPLE_TEAM_ID:GBA565XJC8}
+  key-id: ${APPLE_KEY_ID:SXG46WWVLC}
+  private-key: ${APPLE_PRIVATE_KEY:}
+  redirect-uri: https://dev-api.guiderun.org/api/oauth/apple/callback
+  frontend-url: https://dev.guiderun.org
+
 cloud:
   aws:
     s3:

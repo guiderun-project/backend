@@ -71,6 +71,14 @@ redis:
 cors:
   origin: http://localhost:3000
 
+apple:
+  client-id: com.guiderun.web.login
+  team-id: GBA565XJC8
+  key-id: SXG46WWVLC
+  private-key: test-private-key
+  redirect-uri: https://dev-api.guiderun.org/api/oauth/apple/callback
+  frontend-url: https://dev.guiderun.org
+
 cloud:
   aws:
     s3:
