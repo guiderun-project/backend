@@ -5,7 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
 @Getter
-@RedisHash(value = "tmpToken", timeToLive = 1000L * 60 * 30)
+// timeToLive is in SECONDS: 30 minutes, matching JwtProvider.TMP_VALID_TIME
+@RedisHash(value = "tmpToken", timeToLive = 60L * 30)
 public class TmpToken {
     @Id
     private String token;
