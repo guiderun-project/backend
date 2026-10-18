@@ -92,27 +92,15 @@ public class UserService {
 
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public String getUserStatus(String privateId){
         User user = userRepository.findById(privateId).orElse(null);
 
-        if(user != null){
-            if(user.getPhoneNumber()==null) {
-                return "0";
-            }
-            else{
-                return "1";
-            }
-        }else{
-                //신규 가입자의 경우 인증을 위해 임시 유저 생성
-                //가입이 완료되면 새 토큰 다시 줘야함
-                userRepository.save(User.builder()
-                        .privateId(privateId)
-                        .role(Role.ROLE_NEW)
-                        .userId(getUUID())
-                        .build());
-                return "0";
+        // 신규 가입자는 row를 만들지 않는다. 가입 토큰으로 인증하고 가입 완료 시 저장한다.
+        if(user == null || user.getPhoneNumber()==null) {
+            return "0";
         }
+        return "1";
     }
 
     public User findByPrivateId(String privateId) {
