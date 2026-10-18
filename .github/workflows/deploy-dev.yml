@@ -10,6 +10,7 @@ env:
   S3_BUCKET: guiderun-deploy-bucket
   CODEDEPLOY_APP: guiderun
   DEPLOY_GROUP: dev-deploy-group
+  DEV_INSTANCE_ID: i-01b144a0d1e6273bd
 
 jobs:
   build-and-deploy:
@@ -48,6 +49,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure dev instance is running
+        # dev EC2 is stopped outside weekdays 09:00-22:00 KST by EventBridge Scheduler.
+        # Start it (no-op if already running) and wait until the CodeDeploy agent can respond.
+        run: |
+          aws ec2 start-instances --instance-ids ${{ env.DEV_INSTANCE_ID }} >/dev/null
+          aws ec2 wait instance-running --instance-ids ${{ env.DEV_INSTANCE_ID }}
+          aws ec2 wait instance-status-ok --instance-ids ${{ env.DEV_INSTANCE_ID }}
 
       - name: Upload to S3
         run: |
