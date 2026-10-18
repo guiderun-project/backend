@@ -8,8 +8,8 @@ import org.springframework.data.redis.core.RedisHash;
 
 @Getter
 @AllArgsConstructor
-@RedisHash(value = "refreshToken", timeToLive = 1000L * 60 * 60 * 24 * 30)
-//@RedisHash(value = "refreshToken", timeToLive = 1L)
+// timeToLive is in SECONDS: 30 days, matching JwtProvider.REFRESH_TOKEN_VALID_TIME
+@RedisHash(value = "refreshToken", timeToLive = 60L * 60 * 24 * 30)
 public class RefreshToken {
     @Id
     private String token;
