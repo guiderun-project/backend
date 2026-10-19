@@ -48,22 +48,11 @@ public class SignController {
     @Operation(summary = "일반 로그인", description = "로그인 화면에서 계정 ID와 비밀번호로 로그인합니다. 응답 본문에는 accessToken을, HttpOnly Cookie에는 refreshToken을 내려줍니다.", security = {})
     @PostMapping("/login")
     public ResponseEntity<LoginPostResponse> generalLogin(@RequestBody GeneralLoginRequest request,
-                                                          HttpServletRequest httpServletRequest,
                                                           HttpServletResponse httpServletResponse) {
         String privateId = userService.generalLogin(request.getAccountId(), request.getPassword());
 
-        boolean isExistCookie = false;
-        if (httpServletRequest.getCookies() != null) {
-            for (Cookie cookie : httpServletRequest.getCookies()) {
-                if (cookie.getName().equals("refreshToken")) {
-                    cookieService.deleteOldCookieAndMakeNewCookie(privateId, httpServletResponse, cookie);
-                    isExistCookie = true;
-                }
-            }
-        }
-        if (!isExistCookie) {
-            cookieService.createCookie("refreshToken", httpServletResponse, privateId);
-        }
+        // 브라우저에 남은 refreshToken 쿠키는 Redis에서 이미 지워졌을 수 있으므로 재사용하지 않고 항상 새로 발급한다.
+        cookieService.createCookie("refreshToken", httpServletResponse, privateId);
 
         return ResponseEntity.ok(LoginPostResponse.builder()
                 .accessToken(jwtProvider.createAccessToken(privateId))
@@ -73,16 +62,15 @@ public class SignController {
     @Operation(summary = "카카오 OAuth 로그인", description = "카카오 인가 코드로 로그인합니다. 기존 회원은 LOGIN_SUCCESS와 accessToken(body) + refreshToken(Cookie)을, 신규 회원은 SIGNUP_REQUIRED와 signupToken을 반환합니다.", security = {})
     @PostMapping("/oauth/login/kakao")
     public ResponseEntity<KakaoOAuthLoginResponse> kakaoLogin(@RequestParam("code") String code,
-                                                              HttpServletRequest request,
                                                               HttpServletResponse response) throws CommunicationException {
         String kakaoAccessToken = providerService.getAccessToken(code, "kakao").getAccess_token();
         OAuthProfile oAuthProfile = providerService.getProfile(kakaoAccessToken, "kakao");
         String privateId = oAuthProfile.getSocialId();
-        return completeSocialLogin(privateId, "KAKAO", request, response);
+        return completeSocialLogin(privateId, "KAKAO", response);
     }
 
     private ResponseEntity<KakaoOAuthLoginResponse> completeSocialLogin(String privateId, String provider,
-            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-store");
         String status = userService.getUserStatus(privateId);
 
@@ -97,18 +85,8 @@ public class SignController {
         }
 
         // 기존 회원 → refreshToken을 HttpOnly Cookie로, accessToken을 body로
-        boolean isExistCookie = false;
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals("refreshToken")) {
-                    cookieService.deleteOldCookieAndMakeNewCookie(privateId, response, cookie);
-                    isExistCookie = true;
-                }
-            }
-        }
-        if (!isExistCookie) {
-            cookieService.createCookie("refreshToken", response, privateId);
-        }
+        // 브라우저에 남은 refreshToken 쿠키는 Redis에서 이미 지워졌을 수 있으므로 재사용하지 않고 항상 새로 발급한다.
+        cookieService.createCookie("refreshToken", response, privateId);
 
         User user = userService.findByPrivateId(privateId);
         return ResponseEntity.ok(KakaoOAuthLoginResponse.builder()
@@ -146,10 +124,9 @@ public class SignController {
 
     @PostMapping("/oauth/apple/exchange")
     public ResponseEntity<KakaoOAuthLoginResponse> appleExchange(@Valid @RequestBody AppleExchangeRequest input,
-                                                                HttpServletRequest request,
                                                                 HttpServletResponse response) {
         String privateId = appleOAuthService.exchange(input.ticket(), input.verifier());
-        return completeSocialLogin(privateId, "APPLE", request, response);
+        return completeSocialLogin(privateId, "APPLE", response);
     }
 
     @Operation(summary = "통합 회원가입 완료", description = "소셜 로그인 후 NEW 권한 사용자가 disabilityType(VI/GUIDE)에 따라 통합 회원가입 폼을 제출합니다. common 기본 정보와 vi/guide 전용 정보, 약관 동의를 함께 받으며, accessToken/refreshToken을 발급합니다.", security = @SecurityRequirement(name = "bearerAuth"))
@@ -178,6 +155,11 @@ public class SignController {
                                 .accessToken(jwtProvider.createAccessToken(privateId))
                                 .build());
 
+                    } catch (NotValidRefreshTokenException e) {
+                        // Redis에 없는 토큰이면 쿠키를 지워야 다음 로그인/재발급이 죽은 토큰을 다시 보내지 않는다.
+                        cookieService.deleteRefreshTokenCookie(response);
+                        log.error("Redis에 없는 refreshToken으로 재발급 요청");
+                        throw e;
                     } catch (ExpiredJwtException e) {
                         cookieService.deleteRefreshTokenCookie(response);
                         log.error("토큰 만료 privateId: {}", jwtProvider.tryExtractUserId(request));
