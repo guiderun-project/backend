@@ -36,6 +36,8 @@ public class UnMatchingRepositoryImpl implements UnMatchingRepositoryCustom
                         user.userId.as("userId"),
                         user.name.as("name"),
                         user.type.as("type"),
+                        user.recordDegree.as("recordDegree"),
+                        eventForm.id.as("eventFormId"),
                         eventForm.hopeTeam.as("hopeTeam"),
                         eventForm.hopePartner.as("hopePartner"),
                         eventForm.referContent.as("referContent"),
