@@ -26,8 +26,8 @@ public class EventMatchingController {
     public ResponseEntity<MatchingCreateResponse> createMatching(@PathVariable("eventId") Long eventId,
                                                                  @RequestBody MatchingCreateRequest request,
                                                                  HttpServletRequest httpRequest) {
-        jwtProvider.extractUserId(httpRequest);
-        return ResponseEntity.ok().body(eventMatchingService.createMatching(eventId, request));
+        String requesterPrivateId = jwtProvider.extractUserId(httpRequest);
+        return ResponseEntity.ok().body(eventMatchingService.createMatching(eventId, request, requesterPrivateId));
     }
 
     @Operation(summary = "VI 매칭 전체 취소", description = "매칭하기 페이지에서 특정 VI에 연결된 모든 Guide 매칭을 한 번에 취소합니다.")
@@ -35,8 +35,8 @@ public class EventMatchingController {
     public ResponseEntity<MatchingCancelResponse> cancelMatching(@PathVariable("eventId") Long eventId,
                                                                  @PathVariable("viId") String viId,
                                                                  HttpServletRequest request) {
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.cancelMatching(eventId, viId));
+        String requesterPrivateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.cancelMatching(eventId, viId, requesterPrivateId));
     }
 
     @Operation(summary = "이벤트 매칭 현황 조회", description = "내 파트너와 신청 그룹별 매칭 현황(매칭된 VI+Guide, 미매칭 Guide)을 반환합니다.")
@@ -51,16 +51,16 @@ public class EventMatchingController {
     @GetMapping("{eventId}/matching/waiting")
     public ResponseEntity<MatchingWaitingResponse> getMatchingWaiting(@PathVariable("eventId") Long eventId,
                                                                        HttpServletRequest request) {
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchingWaiting(eventId));
+        String requesterPrivateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingWaiting(eventId, requesterPrivateId));
     }
 
     @Operation(summary = "매칭 완료 참가자 조회", description = "매칭하기 페이지의 매칭 완료 탭. VI와 매칭된 Guide 배열을 RunningGroup별로 반환합니다.")
     @GetMapping("{eventId}/matching/completed")
     public ResponseEntity<MatchingCompletedResponse> getMatchingCompleted(@PathVariable("eventId") Long eventId,
                                                                           HttpServletRequest request) {
-        jwtProvider.extractUserId(request);
-        return ResponseEntity.ok().body(eventMatchingService.getMatchingCompleted(eventId));
+        String requesterPrivateId = jwtProvider.extractUserId(request);
+        return ResponseEntity.ok().body(eventMatchingService.getMatchingCompleted(eventId, requesterPrivateId));
     }
 
 }
