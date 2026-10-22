@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,21 +133,60 @@ public class EventAdditionalInfoService {
             EventAdditionalQuestion question = questionRepository.findById(answer.getQuestionId())
                     .orElseThrow(NotExistEventException::new);
             List<EventAdditionalOption> options = optionRepository.findAllByQuestionIdOrderByDisplayOrderAsc(question.getId());
-            Optional<EventAdditionalOption> selectedOption = options.stream()
-                    .filter(option -> option.getId().equals(answer.getOptionId()))
-                    .findFirst();
-
-            details.add(MyEventApplyGetResponse.AdditionalAnswerDetail.builder()
-                    .questionId(question.getId())
-                    .type(question.getType())
-                    .question(question.getTitle())
-                    .answerText(answer.getTextAnswer())
-                    .selectedOptionId(answer.getOptionId())
-                    .selectedOptionValue(selectedOption.map(EventAdditionalOption::getLabel).orElse(null))
-                    .options(toApplyOptions(options))
-                    .build());
+            details.add(toAnswerDetail(answer, question, options));
         }
         return details;
+    }
+
+    public Map<Long, List<MyEventApplyGetResponse.AdditionalAnswerDetail>> getAnswerDetailsByEventFormIds(List<Long> eventFormIds) {
+        if (eventFormIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<EventAdditionalAnswer> answers = answerRepository.findAllByEventFormIdInOrderByIdAsc(eventFormIds);
+        if (answers.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Long> questionIds = answers.stream()
+                .map(EventAdditionalAnswer::getQuestionId)
+                .distinct()
+                .toList();
+        Map<Long, EventAdditionalQuestion> questionMap = questionRepository.findAllById(questionIds).stream()
+                .collect(Collectors.toMap(EventAdditionalQuestion::getId, question -> question));
+        Map<Long, List<EventAdditionalOption>> optionMap = optionRepository
+                .findAllByQuestionIdInOrderByDisplayOrderAsc(questionIds)
+                .stream()
+                .collect(Collectors.groupingBy(EventAdditionalOption::getQuestionId));
+
+        Map<Long, List<MyEventApplyGetResponse.AdditionalAnswerDetail>> detailMap = new HashMap<>();
+        for (EventAdditionalAnswer answer : answers) {
+            EventAdditionalQuestion question = questionMap.get(answer.getQuestionId());
+            if (question == null) {
+                // 목록 조회이므로 질문이 사라진 답변 하나 때문에 전체 조회를 실패시키지 않는다
+                continue;
+            }
+            detailMap.computeIfAbsent(answer.getEventFormId(), k -> new ArrayList<>())
+                    .add(toAnswerDetail(answer, question, optionMap.getOrDefault(question.getId(), Collections.emptyList())));
+        }
+        return detailMap;
+    }
+
+    private MyEventApplyGetResponse.AdditionalAnswerDetail toAnswerDetail(EventAdditionalAnswer answer,
+                                                                          EventAdditionalQuestion question,
+                                                                          List<EventAdditionalOption> options) {
+        Optional<EventAdditionalOption> selectedOption = options.stream()
+                .filter(option -> option.getId().equals(answer.getOptionId()))
+                .findFirst();
+
+        return MyEventApplyGetResponse.AdditionalAnswerDetail.builder()
+                .questionId(question.getId())
+                .type(question.getType())
+                .question(question.getTitle())
+                .answerText(answer.getTextAnswer())
+                .selectedOptionId(answer.getOptionId())
+                .selectedOptionValue(selectedOption.map(EventAdditionalOption::getLabel).orElse(null))
+                .options(toApplyOptions(options))
+                .build();
     }
 
     @Transactional

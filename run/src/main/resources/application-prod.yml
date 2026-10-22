@@ -58,7 +58,7 @@ spring:
   appsmith:
     webhook-secret: ${APPSMITH_WEBHOOK_SECRET}
 cors:
-  origin: https://guiderun.org
+  origin: https://guiderun.org,https://www.guiderun.org
 
 apple:
   client-id: ${APPLE_CLIENT_ID:com.guiderun.web.login}

@@ -73,6 +73,13 @@ public class UserDtoExceptionAdvice {
                 getMessage("InvalidAuthNumError.code"),
                 getMessage("InvalidAuthNumError.msg")));
     }
+    //1011
+    @ExceptionHandler(SmsRateLimitExceededException.class)
+    protected ResponseEntity<FailResult> SmsRateLimitExceededException(SmsRateLimitExceededException e){
+        return ResponseEntity.status(429).body(responseService.getFailResult(
+                getMessage("smsRateLimit.code"),
+                getMessage("smsRateLimit.msg")));
+    }
 
     //1008
     @ExceptionHandler(NotExistAccountIdException.class)

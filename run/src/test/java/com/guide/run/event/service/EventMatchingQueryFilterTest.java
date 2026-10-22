@@ -22,6 +22,26 @@ class EventMatchingQueryFilterTest {
     }
 
     @Test
+    @DisplayName("매칭 대기 조회 QueryDSL은 사용자 기본 그룹(recordDegree)을 조회한다")
+    void matchingWaitingQuerySelectsUserRecordDegree() throws IOException {
+        String source = Files.readString(Path.of(
+                "src/main/java/com/guide/run/partner/entity/matching/repository/UnMatchingRepositoryImpl.java"
+        ));
+
+        assertThat(source).contains("user.recordDegree.as(\"recordDegree\")");
+    }
+
+    @Test
+    @DisplayName("매칭 대기 조회 QueryDSL은 추가질문 답변 조회용 신청서 ID를 조회한다")
+    void matchingWaitingQuerySelectsEventFormId() throws IOException {
+        String source = Files.readString(Path.of(
+                "src/main/java/com/guide/run/partner/entity/matching/repository/UnMatchingRepositoryImpl.java"
+        ));
+
+        assertThat(source).contains("eventForm.id.as(\"eventFormId\")");
+    }
+
+    @Test
     @DisplayName("매칭 완료 조회 QueryDSL은 APPLIED 신청서만 조인한다")
     void matchingCompletedQueryFiltersAppliedEventForms() throws IOException {
         String source = Files.readString(Path.of(

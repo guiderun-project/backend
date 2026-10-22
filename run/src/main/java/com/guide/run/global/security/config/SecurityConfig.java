@@ -41,11 +41,6 @@ public class SecurityConfig {
     private static final String NOT_EXIST_AUTHORIZATION_MESSAGE = "인증할 수 있는 사용자 데이터가 존재하지 않습니다";
     private static final String UNAUTHORIZED_USER_CODE = "1102";
     private static final String UNAUTHORIZED_USER_MESSAGE = "권한이 없는 사용자 입니다.";
-    private static final List<String> DEFAULT_ALLOWED_ORIGINS = List.of(
-            "https://dev.guiderun.org",
-            "https://guiderun.org",
-            "https://www.guiderun.org"
-    );
 
     private final JwtProvider jwtProvider;
     private final ErrorResponseFactory errorResponseFactory;
@@ -172,8 +167,11 @@ public class SecurityConfig {
         return source;
     }
 
+    // 허용 오리진은 프로필별 설정(cors.allowed-origins / cors.origin)에서만 가져온다.
+    // 과거엔 dev 오리진이 상수로 모든 프로필에 하드코딩돼 있어, 자격증명 포함 CORS가
+    // 운영에서도 dev 오리진을 신뢰했다(환경 격리 부재). 환경별로 명시한 값만 신뢰한다.
     private Set<String> allowedOrigins() {
-        Set<String> allowedOrigins = new LinkedHashSet<>(DEFAULT_ALLOWED_ORIGINS);
+        Set<String> allowedOrigins = new LinkedHashSet<>();
         if (origin == null || origin.isBlank()) {
             return allowedOrigins;
         }

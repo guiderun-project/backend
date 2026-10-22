@@ -29,8 +29,11 @@ public class EventAttendService {
     private final UserRepository userRepository;
     private final AttendService attendService;
     private final PartnerService partnerService;
+    private final EventManagerPolicy eventManagerPolicy;
 
-    public AttendanceUpdateResponse confirmAttend(Long eventId, String userId) {
+    public AttendanceUpdateResponse confirmAttend(Long eventId, String userId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
 
@@ -61,7 +64,9 @@ public class EventAttendService {
                 .build();
     }
 
-    public AttendanceCancelResponse cancelAttend(Long eventId, String userId) {
+    public AttendanceCancelResponse cancelAttend(Long eventId, String userId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         User user = userRepository.findUserByUserId(userId).orElseThrow(NotExistUserException::new);
         Attendance attendance = attendanceRepository.findByEventIdAndPrivateId(eventId, user.getPrivateId());
 
@@ -92,7 +97,9 @@ public class EventAttendService {
                 .build();
     }
 
-    public EventAttendanceResponse getEventAttendance(Long eventId) {
+    public EventAttendanceResponse getEventAttendance(Long eventId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         List<AttendanceParticipant> waiting = attendanceRepository.findAttendanceParticipants(eventId, false);
         List<AttendanceParticipant> attended = attendanceRepository.findAttendanceParticipants(eventId, true);
         return EventAttendanceResponse.builder()
