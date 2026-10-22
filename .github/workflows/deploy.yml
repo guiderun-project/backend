@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         run: |
           cd run
-          ./gradlew clean build -x test
+          ./gradlew clean build
 
       - name: Prepare deployment package
         run: |

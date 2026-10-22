@@ -58,6 +58,7 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'com.h2database:h2' // 테스트용 인메모리 DB (격리)
 
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
