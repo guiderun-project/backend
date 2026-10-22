@@ -34,8 +34,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import com.guide.run.global.exception.event.authorize.NotEventOrganizerException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +58,9 @@ class EventMatchingServiceTest {
     private PartnerService partnerService;
     @Mock
     private AttendanceRepository attendanceRepository;
+
+    @Mock
+    private EventManagerPolicy eventManagerPolicy;
 
     @InjectMocks
     private EventMatchingService eventMatchingService;
@@ -241,7 +246,7 @@ class EventMatchingServiceTest {
                 matchedFlat("vi-a", "김시각", "A", "guide-c", "이가이드", "C")
         ));
 
-        MatchingCompletedResponse response = eventMatchingService.getMatchingCompleted(1L);
+        MatchingCompletedResponse response = eventMatchingService.getMatchingCompleted(1L, "requester");
 
         assertThat(response.getGroups()).hasSize(1);
         assertThat(response.getGroups().get(0).getRunningGroup()).isEqualTo("A");
@@ -257,7 +262,7 @@ class EventMatchingServiceTest {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(Event.builder().id(1L).build()));
         when(unMatchingRepository.findWaitingParticipants(1L)).thenReturn(unsortedWaitingParticipants());
 
-        MatchingWaitingResponse response = eventMatchingService.getMatchingWaiting(1L);
+        MatchingWaitingResponse response = eventMatchingService.getMatchingWaiting(1L, "requester");
 
         assertThat(response.getGroups()).hasSize(1);
         assertThat(response.getGroups().get(0).getParticipants())
@@ -299,7 +304,7 @@ class EventMatchingServiceTest {
         lenient().when(attendanceRepository.findByEventIdAndPrivateId(1L, "g2-private")).thenReturn(null);
 
         MatchingCreateRequest request = new MatchingCreateRequest("vi-user", List.of("g2-user"));
-        eventMatchingService.createMatching(1L, request);
+        eventMatchingService.createMatching(1L, request, "requester");
 
         // G1 은 매칭 해제 + 파트너 원복 + 대기 전환
         verify(matchingRepository).delete(g1Matching);
@@ -321,7 +326,7 @@ class EventMatchingServiceTest {
 
         MatchingCreateRequest request = new MatchingCreateRequest("vi-user", List.of());
 
-        assertThatThrownBy(() -> eventMatchingService.createMatching(1L, request))
+        assertThatThrownBy(() -> eventMatchingService.createMatching(1L, request, "requester"))
                 .isInstanceOf(EventValidationException.class);
     }
 
@@ -393,5 +398,45 @@ class EventMatchingServiceTest {
                 false,
                 guideGroup
         );
+    }
+
+    @Test
+    @DisplayName("매칭 생성: 주최자/ADMIN/COACH가 아니면 거부한다")
+    void createMatchingRequiresManager() {
+        lenient().doThrow(new NotEventOrganizerException())
+                .when(eventManagerPolicy).requireManager(1L, "mallory");
+
+        assertThatThrownBy(() -> eventMatchingService.createMatching(1L, null, "mallory"))
+                .isInstanceOf(NotEventOrganizerException.class);
+    }
+
+    @Test
+    @DisplayName("매칭 취소: 주최자/ADMIN/COACH가 아니면 거부한다")
+    void cancelMatchingRequiresManager() {
+        lenient().doThrow(new NotEventOrganizerException())
+                .when(eventManagerPolicy).requireManager(1L, "mallory");
+
+        assertThatThrownBy(() -> eventMatchingService.cancelMatching(1L, "vi", "mallory"))
+                .isInstanceOf(NotEventOrganizerException.class);
+    }
+
+    @Test
+    @DisplayName("매칭 대기 조회: 주최자/ADMIN/COACH가 아니면 거부한다")
+    void getMatchingWaitingRequiresManager() {
+        lenient().doThrow(new NotEventOrganizerException())
+                .when(eventManagerPolicy).requireManager(1L, "mallory");
+
+        assertThatThrownBy(() -> eventMatchingService.getMatchingWaiting(1L, "mallory"))
+                .isInstanceOf(NotEventOrganizerException.class);
+    }
+
+    @Test
+    @DisplayName("매칭 완료 조회: 주최자/ADMIN/COACH가 아니면 거부한다")
+    void getMatchingCompletedRequiresManager() {
+        lenient().doThrow(new NotEventOrganizerException())
+                .when(eventManagerPolicy).requireManager(1L, "mallory");
+
+        assertThatThrownBy(() -> eventMatchingService.getMatchingCompleted(1L, "mallory"))
+                .isInstanceOf(NotEventOrganizerException.class);
     }
 }

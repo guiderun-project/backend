@@ -47,9 +47,12 @@ public class EventMatchingService {
     private final EventFormRepository eventFormRepository;
     private final PartnerService partnerService;
     private final AttendanceRepository attendanceRepository;
+    private final EventManagerPolicy eventManagerPolicy;
 
     @Transactional
-    public MatchingCreateResponse createMatching(Long eventId, MatchingCreateRequest request) {
+    public MatchingCreateResponse createMatching(Long eventId, MatchingCreateRequest request, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         List<String> guideIds = request.getGuideIds();
@@ -166,7 +169,9 @@ public class EventMatchingService {
     }
 
     @Transactional
-    public MatchingCancelResponse cancelMatching(Long eventId, String viId) {
+    public MatchingCancelResponse cancelMatching(Long eventId, String viId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
         User vi = userRepository.findUserByUserId(viId).orElseThrow(NotExistUserException::new);
         String viPrivateId = vi.getPrivateId();
@@ -339,7 +344,9 @@ public class EventMatchingService {
         return partners;
     }
 
-    public MatchingWaitingResponse getMatchingWaiting(Long eventId) {
+    public MatchingWaitingResponse getMatchingWaiting(Long eventId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         List<MatchingWaitingFlatDto> flatList = unMatchingRepository.findWaitingParticipants(eventId);
@@ -384,7 +391,9 @@ public class EventMatchingService {
                 .build();
     }
 
-    public MatchingCompletedResponse getMatchingCompleted(Long eventId) {
+    public MatchingCompletedResponse getMatchingCompleted(Long eventId, String requesterPrivateId) {
+        eventManagerPolicy.requireManager(eventId, requesterPrivateId);
+
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         List<MatchingCompletedFlatDto> flatList = matchingRepository.findMatchingCompletedByEventId(eventId);
