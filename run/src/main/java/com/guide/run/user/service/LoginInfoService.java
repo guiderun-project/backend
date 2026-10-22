@@ -31,11 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -55,6 +57,8 @@ public class LoginInfoService {
     private final PasswordEncoder passwordEncoder;
 
     private static final int AUTH_EXPIRES_IN_SECONDS = 600;
+    private static final int MAX_VERIFY_ATTEMPTS = 5;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
     @Transactional
@@ -119,6 +123,10 @@ public class LoginInfoService {
         AuthNumber authNumber = authNumberRepository.findByVerificationId(verificationId)
                 .orElseThrow(InvalidAuthNumException::new);
 
+        if (!authNumber.isCanExtend()) {
+            throw new InvalidAuthNumException();
+        }
+
         AuthNumber extended = authNumber.withCanExtendFalse();
         authNumberRepository.save(extended);
 
@@ -135,14 +143,43 @@ public class LoginInfoService {
     }
 
     @Transactional
-    public TokenResponse getToken(String authNum) {
-        AuthNumber authNumber = authNumberRepository.findByAuthNum(authNum).orElseThrow(InvalidAuthNumException::new);
-        User user = userRepository.findUserByPhoneNumber(authNumber.getPhone()).orElseThrow(InvalidAuthNumException::new);
+    public TokenResponse getToken(String verificationId, String authNum) {
+        // 전화번호 무관 전역 조회(findByAuthNum) 대신 해당 세션(verificationId)의 코드만 검증한다.
+        AuthNumber authNumber = authNumberRepository.findByVerificationId(verificationId)
+                .orElseThrow(InvalidAuthNumException::new);
+
+        // 시도 횟수 한도를 넘긴 세션은 정답이어도 무효화한다(무차별 대입 차단).
+        if (authNumber.getAttemptCount() >= MAX_VERIFY_ATTEMPTS) {
+            authNumberRepository.delete(authNumber);
+            throw new InvalidAuthNumException();
+        }
+
+        if (!constantTimeEquals(authNumber.getAuthNum(), authNum)) {
+            authNumberRepository.save(authNumber.withIncrementedAttempt());
+            throw new InvalidAuthNumException();
+        }
+
+        User user = userRepository.findUserByPhoneNumber(authNumber.getPhone())
+                .orElseThrow(InvalidAuthNumException::new);
         String purpose = authNumber.getType().equals("accountId") ? "ACCOUNT_ID" : "PASSWORD";
+        String token = jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType());
+
+        // 인증번호는 1회용: 성공 시 즉시 삭제해 재사용을 막는다.
+        authNumberRepository.delete(authNumber);
+
         return TokenResponse.builder()
-                .token(jwtProvider.createTmpToken(authNumber.getPhone(), user.getPrivateId(), authNumber.getType()))
+                .token(token)
                 .purpose(purpose)
                 .build();
+    }
+
+    private static boolean constantTimeEquals(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                expected.getBytes(StandardCharsets.UTF_8),
+                actual.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -154,10 +191,12 @@ public class LoginInfoService {
             SignUpInfo info = signUpInfoRepository.findById(tmpToken.getPrivateId()).orElseThrow(NotExistUserException::new);
 
             //가입 아이디 찾고 return
-            return FindAccountIdDto.builder()
+            FindAccountIdDto result = FindAccountIdDto.builder()
                     .accountId(info.getAccountId())
                     .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     .build();
+            tmpTokenRepository.delete(tmpToken); // 임시 토큰은 1회용
+            return result;
         }else{
             throw new NotValidTmpTokenException();
         }
@@ -179,19 +218,19 @@ public class LoginInfoService {
             newInfo.hashPassword(passwordEncoder); //암호화
 
             signUpInfoRepository.save(newInfo);//저장
-            
+            tmpTokenRepository.delete(tmpToken); // 임시 토큰은 1회용: 재설정 후 재사용 차단
+
         }else{
             throw new NotValidTmpTokenException();
         }
     }
 
-    // 5자리 수 조합 인증코드 만들기
+    // 6자리 수 조합 인증코드 만들기 (예측 불가하도록 SecureRandom 사용)
     public static String createSmsKey() {
-        StringBuffer key = new StringBuffer();
-        Random rnd = new Random();
+        StringBuilder key = new StringBuilder();
 
-        for (int i = 0; i < 5; i++) { // 인증코드 5자리
-            key.append((rnd.nextInt(10)));
+        for (int i = 0; i < 6; i++) { // 인증코드 6자리
+            key.append(SECURE_RANDOM.nextInt(10));
         }
         return key.toString();
     }
