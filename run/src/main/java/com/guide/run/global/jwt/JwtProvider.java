@@ -31,6 +31,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Slf4j
@@ -92,6 +93,7 @@ public class JwtProvider {
         }
         Date now = new Date();
        RefreshToken refreshToken= new RefreshToken(Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)

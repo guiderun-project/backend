@@ -17,6 +17,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -69,5 +73,19 @@ class JwtProviderTest {
         assertThat(authentication.getAuthorities())
                 .extracting(GrantedAuthority::getAuthority)
                 .containsExactly("ROLE_USER");
+    }
+
+    @Test
+    @DisplayName("빠르게 연속 발급해도 리프레시 토큰은 모두 서로 다른 값을 가진다")
+    void refreshTokensAreUniqueAcrossRapidIssuance() {
+        // 같은 초에 발급되면 iat/exp가 같아 토큰 문자열이 겹칠 수 있다. 각 토큰은 고유해야 한다.
+        when(refreshTokenRepository.findByPrivateId(PRIVATE_ID)).thenReturn(Optional.empty());
+
+        Set<String> tokens = new HashSet<>();
+        for (int i = 0; i < 100; i++) {
+            tokens.add(jwtProvider.createRefreshToken(PRIVATE_ID));
+        }
+
+        assertThat(tokens).hasSize(100);
     }
 }
