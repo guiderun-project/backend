@@ -1,11 +1,13 @@
 package com.guide.run.user.service;
 
 import com.guide.run.global.exception.user.dto.InvalidAuthNumException;
+import com.guide.run.global.exception.user.dto.SmsRateLimitExceededException;
 import com.guide.run.global.jwt.JwtProvider;
 import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
+import com.guide.run.global.sms.SmsRateLimiter;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.response.TokenResponse;
 import com.guide.run.user.entity.SignUpInfo;
@@ -28,7 +30,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +51,7 @@ class LoginInfoServiceTest {
     @Mock private CoolSmsService smsService;
     @Mock private JwtProvider jwtProvider;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private SmsRateLimiter smsRateLimiter;
 
     private LoginInfoService loginInfoService;
 
@@ -53,7 +59,7 @@ class LoginInfoServiceTest {
     void setUp() {
         loginInfoService = new LoginInfoService(
                 userRepository, signUpInfoRepository, authNumberRepository, tmpTokenRepository,
-                userService, smsService, jwtProvider, passwordEncoder);
+                userService, smsService, jwtProvider, passwordEncoder, smsRateLimiter);
     }
 
     @Test
@@ -154,5 +160,19 @@ class LoginInfoServiceTest {
         loginInfoService.findAccountId("tmp-token");
 
         verify(tmpTokenRepository).delete(tmpToken);
+    }
+
+    @Test
+    @DisplayName("발송 레이트리밋에 걸리면 인증번호를 보내지 않고 거부한다")
+    void rejectsSmsSendWhenRateLimited() throws Exception {
+        when(userService.extractNumber("010-1234-5678")).thenReturn(PHONE);
+        when(userRepository.findUserByPhoneNumber(PHONE))
+                .thenReturn(java.util.Optional.of(User.builder().privateId("p").build()));
+        lenient().doThrow(new SmsRateLimitExceededException())
+                .when(smsRateLimiter).requireSendAllowed(PHONE);
+
+        assertThatThrownBy(() -> loginInfoService.getNumberForAccountId("010-1234-5678"))
+                .isInstanceOf(SmsRateLimitExceededException.class);
+        verify(smsService, never()).sendSMS(anyString(), anyString());
     }
 }

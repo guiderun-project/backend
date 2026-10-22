@@ -12,6 +12,7 @@ import com.guide.run.global.redis.AuthNumber;
 import com.guide.run.global.redis.AuthNumberRepository;
 import com.guide.run.global.redis.TmpToken;
 import com.guide.run.global.redis.TmpTokenRepository;
+import com.guide.run.global.sms.SmsRateLimiter;
 import com.guide.run.global.sms.cool.CoolSmsService;
 import com.guide.run.user.dto.request.AccountIdPhoneRequest;
 import com.guide.run.user.dto.response.FindAccountIdDto;
@@ -55,6 +56,7 @@ public class LoginInfoService {
     private final JwtProvider jwtProvider;
 
     private final PasswordEncoder passwordEncoder;
+    private final SmsRateLimiter smsRateLimiter;
 
     private static final int AUTH_EXPIRES_IN_SECONDS = 600;
     private static final int MAX_VERIFY_ATTEMPTS = 5;
@@ -68,6 +70,7 @@ public class LoginInfoService {
 
         String authNum = createSmsKey();
         String verificationId = UUID.randomUUID().toString();
+        smsRateLimiter.requireSendAllowed(phone); // 발송 전 레이트리밋(번호/전역)
         smsService.sendSMS(phone, authNum);
 
         AuthNumber authNumber = new AuthNumber(phone, authNum, "accountId", verificationId);
@@ -100,6 +103,7 @@ public class LoginInfoService {
 
         String authNum = createSmsKey();
         String verificationId = UUID.randomUUID().toString();
+        smsRateLimiter.requireSendAllowed(phone); // 발송 전 레이트리밋(번호/전역)
         smsService.sendSMS(phone, authNum);
 
         AuthNumber authNumber = new AuthNumber(phone, authNum, "password", verificationId);
