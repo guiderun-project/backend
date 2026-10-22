@@ -10,6 +10,8 @@ public class MatchingWaitingFlatDto {
     private String userId;
     private String name;
     private UserType type;
+    private String recordDegree;
+    private Long eventFormId;
     private String hopeTeam;
     private String hopePartner;
     private String referContent;

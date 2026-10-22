@@ -1,9 +1,11 @@
 spring:
+  # 테스트는 격리된 H2 인메모리 DB를 쓴다. 공유 RDS(운영/dev)에는 절대 붙지 않는다.
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${TEST_RDS}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    driver-class-name: org.h2.Driver
+    # NON_KEYWORDS=USER: 'user' 테이블명이 H2 예약어라 제외해야 한다(MySQL에선 허용됨).
+    url: jdbc:h2:mem:guiderun_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=USER
+    username: sa
+    password:
 
   servlet:
     multipart:
@@ -12,9 +14,9 @@ spring:
       resolve-lazily: true
 
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show_sql: false
 
   jwt:

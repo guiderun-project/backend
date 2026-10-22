@@ -4,6 +4,7 @@ import com.guide.run.attendance.entity.Attendance;
 import com.guide.run.attendance.repository.AttendanceRepository;
 import com.guide.run.event.entity.EventForm;
 import com.guide.run.event.entity.dto.request.match.MatchingCreateRequest;
+import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.dto.response.match.*;
 import com.guide.run.event.entity.repository.EventFormRepository;
 import com.guide.run.event.entity.repository.EventRepository;
@@ -48,6 +49,7 @@ public class EventMatchingService {
     private final PartnerService partnerService;
     private final AttendanceRepository attendanceRepository;
     private final EventManagerPolicy eventManagerPolicy;
+    private final EventAdditionalInfoService eventAdditionalInfoService;
 
     @Transactional
     public MatchingCreateResponse createMatching(Long eventId, MatchingCreateRequest request, String requesterPrivateId) {
@@ -234,6 +236,7 @@ public class EventMatchingService {
                         .name(flat.getViName())
                         .type(flat.getViType())
                         .applyGroup(flat.getViRunningGroup())
+                        .defaultGroup(flat.getViRecordDegree())
                         .build();
                 rowMap.put(flat.getViUserId(), MatchingStatusRow.builder()
                         .vi(vi)
@@ -245,6 +248,7 @@ public class EventMatchingService {
                     .name(flat.getGuideName())
                     .type(flat.getGuideType())
                     .applyGroup(flat.getGuideApplyRecord())
+                    .defaultGroup(flat.getGuideRecordDegree())
                     .build();
             rowMap.get(flat.getViUserId()).getGuides().add(guide);
         }
@@ -260,6 +264,7 @@ public class EventMatchingService {
                         .name(flat.getName())
                         .type(flat.getType())
                         .applyGroup(flat.getHopeTeam())
+                        .defaultGroup(flat.getRecordDegree())
                         .build();
                 groupRowMap.get(rg).put("unmatched_vi_" + flat.getUserId(), MatchingStatusRow.builder()
                         .vi(viUser)
@@ -273,6 +278,7 @@ public class EventMatchingService {
                     .name(flat.getName())
                     .type(flat.getType())
                     .applyGroup(flat.getHopeTeam())
+                    .defaultGroup(flat.getRecordDegree())
                     .build();
             groupRowMap.get(rg).put("unmatched_" + flat.getUserId(), MatchingStatusRow.builder()
                     .vi(null)
@@ -350,6 +356,10 @@ public class EventMatchingService {
         eventRepository.findById(eventId).orElseThrow(NotExistEventException::new);
 
         List<MatchingWaitingFlatDto> flatList = unMatchingRepository.findWaitingParticipants(eventId);
+        Map<Long, List<MyEventApplyGetResponse.AdditionalAnswerDetail>> answerMap =
+                eventAdditionalInfoService.getAnswerDetailsByEventFormIds(flatList.stream()
+                        .map(MatchingWaitingFlatDto::getEventFormId)
+                        .toList());
 
         int viCount = (int) flatList.stream().filter(f -> f.getType() == UserType.VI).count();
         int guideCount = (int) flatList.stream().filter(f -> f.getType() == UserType.GUIDE).count();
@@ -361,11 +371,11 @@ public class EventMatchingService {
                     .userId(flat.getUserId())
                     .name(flat.getName())
                     .type(flat.getType())
-                    .originalRunningGroup(flat.getHopeTeam())
+                    .originalRunningGroup(flat.getRecordDegree())
                     .isFirstParticipation(flat.getTrainingCnt() == 0 && flat.getCompetitionCnt() == 0)
                     .hopePartner(flat.getHopePartner())
                     .additionalComment(flat.getReferContent())
-                    .additionalAnswers(Collections.emptyList())
+                    .additionalAnswers(toWaitingAdditionalAnswers(answerMap.get(flat.getEventFormId())))
                     .build();
             groupMap.computeIfAbsent(runningGroup, k -> new ArrayList<>()).add(participant);
         }
@@ -389,6 +399,22 @@ public class EventMatchingService {
                         .build())
                 .groups(groups)
                 .build();
+    }
+
+    // 추가질문 답변이 없으면 빈 배열 대신 null을 반환한다
+    private List<MatchingWaitingParticipant.AdditionalAnswer> toWaitingAdditionalAnswers(
+            List<MyEventApplyGetResponse.AdditionalAnswerDetail> details) {
+        if (details == null || details.isEmpty()) {
+            return null;
+        }
+        return details.stream()
+                .map(answer -> MatchingWaitingParticipant.AdditionalAnswer.builder()
+                        .questionId(answer.getQuestionId())
+                        .questionTitle(answer.getQuestion())
+                        .questionType(answer.getType())
+                        .answer(answer.getAnswerText() != null ? answer.getAnswerText() : answer.getSelectedOptionValue())
+                        .build())
+                .toList();
     }
 
     public MatchingCompletedResponse getMatchingCompleted(Long eventId, String requesterPrivateId) {

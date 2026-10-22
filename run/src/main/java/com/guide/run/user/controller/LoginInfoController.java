@@ -65,7 +65,7 @@ public class LoginInfoController {
     @Operation(summary = "인증번호 검증", description = "문자로 받은 인증번호를 검증하고 아이디 찾기 또는 비밀번호 재설정에 사용할 임시 토큰을 발급합니다.", security = {})
     @PostMapping("/sms/token")
     public ResponseEntity<TokenResponse> getToken(@RequestBody AuthNumRequest request){
-        return ResponseEntity.ok(loginInfoService.getToken(request.getNumber()));
+        return ResponseEntity.ok(loginInfoService.getToken(request.getVerificationId(), request.getNumber()));
     }
 
     //아이디 찾기

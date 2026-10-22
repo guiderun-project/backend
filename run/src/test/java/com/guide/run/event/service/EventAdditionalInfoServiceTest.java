@@ -1,9 +1,11 @@
 package com.guide.run.event.service;
 
+import com.guide.run.event.entity.EventAdditionalAnswer;
 import com.guide.run.event.entity.EventAdditionalOption;
 import com.guide.run.event.entity.EventAdditionalQuestion;
 import com.guide.run.event.entity.dto.request.EventApplyRequest;
 import com.guide.run.event.entity.dto.request.EventCreateRequest;
+import com.guide.run.event.entity.dto.response.form.MyEventApplyGetResponse;
 import com.guide.run.event.entity.repository.EventAdditionalAnswerRepository;
 import com.guide.run.event.entity.repository.EventAdditionalOptionRepository;
 import com.guide.run.event.entity.repository.EventAdditionalQuestionRepository;
@@ -18,10 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
@@ -181,5 +185,44 @@ class EventAdditionalInfoServiceTest {
                 .hasMessage("존재하지 않는 추가질문입니다.");
         verify(answerRepository).deleteAllByEventFormId(55L);
         verify(answerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("여러 신청서의 추가질문 답변을 한 번에 조회해 신청서별로 묶는다")
+    void getAnswerDetailsByEventFormIdsGroupsAnswersByForm() {
+        when(answerRepository.findAllByEventFormIdInOrderByIdAsc(List.of(10L, 20L))).thenReturn(List.of(
+                EventAdditionalAnswer.builder().id(1L).eventFormId(10L).questionId(100L).textAnswer("천천히 뛰고 싶어요").build(),
+                EventAdditionalAnswer.builder().id(2L).eventFormId(10L).questionId(200L).optionId(201L).build(),
+                EventAdditionalAnswer.builder().id(3L).eventFormId(20L).questionId(200L).optionId(202L).build()
+        ));
+        when(questionRepository.findAllById(List.of(100L, 200L))).thenReturn(List.of(
+                EventAdditionalQuestion.builder().id(100L).eventId(1L).type(AdditionalQuestionType.TEXT).title("하고 싶은 말").build(),
+                EventAdditionalQuestion.builder().id(200L).eventId(1L).type(AdditionalQuestionType.SELECT).title("티셔츠 사이즈").build()
+        ));
+        when(optionRepository.findAllByQuestionIdInOrderByDisplayOrderAsc(List.of(100L, 200L))).thenReturn(List.of(
+                EventAdditionalOption.builder().id(201L).questionId(200L).label("M").displayOrder(0).build(),
+                EventAdditionalOption.builder().id(202L).questionId(200L).label("L").displayOrder(1).build()
+        ));
+
+        Map<Long, List<MyEventApplyGetResponse.AdditionalAnswerDetail>> result =
+                eventAdditionalInfoService.getAnswerDetailsByEventFormIds(List.of(10L, 20L));
+
+        assertThat(result).containsOnlyKeys(10L, 20L);
+        assertThat(result.get(10L))
+                .extracting("questionId", "question", "answerText", "selectedOptionValue")
+                .containsExactly(
+                        tuple(100L, "하고 싶은 말", "천천히 뛰고 싶어요", null),
+                        tuple(200L, "티셔츠 사이즈", null, "M")
+                );
+        assertThat(result.get(20L))
+                .extracting("questionId", "selectedOptionValue")
+                .containsExactly(tuple(200L, "L"));
+    }
+
+    @Test
+    @DisplayName("조회할 신청서가 없으면 답변을 조회하지 않고 빈 결과를 반환한다")
+    void getAnswerDetailsByEventFormIdsReturnsEmptyWithoutForms() {
+        assertThat(eventAdditionalInfoService.getAnswerDetailsByEventFormIds(List.of())).isEmpty();
+        verify(answerRepository, never()).findAllByEventFormIdInOrderByIdAsc(any());
     }
 }

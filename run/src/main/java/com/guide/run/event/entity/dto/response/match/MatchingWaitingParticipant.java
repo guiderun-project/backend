@@ -1,6 +1,7 @@
 package com.guide.run.event.entity.dto.response.match;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.guide.run.event.entity.type.AdditionalQuestionType;
 import com.guide.run.user.entity.type.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public class MatchingWaitingParticipant {
     public static class AdditionalAnswer {
         private Long questionId;
         private String questionTitle;
-        private String questionType;
+        private AdditionalQuestionType questionType;
         private String answer;
     }
 }
